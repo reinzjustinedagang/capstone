@@ -247,35 +247,6 @@ const SeniorCitizenList = () => {
 
   return (
     <div>
-      {/* <div className="flex flex-col sm:flex-row justify-end sm:items-center space-y-4 sm:space-y-0">
-        <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3">
-          <NavLink to="/admin/recycle-bin">
-            <Button
-              variant="secondary"
-              icon={<ArchiveRestore className="h-4 w-4 mr-2" />}
-              className="relative hover:bg-gray-200"
-            >
-              Recycle Bin
-              {deletedCitizens.length > 0 && (
-                <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                  {deletedCitizens.length}
-                </span>
-              )}
-            </Button>
-          </NavLink>
-          <Button
-            onClick={() => {
-              setShowAddModal(true);
-              setSelectedCitizen(null); // Ensure no pre-filled data for new add
-            }}
-            variant="primary"
-            icon={<Plus className="h-4 w-4 mr-2" />}
-          >
-            Add New Senior Citizen
-          </Button>
-        </div>
-      </div> */}
-
       <div className="bg-white rounded-lg shadow overflow-hidden">
         <SearchAndFilterBar
           searchTerm={searchTerm}

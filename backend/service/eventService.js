@@ -12,6 +12,11 @@ const extractCloudinaryPublicId = (url) => {
   return `${folder}/${filename}`;
 };
 
+exports.getEventCount = async () => {
+  const [result] = await Connection("SELECT COUNT(*) AS count FROM events");
+  return result.count;
+};
+
 // GET all events
 exports.getAll = async () => {
   const query = `

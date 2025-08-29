@@ -39,6 +39,42 @@ db.query(
       console.error("❌ Failed to create users table:", err);
     } else {
       console.log("✅ users table ready.");
+
+      // 🔹 Check if table has records
+      db.query("SELECT COUNT(*) AS count FROM users", (err, results) => {
+        if (err) {
+          console.error("❌ Failed to check users count:", err);
+          return;
+        }
+
+        if (results[0].count === 0) {
+          // hash your password before saving
+          const bcrypt = require("bcryptjs");
+          const hashedPassword = bcrypt.hashSync("Iamreinz2004", 10);
+
+          db.query(
+            `INSERT INTO users (username, email, password, cp_number, role, status) 
+             VALUES (?, ?, ?, ?, ?, ?)`,
+            [
+              "Administrator",
+              "reinzjustinedagang@gmail.com",
+              hashedPassword,
+              "09123456789",
+              "admin",
+              "active",
+            ],
+            (err) => {
+              if (err) {
+                console.error("❌ Failed to insert default admin:", err);
+              } else {
+                console.log(
+                  "✅ Default admin account created (email: admin@example.com / password: admin123)"
+                );
+              }
+            }
+          );
+        }
+      });
     }
   }
 );
@@ -125,14 +161,11 @@ db.query(
 db.query(
   `
   CREATE TABLE IF NOT EXISTS sms_credentials (
-  id INT PRIMARY KEY AUTO_INCREMENT,
-  email VARCHAR(255) NOT NULL,
-  password VARCHAR(255) NOT NULL,
-  api_code VARCHAR(255) NOT NULL,
+  id INT PRIMARY KEY,
+  api_key VARCHAR(255),
+  sender_id VARCHAR(50),
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-);
-
-  `,
+)`,
   (err) => {
     if (err) {
       console.error("❌ Failed to create sms credentials table:", err);
@@ -213,6 +246,7 @@ db.query(
   CREATE TABLE IF NOT EXISTS events (
     id INT AUTO_INCREMENT PRIMARY KEY,
     title VARCHAR(255) NOT NULL,
+    type VARCHAR(50) DEFAULT 'event',
     description TEXT NOT NULL,
     date DATE NOT NULL,
     image_url VARCHAR(500),

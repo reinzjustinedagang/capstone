@@ -60,37 +60,7 @@ router.delete("/delete/:id", async (req, res) => {
   }
 });
 
-// In smsRoutes.js
-
-router.get("/logs", async (req, res) => {
-  try {
-    const { recipient, status, startDate, endDate } = req.query;
-
-    const filters = {
-      recipient,
-      status,
-      startDate,
-      endDate,
-    };
-
-    // Remove undefined or empty filters
-    Object.keys(filters).forEach(
-      (key) =>
-        (filters[key] === undefined || filters[key] === "") &&
-        delete filters[key]
-    );
-
-    const logs = await smsService.getSmsLogs(filters);
-    res.json({ success: true, logs });
-  } catch (err) {
-    console.error("Error fetching SMS logs:", err);
-    res
-      .status(500)
-      .json({ success: false, message: "Failed to retrieve SMS logs." });
-  }
-});
-
-// GET message history
+// GET paginated SMS history
 router.get("/history", async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
@@ -108,7 +78,7 @@ router.get("/history", async (req, res) => {
   }
 });
 
-// GET
+// GET Semaphore credentials
 router.get("/sms-credentials", async (req, res) => {
   try {
     const credentials = await smsService.getSmsCredentials();
@@ -122,17 +92,16 @@ router.get("/sms-credentials", async (req, res) => {
   }
 });
 
-// PUT
+// PUT Semaphore credentials
 router.put("/sms-credentials", async (req, res) => {
   try {
-    const { email, password, api_code } = req.body;
+    const { api_key, sender_id } = req.body; // updated fields
     const ip = req.userIp;
     const user = req.session.user;
 
     const result = await smsService.updateSmsCredentials(
-      email,
-      password,
-      api_code,
+      api_key,
+      sender_id,
       user,
       ip
     );
@@ -141,7 +110,6 @@ router.put("/sms-credentials", async (req, res) => {
         result.actionType === "INSERT"
           ? "✅ SMS credentials added successfully."
           : "✅ SMS credentials updated successfully.",
-      changes: result.changes,
     });
   } catch (error) {
     console.error("Error updating SMS credentials:", error);

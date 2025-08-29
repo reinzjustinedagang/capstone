@@ -8,66 +8,58 @@ exports.sendSMS = async (message, recipients) => {
       "SELECT * FROM sms_credentials LIMIT 1"
     );
 
-    if (!credentials) {
-      throw new Error("SMS credentials not found in database.");
-    }
+    if (!credentials) throw new Error("SMS credentials not found.");
 
-    const authHeader =
-      "Basic " +
-      Buffer.from(`${credentials.email}:${credentials.password}`).toString(
-        "base64"
-      );
+    // Convert recipients array to comma-separated string
+    const numbersStr = recipients.join(",");
 
-    const payload = {
-      ApiCode: credentials.api_code,
-      Recipients: recipients,
-      Message: message,
-    };
+    // Prepare payload as URL-encoded form data
+    const params = new URLSearchParams();
+    params.append("apikey", credentials.api_key);
+    params.append("number", numbersStr);
+    params.append("message", message);
+    if (credentials.sender_id)
+      params.append("sendername", credentials.sender_id);
 
+    // Send SMS via Semaphore
     const response = await axios.post(
-      "https://api.itexmo.com/api/broadcast",
-      payload,
+      "https://api.semaphore.co/api/v4/messages",
+      params.toString(),
       {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: authHeader,
-        },
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
       }
     );
 
     const data = response.data;
 
-    await Connection(
-      `INSERT INTO sms_logs (recipients, message, status, reference_id, credit_used)
-       VALUES (?, ?, ?, ?, ?)`,
-      [
-        JSON.stringify(recipients),
-        message,
-        data.Error === false ? "Success" : "Failed",
-        data.ReferenceId || null,
-        data.TotalCreditUsed || 0,
-      ]
-    );
+    // Save each message individually in SMS logs
+    const logs = Array.isArray(data) ? data : [data];
+    for (const log of logs) {
+      await Connection(
+        `INSERT INTO sms_logs (recipients, message, status, reference_id, credit_used)
+         VALUES (?, ?, ?, ?, ?)`,
+        [
+          log.recipient,
+          log.message,
+          log.status || "Pending",
+          log.message_id || null,
+          1, // Assume 1 credit per message
+        ]
+      );
+    }
 
-    return data.Error === false && data.Accepted > 0
-      ? { success: true, response: data }
-      : { success: false, response: `iTexMo error: ${JSON.stringify(data)}` };
+    return { success: true, response: data };
   } catch (error) {
     console.error("Error sending SMS:", error);
 
+    // Log failure for all recipients
     await Connection(
       `INSERT INTO sms_logs (recipients, message, status, reference_id, credit_used)
        VALUES (?, ?, ?, ?, ?)`,
-      [JSON.stringify(recipients), message, "Request Failed", null, 0]
+      [JSON.stringify(recipients), message, "Failed", null, 0]
     );
 
-    return {
-      success: false,
-      response:
-        error.response?.status === 400
-          ? "❌ Failed to send broadcast: Insufficient credits or bad request."
-          : `Request failed: ${error.message}`,
-    };
+    return { success: false, response: error.message };
   }
 };
 
@@ -75,41 +67,31 @@ exports.deleteSms = async (id) => {
   try {
     const query = `DELETE FROM sms_logs WHERE id = ?`;
     const result = await Connection(query, [id]);
-
-    if (result.affectedRows > 0) {
-      return true;
-    } else {
-      console.warn("No Message found with ID:", id);
-      return false;
-    }
+    return result.affectedRows > 0;
   } catch (err) {
-    console.error("Error deleting Message:", err);
+    console.error("Error deleting SMS:", err);
     return false;
   }
 };
 
-// In your smsService.js
-
 exports.getSmsCredentials = async () => {
   const result = await Connection(
-    "SELECT email, password, api_code FROM sms_credentials WHERE id = 1"
+    "SELECT api_key, sender_id FROM sms_credentials WHERE id = 1"
   );
   return result.length > 0 ? result[0] : null;
 };
 
-exports.updateSmsCredentials = async (email, password, api_code, user, ip) => {
+exports.updateSmsCredentials = async (api_key, sender_id, user, ip) => {
   const existing = await Connection(
     `SELECT * FROM sms_credentials WHERE id = 1`
   );
 
   let actionType = "UPDATE";
-  const oldData = existing[0];
 
-  if (!oldData) {
-    // Insert new credentials
+  if (!existing[0]) {
     await Connection(
-      `INSERT INTO sms_credentials (id, email, password, api_code) VALUES (1, ?, ?, ?)`,
-      [email, password, api_code]
+      `INSERT INTO sms_credentials (id, api_key, sender_id) VALUES (1, ?, ?)`,
+      [api_key, sender_id]
     );
     actionType = "INSERT";
 
@@ -119,15 +101,14 @@ exports.updateSmsCredentials = async (email, password, api_code, user, ip) => {
         user.email,
         user.role,
         actionType,
-        `Created initial SMS credentials: email='${email}'`,
+        `SMS credentials added: API Key: ${api_key}, Sender ID: ${sender_id}`,
         ip
       );
     }
   } else {
-    // Update existing credentials
     await Connection(
-      `UPDATE sms_credentials SET email = ?, password = ?, api_code = ? WHERE id = 1`,
-      [email, password, api_code]
+      `UPDATE sms_credentials SET api_key = ?, sender_id = ? WHERE id = 1`,
+      [api_key, sender_id]
     );
 
     if (user) {
@@ -136,7 +117,7 @@ exports.updateSmsCredentials = async (email, password, api_code, user, ip) => {
         user.email,
         user.role,
         "UPDATE",
-        `Updated SMS credentials (ID: 1)`,
+        `SMS credentials updated (ID: 1)`,
         ip
       );
     }

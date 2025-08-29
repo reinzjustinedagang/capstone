@@ -31,7 +31,7 @@ import { AuditLogsPage } from "./pages/admin/AuditLogsPage.jsx";
 import { BarangayManagementPage } from "./pages/admin/BarangayManagementPage.jsx";
 import { LoginTrailPage } from "./pages/admin/LoginTrailPage.jsx";
 import { RecycleBinPage } from "./pages/admin/RecycleBinPage.jsx";
-import { EventPage } from "./pages/admin/EventPage.jsx";
+import { EventsPage } from "./pages/admin/EventsPage.jsx";
 import { AboutOscaPage } from "./pages/admin/AboutOscaPage.jsx";
 import { NotificationPage } from "./pages/admin/NotificationPage.jsx";
 
@@ -44,6 +44,7 @@ import { StaffLoginTrailPage } from "./pages/staff/StaffLoginTrailPage.jsx";
 import { StaffAboutPage } from "./pages/staff/StaffAboutPage.jsx";
 import { StaffProfilePage } from "./pages/staff/StaffProfilePage.jsx";
 import { StaffOfficialPage } from "./pages/staff/StaffOfficialPage.jsx";
+import { StaffNewsPage } from "./pages/staff/StaffNewsPage.jsx";
 
 function App() {
   return (
@@ -248,7 +249,7 @@ function App() {
         path="/admin/events"
         element={
           <ProtectedRoute role="Admin">
-            <EventPage />
+            <EventsPage />
           </ProtectedRoute>
         }
       />
@@ -323,6 +324,14 @@ function App() {
         element={
           <ProtectedRoute role="Staff">
             <StaffProfilePage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/staff/news"
+        element={
+          <ProtectedRoute role="Staff">
+            <StaffNewsPage />
           </ProtectedRoute>
         }
       />

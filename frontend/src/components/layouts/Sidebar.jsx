@@ -52,7 +52,7 @@ const Sidebar = () => {
       icon: UsersIcon,
     },
 
-    { to: "/admin/pension-list", label: "Pension List", icon: Wallet },
+    // { to: "/admin/pension-list", label: "Pension List", icon: Wallet },
     {
       to: "/admin/sms-management",
       label: "SMS Management",

@@ -4,6 +4,8 @@ import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
 import OrgChartNode from "./organization/OrgChartNode";
 import StaffHeader from "../staff/layout/StaffHeader";
 import Header from "./Header";
+import Footer from "./Footer";
+import slider5 from "../../assets/slider5.jpg";
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
@@ -169,55 +171,61 @@ const Organization = () => {
   };
 
   return (
-    <>
+    <div
+      className="min-h-screen text-gray-800 bg-no-repeat bg-cover bg-fixed"
+      style={{
+        backgroundImage: `url(${slider5})`,
+      }}
+    >
       <Header />
-      <section className="max-w-7xl mx-auto px-5 lg:px-8 py-12">
-        {/* Section Header */}
-        <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold text-gray-900">Organization</h2>
-          <p className="text-gray-600 mt-2">
-            Meet our officials and see the demographic distribution of senior
-            citizens in San Jose.
-          </p>
-        </div>
 
-        {/* Officials Cards */}
-        <div className="mb-12">
-          <h3 className="text-2xl font-semibold text-blue-700 mb-6 text-center">
-            Federation Officer
-          </h3>
-          <div className="overflow-x-auto w-full py-4 px-2">
-            <div className="inline-block min-w-[1000px] md:min-w-[1200px] lg:min-w-[1400px] flex justify-center">
-              <OrgChartNode node={fedOfficer} isTopNode />
-            </div>
+      {/* Section Header */}
+      <div className="text-center px-5 py-6 md:px-25 mb-6 bg-white">
+        <h2 className="text-3xl font-bold text-gray-900">Organization</h2>
+        <p className="text-gray-600 mt-2">
+          Meet our officials and see the demographic distribution of senior
+          citizens in San Jose.
+        </p>
+      </div>
+
+      {/* Officials Cards */}
+      <div className="mb-6 px-5 py-6 md:px-8 lg:px-25 bg-white">
+        <h3 className="text-2xl font-semibold text-blue-700 mb-6 text-center">
+          Federation Officer
+        </h3>
+        <div className="overflow-x-auto w-full py-4 px-2">
+          <div className="flex justify-center md:min-w-[1500px]">
+            <OrgChartNode node={fedOfficer} isTopNode />
           </div>
         </div>
+      </div>
 
-        {/* Organizational Structure */}
-        <div className="mb-12">
-          <h3 className="text-2xl font-semibold text-blue-700 mb-6 text-center">
-            Organizational Chart
-          </h3>
+      {/* Organizational Structure */}
+      <div className="mb-6 px-5 py-6 md:px-8 lg:px-25 bg-white">
+        <h3 className="text-2xl font-semibold text-blue-700 mb-6 text-center">
+          Organizational Chart
+        </h3>
 
-          {/* Scrollable container for org chart */}
-          <div className="overflow-x-auto w-full py-4 px-2">
-            <div className="inline-block min-w-[1000px] md:min-w-[1200px] lg:min-w-[1400px] flex justify-center">
-              <OrgChartNode node={orgData} isTopNode />
-            </div>
+        {/* Scrollable container for org chart */}
+        <div className="overflow-x-auto w-full px-5 py-6 md:px-8 lg:px-25 bg-white">
+          <div className="flex justify-center md:min-w-[1500px]">
+            <OrgChartNode node={orgData} isTopNode />
           </div>
         </div>
+      </div>
 
-        {/* Demographics Chart */}
-        <div>
-          <h3 className="text-2xl font-semibold text-blue-700 mb-6 text-center">
-            Senior Citizens Demographics
-          </h3>
-          <div className="w-full max-w-md mx-auto">
-            <Pie data={data} />
-          </div>
+      {/* Demographics Chart */}
+      <div className="bg-white px-5 py-6 md:px-8 lg:px-25">
+        <h3 className="text-2xl font-semibold text-blue-700 mb-6 text-center">
+          Senior Citizens Demographics
+        </h3>
+        <div className="w-full max-w-md mx-auto">
+          <Pie data={data} />
         </div>
-      </section>
-    </>
+      </div>
+
+      <Footer />
+    </div>
   );
 };
 

@@ -32,28 +32,64 @@ exports.getLogAudit = async () => {
   }
 };
 
-exports.getPaginatedAuditLogs = async (page, limit) => {
+// services/auditService.js
+exports.getPaginatedAuditLogs = async ({
+  page = 1,
+  limit = 10,
+  search = "",
+  user = "All",
+  userRole = "All",
+  action = "All",
+  sortBy = "timestamp",
+  sortOrder = "desc",
+}) => {
   const offset = (page - 1) * limit;
 
+  let where = "WHERE 1=1";
+  const params = [];
+
+  if (search) {
+    where += ` AND (user LIKE ? OR action LIKE ? OR details LIKE ?)`;
+    const s = `%${search}%`;
+    params.push(s, s, s);
+  }
+
+  if (user && user !== "All") {
+    where += " AND user = ?";
+    params.push(user);
+  }
+
+  if (action && action !== "All") {
+    where += " AND action = ?";
+    params.push(action);
+  }
+
+  if (userRole && userRole !== "All") {
+    where += " AND userRole = ?";
+    params.push(userRole);
+  }
+
+  const allowedSort = ["timestamp", "user", "action", "userRole"];
+  const orderBy = allowedSort.includes(sortBy) ? sortBy : "timestamp";
+  const order = sortOrder === "asc" ? "ASC" : "DESC";
+
   try {
-    const logs = await Connection(
-      `SELECT * FROM audit_logs ORDER BY timestamp DESC LIMIT ? OFFSET ?`,
-      [limit, offset]
+    const totalQuery = `SELECT COUNT(*) AS total FROM audit_logs ${where}`;
+    const totalResult = await Connection(totalQuery, params);
+    const total = totalResult[0].total;
+    const totalPages = Math.ceil(total / limit);
+
+    const data = await Connection(
+      `SELECT * FROM audit_logs
+       ${where}
+       ORDER BY ${orderBy} ${order}
+       LIMIT ? OFFSET ?`,
+      [...params, limit, offset]
     );
 
-    const totalRows = await Connection(
-      `SELECT COUNT(*) AS total FROM audit_logs`
-    );
-    const total = totalRows[0].total;
-
-    return {
-      logs,
-      total,
-      totalPages: Math.ceil(total / limit),
-      page,
-    };
+    return { logs: data, total, totalPages, page };
   } catch (err) {
-    console.error("❌ Failed to retrieve log audit data:", err);
+    console.error("❌ Failed to retrieve audit log data:", err);
     throw err;
   }
 };

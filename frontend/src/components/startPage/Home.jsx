@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import RegistrationBanner from "./home/RegistrationBanner";
-import News from "./home/News";
+import Events from "./home/Events";
 import Header from "./Header";
 import Slideshow from "./home/Slideshow";
 import Footer from "./Footer";
@@ -18,7 +18,7 @@ const Home = () => {
 
       <Slideshow />
       <RegistrationBanner />
-      <News />
+      <Events />
       <Footer />
     </div>
   );

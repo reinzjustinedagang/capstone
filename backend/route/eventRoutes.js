@@ -5,6 +5,16 @@ const upload = require("../middleware/upload");
 const cloudinary = require("../utils/cloudinary");
 const { isAuthenticated } = require("../middleware/authMiddleware");
 
+router.get("/count/all", async (req, res) => {
+  try {
+    const count = await eventService.getEventCount();
+    res.json({ count });
+  } catch (error) {
+    console.error("Error fetching user count:", error);
+    res.status(500).json({ message: "Failed to fetch user count" });
+  }
+});
+
 // GET all events
 router.get("/", async (req, res) => {
   try {

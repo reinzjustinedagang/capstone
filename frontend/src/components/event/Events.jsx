@@ -79,7 +79,9 @@ const Events = () => {
   // Function to fetch all events from the backend API
   const fetchEvents = async () => {
     try {
-      const res = await axios.get(`${backendUrl}/api/events`);
+      const res = await axios.get(`${backendUrl}/api/events/`, {
+        withCredentials: true,
+      });
       setEventList(res.data);
     } catch (err) {
       console.error("Failed to fetch events:", err);
@@ -205,14 +207,14 @@ const Events = () => {
           icon={<Plus className="h-4 w-4 mr-2" />}
           onClick={() => setShowAddModal(true)}
         >
-          Add New Event
+          Add Event
         </Button>
       </div>
       {/* White Card Content (matches Benefits layout) */}
       <div className="bg-white rounded-lg shadow overflow-hidden">
         <div className="p-6">
           {filteredEvents.length > 0 ? (
-            <div className="p-6">
+            <div>
               {filteredEvents.length > 0 ? (
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
                   {filteredEvents.map((event) => (

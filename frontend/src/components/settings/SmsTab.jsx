@@ -4,7 +4,6 @@ import {
   Loader2,
   CheckCircle,
   XCircle,
-  Mail,
   KeyRound,
   MessageCircleCode,
 } from "lucide-react";
@@ -13,9 +12,8 @@ import Modal from "../UI/Modal";
 import axios from "axios";
 
 const SmsCredentialsForm = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [apiCode, setApiCode] = useState("");
+  const [apiKey, setApiKey] = useState("");
+  const [senderId, setSenderId] = useState("");
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -32,9 +30,8 @@ const SmsCredentialsForm = () => {
           withCredentials: true,
         });
         if (res.status === 200 && res.data) {
-          setEmail(res.data.email || "");
-          setPassword(res.data.password || "");
-          setApiCode(res.data.api_code || "");
+          setApiKey(res.data.api_key || "");
+          setSenderId(res.data.sender_id || "");
         }
       } catch (err) {
         setError("Failed to fetch SMS credentials.");
@@ -47,8 +44,7 @@ const SmsCredentialsForm = () => {
     fetchCredentials();
   }, [backendUrl]);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleSubmit = async () => {
     setSaving(true);
     setError("");
     setSuccessMessage("");
@@ -56,71 +52,51 @@ const SmsCredentialsForm = () => {
     try {
       const res = await axios.put(
         `${backendUrl}/api/sms/sms-credentials`,
-        { email, password, api_code: apiCode },
+        { api_key: apiKey, sender_id: senderId },
         { withCredentials: true }
       );
 
       if (res.status === 200) {
-        setSuccessMessage("Credentials updated successfully.");
+        setSuccessMessage("✅ SMS credentials updated successfully.");
       } else {
-        setError("Failed to update credentials.");
+        setError("❌ Failed to update SMS credentials.");
       }
     } catch (err) {
       console.error(err);
-      setError("Error updating credentials.");
+      setError("❌ Error updating SMS credentials.");
     } finally {
       setSaving(false);
     }
   };
 
   return (
-    <form onSubmit={(e) => e.preventDefault()} className="space-y-6">
+    <form className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
           <label className="block text-sm font-medium text-gray-700">
-            Email Address
+            API Key
           </label>
           <div className="mt-1 relative">
             <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              type="text"
+              value={apiKey}
+              onChange={(e) => setApiKey(e.target.value)}
               required
-              autoComplete="false"
-              className="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 pl-10 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-            />
-            <Mail className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
-          </div>
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700">
-            Password
-          </label>
-          <div className="mt-1 relative">
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              autoComplete="false"
               className="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 pl-10 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
             />
             <KeyRound className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
           </div>
         </div>
 
-        <div className="md:col-span-2">
+        <div>
           <label className="block text-sm font-medium text-gray-700">
-            API Code
+            Sender ID (Optional)
           </label>
           <div className="mt-1 relative">
             <input
               type="text"
-              value={apiCode}
-              onChange={(e) => setApiCode(e.target.value)}
-              required
-              autoComplete="false"
+              value={senderId}
+              onChange={(e) => setSenderId(e.target.value)}
               className="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 pl-10 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
             />
             <MessageCircleCode className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
@@ -134,7 +110,7 @@ const SmsCredentialsForm = () => {
           role="alert"
         >
           <XCircle className="h-5 w-5 mr-2" />
-          <span className="block sm:inline">{error}</span>
+          <span>{error}</span>
         </div>
       )}
 
@@ -144,7 +120,7 @@ const SmsCredentialsForm = () => {
           role="alert"
         >
           <CheckCircle className="h-5 w-5 mr-2" />
-          <span className="block sm:inline">{successMessage}</span>
+          <span>{successMessage}</span>
         </div>
       )}
 
@@ -165,6 +141,7 @@ const SmsCredentialsForm = () => {
           {saving ? "Saving..." : "Save SMS Credentials"}
         </Button>
       </div>
+
       <Modal
         isOpen={showConfirmModal}
         onClose={() => setShowConfirmModal(false)}
@@ -173,7 +150,6 @@ const SmsCredentialsForm = () => {
         <div className="mt-4 text-sm text-gray-700">
           Are you sure you want to update your SMS credentials?
         </div>
-
         <div className="mt-6 flex justify-end space-x-4">
           <button
             onClick={() => setShowConfirmModal(false)}
@@ -183,9 +159,9 @@ const SmsCredentialsForm = () => {
           </button>
           <button
             disabled={saving}
-            onClick={(e) => {
+            onClick={() => {
               setShowConfirmModal(false);
-              handleSubmit(e);
+              handleSubmit();
             }}
             className={`px-4 py-2 rounded text-sm ${
               saving

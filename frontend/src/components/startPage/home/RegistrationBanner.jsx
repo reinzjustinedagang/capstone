@@ -42,7 +42,7 @@ const RegistrationBanner = () => {
   }, [citizenCount]);
 
   return (
-    <section className="bg-white py-6 md:px-8 px-25 text-center shadow-md my-6">
+    <section className="bg-white py-6 md:px-25 text-center shadow-md my-6">
       <h2 className="text-5xl md:text-6xl font-extrabold text-gray-900 mb-2">
         {animatedCount.toLocaleString()}
       </h2>
@@ -56,9 +56,6 @@ const RegistrationBanner = () => {
       <div className="flex flex-col sm:flex-row justify-center gap-4 mb-4">
         <button className="px-6 py-3 bg-blue-700 text-white font-semibold rounded-md hover:bg-blue-800 transition">
           Register Now!
-        </button>
-        <button className="px-6 py-3 bg-blue-700 text-white font-semibold rounded-md hover:bg-blue-800 transition">
-          Verify Here!
         </button>
       </div>
       <div className="flex flex-col sm:flex-row justify-center gap-8 mt-4 text-gray-700">

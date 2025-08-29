@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { SendIcon, SaveIcon } from "lucide-react";
+import { SendIcon } from "lucide-react";
 import Button from "../UI/Button";
 import MessageTemplates from "./MessageTemplates";
 import MessageHistory from "./MessageHistory";
-import axios from "axios"; // ✅ Add this at the top
+import axios from "axios";
 
 const Sms = () => {
   const [activeTab, setActiveTab] = useState("send");
@@ -13,6 +13,7 @@ const Sms = () => {
   const [seniorCitizens, setSeniorCitizens] = useState([]);
   const [templates, setTemplates] = useState([]);
   const [selectedTemplateId, setSelectedTemplateId] = useState("");
+  const [loading, setLoading] = useState(false); // ✅ Loading state
   const backendUrl = import.meta.env.VITE_API_BASE_URL;
 
   const fetchData = async () => {
@@ -33,66 +34,73 @@ const Sms = () => {
   }, []);
 
   useEffect(() => {
-    if (activeTab === "send") {
-      fetchData(); // re-fetch on tab switch
-    }
+    if (activeTab === "send") fetchData();
   }, [activeTab]);
 
   const handleSelectAll = (e) => {
     const filtered = filteredCitizens.map((c) => c.id);
-    if (e.target.checked) {
-      setSelectedRecipients(filtered);
-    } else {
-      setSelectedRecipients([]);
-    }
+    setSelectedRecipients(e.target.checked ? filtered : []);
   };
 
   const handleSelectRecipient = (id) => {
-    if (selectedRecipients.includes(id)) {
-      setSelectedRecipients(
-        selectedRecipients.filter((recipientId) => recipientId !== id)
-      );
-    } else {
-      setSelectedRecipients([...selectedRecipients, id]);
-    }
+    setSelectedRecipients((prev) =>
+      prev.includes(id) ? prev.filter((r) => r !== id) : [...prev, id]
+    );
   };
 
   const handleTemplateChange = async (e) => {
     const selectedId = e.target.value;
     setSelectedTemplateId(selectedId);
+    if (!selectedId) return setMessageText("");
 
-    if (selectedId) {
-      try {
-        const res = await axios.get(
-          `${backendUrl}/api/templates/${selectedId}`
-        );
-        const template = res.data;
-        setMessageText(template.message);
-      } catch (err) {
-        console.error("Failed to load template message", err);
-      }
-    } else {
-      setMessageText("");
+    try {
+      const res = await axios.get(`${backendUrl}/api/templates/${selectedId}`);
+      setMessageText(res.data.message || "");
+    } catch (err) {
+      console.error("Failed to load template", err);
     }
   };
 
   const handleSendMessage = async () => {
-    try {
-      const numbers = seniorCitizens
-        .filter((c) => selectedRecipients.includes(c.id))
-        .map((c) => c.contact);
+    const numbersArray = seniorCitizens
+      .filter((c) => selectedRecipients.includes(c.id))
+      .map((c) => c.contact);
 
+    if (numbersArray.length === 0 || !messageText) return;
+
+    setLoading(true);
+
+    try {
       const response = await axios.post(`${backendUrl}/api/sms/send-sms`, {
-        numbers,
+        numbers: numbersArray,
         message: messageText,
       });
 
-      alert(response.data.message); // shows "✅ Broadcast sent successfully"
+      // Extract backend message (including Semaphore errors)
+      const msg =
+        response.data?.message ||
+        response.data?.response?.data?.data ||
+        response.data?.response?.data?.message ||
+        "✅ Broadcast sent successfully";
+
+      alert(msg);
+
+      // Reset form
       setMessageText("");
       setSelectedRecipients([]);
+      setSelectedTemplateId("");
     } catch (err) {
-      console.error("Failed to send SMS", err);
-      alert(err.response?.data?.message || "Failed to send messages.");
+      console.error("Failed to send SMS:", err);
+
+      const msg =
+        err.response?.data?.message ||
+        err.response?.data?.error ||
+        err.response?.data?.response?.data?.data ||
+        "❌ Failed to send messages.";
+
+      alert(msg);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -106,7 +114,6 @@ const Sms = () => {
 
   return (
     <div>
-      {/* <h1 className="text-2xl font-bold mb-6">SMS Management</h1> */}
       <div className="bg-white rounded-lg shadow overflow-hidden">
         {/* Tabs */}
         <div className="border-b border-gray-200">
@@ -266,10 +273,14 @@ const Sms = () => {
                     <Button
                       variant="primary"
                       onClick={handleSendMessage}
-                      disabled={selectedRecipients.length === 0 || !messageText}
+                      disabled={
+                        selectedRecipients.length === 0 ||
+                        !messageText ||
+                        loading
+                      }
                       icon={<SendIcon className="h-4 w-4 mr-2" />}
                     >
-                      Send Message
+                      {loading ? "Sending..." : "Send Message"}
                     </Button>
                   </div>
                 </div>

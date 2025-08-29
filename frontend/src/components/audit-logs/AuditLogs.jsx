@@ -9,28 +9,29 @@ import {
   ArrowUp,
   Loader2,
   XCircle,
+  ChevronDown,
+  X,
 } from "lucide-react";
-import Button from "../UI/Button"; // Assuming you have a Button component
 import axios from "axios";
 
 export default function AuditLogs() {
-  // Mock audit log data
   const [auditLogs, setAuditLogs] = useState([]);
   const [page, setPage] = useState(1);
-  const [limit] = useState(10); // Optional: make this dynamic if needed
+  const [limit] = useState(10);
   const [totalPages, setTotalPages] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
 
-  // State for filters and sorting
   const [searchTerm, setSearchTerm] = useState("");
   const [filterUser, setFilterUser] = useState("All");
+  const [filterRole, setFilterRole] = useState("All");
   const [filterActionType, setFilterActionType] = useState("All");
   const [sortBy, setSortBy] = useState("timestamp");
-  const [sortOrder, setSortOrder] = useState("desc"); // Default to descending for timestamps
+  const [sortOrder, setSortOrder] = useState("desc");
 
-  // State for loading and error messages (for actual API calls)
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [showFilters, setShowFilters] = useState(false);
+
   const backendUrl = import.meta.env.VITE_API_BASE_URL;
 
   useEffect(() => {
@@ -39,11 +40,23 @@ export default function AuditLogs() {
       setError("");
       try {
         const response = await axios.get(
-          `${backendUrl}/api/audit-logs/getAll?page=${page}&limit=${limit}`
+          `${backendUrl}/api/audit-logs/getAll`,
+          {
+            params: {
+              page,
+              limit,
+              search: searchTerm,
+              user: filterUser,
+              userRole: filterRole,
+              action: filterActionType,
+              sortBy,
+              sortOrder,
+            },
+          }
         );
         setAuditLogs(response.data.logs);
         setTotalCount(response.data.total);
-        setTotalPages(response.data.totalPages); // 👈 Add this
+        setTotalPages(response.data.totalPages);
       } catch (err) {
         console.error("Failed to fetch audit logs:", err);
         setError("Failed to load audit logs. Please try again.");
@@ -51,11 +64,21 @@ export default function AuditLogs() {
         setLoading(false);
       }
     };
-
     fetchAuditLogs();
-  }, [page]); // 👈 Add page dependency
+  }, [
+    page,
+    searchTerm,
+    filterUser,
+    filterRole,
+    filterActionType,
+    sortBy,
+    sortOrder,
+  ]);
 
-  // Unique users and action types for filter dropdowns
+  useEffect(() => {
+    setPage(1);
+  }, [searchTerm, filterUser, filterActionType, filterRole]);
+
   const uniqueUsers = useMemo(() => {
     const users = new Set(auditLogs.map((log) => log.user));
     return ["All", ...Array.from(users).sort()];
@@ -66,7 +89,6 @@ export default function AuditLogs() {
     return ["All", ...Array.from(actions).sort()];
   }, [auditLogs]);
 
-  // Function to toggle sort order
   const toggleSortOrder = (column) => {
     if (sortBy === column) {
       setSortOrder(sortOrder === "asc" ? "desc" : "asc");
@@ -76,54 +98,19 @@ export default function AuditLogs() {
     }
   };
 
-  // Memoized filtered and sorted audit logs
-  const filteredAndSortedLogs = useMemo(() => {
-    let currentLogs = [...auditLogs];
+  const clearFilters = () => {
+    setSearchTerm("");
+    setFilterUser("All");
+    setFilterRole("All");
+    setFilterActionType("All");
+    setShowFilters(false);
+  };
 
-    // Apply search term filter
-    if (searchTerm) {
-      currentLogs = currentLogs.filter((log) =>
-        Object.values(log).some((value) =>
-          String(value).toLowerCase().includes(searchTerm.toLowerCase())
-        )
-      );
-    }
-
-    // Apply user filter
-    if (filterUser !== "All") {
-      currentLogs = currentLogs.filter((log) => log.user === filterUser);
-    }
-
-    // Apply action type filter
-    if (filterActionType !== "All") {
-      currentLogs = currentLogs.filter(
-        (log) => log.action === filterActionType
-      );
-    }
-
-    // Apply sorting
-    currentLogs.sort((a, b) => {
-      let comparison = 0;
-      // Handle date sorting specifically
-      if (sortBy === "timestamp") {
-        const dateA = new Date(a.timestamp);
-        const dateB = new Date(b.timestamp);
-        if (dateA > dateB) comparison = 1;
-        if (dateA < dateB) comparison = -1;
-      } else if (
-        typeof a[sortBy] === "string" &&
-        typeof b[sortBy] === "string"
-      ) {
-        comparison = a[sortBy].localeCompare(b[sortBy]);
-      } else {
-        if (a[sortBy] > b[sortBy]) comparison = 1;
-        if (a[sortBy] < b[sortBy]) comparison = -1;
-      }
-      return sortOrder === "asc" ? comparison : comparison * -1;
-    });
-
-    return currentLogs;
-  }, [auditLogs, searchTerm, filterUser, filterActionType, sortBy, sortOrder]);
+  const hasFilters =
+    searchTerm !== "" ||
+    filterUser !== "All" ||
+    filterRole !== "All" ||
+    filterActionType !== "All";
 
   const renderPageButtons = () => {
     const visiblePages = [];
@@ -183,10 +170,11 @@ export default function AuditLogs() {
   };
 
   return (
-    <>
+    <div className="bg-gray-100 min-h-screen rounded-lg font-inter">
       <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+        {/* Header Controls */}
         <div className="p-4 border-b border-gray-200 flex flex-col sm:flex-row justify-between items-center space-y-3 sm:space-y-0">
-          {/* Search Input */}
+          {/* Search */}
           <div className="relative w-full sm:w-64">
             <input
               type="text"
@@ -198,46 +186,102 @@ export default function AuditLogs() {
             <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
           </div>
 
-          {/* Filter Dropdowns */}
-          <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
-            <select
-              className="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              value={filterUser}
-              onChange={(e) => setFilterUser(e.target.value)}
+          {/* Filter Toggle + Clear */}
+          <div className="flex items-center gap-4">
+            <button
+              className={`flex items-center text-sm text-gray-600 hover:text-gray-900 transition-colors ${
+                showFilters ? "text-gray-900 font-semibold" : ""
+              }`}
+              onClick={() => setShowFilters(!showFilters)}
             >
-              {uniqueUsers.map((user) => (
-                <option key={user} value={user}>
-                  {user === "All" ? "All Users" : user}
-                </option>
-              ))}
-            </select>
-            <select
-              className="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              value={filterActionType}
-              onChange={(e) => setFilterActionType(e.target.value)}
-            >
-              {uniqueActionTypes.map((action) => (
-                <option key={action} value={action}>
-                  {action === "All" ? "All Actions" : action.replace(/_/g, " ")}
-                </option>
-              ))}
-            </select>
+              <Filter className="h-4 w-4 mr-1" />
+              Advanced Filters
+              <ChevronDown
+                className={`h-4 w-4 ml-1 transform transition-transform ${
+                  showFilters ? "rotate-180" : ""
+                }`}
+              />
+            </button>
+            {hasFilters && (
+              <button
+                onClick={clearFilters}
+                className="flex items-center text-sm text-red-600 hover:text-red-700 transition-colors"
+              >
+                <X className="h-4 w-4 mr-1" />
+                Clear
+              </button>
+            )}
           </div>
         </div>
 
-        {/* Loading and Error States */}
+        {/* Collapsible Filters */}
+        {showFilters && (
+          <div className="p-4 border-b border-gray-200 bg-gray-50">
+            <div className="grid grid-cols-4 md:grid-cols-5 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  User
+                </label>
+                <select
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                  value={filterUser}
+                  onChange={(e) => setFilterUser(e.target.value)}
+                >
+                  {uniqueUsers.map((user) => (
+                    <option key={user} value={user}>
+                      {user === "All" ? "All Users" : user}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Role
+                </label>
+                <select
+                  value={filterRole}
+                  onChange={(e) => setFilterRole(e.target.value)}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                >
+                  <option value="All">All Roles</option>
+                  <option value="admin">Admin</option>
+                  <option value="staff">Staff</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Action Type
+                </label>
+                <select
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                  value={filterActionType}
+                  onChange={(e) => setFilterActionType(e.target.value)}
+                >
+                  {uniqueActionTypes.map((action) => (
+                    <option key={action} value={action}>
+                      {action === "All"
+                        ? "All Actions"
+                        : action.replace(/_/g, " ")}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Loading / Error */}
         {loading ? (
           <div className="flex justify-center items-center py-10">
             <Loader2 className="animate-spin h-8 w-8 text-blue-500" />
             <p className="ml-3 text-gray-600">Loading audit logs...</p>
           </div>
         ) : error ? (
-          <div
-            className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg mx-4 my-6 flex items-center"
-            role="alert"
-          >
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg mx-4 my-6 flex items-center">
             <XCircle className="h-5 w-5 mr-2" />
-            <span className="block sm:inline">{error}</span>
+            <span>{error}</span>
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -245,7 +289,7 @@ export default function AuditLogs() {
               <thead className="bg-gray-50">
                 <tr>
                   <th
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase cursor-pointer"
                     onClick={() => toggleSortOrder("timestamp")}
                   >
                     <div className="flex items-center">
@@ -259,7 +303,7 @@ export default function AuditLogs() {
                     </div>
                   </th>
                   <th
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase cursor-pointer"
                     onClick={() => toggleSortOrder("user")}
                   >
                     <div className="flex items-center">
@@ -273,7 +317,7 @@ export default function AuditLogs() {
                     </div>
                   </th>
                   <th
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase cursor-pointer"
                     onClick={() => toggleSortOrder("action")}
                   >
                     <div className="flex items-center">
@@ -286,39 +330,35 @@ export default function AuditLogs() {
                         ))}
                     </div>
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                     User Role
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                     Details
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Ip Address
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                    IP Address
                   </th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {filteredAndSortedLogs.length === 0 ? (
+                {auditLogs.length === 0 ? (
                   <tr>
                     <td
-                      colSpan="5"
+                      colSpan="6"
                       className="px-6 py-4 text-center text-gray-500"
                     >
-                      No audit logs found matching your criteria.
+                      No audit logs found.
                     </td>
                   </tr>
                 ) : (
-                  filteredAndSortedLogs.map((log) => (
+                  auditLogs.map((log) => (
                     <tr key={log.id}>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {log.timestamp
-                          ? new Date(log.timestamp).toLocaleString()
-                          : "N/A"}
+                      <td className="px-6 py-4 text-sm">
+                        {new Date(log.timestamp).toLocaleString()}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                        {log.user}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-6 py-4 text-sm">{log.user}</td>
+                      <td className="px-6 py-4">
                         <span
                           className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
                             log.action === "LOGIN"
@@ -331,25 +371,15 @@ export default function AuditLogs() {
                               ? "bg-red-100 text-red-800"
                               : log.action === "LOGOUT"
                               ? "bg-gray-300 text-black"
-                              : log.action === "RESTORE"
-                              ? "bg-green-300 text-green-800"
-                              : log.action === "PERMANENT_DELETE"
-                              ? "bg-red-500 text-white"
                               : "bg-gray-100 text-gray-800"
                           }`}
                         >
                           {log.action.replace(/_/g, " ")}
                         </span>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {log.userRole}
-                      </td>
-                      <td className="px-6 py-4 text-sm text-gray-500">
-                        {log.details}
-                      </td>
-                      <td className="px-6 py-4 text-sm text-gray-500">
-                        {log.ipAddress}
-                      </td>
+                      <td className="px-6 py-4 text-sm">{log.userRole}</td>
+                      <td className="px-6 py-4 text-sm">{log.details}</td>
+                      <td className="px-6 py-4 text-sm">{log.ipAddress}</td>
                     </tr>
                   ))
                 )}
@@ -416,6 +446,6 @@ export default function AuditLogs() {
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 }

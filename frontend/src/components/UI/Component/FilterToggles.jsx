@@ -36,7 +36,7 @@ const FilterToggles = ({
           className="flex items-center text-sm text-red-600 hover:text-red-700 transition-colors"
         >
           <X className="h-4 w-4 mr-1" />
-          Clear Filters
+          Clear
         </button>
       )}
     </div>

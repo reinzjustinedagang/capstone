@@ -256,7 +256,7 @@ const MunicipalOfficials = ({ title }) => {
   }
 
   return (
-    <div className="bg-white rounded-xl shadow-lg p-4">
+    <>
       <div className="flex justify-between items-center border-b border-gray-200 pb-4 mb-6">
         <h2 className="text-lg font-medium text-blue-700">{title}</h2>
         <Button
@@ -435,7 +435,7 @@ const MunicipalOfficials = ({ title }) => {
           </div>
         </Modal>
       )}
-    </div>
+    </>
   );
 };
 

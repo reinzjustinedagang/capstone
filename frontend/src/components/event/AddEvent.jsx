@@ -25,6 +25,24 @@ const AddEvent = memo(
           />
         </div>
 
+        {/* Event Type */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700">
+            Event Type
+          </label>
+          <select
+            name="type"
+            value={newEvent.type}
+            onChange={onInputChange}
+            className="w-full border border-gray-300 rounded-lg px-3 py-2 mt-1 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+            disabled={loading}
+          >
+            <option value="">-- Select Type --</option>
+            <option value="slideshow">Slideshow</option>
+            <option value="event">Event</option>
+          </select>
+        </div>
+
         {/* Description */}
         <div>
           <label className="block text-sm font-medium text-gray-700">

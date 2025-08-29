@@ -13,7 +13,27 @@ import {
 const Dashboard = () => {
   const [barangayCount, setBarangayCount] = useState(0);
   const [citizenCount, setCitizenCount] = useState(0);
+  const [userCount, setUserCount] = useState(0);
+  const [eventsCount, setEventsCount] = useState(0);
   const backendUrl = import.meta.env.VITE_API_BASE_URL;
+
+  const fetchEventsCount = async () => {
+    try {
+      const res = await axios.get(`${backendUrl}/api/events/count/all`);
+      setEventsCount(res.data.count);
+    } catch (err) {
+      console.error("Failed to fetch barangay count", err);
+    }
+  };
+
+  const fetchUserCount = async () => {
+    try {
+      const res = await axios.get(`${backendUrl}/api/user/count/all`);
+      setUserCount(res.data.count);
+    } catch (err) {
+      console.error("Failed to fetch barangay count", err);
+    }
+  };
 
   const fetchBarangayCount = async () => {
     try {
@@ -38,6 +58,8 @@ const Dashboard = () => {
   useEffect(() => {
     fetchBarangayCount();
     fetchCitizenCount();
+    fetchUserCount();
+    fetchEventsCount();
   }, []);
 
   return (
@@ -63,18 +85,34 @@ const Dashboard = () => {
 
         <Card
           title="SMS Sent (This Month)"
-          value="156"
+          value="0"
           icon={<MessageSquareIcon />}
           color="indigo"
         />
         <Card
-          title="Pending Notifications"
+          title="Total Benefits"
           value="12"
           icon={<BellIcon />}
           color="amber"
         />
+        <NavLink to="/admin/events">
+          <Card
+            title="Total Events"
+            value={eventsCount}
+            icon={<BellIcon />}
+            color="amber"
+          />
+        </NavLink>
+        <NavLink to="/admin/user-management">
+          <Card
+            title="Total User"
+            value={userCount}
+            icon={<BellIcon />}
+            color="amber"
+          />
+        </NavLink>
       </div>
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      {/* <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="bg-white rounded-lg shadow p-6">
           <h2 className="text-lg font-semibold mb-4">Recent Registrations</h2>
           <div className="overflow-x-auto">
@@ -159,7 +197,7 @@ const Dashboard = () => {
             </div>
           </div>
         </div>
-      </div>
+      </div> */}
     </>
   );
 };

@@ -15,6 +15,11 @@ const extractCloudinaryPublicId = (url) => {
   return `${folder}/${filename}`;
 };
 
+exports.getUserCount = async () => {
+  const [result] = await Connection("SELECT COUNT(*) AS count FROM users");
+  return result.count;
+};
+
 exports.getUser = async (id) => {
   try {
     const user = await Connection(

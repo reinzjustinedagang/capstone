@@ -5,6 +5,16 @@ const upload = require("../middleware/upload");
 const uploadToCloudinary = require("../utils/uploadToCloudinary");
 const { isAuthenticated } = require("../middleware/authMiddleware");
 
+router.get("/count/all", async (req, res) => {
+  try {
+    const count = await userService.getUserCount();
+    res.json({ count });
+  } catch (error) {
+    console.error("Error fetching user count:", error);
+    res.status(500).json({ message: "Failed to fetch user count" });
+  }
+});
+
 // Get user by ID
 router.get("/user/:id", async (req, res) => {
   const { id } = req.params;
