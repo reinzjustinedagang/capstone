@@ -39,6 +39,7 @@ exports.getSystemSettings = async () => {
 exports.updateSystemSettings = async (
   systemName,
   municipality,
+  province,
   sealPath,
   mission,
   vision,
@@ -61,16 +62,25 @@ exports.updateSystemSettings = async (
 
   if (existingRows.length === 0) {
     await Connection(
-      `INSERT INTO system (id, system_name, municipality, seal, mission, vision, preamble) VALUES (1, ?, ?, ?, ?, ?, ?)`,
-      [systemName, municipality, sealPath, mission, vision, preamble || null]
+      `INSERT INTO system (id, system_name, municipality, province, seal, mission, vision, preamble) VALUES (1, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        systemName,
+        municipality,
+        province,
+        sealPath,
+        mission,
+        vision,
+        preamble || null,
+      ]
     );
     changes.push("Initial system settings created.");
   } else {
     await Connection(
-      `UPDATE system SET system_name = ?, municipality = ?, seal = ?, mission = ?, vision = ?, preamble = ? WHERE id = 1`,
+      `UPDATE system SET system_name = ?, municipality = ?, province = ?, seal = ?, mission = ?, vision = ?, preamble = ? WHERE id = 1`,
       [
         systemName,
         municipality,
+        province,
         sealPath,
         mission,
         vision,
@@ -84,6 +94,8 @@ exports.updateSystemSettings = async (
     changes.push(`System name: '${old.system_name}' → '${systemName}'`);
   if (old.municipality !== municipality)
     changes.push(`Municipality: '${old.municipality}' → '${municipality}'`);
+  if (old.province !== province)
+    changes.push(`Province: '${old.province}' → '${province}'`);
   if (sealPath && old.seal !== sealPath) changes.push(`Seal updated`);
   if (old.mission !== mission)
     changes.push(`Mission: '${old.mission}' → '${mission}'`);

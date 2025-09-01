@@ -8,12 +8,7 @@ import slider5 from "../../assets/slider5.jpg";
 
 const Home = () => {
   return (
-    <div
-      className="min-h-screen text-gray-800 bg-no-repeat bg-cover bg-fixed"
-      style={{
-        backgroundImage: `url(${slider5})`,
-      }}
-    >
+    <div>
       <Header />
 
       <Slideshow />

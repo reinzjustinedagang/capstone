@@ -326,47 +326,27 @@ db.query(
 // Create the 'senior_citizens' table if it does not already exist.
 db.query(
   `
-  CREATE TABLE IF NOT EXISTS senior_citizens (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    firstName VARCHAR(255) NOT NULL,
-    lastName VARCHAR(255) NOT NULL,
-    middleName VARCHAR(255),
-    suffix VARCHAR(50),
-    age INT,
-    gender VARCHAR(10),
-    birthdate DATE,
-    civilStatus VARCHAR(50),
-    religion VARCHAR(100),
-    bloodType VARCHAR(5),
-    houseNumberStreet VARCHAR(255),
-    barangay VARCHAR(100),
-    municipality VARCHAR(100),
-    province VARCHAR(100),
-    zipCode VARCHAR(10),
-    mobileNumber VARCHAR(15),
-    telephoneNumber VARCHAR(15),
-    emailAddress VARCHAR(255),
-    validIdType VARCHAR(100),
-    validIdNumber VARCHAR(100),
-    philSysId VARCHAR(100),
-    sssNumber VARCHAR(100),
-    gsisNumber VARCHAR(100),
-    philhealthNumber VARCHAR(100),
-    tinNumber VARCHAR(100),
-    employmentStatus VARCHAR(50),
-    occupation VARCHAR(255),
-    highestEducation VARCHAR(100),
-    classification VARCHAR(50),
-    monthlyPension DECIMAL(10,2),
-    emergencyContactName VARCHAR(255),
-    emergencyContactRelationship VARCHAR(100),
-    emergencyContactNumber VARCHAR(15),
-    healthStatus VARCHAR(50),
-    healthNotes TEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    deleted TINYINT(1) DEFAULT 0,
-    deleted_at TIMESTAMP NULL,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    CREATE TABLE IF NOT EXISTS senior_citizens (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      
+      -- Core structured fields
+      firstName VARCHAR(255) NOT NULL,
+      lastName VARCHAR(255) NOT NULL,
+      middleName VARCHAR(255),
+      suffix VARCHAR(50),
+      
+      -- Dynamic form fields stored here
+      form_data JSON NOT NULL,
+      
+      -- Optional: quick access columns (can be included in JSON too)
+      age INT GENERATED ALWAYS AS (CAST(JSON_EXTRACT(form_data, '$.age') AS UNSIGNED)) VIRTUAL,
+      gender VARCHAR(10) GENERATED ALWAYS AS (JSON_UNQUOTE(JSON_EXTRACT(form_data, '$.gender'))) VIRTUAL,
+      
+      -- Metadata
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+      deleted TINYINT(1) DEFAULT 0,
+      deleted_at TIMESTAMP NULL
   )
 `,
   (err) => {
@@ -384,6 +364,7 @@ db.query(
     id INT PRIMARY KEY AUTO_INCREMENT,
     system_name VARCHAR(255) NOT NULL,
     municipality VARCHAR(255) NOT NULL,
+    province VARCHAR(255) NOT NULL,
     seal VARCHAR(500), -- path or URL of uploaded seal image,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     mission TEXT NULL,
@@ -396,6 +377,29 @@ db.query(
       console.error("❌ Failed to create system table:", err);
     } else {
       console.log("✅ system table ready.");
+    }
+  }
+);
+
+// Create the 'senior citizen form' table if it does not already exist.
+db.query(
+  `
+  CREATE TABLE IF NOT EXISTS form_fields (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    field_name VARCHAR(255) NOT NULL,       
+    label VARCHAR(255) NOT NULL,           
+    type VARCHAR(50) NOT NULL,              
+    options TEXT,                          
+    required BOOLEAN DEFAULT FALSE,        
+    \`group\` VARCHAR(50),                    
+    \`order\` INT DEFAULT 0                   
+  )
+  `,
+  (err) => {
+    if (err) {
+      console.error("❌ Failed to create form_fields table:", err);
+    } else {
+      console.log("✅ form_fields table ready.");
     }
   }
 );

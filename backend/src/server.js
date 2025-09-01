@@ -80,6 +80,7 @@ const benefitRoutes = require("../route/benefitRoutes");
 const eventRoutes = require("../route/eventRoutes");
 const reportRoutes = require("../route/reportRoutes");
 const systemRoutes = require("../route/systemRoutes");
+const formFieldRoutes = require("../route/formFieldRoutes");
 const getUserIp = require("../middleware/getUserIp");
 
 app.use(getUserIp);
@@ -93,7 +94,8 @@ app.use("/api/barangays", barangayRoutes);
 app.use("/api/benefits", benefitRoutes);
 app.use("/api/events", eventRoutes);
 app.use("/api/charts", reportRoutes);
-app.use("/api/settings/", systemRoutes);
+app.use("/api/settings", systemRoutes);
+app.use("/api/form-fields", formFieldRoutes);
 
 // Global error handler
 app.use((err, req, res, next) => {

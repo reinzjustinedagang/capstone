@@ -171,16 +171,11 @@ const Organization = () => {
   };
 
   return (
-    <div
-      className="min-h-screen text-gray-800 bg-no-repeat bg-cover bg-fixed"
-      style={{
-        backgroundImage: `url(${slider5})`,
-      }}
-    >
+    <div>
       <Header />
 
       {/* Section Header */}
-      <div className="text-center px-5 py-6 md:px-25 mb-6 bg-white">
+      <div className="text-center px-5 py-6 md:px-25 bg-white">
         <h2 className="text-3xl font-bold text-gray-900">Organization</h2>
         <p className="text-gray-600 mt-2">
           Meet our officials and see the demographic distribution of senior
@@ -189,7 +184,7 @@ const Organization = () => {
       </div>
 
       {/* Officials Cards */}
-      <div className="mb-6 px-5 py-6 md:px-8 lg:px-25 bg-white">
+      <div className="px-5 py-6 md:px-8 lg:px-25 bg-white">
         <h3 className="text-2xl font-semibold text-blue-700 mb-6 text-center">
           Federation Officer
         </h3>
@@ -201,7 +196,7 @@ const Organization = () => {
       </div>
 
       {/* Organizational Structure */}
-      <div className="mb-6 px-5 py-6 md:px-8 lg:px-25 bg-white">
+      <div className="px-5 py-6 md:px-8 lg:px-25 bg-white">
         <h3 className="text-2xl font-semibold text-blue-700 mb-6 text-center">
           Organizational Chart
         </h3>

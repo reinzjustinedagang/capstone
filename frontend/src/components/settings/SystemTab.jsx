@@ -10,6 +10,7 @@ import {
   Target,
   Eye,
   ScrollText,
+  MapIcon,
 } from "lucide-react";
 import Button from "../UI/Button";
 import axios from "axios";
@@ -20,6 +21,7 @@ const SystemTab = () => {
   const [formData, setFormData] = useState({
     systemName: "",
     municipality: "",
+    province: "",
     mission: "",
     vision: "",
     preamble: "",
@@ -52,6 +54,7 @@ const SystemTab = () => {
           setFormData({
             systemName: res.data.system_name || "",
             municipality: res.data.municipality || "",
+            province: res.data.province || "",
             mission: res.data.mission || "",
             vision: res.data.vision || "",
             preamble: res.data.preamble || "",
@@ -103,7 +106,7 @@ const SystemTab = () => {
     setError("");
     setSuccessMessage("");
 
-    if (!formData.systemName || !formData.municipality) {
+    if (!formData.systemName || !formData.municipality || !formData.province) {
       setError("All required fields must be filled.");
       setLoading(false);
       return;
@@ -113,6 +116,7 @@ const SystemTab = () => {
       const formPayload = new FormData();
       formPayload.append("systemName", formData.systemName);
       formPayload.append("municipality", formData.municipality);
+      formPayload.append("province", formData.province);
       formPayload.append("mission", formData.mission);
       formPayload.append("vision", formData.vision);
       formPayload.append("preamble", formData.preamble);
@@ -188,6 +192,23 @@ const SystemTab = () => {
               className="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 pl-10 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
             />
             <Landmark className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
+          </div>
+        </div>
+
+        {/* Province */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700">
+            Province
+          </label>
+          <div className="mt-1 relative">
+            <input
+              value={formData.province}
+              onChange={(e) =>
+                setFormData({ ...formData, province: e.target.value })
+              }
+              className="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 pl-10 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+            />
+            <MapIcon className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
           </div>
         </div>
 

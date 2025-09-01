@@ -20,7 +20,7 @@ const Footer = () => {
   }, []);
 
   return (
-    <footer className="bg-white text-gray-700 p-6 mt-6">
+    <footer className="bg-white text-gray-700 p-6">
       <div className="container mx-auto flex flex-col items-center gap-4">
         {/* Links */}
         <div className="flex flex-wrap justify-center gap-6 text-sm font-medium">

@@ -25,6 +25,7 @@ router.post("/", isAuthenticated, upload.single("image"), async (req, res) => {
     const {
       systemName,
       municipality,
+      province,
       existingSeal,
       mission,
       vision,
@@ -56,6 +57,7 @@ router.post("/", isAuthenticated, upload.single("image"), async (req, res) => {
     const result = await systemService.updateSystemSettings(
       systemName,
       municipality,
+      province,
       sealPath,
       mission,
       vision,

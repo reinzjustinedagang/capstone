@@ -56,7 +56,7 @@ const Slideshow = () => {
   };
 
   return (
-    <section className="relative h-[70vh] md:h-[60vh] flex items-center justify-center overflow-hidden rounded-xl shadow-lg my-6 mx-4">
+    <section className="relative h-[70vh] md:h-[60vh] flex items-center justify-center overflow-hidden rounded-xl shadow-lg mx-4">
       {/* Slide */}
       <div
         className="absolute inset-0 bg-cover bg-center transition-all duration-700"

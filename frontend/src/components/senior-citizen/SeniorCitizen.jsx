@@ -14,6 +14,7 @@ import Modal from "../UI/Modal";
 import Button from "../UI/Button";
 import AddSenior from "./AddSenior";
 import SeniorCitizenList from "./SeniorCitizenList";
+import SeniorCitizenForm from "./SeniorCitizenForm";
 
 const SeniorCitizen = () => {
   const [activeTab, setActiveTab] = useState("list");
@@ -62,7 +63,7 @@ const SeniorCitizen = () => {
       <div className="bg-white rounded-lg shadow overflow-hidden">
         {activeTab === "list" && <SeniorCitizenList />}
 
-        {activeTab === "add" && <AddSenior />}
+        {activeTab === "add" && <SeniorCitizenForm />}
       </div>
       {/* Success Modal */}
       <Modal

@@ -1,0 +1,74 @@
+const express = require("express");
+const router = express.Router();
+const formFieldsService = require("../service/formFieldsService");
+
+// GET all form fields
+router.get("/", async (req, res) => {
+  try {
+    const fields = await formFieldsService.getAll();
+    res.status(200).json(fields);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// GET a single field by ID
+router.get("/:id", async (req, res) => {
+  const { id } = req.params;
+  try {
+    const field = await formFieldsService.getById(id);
+    if (!field) return res.status(404).json({ message: "Field not found" });
+    res.status(200).json(field);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// POST create a new field
+router.post("/", async (req, res) => {
+  const user = req.session.user;
+  const ip = req.userIp;
+  if (!user) return res.status(401).json({ message: "Unauthorized" });
+
+  try {
+    const inserted = await formFieldsService.create(req.body, user, ip);
+    res.status(201).json({ message: "Field created", id: inserted.insertId });
+  } catch (err) {
+    console.error("Error creating form field:", err);
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// PUT update field
+router.put("/:id", async (req, res) => {
+  const { id } = req.params;
+  const user = req.session.user;
+  const ip = req.userIp;
+  if (!user) return res.status(401).json({ message: "Unauthorized" });
+
+  try {
+    const updated = await formFieldsService.update(id, req.body, user, ip);
+    if (!updated) return res.status(404).json({ message: "Field not found" });
+    res.status(200).json({ message: "Field updated" });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// DELETE field
+router.delete("/:id", async (req, res) => {
+  const { id } = req.params;
+  const user = req.session.user;
+  const ip = req.userIp;
+  if (!user) return res.status(401).json({ message: "Unauthorized" });
+
+  try {
+    const deleted = await formFieldsService.remove(id, user, ip);
+    if (!deleted) return res.status(404).json({ message: "Field not found" });
+    res.status(200).json({ message: "Field deleted" });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+module.exports = router;
