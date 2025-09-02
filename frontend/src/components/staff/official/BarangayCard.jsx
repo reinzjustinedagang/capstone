@@ -23,7 +23,7 @@ const BarangayCard = ({ official }) => {
             e.target.src =
               "https://placehold.co/80x80/cccccc/ffffff?text=No+Image";
           }}
-          className="w-24 h-24 object-cover rounded-full border-4 border-blue-500"
+          className="w-24 h-24 object-cover border-2 rounded-lg border-blue-500"
         />
       </div>
 

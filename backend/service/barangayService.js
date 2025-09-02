@@ -23,7 +23,7 @@ exports.getPaginatedBarangays = async (page = 1, limit = 10) => {
 
 // Get all barangay
 exports.getAllBarangay = async () => {
-  const result = await Connection("SELECT barangay_name FROM barangays");
+  const result = await Connection("SELECT * FROM barangays");
   return result;
 };
 

@@ -22,9 +22,6 @@ const SystemTab = () => {
     systemName: "",
     municipality: "",
     province: "",
-    mission: "",
-    vision: "",
-    preamble: "",
   });
 
   const [sealFile, setSealFile] = useState(null);
@@ -55,9 +52,6 @@ const SystemTab = () => {
             systemName: res.data.system_name || "",
             municipality: res.data.municipality || "",
             province: res.data.province || "",
-            mission: res.data.mission || "",
-            vision: res.data.vision || "",
-            preamble: res.data.preamble || "",
           });
           setSealPreview(res.data.seal || null);
           setSealFile(null);
@@ -117,9 +111,7 @@ const SystemTab = () => {
       formPayload.append("systemName", formData.systemName);
       formPayload.append("municipality", formData.municipality);
       formPayload.append("province", formData.province);
-      formPayload.append("mission", formData.mission);
-      formPayload.append("vision", formData.vision);
-      formPayload.append("preamble", formData.preamble);
+
       formPayload.append("existingSeal", sealPreview || "");
       if (sealFile) formPayload.append("image", sealFile);
 
@@ -242,60 +234,6 @@ const SystemTab = () => {
               onChange={handleSealChange}
             />
           </div>
-        </div>
-      </div>
-
-      {/* Mission */}
-      <div className="mt-4">
-        <label className="block text-sm font-medium text-gray-700">
-          Mission
-        </label>
-        <div className="mt-1 relative">
-          <textarea
-            value={formData.mission}
-            onChange={(e) =>
-              setFormData({ ...formData, mission: e.target.value })
-            }
-            className="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 pl-10 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-            rows={3}
-          />
-          <Target className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
-        </div>
-      </div>
-
-      {/* Vision */}
-      <div className="mt-4">
-        <label className="block text-sm font-medium text-gray-700">
-          Vision
-        </label>
-        <div className="mt-1 relative">
-          <textarea
-            value={formData.vision}
-            onChange={(e) =>
-              setFormData({ ...formData, vision: e.target.value })
-            }
-            className="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 pl-10 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-            rows={3}
-          />
-          <Eye className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
-        </div>
-      </div>
-
-      {/* Preamble */}
-      <div className="mt-4">
-        <label className="block text-sm font-medium text-gray-700">
-          Preamble
-        </label>
-        <div className="mt-1 relative">
-          <textarea
-            value={formData.preamble}
-            onChange={(e) =>
-              setFormData({ ...formData, preamble: e.target.value })
-            }
-            className="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 pl-10 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-            rows={4}
-          />
-          <ScrollText className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
         </div>
       </div>
 

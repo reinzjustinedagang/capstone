@@ -2,8 +2,8 @@
 import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import Button from "../UI/Button";
-import BarangayCard from "./BarangayCard";
-import BarangayForm from "./BarangayForm";
+import BarangayCard from "./card/BarangayCard";
+import BarangayForm from "./form/BarangayForm";
 import ConfirmationModal from "./ConfirmationModal";
 import StatusMessage from "./StatusMessage";
 import { PlusIcon, Loader2 } from "lucide-react";
@@ -221,8 +221,7 @@ const BarangayOfficials = ({ title }) => {
 
   return (
     <>
-      <div className="flex justify-between items-center border-b border-gray-200 pb-4 mb-6">
-        <h3 className="text-lg font-medium text-blue-700">{title}</h3>
+      <div className="flex justify-end items-center pb-4 mb-6">
         <Button
           onClick={() => {
             setFormData({

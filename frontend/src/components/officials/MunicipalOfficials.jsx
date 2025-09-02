@@ -7,8 +7,8 @@ import {
   SaveIcon,
   TrashIcon,
 } from "lucide-react";
-import MunicipalForm from "./MunicipalForm";
-import MunicipalCard from "./MunicipalCard";
+import MunicipalForm from "./form/MunicipalForm";
+import MunicipalCard from "./card/MunicipalCard";
 import Modal from "../UI/Modal";
 import Button from "../UI/Button";
 import axios from "axios";
@@ -38,9 +38,9 @@ const MunicipalOfficials = ({ title }) => {
   const backendUrl =
     import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
 
-  const head = officials.find((m) => m.type === "head");
-  const vice = officials.find((m) => m.type === "vice");
-  const others = officials.filter((m) => m.type === "officer");
+  const head = officials.find((m) => m.type === "top");
+  const vice = officials.find((m) => m.type === "mid");
+  const others = officials.filter((m) => m.type === "bottom");
   const isHeadOccupied = !!head;
   const isViceOccupied = !!vice;
 
@@ -257,8 +257,7 @@ const MunicipalOfficials = ({ title }) => {
 
   return (
     <>
-      <div className="flex justify-between items-center border-b border-gray-200 pb-4 mb-6">
-        <h2 className="text-lg font-medium text-blue-700">{title}</h2>
+      <div className="flex justify-end items-center pb-4 mb-6">
         <Button
           onClick={openAddModal}
           variant="primary"
@@ -301,7 +300,7 @@ const MunicipalOfficials = ({ title }) => {
           {/* Vice */}
           {vice && (
             <>
-              <div className="w-1 h-6 bg-blue-400"></div>
+              <div className="w-0.5 h-6 bg-blue-400"></div>
               <MunicipalCard
                 official={vice}
                 onEdit={() => openEditModal(vice)}
@@ -315,10 +314,10 @@ const MunicipalOfficials = ({ title }) => {
           {others.length > 0 && (
             <>
               <div className="relative flex justify-center items-center w-full mb-2">
-                <div className="w-1 h-6 bg-blue-400"></div>
-                <div className="absolute top-6 h-1 w-2/3 bg-blue-400"></div>
+                <div className="w-0.5 h-6 bg-blue-400"></div>
+                <div className="absolute top-6 h-0.5 w-2/3 bg-blue-400"></div>
               </div>
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 w-full place-items-center">
+              <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full place-items-center">
                 {others.map((o) => (
                   <MunicipalCard
                     key={o.id}

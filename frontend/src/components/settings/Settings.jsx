@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   MessageSquare,
   Settings as SettingsIconLucide, // Renamed to avoid conflict with component name
@@ -13,6 +13,25 @@ import FormFieldsPage from "./FormFieldPage";
 
 const Settings = () => {
   const [activeTab, setActiveTab] = useState("system");
+
+  useEffect(() => {
+    const handleHashChange = () => {
+      const hash = window.location.hash;
+      if (hash === "#senior-form") {
+        setActiveTab("senior-form");
+      }
+      // You can add more conditions here for other tabs if needed
+    };
+
+    // Set initial tab based on hash
+    handleHashChange();
+
+    // Listen for hash changes in case the user navigates within the same page
+    window.addEventListener("hashchange", handleHashChange);
+    return () => {
+      window.removeEventListener("hashchange", handleHashChange);
+    };
+  }, []);
 
   return (
     <>

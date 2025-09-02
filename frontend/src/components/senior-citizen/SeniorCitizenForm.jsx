@@ -1,40 +1,82 @@
 import React, { useEffect, useState } from "react";
-import Button from "../UI/Button";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import { ChevronDown, ChevronUp, CheckCircle } from "lucide-react";
+import Button from "../UI/Button";
+import Modal from "../UI/Modal";
 
-const SeniorCitizenForm = ({ citizen, onSubmit, onCancel }) => {
+const SeniorCitizenForm = ({ onSubmit, onCancel, onSuccess }) => {
   const [fields, setFields] = useState([]);
+  const [groups, setGroups] = useState([]);
   const [formData, setFormData] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formError, setFormError] = useState("");
   const [collapsedGroups, setCollapsedGroups] = useState({});
-  const backendUrl = import.meta.env.VITE_API_BASE_URL;
+  const [barangays, setBarangays] = useState([]);
+  const [barangayLoading, setBarangayLoading] = useState(false);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [saving, setSaving] = useState(false);
+
+  const backendUrl = "http://localhost:3000"; // replace with env
   const navigate = useNavigate();
 
-  // Fetch form fields
   useEffect(() => {
-    const fetchFields = async () => {
+    const fetchFormData = async () => {
       try {
-        const res = await axios.get(`${backendUrl}/api/form-fields/`);
-        setFields(res.data);
+        // Fetch fields and groups concurrently
+        const [fieldsRes, groupsRes] = await Promise.all([
+          axios.get(`${backendUrl}/api/form-fields/`, {
+            withCredentials: true,
+          }),
+          axios.get(`${backendUrl}/api/form-fields/group`, {
+            withCredentials: true,
+          }),
+        ]);
 
-        const initialData = {};
+        const fetchedFields = fieldsRes.data;
+        const fetchedGroups = groupsRes.data;
+
+        setFields(fetchedFields);
+        setGroups(fetchedGroups);
+
+        // Fetch barangays separately
+        try {
+          setBarangayLoading(true);
+          const barangayRes = await axios.get(
+            `${backendUrl}/api/barangays/all`,
+            { withCredentials: true }
+          );
+          setBarangays(barangayRes.data || []);
+        } catch (err) {
+          console.error("Failed to fetch barangays:", err);
+          setBarangays([]);
+          setFormError("Failed to load barangays. Please refresh the page.");
+        } finally {
+          setBarangayLoading(false);
+        }
+
+        // Prepare initial form data (empty but with all fields initialized)
+        let initialData = {};
         const initialCollapsed = {};
-        res.data.forEach((f) => {
-          initialData[f.field_name] =
-            citizen?.[f.field_name] || (f.type === "checkbox" ? [] : "");
-          if (!(f.group in initialCollapsed)) initialCollapsed[f.group] = false; // default expanded
+
+        fetchedFields.forEach((f) => {
+          initialData[f.field_name] = f.type === "checkbox" ? [] : "";
+          if (!(f.group in initialCollapsed)) {
+            initialCollapsed[f.group] = false; // expand by default
+          }
         });
+
         setFormData(initialData);
         setCollapsedGroups(initialCollapsed);
       } catch (err) {
-        console.error("Failed to fetch form fields:", err);
+        console.error("Failed to fetch form fields/groups:", err);
+        setFormError("Failed to load form. Please refresh the page.");
       }
     };
-    fetchFields();
-  }, [citizen]);
+
+    fetchFormData();
+  }, [backendUrl]);
 
   const handleChange = (e, field) => {
     const { type, value, checked } = e.target;
@@ -59,36 +101,208 @@ const SeniorCitizenForm = ({ citizen, onSubmit, onCancel }) => {
     }
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
+    setShowConfirmModal(true); // open confirm first
+  };
+
+  const handleFinalSubmit = async () => {
     setIsSubmitting(true);
     setFormError("");
 
     try {
+      const {
+        firstName = "",
+        lastName = "",
+        middleName = "",
+        suffix = "",
+        ...dynamicFields
+      } = formData;
+
       const payload = {
-        firstName: formData.firstName || "",
-        lastName: formData.lastName || "",
-        // Add other fixed fields if any
-        form_data: JSON.stringify(formData), // <-- all dynamic fields here
+        firstName,
+        lastName,
+        middleName,
+        suffix,
+        form_data: JSON.stringify(dynamicFields),
       };
 
-      const url = citizen
-        ? `${backendUrl}/api/senior-citizens/update/${citizen.id}`
-        : `${backendUrl}/api/senior-citizens/create`;
-      const method = citizen ? "put" : "post";
+      await axios.post(`${backendUrl}/api/senior-citizens/create`, payload, {
+        withCredentials: true,
+      });
 
-      await axios[method](url, payload, { withCredentials: true });
-      onSubmit?.();
+      setShowConfirmModal(false); // close confirm
+      setShowSuccessModal(true); // open success
+      onSubmit?.(); // notify parent if needed
+      if (onSuccess) onSuccess();
     } catch (err) {
       console.error(err);
-      setFormError("Failed to submit form.");
+      setFormError(err.response?.data?.message || "Failed to submit form.");
+      setShowConfirmModal(false);
     } finally {
       setIsSubmitting(false);
     }
   };
 
+  const handleSuccessClose = () => {
+    setShowSuccessModal(false);
+    navigate("/admin/senior-citizen-list", {
+      state: { message: "New senior citizen added!" },
+    });
+  };
+
   const toggleGroup = (groupName) => {
     setCollapsedGroups((prev) => ({ ...prev, [groupName]: !prev[groupName] }));
+  };
+
+  // barangay special rendering kept
+  const renderBarangaySelect = (field) => {
+    const value = formData[field.field_name];
+    return (
+      <div key={field.id}>
+        <label className="block text-sm font-medium text-gray-700">
+          {field.label}
+          {field.required ? <span className="text-red-600"> *</span> : null}
+        </label>
+        <select
+          value={value || ""}
+          onChange={(e) => handleChange(e, field)}
+          required={field.required}
+          disabled={barangayLoading}
+          className="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:ring-blue-500 focus:border-blue-500 sm:text-sm disabled:bg-gray-100 disabled:cursor-not-allowed"
+        >
+          <option value="">
+            {barangayLoading ? "Loading barangays..." : `Select ${field.label}`}
+          </option>
+          {barangays.map((barangay) => (
+            <option key={barangay.id} value={barangay.barangay_name}>
+              {barangay.barangay_name}
+            </option>
+          ))}
+        </select>
+      </div>
+    );
+  };
+
+  const renderField = (field) => {
+    const value = formData[field.field_name];
+
+    if (
+      field.field_name.toLowerCase().includes("barangay") ||
+      field.label.toLowerCase().includes("barangay")
+    ) {
+      return renderBarangaySelect(field);
+    }
+
+    switch (field.type) {
+      case "text":
+      case "number":
+      case "date":
+        return (
+          <div key={field.id}>
+            <label className="block text-sm font-medium text-gray-700">
+              {field.label}
+              {field.required ? <span className="text-red-600"> *</span> : null}
+            </label>
+            <input
+              type={field.type}
+              value={value || ""}
+              onChange={(e) => handleChange(e, field)}
+              required={field.required}
+              className="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+            />
+          </div>
+        );
+      case "textarea":
+        return (
+          <div key={field.id}>
+            <label className="block text-sm font-medium text-gray-700">
+              {field.label}
+            </label>
+            <textarea
+              value={value || ""}
+              onChange={(e) => handleChange(e, field)}
+              className="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+            />
+          </div>
+        );
+      case "select":
+        return (
+          <div key={field.id}>
+            <label className="block text-sm font-medium text-gray-700">
+              {field.label}
+              {field.required ? <span className="text-red-600"> *</span> : null}
+            </label>
+            <select
+              value={value || ""}
+              onChange={(e) => handleChange(e, field)}
+              required={field.required}
+              className="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+            >
+              <option value="">Select {field.label}</option>
+              {field.options?.split(",").map((opt) => (
+                <option key={opt.trim()} value={opt.trim()}>
+                  {opt.trim()}
+                </option>
+              ))}
+            </select>
+          </div>
+        );
+      case "radio":
+        return (
+          <div key={field.id}>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              {field.label}
+              {field.required ? <span className="text-red-600"> *</span> : null}
+            </label>
+            <div className="space-y-2">
+              {field.options?.split(",").map((opt) => (
+                <label
+                  key={opt.trim()}
+                  className="flex items-center text-sm text-gray-700"
+                >
+                  <input
+                    type="radio"
+                    value={opt.trim()}
+                    checked={value === opt.trim()}
+                    onChange={(e) => handleChange(e, field)}
+                    required={field.required}
+                    className="mr-2"
+                  />
+                  {opt.trim()}
+                </label>
+              ))}
+            </div>
+          </div>
+        );
+      case "checkbox":
+        return (
+          <div key={field.id}>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              {field.label}
+            </label>
+            <div className="space-y-2">
+              {field.options?.split(",").map((opt) => (
+                <label
+                  key={opt.trim()}
+                  className="flex items-center text-sm text-gray-700"
+                >
+                  <input
+                    type="checkbox"
+                    value={opt.trim()}
+                    checked={(value || []).includes(opt.trim())}
+                    onChange={(e) => handleChange(e, field)}
+                    className="mr-2"
+                  />
+                  {opt.trim()}
+                </label>
+              ))}
+            </div>
+          </div>
+        );
+      default:
+        return null;
+    }
   };
 
   const groupedFields = fields.reduce((acc, field) => {
@@ -97,22 +311,6 @@ const SeniorCitizenForm = ({ citizen, onSubmit, onCancel }) => {
     return acc;
   }, {});
 
-  // Define group order and symbols
-  const groupOrder = [
-    "i_personal_information",
-    "ii_contact_information",
-    "iii_address",
-    "iv_other",
-  ];
-
-  const groupSymbols = {
-    i_personal_information: "I. Personal Information",
-    ii_contact_information: "II. Contact Information",
-    iii_address: "III. Address",
-    iv_other: "IV. Other",
-  };
-
-  // Render when no fields exist
   if (fields.length === 0) {
     return (
       <div className="text-center p-8 border rounded-md bg-gray-50">
@@ -131,131 +329,30 @@ const SeniorCitizenForm = ({ citizen, onSubmit, onCancel }) => {
 
   return (
     <form className="space-y-6 md:p-4" onSubmit={handleSubmit}>
-      {groupOrder
-        .filter((groupName) => groupedFields[groupName]) // only existing groups
-        .map((groupName) => (
+      {groups
+        .filter((g) => groupedFields[g.group_key])
+        .map((g) => (
           <div
-            key={groupName}
+            key={g.group_key}
             className="bg-gray-50 rounded-md border border-gray-200"
           >
             <div
-              onClick={() => toggleGroup(groupName)}
+              onClick={() => toggleGroup(g.group_key)}
               className="cursor-pointer flex justify-between items-center p-4 bg-gray-100"
             >
-              <h3 className="text-lg font-semibold text-gray-800">
-                {groupSymbols[groupName] || groupName.replace("_", " ")}
+              <h3 className="text-base font-semibold text-gray-800">
+                {g.group_label}
               </h3>
               <span className="text-gray-600">
-                {collapsedGroups[groupName] ? <ChevronUp /> : <ChevronDown />}
+                {collapsedGroups[g.group_key] ? <ChevronUp /> : <ChevronDown />}
               </span>
             </div>
 
-            {!collapsedGroups[groupName] && (
+            {!collapsedGroups[g.group_key] && (
               <div className="p-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                {groupedFields[groupName]
+                {groupedFields[g.group_key]
                   .sort((a, b) => a.order - b.order)
-                  .map((field) => {
-                    const value = formData[field.field_name];
-                    switch (field.type) {
-                      case "text":
-                      case "number":
-                      case "date":
-                        return (
-                          <div key={field.id}>
-                            <label className="block">
-                              {field.label}
-                              {field.required ? (
-                                <span className="text-red-600"> *</span>
-                              ) : null}
-                            </label>
-                            <input
-                              type={field.type}
-                              value={value}
-                              onChange={(e) => handleChange(e, field)}
-                              required={field.required}
-                              className="border p-2 rounded w-full"
-                            />
-                          </div>
-                        );
-                      case "textarea":
-                        return (
-                          <div key={field.id}>
-                            <label className="block">{field.label}</label>
-                            <textarea
-                              value={value}
-                              onChange={(e) => handleChange(e, field)}
-                              className="border p-2 rounded w-full"
-                            />
-                          </div>
-                        );
-                      case "select":
-                        return (
-                          <div key={field.id}>
-                            <label className="block">
-                              {field.label}
-                              {field.required ? (
-                                <span className="text-red-600"> *</span>
-                              ) : null}
-                            </label>
-                            <select
-                              value={value}
-                              onChange={(e) => handleChange(e, field)}
-                              required={field.required}
-                              className="border p-2 rounded w-full"
-                            >
-                              <option value="">Select {field.label}</option>
-                              {field.options?.split(",").map((opt) => (
-                                <option key={opt} value={opt}>
-                                  {opt}
-                                </option>
-                              ))}
-                            </select>
-                          </div>
-                        );
-                      case "radio":
-                        return (
-                          <div key={field.id}>
-                            <label className="block">
-                              {field.label}
-                              {field.required ? (
-                                <span className="text-red-600"> *</span>
-                              ) : null}
-                            </label>
-                            {field.options?.split(",").map((opt) => (
-                              <label key={opt} className="mr-4">
-                                <input
-                                  type="radio"
-                                  value={opt}
-                                  checked={value === opt}
-                                  onChange={(e) => handleChange(e, field)}
-                                  required={field.required}
-                                />{" "}
-                                {opt}
-                              </label>
-                            ))}
-                          </div>
-                        );
-                      case "checkbox":
-                        return (
-                          <div key={field.id}>
-                            <label className="block">{field.label}</label>
-                            {field.options?.split(",").map((opt) => (
-                              <label key={opt} className="mr-4">
-                                <input
-                                  type="checkbox"
-                                  value={opt}
-                                  checked={(value || []).includes(opt)}
-                                  onChange={(e) => handleChange(e, field)}
-                                />{" "}
-                                {opt}
-                              </label>
-                            ))}
-                          </div>
-                        );
-                      default:
-                        return null;
-                    }
-                  })}
+                  .map((field) => renderField(field))}
               </div>
             )}
           </div>
@@ -268,10 +365,38 @@ const SeniorCitizenForm = ({ citizen, onSubmit, onCancel }) => {
           Cancel
         </Button>
         <Button type="submit" variant="primary" disabled={isSubmitting}>
-          {isSubmitting ? "Saving..." : citizen ? "Update" : "Register"} Senior
-          Citizen
+          {isSubmitting ? "Saving..." : "Register Senior Citizen"}
         </Button>
       </div>
+
+      <Modal
+        isOpen={showConfirmModal}
+        onClose={() => setShowConfirmModal(false)}
+        title="Confirm Add"
+      >
+        <div className="mt-4 text-sm text-gray-700">
+          Are you sure you want to add this senior citizen?
+        </div>
+        <div className="mt-6 flex justify-end space-x-4">
+          <button
+            onClick={() => setShowConfirmModal(false)}
+            className="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 text-sm"
+          >
+            Cancel
+          </button>
+          <button
+            disabled={isSubmitting}
+            onClick={handleFinalSubmit}
+            className={`px-4 py-2 rounded text-sm ${
+              isSubmitting
+                ? "bg-blue-400 cursor-not-allowed"
+                : "bg-blue-600 hover:bg-blue-700"
+            } text-white`}
+          >
+            {isSubmitting ? "Saving..." : "Yes, Add"}
+          </button>
+        </div>
+      </Modal>
     </form>
   );
 };

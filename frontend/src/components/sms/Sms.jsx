@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { SendIcon } from "lucide-react";
+import { SendIcon, Loader2 } from "lucide-react";
 import Button from "../UI/Button";
 import MessageTemplates from "./MessageTemplates";
 import MessageHistory from "./MessageHistory";
@@ -10,41 +10,70 @@ const Sms = () => {
   const [selectedRecipients, setSelectedRecipients] = useState([]);
   const [messageText, setMessageText] = useState("");
   const [barangayFilter, setBarangayFilter] = useState("");
+  const [barangays, setBarangays] = useState([]);
   const [seniorCitizens, setSeniorCitizens] = useState([]);
   const [templates, setTemplates] = useState([]);
   const [selectedTemplateId, setSelectedTemplateId] = useState("");
-  const [loading, setLoading] = useState(false); // ✅ Loading state
+  const [loading, setLoading] = useState(false);
   const backendUrl = import.meta.env.VITE_API_BASE_URL;
 
-  const fetchData = async () => {
+  // Fetch barangays
+  const fetchBarangays = async () => {
     try {
-      const [citizensRes, templatesRes] = await Promise.all([
-        axios.get(`${backendUrl}/api/senior-citizens/sms-citizens`),
-        axios.get(`${backendUrl}/api/templates/`),
-      ]);
-      setSeniorCitizens(citizensRes.data);
-      setTemplates(templatesRes.data);
+      const res = await axios.get(`${backendUrl}/api/barangays/all`);
+      setBarangays(res.data || []); // API returns array directly
     } catch (err) {
-      console.error("Failed to fetch data", err);
+      console.error("Failed to fetch barangays:", err);
+      setBarangays([]);
+    }
+  };
+
+  // Fetch senior citizens by barangay ID
+  const fetchCitizens = async (barangayId = "") => {
+    try {
+      setLoading(true);
+      const res = await axios.get(
+        `${backendUrl}/api/senior-citizens/sms-citizens`,
+        { params: { barangay_id: barangayId } } // send ID instead of name
+      );
+      const citizens = res.data || [];
+      setSeniorCitizens(citizens);
+      setSelectedRecipients(citizens.map((c) => c.id)); // auto-select all
+    } catch (err) {
+      console.error("Failed to fetch citizens:", err);
+      setSeniorCitizens([]);
+      setSelectedRecipients([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Fetch templates
+  const fetchTemplates = async () => {
+    try {
+      const res = await axios.get(`${backendUrl}/api/templates/`);
+      setTemplates(res.data || []);
+    } catch (err) {
+      console.error("Failed to fetch templates:", err);
+      setTemplates([]);
     }
   };
 
   useEffect(() => {
-    fetchData();
+    fetchBarangays();
+    fetchCitizens();
+    fetchTemplates();
   }, []);
-
-  useEffect(() => {
-    if (activeTab === "send") fetchData();
-  }, [activeTab]);
-
-  const handleSelectAll = (e) => {
-    const filtered = filteredCitizens.map((c) => c.id);
-    setSelectedRecipients(e.target.checked ? filtered : []);
-  };
 
   const handleSelectRecipient = (id) => {
     setSelectedRecipients((prev) =>
       prev.includes(id) ? prev.filter((r) => r !== id) : [...prev, id]
+    );
+  };
+
+  const handleSelectAll = (e) => {
+    setSelectedRecipients(
+      e.target.checked ? seniorCitizens.map((c) => c.id) : []
     );
   };
 
@@ -55,34 +84,30 @@ const Sms = () => {
 
     try {
       const res = await axios.get(`${backendUrl}/api/templates/${selectedId}`);
-      setMessageText(res.data.message || "");
+      setMessageText(res.data?.message || "");
     } catch (err) {
-      console.error("Failed to load template", err);
+      console.error("Failed to load template:", err);
     }
   };
 
   const handleSendMessage = async () => {
-    const numbersArray = seniorCitizens
+    const numbers = seniorCitizens
       .filter((c) => selectedRecipients.includes(c.id))
       .map((c) => c.contact);
 
-    if (numbersArray.length === 0 || !messageText) return;
+    if (!numbers.length || !messageText) return;
 
     setLoading(true);
-
     try {
-      const response = await axios.post(`${backendUrl}/api/sms/send-sms`, {
-        numbers: numbersArray,
+      const res = await axios.post(`${backendUrl}/api/sms/send-sms`, {
+        numbers,
         message: messageText,
       });
 
-      // Extract backend message (including Semaphore errors)
       const msg =
-        response.data?.message ||
-        response.data?.response?.data?.data ||
-        response.data?.response?.data?.message ||
+        res.data?.message ||
+        res.data?.response?.data?.message ||
         "✅ Broadcast sent successfully";
-
       alert(msg);
 
       // Reset form
@@ -91,29 +116,27 @@ const Sms = () => {
       setSelectedTemplateId("");
     } catch (err) {
       console.error("Failed to send SMS:", err);
-
       const msg =
         err.response?.data?.message ||
         err.response?.data?.error ||
-        err.response?.data?.response?.data?.data ||
         "❌ Failed to send messages.";
-
       alert(msg);
     } finally {
       setLoading(false);
     }
   };
 
-  const uniqueBarangays = Array.from(
-    new Set(seniorCitizens.map((c) => c.barangay))
-  );
-
-  const filteredCitizens = barangayFilter
-    ? seniorCitizens.filter((c) => c.barangay === barangayFilter)
-    : seniorCitizens;
-
   return (
-    <div>
+    <div className="relative">
+      {loading && (
+        <div className="absolute inset-0 z-50 flex items-center justify-center bg-white/70 backdrop-blur-sm">
+          <div className="flex flex-col items-center">
+            <Loader2 className="animate-spin h-10 w-10 text-blue-600 mb-2" />
+            <span className="text-blue-700 font-medium">Loading...</span>
+          </div>
+        </div>
+      )}
+
       <div className="bg-white rounded-lg shadow overflow-hidden">
         {/* Tabs */}
         <div className="border-b border-gray-200">
@@ -153,10 +176,8 @@ const Sms = () => {
                         id="selectAll"
                         onChange={handleSelectAll}
                         checked={
-                          selectedRecipients.length > 0 &&
-                          filteredCitizens.every((c) =>
-                            selectedRecipients.includes(c.id)
-                          )
+                          seniorCitizens.length > 0 &&
+                          selectedRecipients.length === seniorCitizens.length
                         }
                         className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                       />
@@ -180,13 +201,17 @@ const Sms = () => {
                       <select
                         id="barangayFilter"
                         value={barangayFilter}
-                        onChange={(e) => setBarangayFilter(e.target.value)}
+                        onChange={(e) => {
+                          const selected = e.target.value;
+                          setBarangayFilter(selected);
+                          fetchCitizens(selected); // fetch by ID
+                        }}
                         className="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                       >
                         <option value="">All Barangays</option>
-                        {uniqueBarangays.map((brgy, index) => (
-                          <option key={index} value={brgy}>
-                            {brgy}
+                        {barangays.map((b) => (
+                          <option key={b.id} value={b.id}>
+                            {b.barangay_name}
                           </option>
                         ))}
                       </select>
@@ -194,31 +219,37 @@ const Sms = () => {
                   </div>
 
                   <div className="max-h-80 overflow-y-auto">
-                    {filteredCitizens.map((citizen) => (
-                      <div
-                        key={citizen.id}
-                        className="px-4 py-2 border-b border-gray-200 last:border-b-0 flex items-center"
-                      >
-                        <input
-                          type="checkbox"
-                          id={`citizen-${citizen.id}`}
-                          checked={selectedRecipients.includes(citizen.id)}
-                          onChange={() => handleSelectRecipient(citizen.id)}
-                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                        />
-                        <label
-                          htmlFor={`citizen-${citizen.id}`}
-                          className="ml-2 flex-1"
+                    {seniorCitizens.length > 0 ? (
+                      seniorCitizens.map((citizen) => (
+                        <div
+                          key={citizen.id}
+                          className="px-4 py-2 border-b border-gray-200 last:border-b-0 flex items-center"
                         >
-                          <div className="text-sm font-medium text-gray-700">
-                            {citizen.name}
-                          </div>
-                          <div className="text-xs text-gray-500">
-                            {citizen.contact}
-                          </div>
-                        </label>
+                          <input
+                            type="checkbox"
+                            id={`citizen-${citizen.id}`}
+                            checked={selectedRecipients.includes(citizen.id)}
+                            onChange={() => handleSelectRecipient(citizen.id)}
+                            className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                          />
+                          <label
+                            htmlFor={`citizen-${citizen.id}`}
+                            className="ml-2 flex-1"
+                          >
+                            <div className="text-sm font-medium text-gray-700">
+                              {citizen.name}
+                            </div>
+                            <div className="text-xs text-gray-500">
+                              {citizen.contact}
+                            </div>
+                          </label>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="p-4 text-center text-gray-500">
+                        No senior citizens found in this barangay.
                       </div>
-                    ))}
+                    )}
                   </div>
                 </div>
               </div>
@@ -241,9 +272,9 @@ const Sms = () => {
                       className="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                     >
                       <option value="">-- Select a template --</option>
-                      {templates.map((template) => (
-                        <option key={template.id} value={template.id}>
-                          {template.name}
+                      {templates.map((t) => (
+                        <option key={t.id} value={t.id}>
+                          {t.name}
                         </option>
                       ))}
                     </select>
@@ -268,8 +299,7 @@ const Sms = () => {
                       <span>{messageText.length} / 160 characters</span>
                     </p>
                   </div>
-                  <div className="flex justify-between">
-                    <span></span>
+                  <div className="flex justify-end">
                     <Button
                       variant="primary"
                       onClick={handleSendMessage}
@@ -289,10 +319,7 @@ const Sms = () => {
           </div>
         )}
 
-        {/* Templates Tab */}
         {activeTab === "templates" && <MessageTemplates />}
-
-        {/* History Tab */}
         {activeTab === "history" && <MessageHistory />}
       </div>
     </div>

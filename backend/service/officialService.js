@@ -63,7 +63,7 @@ exports.addMunicipalOfficial = async (
   ip
 ) => {
   try {
-    if (type === "head" || type === "vice") {
+    if (type === "top" || type === "mid") {
       const typeAlreadyExists = await checkIfTypeExists(type);
       if (typeAlreadyExists) {
         throw duplicateError(
@@ -112,7 +112,7 @@ exports.updateMunicipalOfficial = async (
 
     if (!oldData) throw new Error("Municipal official not found for update.");
 
-    if ((type === "head" || type === "vice") && oldData.type !== type) {
+    if ((type === "top" || type === "mid") && oldData.type !== type) {
       const typeAlreadyExists = await checkIfTypeExists(type, id);
       if (typeAlreadyExists) {
         throw duplicateError(

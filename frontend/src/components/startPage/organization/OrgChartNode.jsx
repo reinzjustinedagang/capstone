@@ -8,20 +8,28 @@ const OrgChartNode = ({ node, isTopNode = false }) => {
   const renderNode = () => (
     <div
       className={`
-      relative
-      bg-white
-      p-4
-      rounded-xl
-      shadow-lg
-      min-w-[150px]
-      flex flex-col items-center
-      text-center
-      border-2
-      ${isTopNode ? "border-indigo-600" : "border-gray-200"}
-    `}
+    relative
+    bg-white
+    p-4
+    rounded-xl
+    shadow-lg
+    flex
+    items-center
+    text-left
+    border-2
+    ${isTopNode ? "border-indigo-600" : "border-gray-200"}
+  `}
     >
-      <h3 className="text-lg font-semibold text-gray-800">{node.name}</h3>
-      <p className="text-sm text-gray-500 mt-1">{node.title}</p>
+      {/* Left: Square or Image */}
+      <div className="flex-shrink-0 mr-4">
+        <div className="bg-gray-200 h-20 w-20 rounded"></div>
+      </div>
+
+      {/* Right: Text */}
+      <div className="flex flex-col">
+        <h3 className="text-lg font-semibold text-gray-800">{node.name}</h3>
+        <p className="text-sm text-gray-500 mt-1">{node.title}</p>
+      </div>
     </div>
   );
 

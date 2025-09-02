@@ -58,11 +58,7 @@ const BarangayOfficials = ({ title }) => {
   }, [fetchBarangays]);
 
   return (
-    <div className="bg-white rounded-xl shadow-lg p-4 mb-4">
-      <div className="flex justify-between items-center border-b border-gray-200 pb-4 mb-6">
-        <h3 className="text-lg font-medium text-blue-700">{title}</h3>
-      </div>
-
+    <div className="">
       {isLoading || crudLoading ? (
         <div className="flex justify-center items-center py-10">
           <Loader2 className="animate-spin h-8 w-8 text-blue-500" />

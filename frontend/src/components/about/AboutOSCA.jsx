@@ -1,8 +1,11 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import Button from "../UI/Button";
+import { SaveIcon, Loader2, Target, Eye, ScrollText } from "lucide-react";
 
 const AboutOSCA = () => {
   const backendUrl = import.meta.env.VITE_API_BASE_URL;
+  const [loading, setLoading] = useState(false);
   const [settings, setSettings] = useState({
     mission: "",
     vision: "",
@@ -12,6 +15,7 @@ const AboutOSCA = () => {
     seal: null,
   });
 
+  // Fetch settings on load
   useEffect(() => {
     const fetchSettings = async () => {
       try {
@@ -22,86 +26,96 @@ const AboutOSCA = () => {
       }
     };
     fetchSettings();
-  }, []);
+  }, [backendUrl]);
+
+  // Handle save
+  const handleSave = async () => {
+    setLoading(true);
+    try {
+      await axios.put(`${backendUrl}/api/settings/`, settings);
+      alert("About OSCA updated successfully!");
+    } catch (err) {
+      console.error("Failed to save settings:", err);
+      alert("Failed to update. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
-    <div>
-      <div className="bg-white rounded-lg shadow overflow-hidden">
+    <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
+      <div className="space-y-6">
+        {/* Mission */}
+        <div className="mt-4">
+          <label className="block text-sm font-medium text-gray-700">
+            Mission
+          </label>
+          <div className="mt-1 relative">
+            <textarea
+              value={settings.mission}
+              onChange={(e) =>
+                setSettings({ ...settings, mission: e.target.value })
+              }
+              className="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 pl-10 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+              rows={3}
+            />
+            <Target className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
+          </div>
+        </div>
+
+        {/* Vision */}
+        <div className="mt-4">
+          <label className="block text-sm font-medium text-gray-700">
+            Vision
+          </label>
+          <div className="mt-1 relative">
+            <textarea
+              value={settings.vision}
+              onChange={(e) =>
+                setSettings({ ...settings, vision: e.target.value })
+              }
+              className="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 pl-10 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+              rows={3}
+            />
+            <Eye className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
+          </div>
+        </div>
+
         {/* Preamble */}
-        <div className="w-full px-5 py-6 md:px-8 lg:px-12 mb-6">
-          <h2 className="text-2xl font-semibold text-blue-700 mb-4 text-center">
+        <div className="mt-4">
+          <label className="block text-sm font-medium text-gray-700">
             Preamble
-          </h2>
-          <div className="p-4 border rounded-lg">
-            <p className="text-gray-700 leading-relaxed text-justify">
-              {settings.preamble ||
-                "The Office for Senior Citizens Affairs (OSCA) is committed to ensuring the welfare, rights, and dignity of senior citizens. We aim to provide programs and services that enhance the quality of life of the elderly population in San Jose."}
-            </p>
+          </label>
+          <div className="mt-1 relative">
+            <textarea
+              value={settings.preamble}
+              onChange={(e) =>
+                setSettings({ ...settings, preamble: e.target.value })
+              }
+              className="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 pl-10 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+              rows={4}
+            />
+            <ScrollText className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
           </div>
         </div>
 
-        {/* Mission & Vision */}
-        <div className="w-full px-5 py-6 md:px-8 lg:px-12 mb-6">
-          <h2 className="text-2xl font-semibold text-blue-700 mb-6 text-center">
-            Mission & Vision
-          </h2>
-          <div className="grid md:grid-cols-2 gap-6">
-            <div className="p-4 border rounded-lg">
-              <h3 className="text-xl font-semibold text-gray-900 mb-3">
-                Mission
-              </h3>
-              <p className="text-gray-700 leading-relaxed text-justify">
-                {settings.mission ||
-                  "To provide social services, programs, and activities that promote the welfare, security, and well-being of senior citizens in our community."}
-              </p>
-            </div>
-            <div className="p-4 border rounded-lg">
-              <h3 className="text-xl font-semibold text-gray-900 mb-3">
-                Vision
-              </h3>
-              <p className="text-gray-700 leading-relaxed text-justify">
-                {settings.vision ||
-                  "To be a model local government unit in empowering senior citizens, ensuring their rights, and enhancing their participation in community development."}
-              </p>
-            </div>
-          </div>
+        {/* Save Button */}
+        <div className="flex justify-end">
+          <Button
+            onClick={handleSave}
+            variant="primary"
+            icon={
+              loading ? (
+                <Loader2 className="animate-spin h-4 w-4 mr-2" />
+              ) : (
+                <SaveIcon className="h-4 w-4 mr-2" />
+              )
+            }
+            disabled={loading}
+          >
+            {loading ? "Saving..." : "Save Profile"}
+          </Button>
         </div>
-
-        {/* Mandate */}
-        {/* <div className="w-full px-5 py-6 md:px-8 lg:px-12 mb-6">
-          <h2 className="text-2xl font-semibold text-blue-700 mb-4 text-center">
-            Mandate
-          </h2>
-          <div className="p-4 border rounded-lg">
-            <p className="text-gray-700 leading-relaxed text-justify">
-              OSCA is mandated to implement programs and services for senior
-              citizens, including health assistance, social pension, advocacy,
-              and community integration initiatives as per RA 9994 – Expanded
-              Senior Citizens Act.
-            </p>
-          </div>
-        </div> */}
-
-        {/* Core Functions */}
-        {/* <div className="w-full px-5 py-6 md:px-8 lg:px-12 mb-6">
-          <h2 className="text-2xl font-semibold text-blue-700 mb-4 text-center">
-            Core Functions
-          </h2>
-          <div className="p-4 border rounded-lg">
-            <ul className="list-disc list-inside text-gray-700 space-y-2 max-w-3xl mx-auto">
-              <li>Registration and issuance of senior citizen IDs.</li>
-              <li>
-                Monitoring and distribution of social pensions and benefits.
-              </li>
-              <li>
-                Organization of senior citizen programs, seminars, and
-                activities.
-              </li>
-              <li>Advocacy for senior citizens' rights and welfare.</li>
-              <li>Data collection, reporting, and demographic studies.</li>
-            </ul>
-          </div>
-        </div> */}
       </div>
     </div>
   );

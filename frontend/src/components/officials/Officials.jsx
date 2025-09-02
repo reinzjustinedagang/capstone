@@ -52,12 +52,8 @@ const Officials = () => {
         </div>
         <div className="p-6">
           {/* Pass the handleEdit function as a prop to the components that render BenefitsCards */}
-          {activeTab === "barangay" && (
-            <BarangayOfficials title="Barangay Association Presidents" />
-          )}
-          {activeTab === "federation" && (
-            <MunicipalOfficials title="Municipal Federation Officer" />
-          )}
+          {activeTab === "barangay" && <BarangayOfficials />}
+          {activeTab === "federation" && <MunicipalOfficials />}
           {activeTab === "organizational" && (
             <OrgChart title="Organizational Chart" />
           )}

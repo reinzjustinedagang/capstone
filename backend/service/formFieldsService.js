@@ -121,3 +121,63 @@ exports.remove = async (id, user, ip) => {
   }
   return result.affectedRows > 0;
 };
+
+exports.getGroup = async () => {
+  const query = `SELECT * FROM form_group ORDER BY group_label ASC`;
+  return await Connection(query);
+};
+
+exports.createGroup = async (data, user, ip) => {
+  const { group_key, group_label } = data;
+
+  // 1. Check for duplicate field_name
+  const existing = await Connection(
+    `SELECT id FROM form_group WHERE group_key = ? OR group_label = ? LIMIT 1`,
+    [group_key, group_label]
+  );
+
+  if (existing.length > 0) {
+    throw new Error("A group with the same name or label already exists.");
+  }
+
+  // 2. Insert new field
+  const query = `
+    INSERT INTO form_group (group_key, group_label)
+    VALUES (?, ?)
+  `;
+  const result = await Connection(query, [group_key, group_label]);
+
+  // 3. Log audit
+  await logAudit(
+    user.id,
+    user.email,
+    user.role,
+    "CREATE",
+    `Added form group: '${group_label}'`,
+    ip
+  );
+
+  return result;
+};
+
+exports.reorder = async (fields, user, ip) => {
+  if (!Array.isArray(fields) || fields.length === 0) return;
+
+  // Loop through each field and update its order
+  for (const f of fields) {
+    const query = `UPDATE form_fields SET \`order\` = ? WHERE id = ?`;
+    await Connection(query, [parseInt(f.order), f.id]);
+  }
+
+  // Optional: Log audit
+  await logAudit(
+    user.id,
+    user.email,
+    user.role,
+    "UPDATE",
+    `Reordered ${fields.length} form fields`,
+    ip
+  );
+
+  return true;
+};

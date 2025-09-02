@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import {
   PercentIcon,
   Stethoscope,
@@ -19,6 +19,13 @@ import SeniorCitizenForm from "./SeniorCitizenForm";
 const SeniorCitizen = () => {
   const [activeTab, setActiveTab] = useState("list");
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+
+  const navigate = useNavigate();
+
+  const handleAddSuccess = () => {
+    setActiveTab("list");
+    setShowSuccessModal(true);
+  };
 
   return (
     <>
@@ -63,9 +70,11 @@ const SeniorCitizen = () => {
       <div className="bg-white rounded-lg shadow overflow-hidden">
         {activeTab === "list" && <SeniorCitizenList />}
 
-        {activeTab === "add" && <SeniorCitizenForm />}
+        {activeTab === "add" && (
+          <SeniorCitizenForm onSuccess={handleAddSuccess} />
+        )}
       </div>
-      {/* Success Modal */}
+
       <Modal
         isOpen={showSuccessModal}
         onClose={() => setShowSuccessModal(false)}

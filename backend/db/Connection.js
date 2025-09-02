@@ -104,7 +104,7 @@ db.query(
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     position VARCHAR(255) NOT NULL,
-    type ENUM('head', 'vice', 'officer') NOT NULL,
+    type ENUM('top', 'mid', 'bottom') NOT NULL,
     image VARCHAR(255), -- stores file name or URL
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
   )
@@ -114,6 +114,27 @@ db.query(
       console.error("❌ Failed to create municipal_officials table:", err);
     } else {
       console.log("✅ municipal_officials table ready.");
+    }
+  }
+);
+
+// organizational chart Table
+db.query(
+  `
+  CREATE TABLE IF NOT EXISTS orgChart (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    position VARCHAR(255) NOT NULL,
+    type ENUM('top', 'mid', 'bottom') NOT NULL,
+    image VARCHAR(255), -- stores file name or URL
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  )
+  `,
+  (err) => {
+    if (err) {
+      console.error("❌ Failed to create organizational chart table:", err);
+    } else {
+      console.log("✅ organizational chart table ready.");
     }
   }
 );
@@ -323,6 +344,55 @@ db.query(
   }
 );
 
+// Ensure form_group table exists
+db.query(
+  `
+  CREATE TABLE IF NOT EXISTS form_group (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    group_key VARCHAR(255) NOT NULL,
+    group_label VARCHAR(255) NOT NULL
+  )
+  `,
+  (err) => {
+    if (err) {
+      console.error("❌ Failed to create form_group table:", err);
+      return;
+    }
+
+    console.log("✅ form_group table ready.");
+
+    // Now check if empty
+    db.query(`SELECT COUNT(*) AS count FROM form_group`, (err, results) => {
+      if (err) {
+        console.error("❌ Failed to check form_group count:", err);
+        return;
+      }
+
+      if (results[0].count === 0) {
+        const defaultFields = [
+          ["i_personal_information", "I. Personal Information"],
+          ["ii_contact", "II. Contact"],
+          ["iii_address", "III. Address"],
+        ];
+
+        db.query(
+          `INSERT INTO form_group (group_key, group_label) VALUES ?`,
+          [defaultFields],
+          (err) => {
+            if (err) {
+              console.error("❌ Failed to insert default form groups:", err);
+            } else {
+              console.log("✅ Default form groups inserted.");
+            }
+          }
+        );
+      } else {
+        console.log("ℹ️ form_group already has data, skipping defaults.");
+      }
+    });
+  }
+);
+
 // Create the 'senior_citizens' table if it does not already exist.
 db.query(
   `
@@ -358,6 +428,118 @@ db.query(
   }
 );
 
+// Insert default form fields if table is empty
+db.query(`SELECT COUNT(*) AS count FROM form_fields`, (err, results) => {
+  if (err) {
+    console.error("❌ Failed to check form_fields count:", err);
+    return;
+  }
+
+  if (results[0].count === 0) {
+    const defaultFields = [
+      // Personal Info
+      [
+        "firstName",
+        "First Name",
+        "text",
+        null,
+        true,
+        "i_personal_information",
+        1,
+      ],
+      [
+        "middleName",
+        "Middle Name",
+        "text",
+        null,
+        false,
+        "i_personal_information",
+        2,
+      ],
+      [
+        "lastName",
+        "Last Name",
+        "text",
+        null,
+        true,
+        "i_personal_information",
+        3,
+      ],
+      ["suffix", "Suffix", "text", null, false, "i_personal_information", 4],
+      [
+        "gender",
+        "Gender",
+        "select",
+        "Male,Female",
+        true,
+        "i_personal_information",
+        5,
+      ],
+      [
+        "birthdate",
+        "Birthdate",
+        "date",
+        null,
+        true,
+        "i_personal_information",
+        6,
+      ],
+      ["age", "Age", "number", null, false, "i_personal_information", 7],
+
+      // Contact Info
+      ["phone", "Phone Number", "text", null, true, "ii_contact", 1],
+      ["email", "Email", "text", null, false, "ii_contact", 2],
+
+      // Address
+      ["street", "Street", "text", null, true, "iii_address", 1],
+      ["barangay", "Barangay", "select", null, true, "iii_address", 2],
+      ["municipality", "Municipality", "text", null, true, "iii_address", 3],
+      ["province", "Province", "text", null, true, "iii_address", 4],
+      ["zipcode", "Zip Code", "text", null, false, "iii_address", 5],
+
+      // Senior Citizen Details
+      ["senior_id", "Senior Citizen ID No.", "text", null, true, "senior", 1],
+      [
+        "pension_status",
+        "Pension Status",
+        "select",
+        "Yes,No",
+        true,
+        "senior",
+        2,
+      ],
+      [
+        "membership_date",
+        "Date of Membership",
+        "date",
+        null,
+        false,
+        "senior",
+        3,
+      ],
+    ];
+
+    // Create the 'senior citizen form' table if it does not already exist.
+    db.query(
+      `
+      INSERT INTO form_fields 
+      (field_name, label, type, options, required, \`group\`, \`order\`) 
+      VALUES ?
+      `,
+      [defaultFields],
+      (err) => {
+        if (err) {
+          console.error("❌ Failed to insert default form fields:", err);
+        } else {
+          console.log("✅ Default form fields inserted.");
+        }
+      }
+    );
+  } else {
+    console.log("ℹ️ form_fields already has data, skipping defaults.");
+  }
+});
+
 db.query(
   `
   CREATE TABLE IF NOT EXISTS system (
@@ -377,29 +559,6 @@ db.query(
       console.error("❌ Failed to create system table:", err);
     } else {
       console.log("✅ system table ready.");
-    }
-  }
-);
-
-// Create the 'senior citizen form' table if it does not already exist.
-db.query(
-  `
-  CREATE TABLE IF NOT EXISTS form_fields (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    field_name VARCHAR(255) NOT NULL,       
-    label VARCHAR(255) NOT NULL,           
-    type VARCHAR(50) NOT NULL,              
-    options TEXT,                          
-    required BOOLEAN DEFAULT FALSE,        
-    \`group\` VARCHAR(50),                    
-    \`order\` INT DEFAULT 0                   
-  )
-  `,
-  (err) => {
-    if (err) {
-      console.error("❌ Failed to create form_fields table:", err);
-    } else {
-      console.log("✅ form_fields table ready.");
     }
   }
 );

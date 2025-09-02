@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
-import Button from "../UI/Button";
-import Modal from "../UI/Modal";
+import Button from "../../UI/Button";
+import Modal from "../../UI/Modal";
 import { Loader2, SaveIcon, XCircle, UploadCloud } from "lucide-react";
-import user from "../../assets/user.png";
+import user from "../../../assets/user.png";
 import axios from "axios";
 
 const BarangayForm = ({

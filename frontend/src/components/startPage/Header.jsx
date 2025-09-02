@@ -18,6 +18,7 @@ const Header = () => {
   const [systemSettings, setSystemSettings] = useState({
     system_name: "",
     municipality: "",
+    province: "",
     seal: null,
   });
   const backendUrl = import.meta.env.VITE_API_BASE_URL;
@@ -59,7 +60,7 @@ const Header = () => {
                 "Office of the Senior Citizen Affairs"}
             </h1>
             <p className="text-base font-medium">
-              {systemSettings.municipality || "San Jose, Occidental Mindoro"}
+              {systemSettings.municipality}, {systemSettings.province}
             </p>
           </div>
         </div>

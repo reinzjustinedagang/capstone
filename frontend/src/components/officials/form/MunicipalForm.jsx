@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import Button from "../UI/Button"; // Importing your Button component
+import Button from "../../UI/Button"; // Importing your Button component
 import {
   Loader2,
   SaveIcon,
@@ -7,7 +7,7 @@ import {
   UploadCloud,
   UserIcon,
 } from "lucide-react"; // Importing necessary icons
-import user from "../../assets/user.png";
+import user from "../../../assets/user.png";
 
 const MunicipalForm = ({
   formData,
@@ -132,7 +132,7 @@ const MunicipalForm = ({
           htmlFor="type"
           className="block text-sm font-medium text-gray-700"
         >
-          Type
+          Hierarchy
         </label>
         <select
           id="type"
@@ -142,10 +142,10 @@ const MunicipalForm = ({
           className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
           required
         >
-          <option value="">Select type</option>
-          <option value="head">Head</option>
-          <option value="vice">Vice</option>
-          <option value="officer">Officer</option>
+          <option value="">Select hierarchy</option>
+          <option value="top">Top</option>
+          <option value="mid">Middle</option>
+          <option value="bottom">Bottom</option>
         </select>
       </div>
 

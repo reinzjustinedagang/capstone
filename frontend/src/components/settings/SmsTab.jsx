@@ -78,7 +78,7 @@ const SmsCredentialsForm = () => {
           </label>
           <div className="mt-1 relative">
             <input
-              type="text"
+              type="password"
               value={apiKey}
               onChange={(e) => setApiKey(e.target.value)}
               required
@@ -90,7 +90,7 @@ const SmsCredentialsForm = () => {
 
         <div>
           <label className="block text-sm font-medium text-gray-700">
-            Sender ID (Optional)
+            Sender ID
           </label>
           <div className="mt-1 relative">
             <input

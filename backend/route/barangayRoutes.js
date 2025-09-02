@@ -20,7 +20,7 @@ router.get("/", async (req, res) => {
 });
 
 // GET barangay
-router.get("/All", async (req, res) => {
+router.get("/all", async (req, res) => {
   try {
     const barangays = await barangayService.getAllBarangay();
     if (!barangays || barangays.length === 0) {
