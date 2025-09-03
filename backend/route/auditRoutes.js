@@ -24,6 +24,17 @@ router.get("/getAll", async (req, res) => {
   }
 });
 
+// GET /api/audit-logs/filters → Get all users and action types
+router.get("/filters", async (req, res) => {
+  try {
+    const filters = await auditService.getAuditFilters();
+    res.status(200).json(filters);
+  } catch (err) {
+    console.error("Error in /audit-logs/filters:", err);
+    res.status(500).json({ message: "Failed to fetch filter options." });
+  }
+});
+
 // GET /api/login-trails/:id → Get login trails for specific user
 router.get("/:id", async (req, res) => {
   try {

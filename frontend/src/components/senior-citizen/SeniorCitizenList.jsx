@@ -16,6 +16,7 @@ import {
   ArrowUp,
   ArchiveRestore,
   Filter,
+  CheckCircle,
   X,
 } from "lucide-react";
 import axios from "axios";
@@ -40,6 +41,9 @@ const SeniorCitizenList = () => {
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [successMessage, setSuccessMessage] = useState(""); // To customize the text
+
   const backendUrl =
     import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
 
@@ -146,11 +150,10 @@ const SeniorCitizenList = () => {
       setShowDeleteModal(false);
       setSelectedCitizen(null);
 
-      // --- Show success notification for delete ---
-      setNotificationMessage("Senior citizen record deleted successfully!");
-      setNotificationType("success");
-      setShowNotificationModal(true);
-      // ------------------------------------------
+      // --- Show SUCCESS modal ---
+      setSuccessMessage("Senior Citizen deleted successfully!");
+      setShowSuccessModal(true);
+      // ---------------------------
     } catch (err) {
       console.error("Failed to delete:", err);
       setError("Delete failed"); // Keep internal error state for now
@@ -165,7 +168,7 @@ const SeniorCitizenList = () => {
 
   const fetchBarangays = async () => {
     try {
-      const response = await axios.get(`${backendUrl}/api/barangays/All`);
+      const response = await axios.get(`${backendUrl}/api/barangays/all`);
       const options = [
         "All Barangays",
         ...response.data.map((b) => b.barangay_name), // ✅ Use correct field name
@@ -312,36 +315,49 @@ const SeniorCitizenList = () => {
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                       {`${citizen.lastName}, ${citizen.firstName} ${
                         citizen.middleName || ""
-                      }  ${citizen.suffix || ""}`}
+                      } ${citizen.suffix || ""}`}
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-500">
-                      {citizen.age}
+                      {citizen.age}{" "}
+                      {/* This is correct (from generated column) */}
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-500">
-                      {citizen.gender}
+                      {citizen.gender}{" "}
+                      {/* This is correct (from generated column) */}
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-500">
-                      {`${citizen.houseNumberStreet}, Brgy. ${citizen.barangay}, ${citizen.municipality}, ${citizen.province}`}
+                      {/* ✅ FIX: Access properties from citizen.form_data */}
+                      {`${citizen.form_data?.houseNumberStreet || ""}, Brgy. ${
+                        citizen.form_data?.barangay || ""
+                      }, ${citizen.form_data?.municipality || ""}, ${
+                        citizen.form_data?.province || ""
+                      }`}
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-500">
-                      {citizen.mobileNumber}
+                      {/* ✅ FIX: Access from citizen.form_data */}
+                      {citizen.form_data?.mobileNumber}
                     </td>
                     <td className="px-6 py-4">
                       <span
                         className={`px-2 inline-flex text-sm leading-5 font-semibold rounded-md ${
-                          citizen.healthStatus === "Good"
+                          /* ✅ FIX: Access from citizen.form_data */
+                          citizen.form_data?.healthStatus === "Good"
                             ? "bg-green-100 text-green-800"
-                            : citizen.healthStatus === "With Maintenance Meds"
+                            : citizen.form_data?.healthStatus ===
+                              "With Maintenance Meds"
                             ? "bg-blue-100 text-blue-800"
-                            : citizen.healthStatus === "Needs Medical Attention"
+                            : citizen.form_data?.healthStatus ===
+                              "Needs Medical Attention"
                             ? "bg-yellow-100 text-yellow-800"
                             : "bg-red-100 text-red-800"
                         }`}
                       >
-                        {citizen.healthStatus}
+                        {/* ✅ FIX: Access from citizen.form_data */}
+                        {citizen.form_data?.healthStatus}
                       </span>
                     </td>
                     <td className="px-6 py-4 text-sm font-xs">
+                      {/* ... your actions buttons are fine ... */}
                       <div className="flex space-x-2">
                         <button
                           onClick={() => handleEdit(citizen)}
@@ -455,7 +471,23 @@ const SeniorCitizenList = () => {
           </Button>
         </div>
       </Modal>
-      {/* ------------------------------- */}
+      {/* --- SUCCESS MODAL --- */}
+      <Modal
+        isOpen={showSuccessModal}
+        onClose={() => setShowSuccessModal(false)}
+        title="Success"
+      >
+        <div className="p-6 text-center">
+          <div className="mx-auto mb-4 w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
+            <Trash2 className="w-6 h-6 text-red-500" />
+          </div>
+          <h3 className="text-lg font-medium text-gray-800 mb-2">Success</h3>
+          <p className="text-sm text-gray-600 mb-4">{successMessage}</p>
+          <Button variant="primary" onClick={() => setShowSuccessModal(false)}>
+            OK
+          </Button>
+        </div>
+      </Modal>
     </div>
   );
 };

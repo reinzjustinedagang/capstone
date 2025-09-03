@@ -22,15 +22,7 @@ router.get("/", async (req, res) => {
 // POST (insert/update) system settings
 router.post("/", isAuthenticated, upload.single("image"), async (req, res) => {
   try {
-    const {
-      systemName,
-      municipality,
-      province,
-      existingSeal,
-      mission,
-      vision,
-      preamble,
-    } = req.body;
+    const { systemName, municipality, province, existingSeal } = req.body;
     let sealPath = existingSeal || null;
     const ip = req.userIp;
     const user = req.session.user;
@@ -59,9 +51,6 @@ router.post("/", isAuthenticated, upload.single("image"), async (req, res) => {
       municipality,
       province,
       sealPath,
-      mission,
-      vision,
-      preamble,
       user,
       ip
     );
@@ -76,6 +65,37 @@ router.post("/", isAuthenticated, upload.single("image"), async (req, res) => {
   } catch (err) {
     console.error("Error saving system settings:", err);
     res.status(500).json({ message: "Failed to save system settings" });
+  }
+});
+
+// POST update About OSCA
+router.post("/about", isAuthenticated, async (req, res) => {
+  try {
+    const { mission, vision, preamble } = req.body;
+    const user = req.session.user;
+    const ip = req.userIp;
+
+    if (!user) return res.status(401).json({ message: "Unauthorized" });
+
+    // Update system settings via service
+    const result = await systemService.updateAbout(
+      mission,
+      vision,
+      preamble,
+      user,
+      ip
+    );
+
+    res.status(200).json({
+      message:
+        result.actionType === "INSERT"
+          ? "About OSCA created successfully."
+          : "About OSCA updated successfully.",
+      changes: result.changes,
+    });
+  } catch (err) {
+    console.error("Error updating About OSCA:", err);
+    res.status(500).json({ message: "Failed to update About OSCA" });
   }
 });
 

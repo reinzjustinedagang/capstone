@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Button from "../../UI/Button";
 import Modal from "../../UI/Modal";
-import { Loader2, SaveIcon, XCircle, UploadCloud } from "lucide-react";
+import { Loader2, SaveIcon, XCircle, ImagePlus } from "lucide-react";
 import user from "../../../assets/user.png";
 import axios from "axios";
 
@@ -73,7 +73,7 @@ const BarangayForm = ({
           }}
         >
           <div className="flex justify-center">
-            <div className="relative group w-32 h-32">
+            <div className="relative group w-24 h-24 sm:w-32 sm:h-32">
               <img
                 src={
                   formData.imageFile instanceof File
@@ -81,14 +81,17 @@ const BarangayForm = ({
                     : existingImage || user
                 }
                 alt="Profile Preview"
-                className="w-full h-full object-cover rounded-full border-4 border-blue-200 group-hover:border-blue-400 transition-all duration-300 shadow"
+                className="w-full h-full object-cover rounded-xl border-4 border-blue-200 group-hover:border-blue-400 transition-all duration-300 shadow"
               />
               <label
                 htmlFor="image"
-                className="absolute bottom-0 right-0 bg-blue-600 text-white rounded-full p-1.5 cursor-pointer opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-1 group-hover:translate-y-0 shadow-lg hover:bg-blue-700"
+                className="absolute bottom-0.5 right-0.5 bg-blue-600 text-white rounded-xl p-2 sm:p-1.5 cursor-pointer 
+                 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 
+                 transition-all duration-300 transform translate-y-0 sm:translate-y-1 sm:group-hover:translate-y-0 
+                 shadow-lg hover:bg-blue-700"
                 title="Change Image"
               >
-                <UploadCloud className="text-white w-4 h-4" />
+                <ImagePlus className="text-white w-5 h-5 sm:w-4 sm:h-4" />
               </label>
               <input
                 type="file"
@@ -98,30 +101,6 @@ const BarangayForm = ({
                 className="hidden"
               />
             </div>
-          </div>
-
-          <div>
-            <label
-              htmlFor="barangay"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Barangay <span className="text-red-500">*</span>
-            </label>
-            <select
-              id="barangay"
-              name="barangay"
-              value={formData.barangay}
-              onChange={handleChange}
-              className="mt-1 block w-full border rounded-md px-3 py-2"
-              required
-            >
-              <option value="">Select barangay</option>
-              {barangayOptions.map((barangay, index) => (
-                <option key={index} value={barangay}>
-                  {barangay}
-                </option>
-              ))}
-            </select>
           </div>
 
           <div>

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { NavLink } from "react-router-dom";
 import axios from "axios";
-import { ArchiveRestore, Trash, ArrowUp } from "lucide-react";
+import { ArchiveRestore, Trash, ArrowUp, CheckCircle } from "lucide-react";
 // Assuming you have a Modal component for notifications
 import Modal from "../UI/Modal"; // Adjust path if necessary
 import Button from "../UI/Button"; // Assuming you have a Button component
@@ -15,6 +15,14 @@ const RecycleBin = () => {
   const [notificationType, setNotificationType] = useState(""); // 'success' or 'error'
   const [showNotificationModal, setShowNotificationModal] = useState(false);
   const [selectedCitizenId, setSelectedCitizenId] = useState(null); // New state to hold ID for modals
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [confirmAction, setConfirmAction] = useState(""); // 'restore' or 'delete'
+  const [confirmCitizenId, setConfirmCitizenId] = useState(null);
+  const [successType, setSuccessType] = useState(""); // 'restore' or 'delete'
+
+  // Custom message
 
   const fetchDeletedCitizens = async () => {
     try {
@@ -50,24 +58,28 @@ const RecycleBin = () => {
     // Example: window.location.reload(); // Not ideal, but simple for immediate test
   };
 
+  const confirmActionForCitizen = (id, actionType) => {
+    setConfirmCitizenId(id);
+    setConfirmAction(actionType); // 'restore' or 'delete'
+    setShowConfirmModal(true);
+  };
+
   const handleRestore = async (idToRestore) => {
-    // Pass the ID directly
-    setSelectedCitizenId(idToRestore); // Store for potential future modal use, though not strictly needed here
-    console.log("Restoring ID:", idToRestore);
+    setSelectedCitizenId(idToRestore);
     try {
       await axios.patch(
-        `${backendUrl}/api/senior-citizens/restore/${idToRestore}`, // Use the passed ID
+        `${backendUrl}/api/senior-citizens/restore/${idToRestore}`,
         {},
         { withCredentials: true }
       );
-      // Removed fetchCitizens() - this component doesn't have it.
-      // Call a function that informs the parent or reloads the main list
-      fetchMainCitizensList(); // Call placeholder or actual function
-      await fetchDeletedCitizens(); // Refresh the recycle bin list
+      await fetchDeletedCitizens();
 
-      setNotificationMessage("Senior citizen record restored successfully!");
-      setNotificationType("success");
-      setShowNotificationModal(true);
+      // Show success modal with restore icon
+      setSuccessType("restore");
+      setSuccessMessage("Senior citizen record restored successfully!");
+      setShowSuccessModal(true);
+
+      fetchMainCitizensList();
     } catch (err) {
       console.error("Failed to restore:", err);
       setNotificationMessage("Failed to restore senior citizen record.");
@@ -77,29 +89,23 @@ const RecycleBin = () => {
   };
 
   const handlePermanentDelete = async (idToDelete) => {
-    // Pass the ID directly
-    setSelectedCitizenId(idToDelete); // Store for potential future modal use
-    if (
-      window.confirm(
-        "This will permanently delete the record. This action cannot be undone. Are you sure?"
-      )
-    ) {
-      try {
-        await axios.delete(
-          `${backendUrl}/api/senior-citizens/permanent-delete/${idToDelete}`, // Use the passed ID
-          { withCredentials: true }
-        );
-        await fetchDeletedCitizens(); // Refresh the recycle bin list
+    setSelectedCitizenId(idToDelete);
+    try {
+      await axios.delete(
+        `${backendUrl}/api/senior-citizens/permanent-delete/${idToDelete}`,
+        { withCredentials: true }
+      );
+      await fetchDeletedCitizens();
 
-        setNotificationMessage("Record permanently deleted.");
-        setNotificationType("success");
-        setShowNotificationModal(true);
-      } catch (err) {
-        console.error("Failed to permanently delete:", err);
-        setNotificationMessage("Failed to permanently delete record.");
-        setNotificationType("error");
-        setShowNotificationModal(true);
-      }
+      // Show success modal with delete icon
+      setSuccessType("delete");
+      setSuccessMessage("Record permanently deleted successfully!");
+      setShowSuccessModal(true);
+    } catch (err) {
+      console.error("Failed to permanently delete:", err);
+      setNotificationMessage("Failed to permanently delete record.");
+      setNotificationType("error");
+      setShowNotificationModal(true);
     }
   };
 
@@ -179,16 +185,19 @@ const RecycleBin = () => {
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                       <div className="flex space-x-2">
                         <button
-                          // Pass the specific citizen.id to the handler
-                          onClick={() => handleRestore(citizen.id)}
+                          onClick={() =>
+                            confirmActionForCitizen(citizen.id, "restore")
+                          }
                           className="inline-flex items-center px-3 py-1 rounded-md text-sm font-medium bg-green-100 text-green-700 hover:bg-green-200 transition-colors"
                         >
                           <ArchiveRestore className="h-4 w-4 mr-1" />
                           Restore
                         </button>
+
                         <button
-                          // Pass the specific citizen.id to the handler
-                          onClick={() => handlePermanentDelete(citizen.id)}
+                          onClick={() =>
+                            confirmActionForCitizen(citizen.id, "delete")
+                          }
                           className="inline-flex items-center px-3 py-1 rounded-md text-sm font-medium bg-red-100 text-red-700 hover:bg-red-200 transition-colors"
                         >
                           <Trash className="h-4 w-4 mr-1" />
@@ -203,6 +212,43 @@ const RecycleBin = () => {
           </div>
         )}
       </div>
+
+      <Modal
+        isOpen={showConfirmModal}
+        onClose={() => setShowConfirmModal(false)}
+        title={
+          confirmAction === "restore" ? "Confirm Restore" : "Confirm Delete"
+        }
+      >
+        <div className="p-6 text-center">
+          <p className="text-gray-700 mb-4">
+            {confirmAction === "restore"
+              ? "Are you sure you want to restore this senior citizen record?"
+              : "This will permanently delete the record. This action cannot be undone. Are you sure?"}
+          </p>
+          <div className="flex justify-end space-x-4">
+            <Button
+              variant="secondary"
+              onClick={() => setShowConfirmModal(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant={confirmAction === "restore" ? "primary" : "danger"}
+              onClick={async () => {
+                setShowConfirmModal(false);
+                if (confirmAction === "restore") {
+                  await handleRestore(confirmCitizenId);
+                } else if (confirmAction === "delete") {
+                  await handlePermanentDelete(confirmCitizenId);
+                }
+              }}
+            >
+              {confirmAction === "restore" ? "Restore" : "Delete"}
+            </Button>
+          </div>
+        </div>
+      </Modal>
 
       {/* Notification Modal */}
       <Modal
@@ -222,6 +268,32 @@ const RecycleBin = () => {
             variant={notificationType === "success" ? "primary" : "danger"}
             onClick={() => setShowNotificationModal(false)}
           >
+            OK
+          </Button>
+        </div>
+      </Modal>
+
+      {/* --- SUCCESS MODAL --- */}
+      <Modal
+        isOpen={showSuccessModal}
+        onClose={() => setShowSuccessModal(false)}
+        title="Success"
+      >
+        <div className="p-6 text-center">
+          <div
+            className={`mx-auto mb-4 w-12 h-12  rounded-full flex items-center justify-center ${
+              successType === "restore" ? "bg-green-100" : "bg-red-100"
+            }`}
+          >
+            {successType === "restore" ? (
+              <ArchiveRestore className="w-6 h-6 text-green-500" />
+            ) : (
+              <Trash className="w-6 h-6 text-red-500" />
+            )}
+          </div>
+          <h3 className="text-lg font-medium text-gray-800 mb-2">Success</h3>
+          <p className="text-sm text-gray-600 mb-4">{successMessage}</p>
+          <Button variant="primary" onClick={() => setShowSuccessModal(false)}>
             OK
           </Button>
         </div>

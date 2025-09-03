@@ -20,7 +20,8 @@ export default function AuditLogs() {
   const [limit] = useState(10);
   const [totalPages, setTotalPages] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
-
+  const [allActionTypes, setAllActionTypes] = useState(["All"]);
+  const [allUsers, setAllUsers] = useState(["All"]);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterUser, setFilterUser] = useState("All");
   const [filterRole, setFilterRole] = useState("All");
@@ -33,6 +34,21 @@ export default function AuditLogs() {
   const [showFilters, setShowFilters] = useState(false);
 
   const backendUrl = import.meta.env.VITE_API_BASE_URL;
+
+  useEffect(() => {
+    const fetchFilterOptions = async () => {
+      try {
+        const response = await axios.get(
+          `${backendUrl}/api/audit-logs/filters`
+        );
+        setAllActionTypes(["All", ...response.data.actions]);
+        setAllUsers(["All", ...response.data.users]);
+      } catch (err) {
+        console.error("Failed to fetch filter options:", err);
+      }
+    };
+    fetchFilterOptions();
+  }, []);
 
   useEffect(() => {
     const fetchAuditLogs = async () => {
@@ -78,16 +94,6 @@ export default function AuditLogs() {
   useEffect(() => {
     setPage(1);
   }, [searchTerm, filterUser, filterActionType, filterRole]);
-
-  const uniqueUsers = useMemo(() => {
-    const users = new Set(auditLogs.map((log) => log.user));
-    return ["All", ...Array.from(users).sort()];
-  }, [auditLogs]);
-
-  const uniqueActionTypes = useMemo(() => {
-    const actions = new Set(auditLogs.map((log) => log.action));
-    return ["All", ...Array.from(actions).sort()];
-  }, [auditLogs]);
 
   const toggleSortOrder = (column) => {
     if (sortBy === column) {
@@ -227,7 +233,7 @@ export default function AuditLogs() {
                   value={filterUser}
                   onChange={(e) => setFilterUser(e.target.value)}
                 >
-                  {uniqueUsers.map((user) => (
+                  {allUsers.map((user) => (
                     <option key={user} value={user}>
                       {user === "All" ? "All Users" : user}
                     </option>
@@ -259,7 +265,7 @@ export default function AuditLogs() {
                   value={filterActionType}
                   onChange={(e) => setFilterActionType(e.target.value)}
                 >
-                  {uniqueActionTypes.map((action) => (
+                  {allActionTypes.map((action) => (
                     <option key={action} value={action}>
                       {action === "All"
                         ? "All Actions"

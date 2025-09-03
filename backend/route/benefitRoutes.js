@@ -2,6 +2,17 @@ const express = require("express");
 const router = express.Router();
 const benefitService = require("../service/benefitService");
 
+// GET benefit count
+router.get("/count/all", async (req, res) => {
+  try {
+    const count = await benefitService.getBenefitsCounts();
+    res.json({ count });
+  } catch (error) {
+    console.error("Error fetching benefit count:", error);
+    res.status(500).json({ message: "Failed to fetch benefit count" });
+  }
+});
+
 // GET discounts
 router.get("/discount", async (req, res) => {
   try {

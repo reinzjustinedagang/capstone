@@ -86,7 +86,7 @@ const SeniorCitizen = () => {
           </div>
           <h3 className="text-lg font-medium text-gray-800 mb-2">Success</h3>
           <p className="text-sm text-gray-600 mb-4">
-            Benefit updated successfully!
+            Senior Citizen Added successfully!
           </p>
           <Button variant="primary" onClick={() => setShowSuccessModal(false)}>
             OK

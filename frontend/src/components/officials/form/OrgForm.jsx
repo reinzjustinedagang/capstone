@@ -4,7 +4,7 @@ import { Loader2, SaveIcon, XCircle, ImagePlus, UserIcon } from "lucide-react"; 
 import user from "../../../assets/user.png";
 import axios from "axios";
 
-const MunicipalForm = ({
+const OrgForm = ({
   formData,
   onChange,
   onFileChange,
@@ -20,10 +20,10 @@ const MunicipalForm = ({
 
   const fetchPositions = async () => {
     try {
-      const res = await axios.get(`${backendUrl}/api/position/federation`);
+      const res = await axios.get(`${backendUrl}/api/position/orgchart`);
       setPosition(res.data);
     } catch (error) {
-      console.error("Failed to fetch federation position settings:", error);
+      console.error("Failed to fetch organizational position settings:", error);
     }
   };
 
@@ -197,8 +197,8 @@ const MunicipalForm = ({
           {isLoading
             ? "Saving..." // Text when loading
             : isEditing
-            ? "Update Municipal Federation Officer" // Text when editing
-            : "Add Municipal Federation Officer "}{" "}
+            ? "Update Officer in Organization Chart" // Text when editing
+            : "Add Officer in Organization Chart"}{" "}
           {/* Text when adding new */}
         </Button>
       </div>
@@ -206,4 +206,4 @@ const MunicipalForm = ({
   );
 };
 
-export default MunicipalForm;
+export default OrgForm;

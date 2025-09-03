@@ -1,7 +1,16 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import Button from "../UI/Button";
-import { SaveIcon, Loader2, Target, Eye, ScrollText } from "lucide-react";
+import Modal from "../UI/Modal";
+import {
+  SaveIcon,
+  Loader2,
+  Target,
+  Eye,
+  ScrollText,
+  CheckCircle,
+  XCircle,
+} from "lucide-react";
 
 const AboutOSCA = () => {
   const backendUrl = import.meta.env.VITE_API_BASE_URL;
@@ -10,10 +19,11 @@ const AboutOSCA = () => {
     mission: "",
     vision: "",
     preamble: "",
-    system_name: "",
-    municipality: "",
-    seal: null,
   });
+
+  // Modals
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
 
   // Fetch settings on load
   useEffect(() => {
@@ -28,17 +38,19 @@ const AboutOSCA = () => {
     fetchSettings();
   }, [backendUrl]);
 
-  // Handle save
   const handleSave = async () => {
     setLoading(true);
     try {
-      await axios.put(`${backendUrl}/api/settings/`, settings);
-      alert("About OSCA updated successfully!");
+      await axios.post(`${backendUrl}/api/settings/about`, settings, {
+        withCredentials: true,
+      });
+      setShowSuccessModal(true); // Show success modal
     } catch (err) {
       console.error("Failed to save settings:", err);
       alert("Failed to update. Please try again.");
     } finally {
       setLoading(false);
+      setShowConfirmModal(false);
     }
   };
 
@@ -102,7 +114,7 @@ const AboutOSCA = () => {
         {/* Save Button */}
         <div className="flex justify-end">
           <Button
-            onClick={handleSave}
+            onClick={() => setShowConfirmModal(true)} // Open confirm modal
             variant="primary"
             icon={
               loading ? (
@@ -113,10 +125,60 @@ const AboutOSCA = () => {
             }
             disabled={loading}
           >
-            {loading ? "Saving..." : "Save Profile"}
+            {loading ? "Saving..." : "Save"}
           </Button>
         </div>
       </div>
+
+      {/* Confirm Modal */}
+      <Modal
+        isOpen={showConfirmModal}
+        onClose={() => setShowConfirmModal(false)}
+        title="Confirm Update"
+      >
+        <div className="mt-4 text-sm text-gray-700">
+          Are you sure you want to save changes to About OSCA?
+        </div>
+        <div className="mt-6 flex justify-end space-x-4">
+          <button
+            onClick={() => setShowConfirmModal(false)}
+            className="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 text-sm"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={handleSave}
+            disabled={loading}
+            className={`px-4 py-2 rounded text-sm ${
+              loading
+                ? "bg-blue-400 cursor-not-allowed"
+                : "bg-blue-600 hover:bg-blue-700"
+            } text-white`}
+          >
+            {loading ? "Saving..." : "Yes, Save"}
+          </button>
+        </div>
+      </Modal>
+
+      {/* Success Modal */}
+      <Modal
+        isOpen={showSuccessModal}
+        onClose={() => setShowSuccessModal(false)}
+        title=""
+      >
+        <div className="p-6 text-center">
+          <div className="mx-auto mb-4 w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+            <CheckCircle className="w-6 h-6 text-green-500" />
+          </div>
+          <h3 className="text-lg font-medium text-gray-800 mb-2">Success</h3>
+          <p className="text-sm text-gray-600 mb-4">
+            About OSCA updated successfully!
+          </p>
+          <Button variant="primary" onClick={() => setShowSuccessModal(false)}>
+            OK
+          </Button>
+        </div>
+      </Modal>
     </div>
   );
 };

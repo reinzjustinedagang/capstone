@@ -41,9 +41,6 @@ exports.updateSystemSettings = async (
   municipality,
   province,
   sealPath,
-  mission,
-  vision,
-  preamble,
   user,
   ip
 ) => {
@@ -62,30 +59,14 @@ exports.updateSystemSettings = async (
 
   if (existingRows.length === 0) {
     await Connection(
-      `INSERT INTO system (id, system_name, municipality, province, seal, mission, vision, preamble) VALUES (1, ?, ?, ?, ?, ?, ?, ?)`,
-      [
-        systemName,
-        municipality,
-        province,
-        sealPath,
-        mission,
-        vision,
-        preamble || null,
-      ]
+      `INSERT INTO system (id, system_name, municipality, province, seal) VALUES (1, ?, ?, ?, ?)`,
+      [systemName, municipality, province, sealPath]
     );
     changes.push("Initial system settings created.");
   } else {
     await Connection(
-      `UPDATE system SET system_name = ?, municipality = ?, province = ?, seal = ?, mission = ?, vision = ?, preamble = ? WHERE id = 1`,
-      [
-        systemName,
-        municipality,
-        province,
-        sealPath,
-        mission,
-        vision,
-        preamble || old.seal,
-      ]
+      `UPDATE system SET system_name = ?, municipality = ?, province = ?, seal = ? WHERE id = 1`,
+      [systemName, municipality, province, sealPath || old.seal]
     );
   }
 
@@ -97,14 +78,48 @@ exports.updateSystemSettings = async (
   if (old.province !== province)
     changes.push(`Province: '${old.province}' → '${province}'`);
   if (sealPath && old.seal !== sealPath) changes.push(`Seal updated`);
-  if (old.mission !== mission)
-    changes.push(`Mission: '${old.mission}' → '${mission}'`);
-  if (old.vision !== vision)
-    changes.push(`Vision: '${old.vision}' → '${vision}'`);
-  if (old.preamble !== preamble)
-    changes.push(`Preamble: '${old.preamble}' → '${preamble}'`);
 
   // Log audit
+  if (changes.length > 0 && user) {
+    await logAudit(
+      user.id,
+      user.email,
+      user.role,
+      actionType,
+      changes.join("; "),
+      ip
+    );
+  }
+
+  return { actionType, changes };
+};
+
+exports.updateAbout = async (mission, vision, preamble, user, ip) => {
+  const existing = await Connection(
+    `SELECT mission, vision, preamble FROM system WHERE id = 1`
+  );
+  const old = existing[0] || {};
+  const actionType = existing.length === 0 ? "INSERT" : "UPDATE";
+  const changes = [];
+
+  if (existing.length === 0) {
+    await Connection(
+      `INSERT INTO system (id, mission, vision, preamble) VALUES (1, ?, ?, ?)`,
+      [mission, vision, preamble]
+    );
+    changes.push("Created initial About OSCA settings.");
+  } else {
+    await Connection(
+      `UPDATE system SET mission = ?, vision = ?, preamble = ? WHERE id = 1`,
+      [mission, vision, preamble]
+    );
+  }
+
+  // Track changes
+  if (old.mission !== mission) changes.push(`Mission updated`);
+  if (old.vision !== vision) changes.push(`Vision updated`);
+  if (old.preamble !== preamble) changes.push(`Preamble updated`);
+
   if (changes.length > 0 && user) {
     await logAudit(
       user.id,

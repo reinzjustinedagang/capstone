@@ -97,6 +97,26 @@ db.query(
   }
 );
 
+//  position Table
+db.query(
+  `
+  CREATE TABLE IF NOT EXISTS positions (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(100) NOT NULL,
+  type ENUM('orgchart', 'federation') NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+)
+
+  `,
+  (err) => {
+    if (err) {
+      console.error("❌ Failed to create position table:", err);
+    } else {
+      console.log("✅ position table ready.");
+    }
+  }
+);
+
 // Municipal Officials Table
 db.query(
   `
@@ -267,7 +287,7 @@ db.query(
   CREATE TABLE IF NOT EXISTS events (
     id INT AUTO_INCREMENT PRIMARY KEY,
     title VARCHAR(255) NOT NULL,
-    type VARCHAR(50) DEFAULT 'event',
+    type ENUM('event', 'slideshow') NOT NULL,
     description TEXT NOT NULL,
     date DATE NOT NULL,
     image_url VARCHAR(500),
@@ -487,7 +507,7 @@ db.query(`SELECT COUNT(*) AS count FROM form_fields`, (err, results) => {
       ["age", "Age", "number", null, false, "i_personal_information", 7],
 
       // Contact Info
-      ["phone", "Phone Number", "text", null, true, "ii_contact", 1],
+      ["mobileNumber", "Mobile Number", "text", null, true, "ii_contact", 1],
       ["email", "Email", "text", null, false, "ii_contact", 2],
 
       // Address
@@ -496,27 +516,6 @@ db.query(`SELECT COUNT(*) AS count FROM form_fields`, (err, results) => {
       ["municipality", "Municipality", "text", null, true, "iii_address", 3],
       ["province", "Province", "text", null, true, "iii_address", 4],
       ["zipcode", "Zip Code", "text", null, false, "iii_address", 5],
-
-      // Senior Citizen Details
-      ["senior_id", "Senior Citizen ID No.", "text", null, true, "senior", 1],
-      [
-        "pension_status",
-        "Pension Status",
-        "select",
-        "Yes,No",
-        true,
-        "senior",
-        2,
-      ],
-      [
-        "membership_date",
-        "Date of Membership",
-        "date",
-        null,
-        false,
-        "senior",
-        3,
-      ],
     ];
 
     // Create the 'senior citizen form' table if it does not already exist.

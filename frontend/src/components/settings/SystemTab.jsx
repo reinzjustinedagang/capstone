@@ -111,7 +111,6 @@ const SystemTab = () => {
       formPayload.append("systemName", formData.systemName);
       formPayload.append("municipality", formData.municipality);
       formPayload.append("province", formData.province);
-
       formPayload.append("existingSeal", sealPreview || "");
       if (sealFile) formPayload.append("image", sealFile);
 
@@ -152,6 +151,38 @@ const SystemTab = () => {
       }}
       className="space-y-6"
     >
+      {/* Municipality Seal */}
+      <div>
+        <label className="block text-sm font-medium">Municipality Seal</label>
+        <div className="flex items-center gap-4 mt-2">
+          {sealPreview ? (
+            <img
+              src={sealPreview}
+              alt="Seal Preview"
+              className="w-30 h-30 object-cover border rounded-full"
+            />
+          ) : (
+            <div className="w-20 h-20 border flex items-center justify-center text-gray-400">
+              No Image
+            </div>
+          )}
+          <button
+            type="button"
+            onClick={() => fileInputRef.current.click()}
+            className="px-3 py-1 border rounded flex items-center gap-1 text-sm"
+          >
+            <ImagePlus size={16} /> Change
+          </button>
+          <input
+            type="file"
+            ref={fileInputRef}
+            className="hidden"
+            accept="image/png, image/jpeg"
+            onChange={handleSealChange}
+          />
+        </div>
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* System Name */}
         <div>
@@ -201,38 +232,6 @@ const SystemTab = () => {
               className="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 pl-10 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
             />
             <MapIcon className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
-          </div>
-        </div>
-
-        {/* Municipality Seal */}
-        <div>
-          <label className="block text-sm font-medium">Municipality Seal</label>
-          <div className="flex items-center gap-4 mt-2">
-            {sealPreview ? (
-              <img
-                src={sealPreview}
-                alt="Seal Preview"
-                className="w-20 h-20 object-cover border"
-              />
-            ) : (
-              <div className="w-20 h-20 border flex items-center justify-center text-gray-400">
-                No Image
-              </div>
-            )}
-            <button
-              type="button"
-              onClick={() => fileInputRef.current.click()}
-              className="px-3 py-1 border rounded flex items-center gap-1 text-sm"
-            >
-              <ImagePlus size={16} /> Change
-            </button>
-            <input
-              type="file"
-              ref={fileInputRef}
-              className="hidden"
-              accept="image/png, image/jpeg"
-              onChange={handleSealChange}
-            />
           </div>
         </div>
       </div>

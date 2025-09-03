@@ -94,6 +94,27 @@ exports.getPaginatedAuditLogs = async ({
   }
 };
 
+// Get all unique users and action types for filters
+exports.getAuditFilters = async () => {
+  try {
+    const usersResult = await Connection(
+      `SELECT DISTINCT user FROM audit_logs ORDER BY user ASC`
+    );
+
+    const actionsResult = await Connection(
+      `SELECT DISTINCT action FROM audit_logs ORDER BY action ASC`
+    );
+
+    const users = usersResult.map((row) => row.user);
+    const actions = actionsResult.map((row) => row.action);
+
+    return { users, actions };
+  } catch (err) {
+    console.error("❌ Failed to fetch audit filter options:", err);
+    throw err;
+  }
+};
+
 // Get all login records for a specific user
 exports.getLoginTrailsByUserId = async (userId) => {
   try {

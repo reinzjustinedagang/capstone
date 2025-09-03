@@ -16,6 +16,26 @@ router.get("/count/all", async (req, res) => {
 });
 
 // GET all events
+router.get("/event", async (req, res) => {
+  try {
+    const data = await eventService.getEvent();
+    res.status(200).json(data);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// GET all events
+router.get("/slideshow", async (req, res) => {
+  try {
+    const data = await eventService.getSlideshow();
+    res.status(200).json(data);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// GET all events
 router.get("/", async (req, res) => {
   try {
     const data = await eventService.getAll();
@@ -27,7 +47,7 @@ router.get("/", async (req, res) => {
 
 // POST create event
 router.post("/", isAuthenticated, upload.single("image"), async (req, res) => {
-  const { title, description, date } = req.body; // Remove image_url destructure
+  const { title, type, description, date } = req.body; // Remove image_url destructure
   const user = req.session.user;
   const ip = req.userIp;
 
@@ -51,7 +71,7 @@ router.post("/", isAuthenticated, upload.single("image"), async (req, res) => {
     }
 
     const inserted = await eventService.create(
-      { title, description, date, image_url },
+      { title, type, description, date, image_url },
       user,
       ip
     );
@@ -64,27 +84,53 @@ router.post("/", isAuthenticated, upload.single("image"), async (req, res) => {
 });
 
 // PUT update event
-router.put("/:id", async (req, res) => {
-  const { id } = req.params;
-  const { title, description, date, image_url } = req.body;
-  const user = req.session.user;
-  const ip = req.userIp;
+// PUT update event
+router.put(
+  "/:id",
+  isAuthenticated,
+  upload.single("image"),
+  async (req, res) => {
+    const { id } = req.params;
+    const { title, type, description, date } = req.body;
+    const user = req.session.user;
+    const ip = req.userIp;
 
-  if (!user) return res.status(401).json({ message: "Unauthorized" });
+    if (!user) return res.status(401).json({ message: "Unauthorized" });
 
-  try {
-    const updated = await eventService.update(
-      id,
-      { title, description, date, image_url },
-      user,
-      ip
-    );
-    if (!updated) return res.status(404).json({ message: "Event not found" });
-    res.status(200).json({ message: "Event updated" });
-  } catch (err) {
-    res.status(500).json({ message: err.message });
+    try {
+      let image_url = req.body.image_url || null;
+
+      // Handle new image upload
+      if (req.file) {
+        const result = await new Promise((resolve, reject) => {
+          const stream = cloudinary.uploader.upload_stream(
+            { folder: "events" },
+            (error, result) => {
+              if (error) reject(error);
+              else resolve(result);
+            }
+          );
+          stream.end(req.file.buffer);
+        });
+        image_url = result.secure_url;
+      }
+
+      const updated = await eventService.update(
+        id,
+        { title, type, description, date, image_url },
+        user,
+        ip
+      );
+
+      if (!updated) return res.status(404).json({ message: "Event not found" });
+
+      res.status(200).json({ message: "Event updated" });
+    } catch (err) {
+      console.error("Failed to update event:", err);
+      res.status(500).json({ message: err.message });
+    }
   }
-});
+);
 
 // DELETE event
 router.delete("/:id", async (req, res) => {
@@ -100,17 +146,6 @@ router.delete("/:id", async (req, res) => {
     res.status(200).json({ message: "Event deleted" });
   } catch (err) {
     res.status(500).json({ message: err.message });
-  }
-});
-
-// GET count
-router.get("/count/all", async (req, res) => {
-  try {
-    const count = await eventService.getEventsCount();
-    res.json({ count });
-  } catch (error) {
-    console.error("Error fetching events count:", error);
-    res.status(500).json({ message: "Failed to fetch events count" });
   }
 });
 

@@ -1,6 +1,25 @@
 const Connection = require("../db/Connection");
 const { logAudit } = require("./auditService");
 
+// Get total number of benefits
+exports.getBenefitsCounts = async () => {
+  const query = `
+    SELECT type, COUNT(*) AS count
+    FROM benefits
+    WHERE type <> 'republic acts'
+    GROUP BY type
+  `;
+  const [rows] = await Connection(query);
+
+  // Convert rows into an object for easy use in frontend
+  const counts = rows.reduce((acc, row) => {
+    acc[row.type] = row.count;
+    return acc;
+  }, {});
+
+  return counts;
+};
+
 exports.getDiscounts = async () => {
   const query = `
     SELECT *

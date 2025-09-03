@@ -137,8 +137,8 @@ router.get("/page", async (req, res) => {
 
   try {
     const result = await seniorCitizenService.getPaginatedFilteredCitizens({
-      page,
-      limit,
+      page: parseInt(page, 10),
+      limit: parseInt(limit, 10),
       search,
       barangay,
       gender,
@@ -148,8 +148,12 @@ router.get("/page", async (req, res) => {
       sortOrder,
     });
 
-    // ✅ age & gender are computed by MySQL, included in result
-    res.status(200).json(result);
+    // ✅ Return exactly what the frontend expects
+    res.status(200).json({
+      citizens: result.citizens,
+      total: result.total,
+      totalPages: result.totalPages,
+    });
   } catch (err) {
     console.error("Error getting filtered citizens:", err);
     res.status(500).json({ message: "Internal server error" });
