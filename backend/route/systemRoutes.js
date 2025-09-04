@@ -99,4 +99,18 @@ router.post("/about", isAuthenticated, async (req, res) => {
   }
 });
 
+// POST save a new key
+router.post("/save-key", async (req, res) => {
+  try {
+    const { key } = req.body;
+    const result = await systemService.saveKey(key);
+    res.status(200).json(result);
+  } catch (err) {
+    console.error("Error saving key:", err);
+    res
+      .status(err.status || 500)
+      .json({ message: err.message || "Failed to save key" });
+  }
+});
+
 module.exports = router;

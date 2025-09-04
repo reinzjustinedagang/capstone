@@ -59,7 +59,7 @@ const AboutOSCA = () => {
       <div className="space-y-6">
         {/* Mission */}
         <div className="mt-4">
-          <label className="block text-sm font-medium text-gray-700">
+          <label className="block text-base font-medium text-gray-700">
             Mission
           </label>
           <div className="mt-1 relative">
@@ -77,7 +77,7 @@ const AboutOSCA = () => {
 
         {/* Vision */}
         <div className="mt-4">
-          <label className="block text-sm font-medium text-gray-700">
+          <label className="block text-base font-medium text-gray-700">
             Vision
           </label>
           <div className="mt-1 relative">
@@ -95,7 +95,7 @@ const AboutOSCA = () => {
 
         {/* Preamble */}
         <div className="mt-4">
-          <label className="block text-sm font-medium text-gray-700">
+          <label className="block text-base font-medium text-gray-700">
             Preamble
           </label>
           <div className="mt-1 relative">

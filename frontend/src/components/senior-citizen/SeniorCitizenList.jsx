@@ -53,6 +53,7 @@ const SeniorCitizenList = () => {
   const [limit] = useState(10);
   const [totalPages, setTotalPages] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
+  const [barangayMap, setBarangayMap] = useState({});
 
   // --- NEW STATE FOR NOTIFICATION MODAL ---
   const [showNotificationModal, setShowNotificationModal] = useState(false);
@@ -85,10 +86,19 @@ const SeniorCitizenList = () => {
         }
       );
 
-      // ✅ Log the data that just came from the API
       console.log("API Response Data (citizens):", response.data.citizens);
 
-      setSeniorCitizens(response.data.citizens);
+      // ✅ Ensure form_data is always an object
+      setSeniorCitizens(
+        response.data.citizens.map((citizen) => ({
+          ...citizen,
+          form_data:
+            typeof citizen.form_data === "string"
+              ? JSON.parse(citizen.form_data || "{}")
+              : citizen.form_data || {},
+        }))
+      );
+
       setTotalCount(response.data.total);
       setTotalPages(response.data.totalPages);
     } catch (err) {
@@ -169,9 +179,18 @@ const SeniorCitizenList = () => {
   const fetchBarangays = async () => {
     try {
       const response = await axios.get(`${backendUrl}/api/barangays/all`);
+
+      // Create mapping: { id: name }
+      const map = {};
+      response.data.forEach((b) => {
+        map[b.id] = b.barangay_name;
+      });
+      setBarangayMap(map);
+
+      // Optional: for filters dropdown
       const options = [
         "All Barangays",
-        ...response.data.map((b) => b.barangay_name), // ✅ Use correct field name
+        ...response.data.map((b) => b.barangay_name),
       ];
       setBarangayOptions(options);
     } catch (error) {
@@ -326,9 +345,11 @@ const SeniorCitizenList = () => {
                       {/* This is correct (from generated column) */}
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-500">
-                      {/* ✅ FIX: Access properties from citizen.form_data */}
-                      {`${citizen.form_data?.houseNumberStreet || ""}, Brgy. ${
-                        citizen.form_data?.barangay || ""
+                      {`${citizen.form_data?.street || ""}, Brgy. ${
+                        // Use barangayMap for new records; fallback to form_data for old records
+                        citizen.barangay_id
+                          ? barangayMap[citizen.barangay_id] || "Unknown"
+                          : citizen.form_data?.barangay || ""
                       }, ${citizen.form_data?.municipality || ""}, ${
                         citizen.form_data?.province || ""
                       }`}

@@ -37,7 +37,7 @@ const isDuplicateSeniorCitizen = async ({ firstName, lastName, birthdate }) => {
 
 exports.createSeniorCitizen = async (data, user, ip) => {
   try {
-    // The duplicate check will now receive the correct `birthdate`.
+    // Check for duplicates
     if (await isDuplicateSeniorCitizen(data)) {
       const msg = `A senior citizen named '${data.firstName} ${data.lastName}' with birthdate '${data.birthdate}' already exists.`;
       const err = new Error(msg);
@@ -48,10 +48,9 @@ exports.createSeniorCitizen = async (data, user, ip) => {
     const insertData = {
       firstName: data.firstName,
       lastName: data.lastName,
-      // ✅ FIX: These will now have values from the router.
       middleName: data.middleName || null,
       suffix: data.suffix || null,
-      // ✅ FIX: Stringify the `form_data` object before inserting it into the database.
+      barangay_id: data.barangay_id || null, // save the ID
       form_data: JSON.stringify(data.form_data || {}),
     };
 
@@ -70,6 +69,7 @@ exports.createSeniorCitizen = async (data, user, ip) => {
         ip
       );
     }
+
     return result.insertId;
   } catch (error) {
     if (error.code === 409) throw error;
@@ -128,62 +128,91 @@ exports.getPaginatedFilteredCitizens = async (options) => {
   const offset = (safePage - 1) * safeLimit;
 
   const params = [];
-  let where = "WHERE deleted = 0 AND age >= 60"; // ✅ age comes from generated column
+  let where = "WHERE sc.deleted = 0 AND sc.age >= 60"; // Only active seniors
 
+  // Search by name or barangay
   if (search) {
     where += ` AND (
-      firstName LIKE ? OR lastName LIKE ? OR middleName LIKE ? OR suffix LIKE ?
-      OR JSON_UNQUOTE(JSON_EXTRACT(form_data, '$.barangay')) LIKE ?
+      sc.firstName LIKE ? OR sc.lastName LIKE ? OR sc.middleName LIKE ? OR sc.suffix LIKE ?
+      OR b.barangay_name LIKE ?
     )`;
     const s = `%${search}%`;
     params.push(s, s, s, s, s);
   }
 
+  // Barangay filter
   if (barangay && barangay !== "All Barangays") {
-    where += ` AND JSON_UNQUOTE(JSON_EXTRACT(form_data, '$.barangay')) = ?`;
+    where += ` AND b.barangay_name = ?`;
     params.push(barangay);
   }
 
+  // Health status filter
   if (healthStatus && healthStatus !== "All Health Status") {
-    where += ` AND JSON_UNQUOTE(JSON_EXTRACT(form_data, '$.healthStatus')) = ?`;
+    where += ` AND JSON_UNQUOTE(JSON_EXTRACT(sc.form_data, '$.healthStatus')) = ?`;
     params.push(healthStatus);
   }
 
+  // Gender filter
   if (gender && gender !== "All") {
-    where += ` AND gender = ?`; // ✅ using generated column
+    where += ` AND sc.gender = ?`;
     params.push(gender);
   }
 
+  // Age range filter
   if (ageRange && ageRange !== "All") {
     const [min, maxRaw] = ageRange.split(" - ");
     const max = maxRaw.includes("+") ? 200 : parseInt(maxRaw);
-    where += ` AND age BETWEEN ? AND ?`;
+    where += ` AND sc.age BETWEEN ? AND ?`;
     params.push(parseInt(min), max);
   }
 
-  const allowedSort = ["lastName", "firstName", "gender", "age", "created_at"];
+  // Sorting
+  const allowedSort = [
+    "lastName",
+    "firstName",
+    "gender",
+    "age",
+    "created_at",
+    "barangay_name",
+  ];
   const orderBy = allowedSort.includes(sortBy) ? sortBy : "lastName";
   const order = sortOrder === "desc" ? "DESC" : "ASC";
 
   try {
+    // Get total count
     const totalResult = await Connection(
-      `SELECT COUNT(*) AS total FROM senior_citizens ${where}`,
+      `SELECT COUNT(*) AS total
+       FROM senior_citizens sc
+       LEFT JOIN barangays b ON sc.barangay_id = b.id
+       ${where}`,
       params
     );
     const total = totalResult[0].total;
     const totalPages = Math.ceil(total / safeLimit);
 
+    // Get paginated data
     const data = await Connection(
-      `SELECT id, firstName, middleName, lastName, suffix, 
-              age, gender, form_data, created_at
-       FROM senior_citizens
+      `SELECT sc.id, sc.firstName, sc.middleName, sc.lastName, sc.suffix,
+              sc.age, sc.gender, sc.form_data, sc.created_at,
+              sc.barangay_id, b.barangay_name
+       FROM senior_citizens sc
+       LEFT JOIN barangays b ON sc.barangay_id = b.id
        ${where}
        ORDER BY ${orderBy} ${order}
        LIMIT ? OFFSET ?`,
       [...params, safeLimit, offset]
     );
 
-    return { citizens: data, total, totalPages };
+    // Ensure form_data is always an object
+    const citizens = data.map((citizen) => ({
+      ...citizen,
+      form_data:
+        typeof citizen.form_data === "string"
+          ? JSON.parse(citizen.form_data || "{}")
+          : citizen.form_data || {},
+    }));
+
+    return { citizens, total, totalPages };
   } catch (error) {
     console.error("Error fetching paginated senior citizens:", error);
     throw new Error("Failed to fetch paginated senior citizens.");
@@ -291,7 +320,9 @@ exports.permanentlyDeleteSeniorCitizen = async (id, user, ip) => {
 exports.getCitizenCount = async () => {
   try {
     const result = await Connection(
-      `SELECT COUNT(*) AS count FROM senior_citizens WHERE deleted = 0`
+      `SELECT COUNT(*) AS count 
+       FROM senior_citizens 
+       WHERE deleted = 0 AND age >= 60`
     );
     return result[0].count;
   } catch (error) {
@@ -301,27 +332,51 @@ exports.getCitizenCount = async () => {
 };
 
 // Get SMS recipients with optional barangay filter
-exports.getSmsRecipients = async (barangay = "") => {
+exports.getSmsRecipients = async (
+  barangay = "",
+  barangay_id = "",
+  search = ""
+) => {
   try {
     let sql = `
       SELECT 
-        id,
-        CONCAT_WS(' ', firstName, middleName, lastName, suffix) AS name,
+        sc.id,
+        CONCAT_WS(' ', sc.firstName, sc.middleName, sc.lastName, sc.suffix) AS name,
         COALESCE(
-          JSON_UNQUOTE(JSON_EXTRACT(form_data, '$.mobileNumber')),
-          JSON_UNQUOTE(JSON_EXTRACT(form_data, '$.emergencyContactNumber'))
+          JSON_UNQUOTE(JSON_EXTRACT(sc.form_data, '$.mobileNumber')),
+          JSON_UNQUOTE(JSON_EXTRACT(sc.form_data, '$.emergencyContactNumber'))
         ) AS contact,
-        JSON_UNQUOTE(JSON_EXTRACT(form_data, '$.barangay')) AS barangay
-      FROM senior_citizens
-      WHERE (JSON_EXTRACT(form_data, '$.mobileNumber') IS NOT NULL
-          OR JSON_EXTRACT(form_data, '$.emergencyContactNumber') IS NOT NULL)
-        AND deleted = 0
+        JSON_UNQUOTE(JSON_EXTRACT(sc.form_data, '$.barangay')) AS barangay,
+        sc.barangay_id
+      FROM senior_citizens sc
+      WHERE (JSON_EXTRACT(sc.form_data, '$.mobileNumber') IS NOT NULL
+          OR JSON_EXTRACT(sc.form_data, '$.emergencyContactNumber') IS NOT NULL)
+        AND sc.deleted = 0
     `;
 
     const params = [];
-    if (barangay) {
-      sql += ` AND JSON_UNQUOTE(JSON_EXTRACT(form_data, '$.barangay')) = ?`;
+
+    // Filter by barangay_id
+    if (barangay_id && barangay_id.trim() !== "") {
+      sql += ` AND sc.barangay_id = ?`;
+      params.push(barangay_id);
+    }
+    // Filter by barangay name
+    else if (barangay && barangay.trim() !== "") {
+      sql += ` AND JSON_UNQUOTE(JSON_EXTRACT(sc.form_data, '$.barangay')) = ?`;
       params.push(barangay);
+    }
+
+    // Search by name or contact
+    if (search && search.trim() !== "") {
+      sql += ` AND (
+        CONCAT_WS(' ', sc.firstName, sc.middleName, sc.lastName, sc.suffix) LIKE ? 
+        OR COALESCE(
+          JSON_UNQUOTE(JSON_EXTRACT(sc.form_data, '$.mobileNumber')),
+          JSON_UNQUOTE(JSON_EXTRACT(sc.form_data, '$.emergencyContactNumber'))
+        ) LIKE ?
+      )`;
+      params.push(`%${search}%`, `%${search}%`);
     }
 
     const result = await Connection(sql, params);

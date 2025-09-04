@@ -1,13 +1,14 @@
 import React from "react";
-import Login from "../../components/startPage/Login";
 import Header from "../../components/startPage/Header";
+import ForgotPassword from "../../components/startPage/ForgotPassword";
+import Developer from "../../components/startPage/Developer";
 import Footer from "../../components/startPage/Footer";
 
-export const LoginPage = () => {
+export const DeveloperPage = () => {
   return (
     <div>
       <Header />
-      <Login />
+      <Developer />
       <Footer />
     </div>
   );

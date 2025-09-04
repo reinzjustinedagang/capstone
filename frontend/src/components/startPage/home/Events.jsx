@@ -1,25 +1,29 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import Modal from "../../UI/Modal"; // ✅ Import your Modal
 
 const Events = () => {
-  const backendUrl = import.meta.env.VITE_API_BASE_URL; // ✅ Your backend base URL
+  const backendUrl = import.meta.env.VITE_API_BASE_URL;
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selectedEvent, setSelectedEvent] = useState(null); // For modal
 
   useEffect(() => {
     const fetchEvents = async () => {
       try {
         const res = await axios.get(`${backendUrl}/api/events/`);
-        setEvents(res.data); // assumes backend returns an array of events
+        setEvents(res.data);
       } catch (err) {
         console.error("Error fetching events:", err);
       } finally {
         setLoading(false);
       }
     };
-
     fetchEvents();
   }, [backendUrl]);
+
+  const openModal = (event) => setSelectedEvent(event);
+  const closeModal = () => setSelectedEvent(null);
 
   return (
     <div className="bg-white py-8 rounded-lg shadow-md">
@@ -31,13 +35,12 @@ const Events = () => {
           </h2>
         </div>
 
-        {/* Loading */}
+        {/* Loading / Empty State */}
         {loading ? (
           <div className="text-center py-16 text-gray-500">
             <p>Loading events...</p>
           </div>
         ) : events.length === 0 ? (
-          /* Empty State */
           <div className="text-center py-16 text-gray-500">
             <p className="text-2xl font-semibold mb-4">No events posted</p>
             <p>Check back later for the latest news and updates.</p>
@@ -48,7 +51,8 @@ const Events = () => {
             {events.map((event) => (
               <div
                 key={event.id}
-                className="bg-gray-100 rounded-xl shadow-md overflow-hidden flex flex-col h-full"
+                onClick={() => openModal(event)}
+                className="bg-gray-100 rounded-xl shadow-md overflow-hidden flex flex-col h-full cursor-pointer hover:shadow-lg transition"
               >
                 {/* Image */}
                 <div className="relative">
@@ -89,6 +93,31 @@ const Events = () => {
           </a>
         </div>
       </div>
+
+      {/* Modal */}
+      <Modal
+        isOpen={!!selectedEvent}
+        onClose={closeModal}
+        title={selectedEvent?.title}
+      >
+        {selectedEvent && (
+          <div>
+            <img
+              src={selectedEvent.image_url || "https://placehold.co/600x400"}
+              alt={selectedEvent.title}
+              className="w-full h-full object-cover rounded-lg mb-4"
+            />
+            <p className="text-sm text-gray-600 mb-2">
+              {new Date(selectedEvent.date).toLocaleDateString("en-US", {
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+              })}
+            </p>
+            <p className="text-gray-700">{selectedEvent.description}</p>
+          </div>
+        )}
+      </Modal>
     </div>
   );
 };

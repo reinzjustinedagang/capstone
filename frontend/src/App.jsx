@@ -15,6 +15,7 @@ import { ResetPasswordPage } from "./pages/public/ResetPasswordPage";
 import { RegisterSeniorPage } from "./pages/public/RegisterSeniorPage.jsx";
 import { OrganizationPage } from "./pages/public/OrganizationPage.jsx";
 import { AboutPage } from "./pages/public/AboutPage.jsx";
+import { DeveloperPage } from "./pages/public/DeveloperPage.jsx";
 
 // Admin Pages
 import { DashboardPage } from "./pages/admin/DashboardPage";
@@ -120,6 +121,14 @@ function App() {
         element={
           <PublicOnlyRoute>
             <ResetPasswordPage />
+          </PublicOnlyRoute>
+        }
+      />
+      <Route
+        path="/developer"
+        element={
+          <PublicOnlyRoute>
+            <DeveloperPage />
           </PublicOnlyRoute>
         }
       />

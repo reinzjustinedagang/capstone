@@ -78,6 +78,35 @@ router.delete("/:id", async (req, res) => {
   }
 });
 
+router.put("/blocked/:id", async (req, res) => {
+  const { id } = req.params;
+  const user = req.session.user;
+  const ip = req.userIp;
+
+  if (!user) {
+    return res.status(401).json({ message: "Unauthorized: Not logged in." });
+  }
+
+  if (parseInt(id) === user.id) {
+    return res.status(400).json({ message: "You cannot block yourself." });
+  }
+
+  try {
+    const blocked = await userService.blockUser(id, user, ip);
+
+    if (blocked) {
+      return res.status(200).json({ message: "User blocked successfully." });
+    } else {
+      return res
+        .status(404)
+        .json({ message: "User not found or already blocked." });
+    }
+  } catch (err) {
+    console.error("❌ Error blocking user:", err);
+    return res.status(500).json({ message: "Server error during blocking." });
+  }
+});
+
 // Login
 router.post("/login", async (req, res) => {
   try {
@@ -117,7 +146,7 @@ router.post("/login", async (req, res) => {
 // Register
 router.post("/register", async (req, res) => {
   try {
-    const { username, email, password, cp_number, role } = req.body;
+    const { username, email, password, cp_number, role, devKey } = req.body;
     const ip = req.userIp;
 
     const result = await userService.register(
@@ -126,7 +155,8 @@ router.post("/register", async (req, res) => {
       password,
       cp_number,
       role,
-      ip
+      ip,
+      devKey
     );
 
     if (result) {

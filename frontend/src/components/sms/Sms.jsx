@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { SendIcon, Loader2 } from "lucide-react";
+import { SendIcon, Loader2, Search } from "lucide-react";
 import Button from "../UI/Button";
 import MessageTemplates from "./MessageTemplates";
 import MessageHistory from "./MessageHistory";
@@ -15,6 +15,8 @@ const Sms = () => {
   const [templates, setTemplates] = useState([]);
   const [selectedTemplateId, setSelectedTemplateId] = useState("");
   const [loading, setLoading] = useState(false);
+  const [searchText, setSearchText] = useState("");
+
   const backendUrl = import.meta.env.VITE_API_BASE_URL;
 
   // Fetch barangays
@@ -29,16 +31,21 @@ const Sms = () => {
   };
 
   // Fetch senior citizens by barangay ID
-  const fetchCitizens = async (barangayId = "") => {
+  const fetchCitizens = async (barangayId = "", search = "") => {
     try {
       setLoading(true);
+      const params = {};
+      if (barangayId) params.barangay_id = barangayId;
+      if (search) params.search = search;
+
       const res = await axios.get(
         `${backendUrl}/api/senior-citizens/sms-citizens`,
-        { params: { barangay_id: barangayId } } // send ID instead of name
+        { params }
       );
+
       const citizens = res.data || [];
       setSeniorCitizens(citizens);
-      setSelectedRecipients(citizens.map((c) => c.id)); // auto-select all
+      setSelectedRecipients([]);
     } catch (err) {
       console.error("Failed to fetch citizens:", err);
       setSeniorCitizens([]);
@@ -191,30 +198,44 @@ const Sms = () => {
                         {selectedRecipients.length} selected
                       </span>
                     </div>
-                    <div className="mt-4">
-                      <label
-                        htmlFor="barangayFilter"
-                        className="block text-sm font-medium text-gray-700 mb-1"
-                      >
-                        Filter by Barangay
-                      </label>
-                      <select
-                        id="barangayFilter"
-                        value={barangayFilter}
-                        onChange={(e) => {
-                          const selected = e.target.value;
-                          setBarangayFilter(selected);
-                          fetchCitizens(selected); // fetch by ID
-                        }}
-                        className="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                      >
-                        <option value="">All Barangays</option>
-                        {barangays.map((b) => (
-                          <option key={b.id} value={b.id}>
-                            {b.barangay_name}
-                          </option>
-                        ))}
-                      </select>
+
+                    <div className="mt-4 flex flex-col sm:flex-row sm:space-x-4 space-y-4 sm:space-y-0 w-full">
+                      {/* Search input */}
+                      <div className="relative w-full sm:w-1/2">
+                        <input
+                          type="text"
+                          id="search"
+                          value={searchText}
+                          onChange={(e) => {
+                            setSearchText(e.target.value);
+                            fetchCitizens(barangayFilter, e.target.value); // Pass search
+                          }}
+                          placeholder="Search by Name or Contact..."
+                          className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+                        />
+                        <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
+                      </div>
+
+                      {/* Barangay filter */}
+                      <div className="w-full sm:w-1/2">
+                        <select
+                          id="barangayFilter"
+                          value={barangayFilter}
+                          className="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                          onChange={(e) => {
+                            const selected = e.target.value;
+                            setBarangayFilter(selected);
+                            fetchCitizens(selected, searchText); // fetch with search too
+                          }}
+                        >
+                          <option value="">All Barangays</option>
+                          {barangays.map((b) => (
+                            <option key={b.id} value={b.id}>
+                              {b.barangay_name}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
                     </div>
                   </div>
 

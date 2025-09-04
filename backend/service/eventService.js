@@ -30,11 +30,13 @@ exports.getSlideshow = async () => {
   return await Connection(query);
 };
 
-// GET all events
-exports.getAll = async () => {
+// GET last 5 events
+exports.getFive = async () => {
   const query = `
-    SELECT * FROM events
+    SELECT * 
+    FROM events WHERE type = 'event'
     ORDER BY date DESC
+    LIMIT 5
   `;
   return await Connection(query);
 };

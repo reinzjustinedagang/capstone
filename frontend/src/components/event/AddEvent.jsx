@@ -14,7 +14,7 @@ import axios from "axios";
 const AddEvent = ({ onEventAdded }) => {
   const [formData, setFormData] = useState({
     title: "",
-    type: "",
+    type: "event",
     description: "",
     date: "",
   });
@@ -54,15 +54,22 @@ const AddEvent = ({ onEventAdded }) => {
     }
 
     setError("");
-    // Pass the file to cropper instead of storing it
+
+    // 👉 If type is slideshow, skip cropper
+    if (formData.type === "slideshow") {
+      setImageFile(file);
+      setImagePreview(URL.createObjectURL(file));
+      return;
+    }
+
+    // Otherwise, open cropper
     setRawImage(URL.createObjectURL(file));
     setShowCropper(true);
   };
 
-  // Handle crop
+  // Handle crop complete
   const handleCropComplete = async (croppedBlob) => {
-    // Convert Blob to File
-    const fileName = `event_${Date.now()}.png`; // you can use jpg if needed
+    const fileName = `event_${Date.now()}.png`;
     const croppedFile = new File([croppedBlob], fileName, {
       type: "image/png",
     });
@@ -99,7 +106,7 @@ const AddEvent = ({ onEventAdded }) => {
 
       setSuccessMessage("Event added successfully!");
       setShowSuccessModal(true);
-      setFormData({ title: "", type: "", description: "", date: "" });
+      setFormData({ title: "", type: "event", description: "", date: "" });
       setImageFile(null);
       setImagePreview(null);
 
@@ -122,16 +129,22 @@ const AddEvent = ({ onEventAdded }) => {
     >
       {/* Event Image */}
       <div>
-        <label className="block text-sm font-medium">Event Image</label>
+        <label className="block text-sm font-medium">
+          {formData.type == "event" ? "Event" : "Slideshow"} Image
+        </label>
         <div className="flex items-center gap-4 mt-2">
           {imagePreview ? (
             <img
               src={imagePreview}
               alt="Event Preview"
-              className="w-50 h-50 object-cover border rounded"
+              className={`object-cover border rounded 
+          ${formData.type === "slideshow" ? "w-64 h-36" : "w-40 h-40"}`}
             />
           ) : (
-            <div className="w-50 h-50 border flex items-center justify-center text-gray-400">
+            <div
+              className={`flex items-center justify-center text-gray-400 border rounded 
+          ${formData.type === "slideshow" ? "w-64 h-36" : "w-40 h-40"}`}
+            >
               No Image
             </div>
           )}
@@ -245,6 +258,7 @@ const AddEvent = ({ onEventAdded }) => {
           imageSrc={rawImage}
           onClose={() => setShowCropper(false)}
           onCropComplete={handleCropComplete}
+          aspect={formData.type === "slideshow" ? 16 / 9 : 1} // 👈 dynamic aspect
         />
       )}
 

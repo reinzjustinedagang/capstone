@@ -133,3 +133,40 @@ exports.updateAbout = async (mission, vision, preamble, user, ip) => {
 
   return { actionType, changes };
 };
+
+exports.saveKey = async (key) => {
+  if (!key) throw { status: 400, message: "Key is required" };
+
+  // 1. Clean up expired unused keys (older than 5 minutes)
+  await Connection(
+    `DELETE FROM dev_keys 
+     WHERE used = 0 
+     AND created_at < NOW() - INTERVAL 5 MINUTE`
+  );
+
+  // 2. Check if an unused key exists that is still valid
+  const existing = await Connection(
+    `SELECT * FROM dev_keys 
+     WHERE used = 0 
+     AND created_at >= NOW() - INTERVAL 5 MINUTE 
+     LIMIT 1`
+  );
+
+  if (existing.length > 0) {
+    return {
+      message: "An unused developer key already exists and is still valid",
+      skipped: true,
+      expiresAt: new Date(
+        new Date(existing[0].created_at).getTime() + 5 * 60000
+      ), // Optional: expiry info
+    };
+  }
+
+  // 3. Insert new key with created_at timestamp
+  await Connection(
+    "INSERT INTO dev_keys (`key`, used, created_at) VALUES (?, 0, NOW())",
+    [key]
+  );
+
+  return { message: "Developer key created successfully", skipped: false };
+};

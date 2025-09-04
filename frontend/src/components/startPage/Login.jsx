@@ -3,6 +3,7 @@ import Header from "./Header";
 import { useNavigate, Link } from "react-router-dom";
 import { LogIn, Loader2, EyeIcon, EyeOffIcon, Lock } from "lucide-react";
 import axios from "axios";
+import Modal from "../UI/Modal";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -19,6 +20,9 @@ export default function Login() {
   const [locked, setLocked] = useState(false);
   const [unlockTime, setUnlockTime] = useState(null);
   const [remainingSeconds, setRemainingSeconds] = useState(0);
+
+  const [devKey, setDevKey] = useState("");
+  const [showDevModal, setShowDevModal] = useState(false);
 
   // ✅ Load attempts & lock state from localStorage
   useEffect(() => {
@@ -132,10 +136,20 @@ export default function Login() {
     setShowPassword(!showPassword);
   };
 
+  // Developer access handler
+  const handleDeveloperAccess = () => {
+    const correctDevKey = import.meta.env.VITE_DEV_KEY;
+    if (devKey === correctDevKey) {
+      localStorage.setItem("developerAccess", "true"); // ✅ set access flag
+      navigate("/developer");
+    } else {
+      setError("Invalid developer key.");
+    }
+  };
+
   return (
     <>
-      <Header />
-      <div className="relative flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-blue-50 to-indigo-100 font-inter overflow-hidden">
+      <div className="relative flex items-center justify-center m-0 py-12 sm:px-0 md:px-4 lg:px-8 bg-gradient-to-br from-blue-50 to-indigo-100 font-inter overflow-hidden">
         <div className="absolute inset-0 z-0 opacity-20">
           <div className="absolute w-72 h-72 bg-purple-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob top-1/4 left-1/4"></div>
           <div className="absolute w-64 h-64 bg-pink-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000 bottom-1/4 right-1/4"></div>
@@ -245,8 +259,57 @@ export default function Login() {
               )}
             </button>
           </form>
+          <p className="text-center text-sm text-gray-600 mt-6">
+            Not a member?{" "}
+            <Link
+              id="register"
+              to="/register"
+              className="font-medium text-indigo-600 hover:text-indigo-500 transition-colors duration-200"
+            >
+              Register
+            </Link>
+          </p>
+          <div className="text-center mt-4">
+            <span
+              onClick={() => setShowDevModal(true)}
+              className="text-sm font-medium text-gary-600 hover:text-gray-500 cursor-pointer"
+            >
+              Developer Access
+            </span>
+          </div>
         </div>
       </div>
+      {/* Developer Modal */}
+      <Modal
+        isOpen={showDevModal}
+        onClose={() => setShowDevModal(false)}
+        title="Enter Developer Key"
+      >
+        <input
+          type="text"
+          value={devKey}
+          onChange={(e) => setDevKey(e.target.value)}
+          placeholder="Developer Key"
+          className="w-full px-4 py-2 border rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-indigo-600"
+        />
+        <div className="flex justify-end gap-2">
+          <button
+            onClick={() => setShowDevModal(false)}
+            className="px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-100"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={() => {
+              handleDeveloperAccess();
+              setShowDevModal(false);
+            }}
+            className="px-4 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700"
+          >
+            Access
+          </button>
+        </div>
+      </Modal>
     </>
   );
 }

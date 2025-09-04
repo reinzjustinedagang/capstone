@@ -38,7 +38,7 @@ exports.getAllUsers = async () => {
   try {
     const users = await Connection(`
       SELECT id, username, email, cp_number, role, status, last_login
-      FROM users
+      FROM users WHERE blocked = 0
       ORDER BY username ASC
     `);
     return users;
@@ -70,11 +70,37 @@ exports.deleteUser = async (id, user, ip) => {
   }
 };
 
+exports.blockUser = async (id, user, ip) => {
+  try {
+    // Block only the user with the given id
+    const result = await Connection(
+      `UPDATE users SET blocked = 1 WHERE id = ?`,
+      [id]
+    );
+
+    if (result.affectedRows === 1) {
+      await logAudit(
+        user.id,
+        user.email,
+        user.role,
+        "BLOCKED",
+        `'${user.username}' has been blocked`,
+        ip
+      );
+    }
+
+    return result.affectedRows === 1;
+  } catch (error) {
+    console.error("Error blocking user:", error);
+    throw error;
+  }
+};
+
 // LOGIN SERVICE
 exports.login = async (email, password, ip) => {
   try {
     const results = await Connection(
-      "SELECT id, username, email, password, cp_number, role, status, last_logout, image, last_login FROM users WHERE email = ?",
+      "SELECT id, username, email, password, cp_number, role, status, last_logout, image, last_login FROM users WHERE email = ? AND blocked = 0",
       [email]
     );
 
@@ -117,8 +143,33 @@ exports.login = async (email, password, ip) => {
 };
 
 // REGISTER SERVICE
-exports.register = async (username, email, password, cp_number, role, ip) => {
+exports.register = async (
+  username,
+  email,
+  password,
+  cp_number,
+  role,
+  ip,
+  devKey
+) => {
   try {
+    const keyCheck = await Connection(
+      `SELECT * FROM dev_keys 
+   WHERE \`key\` = ? 
+   AND used = 0
+   AND created_at >= NOW() - INTERVAL 5 MINUTE
+   LIMIT 1`,
+      [devKey]
+    );
+
+    if (!keyCheck.length)
+      throw { status: 400, message: "Invalid or already used developer key" };
+
+    // Mark key as used
+    await Connection("UPDATE dev_keys SET used = 1 WHERE id = ?", [
+      keyCheck[0].id,
+    ]);
+
     const existingUsers = await Connection(
       "SELECT * FROM users WHERE email = ?",
       [email]

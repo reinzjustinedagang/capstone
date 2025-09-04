@@ -1,9 +1,9 @@
 import React, { useState, useMemo, useEffect } from "react";
-import Button from "../UI/Button"; // Assuming you have a Button component
-import Modal from "../UI/Modal"; // Assuming this is your general Modal component for all dialogs
-import Modal2 from "../UI/Modal2";
-import UserForm from "./UserForm";
+import { useNavigate, NavLink } from "react-router-dom";
 import axios from "axios";
+import Button from "../UI/Button";
+import Modal from "../UI/Modal";
+import UserForm from "./UserForm";
 import {
   Search,
   Plus,
@@ -11,45 +11,50 @@ import {
   Trash2,
   ArrowDown,
   ArrowUp,
-  History, // Added History for viewing login trails
-  Loader2, // For loading indicators
-  XCircle, // For error messages
-  CheckCircle, // For success messages
+  History,
+  Loader2,
+  XCircle,
+  CheckCircle,
+  Ban,
 } from "lucide-react";
-import { NavLink } from "react-router-dom";
 
+// --- Main Component: UserManagement ---
 const UserManagement = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null); // For fetching errors or general API errors
+  const [error, setError] = useState(null);
 
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [selectedUser, setSelectedUser] = useState(null);
-  const [formSubmitting, setFormSubmitting] = useState(false); // Used for form/delete specific loading
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
+  const [showUpdateConfirmModal, setShowUpdateConfirmModal] = useState(false);
+  const [pendingUpdateData, setPendingUpdateData] = useState(null);
 
-  // --- States for the Notification Modal ---
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [formSubmitting, setFormSubmitting] = useState(false);
+  const [showBlockModal, setShowBlockModal] = useState(false);
+
   const [showNotificationModal, setShowNotificationModal] = useState(false);
   const [notificationMessage, setNotificationMessage] = useState("");
-  const [notificationType, setNotificationType] = useState("success"); // 'success' or 'error'
 
   const [searchTerm, setSearchTerm] = useState("");
   const [filterRole, setFilterRole] = useState("All Roles");
   const [filterStatus, setFilterStatus] = useState("All Status");
   const [sortBy, setSortBy] = useState("username");
   const [sortOrder, setSortOrder] = useState("asc");
-  const [showLogoutWarning, setShowLogoutWarning] = useState(false);
-  const [pendingUpdatePayload, setPendingUpdatePayload] = useState(null);
 
-  const backendUrl =
-    import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
+  const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
+  const currentUserId = currentUser.id;
+
+  const backendUrl = "http://localhost:3000";
+  const navigate = useNavigate();
 
   const fetchUsers = async () => {
     setLoading(true);
     setError(null);
     try {
-      console.log(`Attempting to fetch users from: ${backendUrl}/api/user/`);
       const response = await axios.get(`${backendUrl}/api/user/`, {
         withCredentials: true,
       });
@@ -58,14 +63,11 @@ const UserManagement = () => {
       console.error("Failed to fetch users:", err);
       let errorMessage = `Failed to load users: ${err.message}.`;
       if (err.code === "ERR_NETWORK") {
-        errorMessage += ` Please ensure the backend server is running and accessible at ${backendUrl}/api/user/.`;
-        errorMessage += ` Also, check your browser's developer console for CORS errors.`;
+        errorMessage += ` Please ensure the backend server is running and accessible.`;
       } else if (err.response) {
-        errorMessage += ` Server responded with status ${
-          err.response.status
-        }: ${err.response.data?.message || "Unknown error"}.`;
+        errorMessage += ` Server responded with status ${err.response.status}.`;
       }
-      setError(errorMessage); // Set error for the main display if fetch fails
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -73,164 +75,174 @@ const UserManagement = () => {
 
   useEffect(() => {
     fetchUsers();
-  }, [backendUrl]); // Added backendUrl to dependencies
+  }, []);
 
-  // --- Notification Handlers ---
   const showSuccessNotification = (message) => {
-    setNotificationMessage(message);
-    setNotificationType("success");
-    setShowNotificationModal(true);
+    setSuccessMessage(message);
+    setShowSuccessModal(true);
   };
 
   const showErrorNotification = (message) => {
     setNotificationMessage(message);
-    setNotificationType("error");
     setShowNotificationModal(true);
-  };
-
-  const closeNotificationModal = () => {
-    setShowNotificationModal(false);
-    setNotificationMessage("");
   };
 
   const handleAddUser = () => {
     setSelectedUser(null);
     setShowAddModal(true);
-    setError(null); // Clear any previous general errors when opening form
+    setError(null);
   };
 
   const handleEditUser = (user) => {
     setSelectedUser(user);
     setShowEditModal(true);
-    setError(null); // Clear any previous general errors when opening form
+    setError(null);
   };
 
   const handleDeleteUser = (user) => {
     setSelectedUser(user);
     setShowDeleteModal(true);
-    setError(null); // Clear any previous general errors when opening form
+    setError(null);
+  };
+
+  const handleConfirmUpdate = async () => {
+    if (!pendingUpdateData) return;
+    const { formData, updatePayload } = pendingUpdateData;
+    setShowUpdateConfirmModal(false);
+    setPendingUpdateData(null);
+    await saveUser(formData, updatePayload);
+  };
+
+  const handleCancelUpdate = () => {
+    setShowUpdateConfirmModal(false);
+    setPendingUpdateData(null);
   };
 
   const handleFormSubmit = async (formData) => {
+    const updatePayload = {
+      username: formData.username,
+      email: formData.email,
+      cp_number: formData.cp_number,
+      role: formData.role,
+    };
+
+    if (formData.password) {
+      updatePayload.password = formData.password;
+    }
+
+    if (formData.id) {
+      setPendingUpdateData({ formData, updatePayload });
+      setShowUpdateConfirmModal(true);
+      return false;
+    }
+
+    await saveUser(formData, updatePayload);
+    return true;
+  };
+
+  const saveUser = async (formData, payload) => {
     setFormSubmitting(true);
-
     try {
-      const updatePayload = {
-        username: formData.username,
-        email: formData.email,
-        password: formData.password,
-        cp_number: formData.cp_number,
-        role: formData.role,
-      };
-      let originalRole = null;
-
-      if (formData.id) {
-        const originalUser = users.find(
-          (u) => String(u.id) === String(formData.id)
-        );
-        originalRole = originalUser?.role;
-      }
-
       if (formData.id) {
         await axios.put(
           `${backendUrl}/api/user/update/${formData.id}`,
-          updatePayload,
+          payload,
           { withCredentials: true }
         );
         showSuccessNotification("User updated successfully!");
+
+        // **FIX**: If the current user changes their own role, log them out and redirect to login.
+        // This is more robust to prevent race conditions with client-side routing.
+        if (
+          currentUserId &&
+          parseInt(currentUserId) === formData.id &&
+          payload.role &&
+          payload.role !== selectedUser?.role
+        ) {
+          try {
+            await axios.post(`${backendUrl}/api/user/logout`, {
+              withCredentials: true,
+            });
+          } catch (logoutError) {
+            console.error(
+              "Logout failed, but proceeding with client-side cleanup and redirect.",
+              logoutError
+            );
+          } finally {
+            // Clear storage and force a redirect to the login page.
+            localStorage.clear();
+            sessionStorage.clear();
+            navigate("/login");
+          }
+          return; // Stop further execution
+        }
       } else {
-        await axios.post(
-          `${backendUrl}/api/user/register`,
-          {
-            ...updatePayload,
-          },
-          { withCredentials: true }
-        );
+        await axios.post(`${backendUrl}/api/user/register`, payload, {
+          withCredentials: true,
+        });
         showSuccessNotification("New user added successfully!");
       }
 
       await fetchUsers();
-
-      const userObj = JSON.parse(localStorage.getItem("user"));
-      const currentUserId = userObj?.id;
-
-      if (
-        formData.id &&
-        currentUserId &&
-        String(formData.id) === String(currentUserId) &&
-        originalRole &&
-        formData.role !== originalRole
-      ) {
-        setPendingUpdatePayload({
-          updatePayload,
-          formData,
-        });
-        setShowLogoutWarning(true);
-        return;
-      } else if (
-        formData.id &&
-        currentUserId &&
-        String(formData.id) === String(currentUserId)
-      ) {
-        window.dispatchEvent(new Event("profileUpdated"));
-      }
-
       setShowAddModal(false);
       setShowEditModal(false);
       setSelectedUser(null);
     } catch (err) {
-      console.error("Failed to save user:", err);
-      const errorMessage =
-        err.response?.data?.message ||
-        `Failed to ${formData.id ? "update" : "add"} user. Please try again.`;
-      showErrorNotification(errorMessage);
-      // Removed the throw err; to prevent uncaught promise rejection in UI
+      showErrorNotification(
+        err.response?.data?.message || "Failed to save user."
+      );
     } finally {
       setFormSubmitting(false);
     }
   };
 
-  const handleConfirmLogout = async () => {
-    setShowLogoutWarning(false);
-    window.dispatchEvent(new Event("profileUpdated"));
-    try {
-      await axios.post(
-        `${backendUrl}/api/user/logout`,
-        {},
-        { withCredentials: true }
-      );
-    } catch (logoutErr) {
-      console.error("Logout failed:", logoutErr);
-      // Even if logout API fails, proceed with client-side logout
-    } finally {
-      localStorage.clear();
-      sessionStorage.clear();
-      window.location.href = "/login"; // Force full page reload to clear state
-    }
-  };
-
-  const handleCancelLogout = () => {
-    setShowLogoutWarning(false);
-    setPendingUpdatePayload(null);
-    setShowEditModal(false);
-    setSelectedUser(null);
-  };
-
   const handleDeleteConfirm = async () => {
     setFormSubmitting(true);
     try {
-      await axios.delete(`${backendUrl}/api/user/${selectedUser.id}`, {
-        withCredentials: true,
-      });
-      showSuccessNotification("User deleted successfully!");
+      await axios.put(
+        `${backendUrl}/api/user/blocked/${selectedUser.id}`,
+        {}, // no request body, so just an empty object
+        { withCredentials: true } // config object
+      );
+
+      showSuccessNotification("User block successfully!");
       await fetchUsers();
       setShowDeleteModal(false);
       setSelectedUser(null);
     } catch (err) {
       console.error("Failed to delete user:", err);
       const errorMessage =
-        err.response?.data?.message ||
-        "Failed to delete user. Please try again.";
+        err.response?.data?.message || "Failed to delete user.";
+      showErrorNotification(errorMessage);
+    } finally {
+      setFormSubmitting(false);
+    }
+  };
+
+  // Handlers
+  const handleBlockUser = (user) => {
+    setSelectedUser(user);
+    setShowBlockModal(true);
+    setError(null);
+  };
+
+  const handleBlockConfirm = async () => {
+    setFormSubmitting(true);
+    try {
+      await axios.put(
+        `${backendUrl}/api/user/blocked/${selectedUser.id}`,
+        {},
+        { withCredentials: true }
+      );
+
+      showSuccessNotification("User blocked successfully!");
+      await fetchUsers();
+      setShowBlockModal(false);
+      setSelectedUser(null);
+    } catch (err) {
+      console.error("Failed to block user:", err);
+      const errorMessage =
+        err.response?.data?.message || "Failed to block user.";
       showErrorNotification(errorMessage);
     } finally {
       setFormSubmitting(false);
@@ -272,8 +284,6 @@ const UserManagement = () => {
       if (typeof a[sortBy] === "string" && typeof b[sortBy] === "string") {
         cmp = a[sortBy].localeCompare(b[sortBy]);
       } else {
-        if (a[sortBy] > b[sortBy]) cmp = 1;
-        else if (a[sortBy] < b[sortBy]) cmp = -1;
         cmp = a[sortBy] > b[sortBy] ? 1 : a[sortBy] < b[sortBy] ? -1 : 0;
       }
       return sortOrder === "asc" ? cmp : -cmp;
@@ -414,7 +424,7 @@ const UserManagement = () => {
                 {filteredAndSortedUsers.length === 0 && !loading ? (
                   <tr>
                     <td
-                      colSpan="6" // Adjusted colspan to match new column count
+                      colSpan="6"
                       className="px-6 py-4 text-center text-gray-500"
                     >
                       No users found.
@@ -436,7 +446,7 @@ const UserManagement = () => {
                           className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
                             user.role === "admin"
                               ? "bg-purple-100 text-purple-800"
-                              : "bg-indigo-100 text-indigo-800"
+                              : "bg-yellow-100 text-yellow-800"
                           }`}
                         >
                           {user.role.charAt(0).toUpperCase() +
@@ -472,18 +482,18 @@ const UserManagement = () => {
                             <Edit className="h-5 w-5" />
                           </button>
                           <button
-                            onClick={() => handleDeleteUser(user)}
-                            className="text-red-600 hover:text-red-900"
-                            aria-label={`Delete ${user.username}`}
+                            onClick={() => handleBlockUser(user)}
+                            className="text-gray-600 hover:text-gray-900"
+                            aria-label={`Block ${user.username}`}
+                            title="Block"
                           >
-                            <Trash2 className="h-5 w-5" />
+                            <Ban className="h-5 w-5" />
                           </button>
-                          {/* New Eye Icon for Login Trails */}
                           <NavLink
                             className="text-green-600 hover:text-green-900"
                             aria-label={`View login trails for ${user.username}`}
                             title="View Login Trails"
-                            to={`/admin/login-trail/${user.id}`} // Adjusted to use user.id
+                            to={`/admin/login-trail/${user.id}`}
                           >
                             <History className="h-5 w-5" />
                           </NavLink>
@@ -537,7 +547,6 @@ const UserManagement = () => {
         </div>
       </div>
 
-      {/* Add User Modal */}
       <Modal
         isOpen={showAddModal}
         onClose={() => setShowAddModal(false)}
@@ -550,12 +559,9 @@ const UserManagement = () => {
             setShowAddModal(false);
             setSelectedUser(null);
           }}
-          onSubmitSuccess={showSuccessNotification}
-          onSubmitError={showErrorNotification}
         />
       </Modal>
 
-      {/* Edit User Modal */}
       <Modal
         isOpen={showEditModal}
         onClose={() => setShowEditModal(false)}
@@ -568,12 +574,9 @@ const UserManagement = () => {
             setShowEditModal(false);
             setSelectedUser(null);
           }}
-          onSubmitSuccess={showSuccessNotification}
-          onSubmitError={showErrorNotification}
         />
       </Modal>
 
-      {/* Delete Confirmation Modal */}
       <Modal
         isOpen={showDeleteModal}
         onClose={() => setShowDeleteModal(false)}
@@ -609,47 +612,77 @@ const UserManagement = () => {
         </div>
       </Modal>
 
-      {/* --- Notification Modal --- */}
       <Modal
-        isOpen={showNotificationModal}
-        onClose={closeNotificationModal}
-        title={notificationType === "success" ? "Success!" : "Error!"}
+        isOpen={showSuccessModal}
+        onClose={() => setShowSuccessModal(false)}
+        title=""
       >
         <div className="p-6 text-center">
-          <div
-            className={`text-lg font-semibold mb-4 ${
-              notificationType === "success" ? "text-green-600" : "text-red-600"
-            }`}
-          >
-            {notificationMessage}
+          <div className="mx-auto mb-4 w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+            <CheckCircle className="w-6 h-6 text-green-500" />
           </div>
-          <Button
-            variant={notificationType === "success" ? "primary" : "danger"}
-            onClick={closeNotificationModal}
-          >
+          <h3 className="text-lg font-medium text-gray-800 mb-2">Success</h3>
+          <p className="text-sm text-gray-600 mb-4">{successMessage}</p>
+          <Button variant="primary" onClick={() => setShowSuccessModal(false)}>
             OK
           </Button>
         </div>
       </Modal>
 
-      {/* --- Logout Warning Modal (for self-role change) --- */}
       <Modal
-        isOpen={showLogoutWarning}
-        onClose={handleCancelLogout}
-        title="Role Change Detected"
+        isOpen={showBlockModal}
+        onClose={() => setShowBlockModal(false)}
+        title="Confirm Block"
       >
-        <div className="p-6 text-center">
-          <div className="text-lg font-semibold mb-4 text-red-700">
-            You are changing your own role.
-            <br />
-            You will be logged out and must re-login to continue.
-          </div>
-          <div className="flex justify-center gap-4 mt-4">
-            <Button variant="secondary" onClick={handleCancelLogout}>
+        <div className="p-6">
+          <p className="mb-4 text-gray-700">
+            Are you sure you want to block{" "}
+            <span className="font-semibold text-gray-600">
+              {selectedUser ? selectedUser.username : "this user"}
+            </span>
+            ? This action will prevent them from accessing the system.
+          </p>
+          <div className="flex justify-end space-x-3">
+            <Button
+              variant="secondary"
+              onClick={() => {
+                setShowBlockModal(false);
+                setSelectedUser(null);
+              }}
+              disabled={formSubmitting}
+            >
               Cancel
             </Button>
-            <Button variant="danger" onClick={handleConfirmLogout}>
-              Continue & Logout
+            <Button
+              variant=""
+              onClick={handleBlockConfirm}
+              disabled={formSubmitting}
+            >
+              {formSubmitting ? "Blocking..." : "Block"}
+            </Button>
+          </div>
+        </div>
+      </Modal>
+
+      <Modal
+        isOpen={showUpdateConfirmModal}
+        onClose={handleCancelUpdate}
+        title="Confirm Update"
+      >
+        <div className="p-6">
+          <p className="mb-4 text-gray-700">
+            Are you sure you want to update the user{" "}
+            <span className="font-semibold text-blue-600">
+              {pendingUpdateData?.formData.username}
+            </span>
+            ? This will overwrite the existing data.
+          </p>
+          <div className="flex justify-end gap-4 mt-4">
+            <Button variant="secondary" onClick={handleCancelUpdate}>
+              Cancel
+            </Button>
+            <Button variant="primary" onClick={handleConfirmUpdate}>
+              Yes, Update
             </Button>
           </div>
         </div>

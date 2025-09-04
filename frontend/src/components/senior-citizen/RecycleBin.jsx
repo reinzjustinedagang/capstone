@@ -128,7 +128,7 @@ const RecycleBin = () => {
       </div>
 
       {/* Recycle Bin Content */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+      <div className="bg-white rounded-lg shadow overflow-hidden">
         {deletedCitizens.length === 0 ? (
           <div className="text-center py-12">
             <ArchiveRestore className="h-12 w-12 text-gray-400 mx-auto mb-4" />
@@ -140,6 +140,7 @@ const RecycleBin = () => {
         ) : (
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
+              {/* Table Header */}
               <thead className="bg-gray-50">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -159,49 +160,53 @@ const RecycleBin = () => {
                   </th>
                 </tr>
               </thead>
+
+              {/* Table Body */}
               <tbody className="bg-white divide-y divide-gray-200">
                 {deletedCitizens.map((citizen) => (
-                  <tr key={citizen.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-gray-900">
-                        {`${citizen.firstName} ${citizen.middleName || ""} ${
-                          citizen.lastName
-                        } ${citizen.suffix || ""}`}
-                      </div>
+                  <tr key={citizen.id}>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                      {`${citizen.lastName}, ${citizen.firstName} ${
+                        citizen.middleName || ""
+                      } ${citizen.suffix || ""}`}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <td className="px-6 py-4 text-sm text-gray-500">
                       {citizen.age}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {citizen.barangay}
+                    <td className="px-6 py-4 text-sm text-gray-500">
+                      {citizen.barangay_id
+                        ? barangayMap[citizen.barangay_id] || "Unknown"
+                        : citizen.barangay || "Unknown"}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <td className="px-6 py-4 text-sm text-gray-500">
                       {citizen.deleted_at
-                        ? `${formatDistanceToNow(new Date(citizen.deleted_at), {
+                        ? formatDistanceToNow(new Date(citizen.deleted_at), {
                             addSuffix: true,
-                          })}`
+                          })
                         : "Unknown"}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                    <td className="px-6 py-4 text-sm font-xs">
                       <div className="flex space-x-2">
+                        {/* Restore Icon */}
                         <button
                           onClick={() =>
                             confirmActionForCitizen(citizen.id, "restore")
                           }
-                          className="inline-flex items-center px-3 py-1 rounded-md text-sm font-medium bg-green-100 text-green-700 hover:bg-green-200 transition-colors"
+                          className="text-green-600 hover:text-green-900"
+                          aria-label={`Restore ${citizen.firstName} ${citizen.lastName}`}
                         >
-                          <ArchiveRestore className="h-4 w-4 mr-1" />
-                          Restore
+                          <ArchiveRestore className="h-5 w-5" />
                         </button>
 
+                        {/* Permanent Delete Icon */}
                         <button
                           onClick={() =>
                             confirmActionForCitizen(citizen.id, "delete")
                           }
-                          className="inline-flex items-center px-3 py-1 rounded-md text-sm font-medium bg-red-100 text-red-700 hover:bg-red-200 transition-colors"
+                          className="text-red-600 hover:text-red-900"
+                          aria-label={`Delete ${citizen.firstName} ${citizen.lastName}`}
                         >
-                          <Trash className="h-4 w-4 mr-1" />
-                          Permanent Delete
+                          <Trash className="h-5 w-5" />
                         </button>
                       </div>
                     </td>

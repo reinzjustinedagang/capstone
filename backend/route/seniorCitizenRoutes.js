@@ -32,21 +32,25 @@ router.post("/create", async (req, res) => {
   }
 
   try {
-    // ✅ FIX 1: Destructure ALL the fields sent from the frontend.
-    const { firstName, lastName, middleName, suffix, form_data } = req.body;
+    // Destructure all fields including barangay_id from frontend
+    const { firstName, lastName, middleName, suffix, form_data, barangay_id } =
+      req.body;
 
-    // ✅ FIX 2: Parse the form_data string into a JavaScript object.
+    // Parse the dynamic form_data object
     const dynamicData = JSON.parse(form_data);
 
-    // ✅ FIX 3: Pass the correct data to your service.
+    // Include barangay_id in dynamicData
+    dynamicData.barangay_id = barangay_id;
+
     const insertId = await seniorCitizenService.createSeniorCitizen(
       {
         firstName,
         lastName,
-        middleName, // Pass middleName
-        suffix, // Pass suffix
-        form_data: dynamicData, // Pass the PARSED object
-        birthdate: dynamicData.birthdate, // Pass the birthdate for the duplicate check
+        middleName,
+        suffix,
+        form_data: dynamicData,
+        birthdate: dynamicData.birthdate,
+        barangay_id, // pass separately if needed
       },
       user,
       ip
@@ -173,9 +177,13 @@ router.get("/count/all", async (req, res) => {
 
 // GET: SMS recipients
 router.get("/sms-citizens", async (req, res) => {
-  const { barangay } = req.query; // optional query param
+  const { barangay, barangay_id, search } = req.query;
   try {
-    const recipients = await seniorCitizenService.getSmsRecipients(barangay);
+    const recipients = await seniorCitizenService.getSmsRecipients(
+      barangay,
+      barangay_id,
+      search
+    );
     res.status(200).json(recipients);
   } catch (error) {
     console.error("Error fetching SMS recipients:", error);

@@ -111,19 +111,32 @@ const SeniorCitizenForm = ({ onSubmit, onCancel, onSuccess }) => {
     setFormError("");
 
     try {
-      const {
-        firstName = "",
-        lastName = "",
-        middleName = "",
-        suffix = "",
-        ...dynamicFields
-      } = formData;
+      const { firstName, lastName, middleName, suffix, ...allFields } =
+        formData;
+
+      // find barangay field
+      const barangayField = fields.find((f) =>
+        f.field_name.toLowerCase().includes("barangay")
+      );
+
+      if (!barangayField) {
+        setFormError("Barangay field is missing!");
+        setIsSubmitting(false);
+        return;
+      }
+
+      const barangay_id = Number(formData[barangayField.field_name]);
+
+      // remove barangay from dynamicFields
+      const dynamicFields = { ...allFields };
+      delete dynamicFields[barangayField.field_name];
 
       const payload = {
         firstName,
         lastName,
         middleName,
         suffix,
+        barangay_id,
         form_data: JSON.stringify(dynamicFields),
       };
 
@@ -131,10 +144,10 @@ const SeniorCitizenForm = ({ onSubmit, onCancel, onSuccess }) => {
         withCredentials: true,
       });
 
-      setShowConfirmModal(false); // close confirm
-      setShowSuccessModal(true); // open success
-      onSubmit?.(); // notify parent if needed
-      if (onSuccess) onSuccess();
+      setShowConfirmModal(false);
+      setShowSuccessModal(true);
+      onSubmit?.();
+      onSuccess?.();
     } catch (err) {
       console.error(err);
       setFormError(err.response?.data?.message || "Failed to submit form.");
@@ -157,7 +170,7 @@ const SeniorCitizenForm = ({ onSubmit, onCancel, onSuccess }) => {
 
   // barangay special rendering kept
   const renderBarangaySelect = (field) => {
-    const value = formData[field.field_name];
+    const value = formData[field.field_name]; // will store id now
     return (
       <div key={field.id}>
         <label className="block text-sm font-medium text-gray-700">
@@ -174,9 +187,9 @@ const SeniorCitizenForm = ({ onSubmit, onCancel, onSuccess }) => {
           <option value="">
             {barangayLoading ? "Loading barangays..." : `Select ${field.label}`}
           </option>
-          {barangays.map((barangay) => (
-            <option key={barangay.id} value={barangay.barangay_name}>
-              {barangay.barangay_name}
+          {barangays.map((b) => (
+            <option key={b.id} value={b.id}>
+              {b.barangay_name} {/* display name */}
             </option>
           ))}
         </select>
@@ -364,7 +377,11 @@ const SeniorCitizenForm = ({ onSubmit, onCancel, onSuccess }) => {
         <Button variant="secondary" onClick={onCancel} disabled={isSubmitting}>
           Cancel
         </Button>
-        <Button type="submit" variant="primary" disabled={isSubmitting}>
+        <Button
+          type="submit"
+          variant="primary"
+          disabled={isSubmitting || barangayLoading}
+        >
           {isSubmitting ? "Saving..." : "Register Senior Citizen"}
         </Button>
       </div>

@@ -9,7 +9,7 @@ const cron = require("node-cron");
 const seniorCitizenService = require("../service/seniorCitizenService");
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const port = process.env.PORT || 3000;
 
 // Run cleanup every day at midnight
 cron.schedule("0 0 * * *", async () => {
@@ -112,6 +112,6 @@ app.get("/api/test-session", (req, res) => {
 });
 
 // Start the server
-app.listen(PORT, () => {
-  console.log(`🚀 Server listening on http://localhost:${PORT}`);
+app.listen(port, "::", () => {
+  console.log(`Server listening on [::]${port}`);
 });

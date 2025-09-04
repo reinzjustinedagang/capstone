@@ -29,6 +29,7 @@ db.query(
     role VARCHAR(50) NOT NULL,
     status ENUM('active', 'inactive') DEFAULT 'inactive',
     image TEXT DEFAULT NULL,
+    blocked INT DEFAULT 0,
     last_login TIMESTAMP NULL DEFAULT NULL,
     last_logout TIMESTAMP NULL DEFAULT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -39,42 +40,6 @@ db.query(
       console.error("❌ Failed to create users table:", err);
     } else {
       console.log("✅ users table ready.");
-
-      // 🔹 Check if table has records
-      db.query("SELECT COUNT(*) AS count FROM users", (err, results) => {
-        if (err) {
-          console.error("❌ Failed to check users count:", err);
-          return;
-        }
-
-        if (results[0].count === 0) {
-          // hash your password before saving
-          const bcrypt = require("bcryptjs");
-          const hashedPassword = bcrypt.hashSync("Iamreinz2004", 10);
-
-          db.query(
-            `INSERT INTO users (username, email, password, cp_number, role, status) 
-             VALUES (?, ?, ?, ?, ?, ?)`,
-            [
-              "Administrator",
-              "reinzjustinedagang@gmail.com",
-              hashedPassword,
-              "09123456789",
-              "admin",
-              "active",
-            ],
-            (err) => {
-              if (err) {
-                console.error("❌ Failed to insert default admin:", err);
-              } else {
-                console.log(
-                  "✅ Default admin account created (email: admin@example.com / password: admin123)"
-                );
-              }
-            }
-          );
-        }
-      });
     }
   }
 );
@@ -433,6 +398,7 @@ db.query(
       gender VARCHAR(10) GENERATED ALWAYS AS (JSON_UNQUOTE(JSON_EXTRACT(form_data, '$.gender'))) VIRTUAL,
       
       -- Metadata
+      barangay_id  INT(100) NULL,
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
       updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
       deleted TINYINT(1) DEFAULT 0,
@@ -448,96 +414,321 @@ db.query(
   }
 );
 
-// Insert default form fields if table is empty
-db.query(`SELECT COUNT(*) AS count FROM form_fields`, (err, results) => {
-  if (err) {
-    console.error("❌ Failed to check form_fields count:", err);
-    return;
-  }
+// Ensure the form_fields table exists
+db.query(
+  `
+  CREATE TABLE IF NOT EXISTS form_fields (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    field_name VARCHAR(100) NOT NULL,
+    label VARCHAR(100) NOT NULL,
+    type VARCHAR(50) NOT NULL,
+    options TEXT,
+    required BOOLEAN DEFAULT false,
+    \`group\` VARCHAR(100) NOT NULL,
+    \`order\` INT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  )
+  `,
+  (err) => {
+    if (err) {
+      console.error("❌ Failed to create form_fields table:", err);
+      return;
+    }
 
-  if (results[0].count === 0) {
-    const defaultFields = [
-      // Personal Info
-      [
-        "firstName",
-        "First Name",
-        "text",
-        null,
-        true,
-        "i_personal_information",
-        1,
-      ],
-      [
-        "middleName",
-        "Middle Name",
-        "text",
-        null,
-        false,
-        "i_personal_information",
-        2,
-      ],
-      [
-        "lastName",
-        "Last Name",
-        "text",
-        null,
-        true,
-        "i_personal_information",
-        3,
-      ],
-      ["suffix", "Suffix", "text", null, false, "i_personal_information", 4],
-      [
-        "gender",
-        "Gender",
-        "select",
-        "Male,Female",
-        true,
-        "i_personal_information",
-        5,
-      ],
-      [
-        "birthdate",
-        "Birthdate",
-        "date",
-        null,
-        true,
-        "i_personal_information",
-        6,
-      ],
-      ["age", "Age", "number", null, false, "i_personal_information", 7],
+    console.log("✅ form_fields table ready.");
 
-      // Contact Info
-      ["mobileNumber", "Mobile Number", "text", null, true, "ii_contact", 1],
-      ["email", "Email", "text", null, false, "ii_contact", 2],
-
-      // Address
-      ["street", "Street", "text", null, true, "iii_address", 1],
-      ["barangay", "Barangay", "select", null, true, "iii_address", 2],
-      ["municipality", "Municipality", "text", null, true, "iii_address", 3],
-      ["province", "Province", "text", null, true, "iii_address", 4],
-      ["zipcode", "Zip Code", "text", null, false, "iii_address", 5],
-    ];
-
-    // Create the 'senior citizen form' table if it does not already exist.
-    db.query(
-      `
-      INSERT INTO form_fields 
-      (field_name, label, type, options, required, \`group\`, \`order\`) 
-      VALUES ?
-      `,
-      [defaultFields],
-      (err) => {
-        if (err) {
-          console.error("❌ Failed to insert default form fields:", err);
-        } else {
-          console.log("✅ Default form fields inserted.");
-        }
+    // Now check if we need to insert defaults
+    db.query(`SELECT COUNT(*) AS count FROM form_fields`, (err, results) => {
+      if (err) {
+        console.error("❌ Failed to check form_fields count:", err);
+        return;
       }
-    );
-  } else {
-    console.log("ℹ️ form_fields already has data, skipping defaults.");
+
+      if (results[0].count === 0) {
+        const defaultFields = [
+          // I. Personal Information
+          [
+            "firstName",
+            "First Name",
+            "text",
+            null,
+            true,
+            "i_personal_information",
+            1,
+          ],
+          [
+            "middleName",
+            "Middle Name",
+            "text",
+            null,
+            false,
+            "i_personal_information",
+            2,
+          ],
+          [
+            "lastName",
+            "Last Name",
+            "text",
+            null,
+            true,
+            "i_personal_information",
+            3,
+          ],
+          [
+            "suffix",
+            "Suffix",
+            "text",
+            null,
+            false,
+            "i_personal_information",
+            4,
+          ],
+          [
+            "gender",
+            "Gender",
+            "select",
+            "Male,Female",
+            true,
+            "i_personal_information",
+            5,
+          ],
+          [
+            "birthdate",
+            "Birthdate",
+            "date",
+            null,
+            true,
+            "i_personal_information",
+            6,
+          ],
+          ["age", "Age", "number", null, false, "i_personal_information", 7],
+          [
+            "placeOfBirth",
+            "Place of Birth",
+            "text",
+            null,
+            true,
+            "i_personal_information",
+            8,
+          ],
+          [
+            "civilStatus",
+            "Civil Status",
+            "select",
+            "Single,Married,Widowed,Separated",
+            true,
+            "i_personal_information",
+            9,
+          ],
+          [
+            "religion",
+            "Religion",
+            "text",
+            null,
+            false,
+            "i_personal_information",
+            10,
+          ],
+          [
+            "occupation",
+            "Occupation (before retirement)",
+            "text",
+            null,
+            false,
+            "i_personal_information",
+            11,
+          ],
+          [
+            "educationalAttainment",
+            "Educational Attainment",
+            "select",
+            "None,Elementary,High School,College,Postgraduate",
+            false,
+            "i_personal_information",
+            12,
+          ],
+
+          // II. Contact Information
+          [
+            "mobileNumber",
+            "Mobile Number",
+            "text",
+            null,
+            true,
+            "ii_contact",
+            1,
+          ],
+          ["email", "Email", "text", null, false, "ii_contact", 2],
+          ["telephone", "Telephone", "text", null, false, "ii_contact", 3],
+
+          // III. Address
+          ["street", "Street", "text", null, true, "iii_address", 1],
+          ["barangay", "Barangay", "select", null, true, "iii_address", 2],
+          [
+            "municipality",
+            "Municipality",
+            "text",
+            null,
+            true,
+            "iii_address",
+            3,
+          ],
+          ["province", "Province", "text", null, true, "iii_address", 4],
+          ["zipcode", "Zip Code", "text", null, false, "iii_address", 5],
+          [
+            "lengthOfResidency",
+            "Length of Residency (years)",
+            "number",
+            null,
+            false,
+            "iii_address",
+            6,
+          ],
+
+          // IV. Senior Citizen Information
+          [
+            "seniorIdNumber",
+            "Senior Citizen ID No.",
+            "text",
+            null,
+            true,
+            "iv_senior_info",
+            1,
+          ],
+          [
+            "sssGsisNo",
+            "SSS/GSIS/Other ID No.",
+            "text",
+            null,
+            false,
+            "iv_senior_info",
+            2,
+          ],
+          [
+            "pensioner",
+            "Pensioner",
+            "select",
+            "Yes,No",
+            true,
+            "iv_senior_info",
+            3,
+          ],
+          [
+            "pensionType",
+            "Type of Pension",
+            "select",
+            "SSS,GSIS,Others,None",
+            false,
+            "iv_senior_info",
+            4,
+          ],
+          [
+            "monthlyPension",
+            "Monthly Pension Amount",
+            "number",
+            null,
+            false,
+            "iv_senior_info",
+            5,
+          ],
+          [
+            "indigent",
+            "Indigent",
+            "select",
+            "Yes,No",
+            true,
+            "iv_senior_info",
+            6,
+          ],
+          [
+            "beneficiary",
+            "Beneficiary Name",
+            "text",
+            null,
+            false,
+            "iv_senior_info",
+            7,
+          ],
+
+          // V. Emergency Contact
+          [
+            "emergencyContactName",
+            "Emergency Contact Name",
+            "text",
+            null,
+            true,
+            "v_emergency_contact",
+            1,
+          ],
+          [
+            "emergencyContactRelation",
+            "Relationship",
+            "text",
+            null,
+            true,
+            "v_emergency_contact",
+            2,
+          ],
+          [
+            "emergencyContactNumber",
+            "Emergency Contact Number",
+            "text",
+            null,
+            true,
+            "v_emergency_contact",
+            3,
+          ],
+          [
+            "emergencyContactAddress",
+            "Emergency Contact Address",
+            "text",
+            null,
+            false,
+            "v_emergency_contact",
+            4,
+          ],
+        ];
+
+        db.query(
+          `
+          INSERT INTO form_fields 
+          (field_name, label, type, options, required, \`group\`, \`order\`) 
+          VALUES ?
+          `,
+          [defaultFields],
+          (err) => {
+            if (err) {
+              console.error("❌ Failed to insert default form fields:", err);
+            } else {
+              console.log("✅ Default form fields inserted.");
+            }
+          }
+        );
+      } else {
+        console.log("ℹ️ form_fields already has data, skipping defaults.");
+      }
+    });
   }
-});
+);
+
+//dev_keys
+db.query(
+  `
+  CREATE TABLE IF NOT EXISTS dev_keys (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  \`key\` VARCHAR(50) NOT NULL UNIQUE,
+  used INT(1) DEFAULT 0,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  )
+  `,
+  (err) => {
+    if (err) {
+      console.error("❌ Failed to create dev_keys table:", err);
+    } else {
+      console.log("✅ system dev_keys ready.");
+    }
+  }
+);
 
 db.query(
   `
