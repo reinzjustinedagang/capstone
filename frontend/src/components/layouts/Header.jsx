@@ -3,128 +3,83 @@ import {
   BellIcon,
   MenuIcon,
   UserIcon,
-  Loader2,
   LogOut,
   Settings,
   ChevronDown,
 } from "lucide-react";
 import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import Modal from "../UI/Modal";
-import user from "../../assets/user.png";
+import defaultUser from "../../assets/user.png";
 import axios from "axios";
 
 const Header = () => {
-  const [profilePicture, setProfilePicture] = useState();
-  const [userName, setUserName] = useState("Guest");
-  const [userRole, setUserRole] = useState("User");
+  const [user, setUser] = useState({
+    username: "Guest",
+    role: "User",
+    image: null,
+  });
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [showLogout, setShowLogout] = useState(false);
+  const [showDropdown, setShowDropdown] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
   const navigate = useNavigate();
   const location = useLocation();
-
   const backendUrl = import.meta.env.VITE_API_BASE_URL;
-  const isProfilePage = location.pathname === "/admin/my-profile";
-  const isSettingsPage = location.pathname === "/admin/settings";
-
-  const fetchUserData = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const meResponse = await axios.get(`${backendUrl}/api/user/me`, {
-        withCredentials: true,
-      });
-
-      if (meResponse.status === 200 && meResponse.data.isAuthenticated) {
-        const userId = meResponse.data.id;
-
-        const response = await axios.get(
-          `${backendUrl}/api/user/user/${userId}`,
-          {
-            withCredentials: true,
-          }
-        );
-
-        if (response.status === 200 && response.data.isAuthenticated) {
-          const user = response.data;
-          setProfilePicture(user.image);
-          setUserName(user.username || "Guest");
-          setUserRole(user.role || "User");
-        } else {
-          setUserName("Guest");
-          setUserRole("User");
-        }
-      }
-    } catch (err) {
-      console.error("Failed to fetch user data for header:", err);
-      setError("Failed to load user info.");
-      setUserName("Guest");
-      setUserRole("User");
-    } finally {
-      setLoading(false);
-    }
-  };
 
   useEffect(() => {
-    fetchUserData();
-  }, []);
+    const fetchUser = async () => {
+      try {
+        setLoading(true);
+        const res = await axios.get(`${backendUrl}/api/user/me`, {
+          withCredentials: true,
+        });
+        if (res.status === 200 && res.data.isAuthenticated) {
+          setUser({
+            username: res.data.username || "Guest",
+            role: res.data.role || "User",
+            image: res.data.image || null,
+          });
+        }
+      } catch (err) {
+        console.error("Failed to fetch user:", err);
+        setUser({ username: "Guest", role: "User", image: null });
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchUser();
+  }, [backendUrl]);
 
   const handleLogout = async () => {
     try {
-      const backendUrl = import.meta.env.VITE_API_BASE_URL;
       await axios.post(
         `${backendUrl}/api/user/logout`,
         {},
-        {
-          withCredentials: true,
-        }
+        { withCredentials: true }
       );
-    } catch (error) {
-      console.error("Logout failed:", error);
+    } catch (err) {
+      console.error("Logout failed:", err);
     } finally {
-      // Always clear localStorage and navigate away
-      // sessionStorage.removeItem("id");
-      // sessionStorage.removeItem("user");
       localStorage.clear();
       navigate("/login");
-      // Close sidebar and confirmation dialog
-      setShowLogoutConfirm(false);
     }
   };
 
-  const confirmLogout = () => {
-    setShowLogoutConfirm(true);
-  };
-
-  const cancelLogout = () => {
-    setShowLogoutConfirm(false);
-  };
-
-  const getPageTitle = () => {
-    if (location.pathname.startsWith("/admin/login-trail")) {
-      return "Login Trail";
-    }
-    // fallback: format last segment
-    return location.pathname
-      .split("/")
-      .pop()
-      .split("-")
-      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(" ");
-  };
+  const pageTitle = location.pathname
+    .split("/")
+    .pop()
+    .split("-")
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(" ");
 
   return (
     <header className="bg-white border-b border-gray-200">
       <div className="flex justify-between items-center p-4">
-        <button className="md:hidden p-2 rounded-md text-gray-600 hover:bg-gray-100 mr-3">
+        <button className="md:hidden p-2 rounded-md text-gray-600 hover:bg-gray-100">
           <MenuIcon className="h-6 w-6" />
         </button>
-        {/* Page Title */}
-        <div className="flex items-center">
-          <h1 className="text-xl font-bold text-blue-700">{getPageTitle()}</h1>
-        </div>
+
+        <h1 className="text-xl font-bold text-blue-700">{pageTitle}</h1>
 
         <div className="flex items-center space-x-4 ml-auto">
           <NavLink
@@ -144,55 +99,39 @@ const Header = () => {
           <div className="flex items-center">
             <div className="mr-3 text-right hidden sm:block">
               {loading ? (
-                <Loader2 className="animate-spin h-5 w-5 text-gray-400 mx-auto" />
-              ) : error ? (
-                <p className="text-sm font-medium text-red-500">Error</p>
+                <div className="text-sm text-gray-400">Loading...</div>
               ) : (
                 <>
                   <p className="text-sm font-medium text-blue-800">
-                    {userName}
+                    {user.username}
                   </p>
-                  <p className="text-xs text-gray-500 capitalize">{userRole}</p>
+                  <p className="text-xs text-gray-500 capitalize">
+                    {user.role}
+                  </p>
                 </>
               )}
             </div>
-            <div className="relative group flex items-center">
+
+            <div className="relative group">
               <button
-                onClick={() => setShowLogout(!showLogout)}
-                className="h-10 w-10 rounded-full overflow-hidden border-2 border-blue-500 group-hover:border-blue-400 transition-all duration-300 shadow focus:outline-none"
-                aria-label="Toggle profile menu"
+                onClick={() => setShowDropdown(!showDropdown)}
+                className="h-10 w-10 rounded-full overflow-hidden border-2 border-blue-500 shadow focus:outline-none"
               >
                 <img
-                  src={profilePicture || user}
+                  src={user.image || defaultUser}
                   alt="Profile"
                   className="w-full h-full object-cover"
                 />
               </button>
-              <label
-                htmlFor="profile-picture-upload"
-                className="absolute bottom-0 right-0 bg-blue-500 text-white rounded-full p-0.3 cursor-pointer
-             opacity-100 lg:opacity-0 lg:group-hover:opacity-100
-             transition-all duration-300 transform lg:translate-y-1 lg:group-hover:translate-y-0.2
-             shadow-lg hover:bg-blue-700"
-                onClick={() => setShowLogout(!showLogout)}
-              >
-                <ChevronDown className="h-4 w-4" />
-              </label>
 
-              {/* Dropdown Menu */}
-              {showLogout && (
-                <div className="absolute top-13 right-0 bg-white border border-gray-200 rounded-md shadow-md w-44 z-50">
+              {showDropdown && (
+                <div className="absolute right-0 mt-2 bg-white border border-gray-200 rounded-md shadow-md w-44 z-50">
                   <button
                     onClick={() => {
                       navigate("/admin/my-profile");
-                      setShowLogout(false);
+                      setShowDropdown(false);
                     }}
-                    className={`flex items-center gap-2 w-full px-4 py-2 text-sm text-left
-    ${
-      isProfilePage
-        ? "bg-blue-700 text-white"
-        : "hover:bg-blue-600 hover:text-white"
-    }`}
+                    className="flex items-center gap-2 w-full px-4 py-2 text-sm hover:bg-blue-600 hover:text-white"
                   >
                     <UserIcon className="h-4 w-4" />
                     My Profile
@@ -201,14 +140,9 @@ const Header = () => {
                   <button
                     onClick={() => {
                       navigate("/admin/settings");
-                      setShowLogout(false);
+                      setShowDropdown(false);
                     }}
-                    className={`flex items-center gap-2 w-full px-4 py-2 text-sm text-left
-    ${
-      isSettingsPage
-        ? "bg-blue-700 text-white"
-        : "hover:bg-blue-600 hover:text-white"
-    }`}
+                    className="flex items-center gap-2 w-full px-4 py-2 text-sm hover:bg-blue-600 hover:text-white"
                   >
                     <Settings className="h-4 w-4" />
                     Settings
@@ -216,10 +150,10 @@ const Header = () => {
 
                   <button
                     onClick={() => {
-                      setShowLogout(false);
-                      confirmLogout();
+                      setShowDropdown(false);
+                      setShowLogoutConfirm(true);
                     }}
-                    className="flex items-center gap-2 w-full px-4 py-2 text-sm text-red-700 hover:font-semibold hover:bg-red-700 hover:text-white text-left"
+                    className="flex items-center gap-2 w-full px-4 py-2 text-sm text-red-700 hover:bg-red-700 hover:text-white"
                   >
                     <LogOut className="h-4 w-4" />
                     Logout
@@ -230,26 +164,26 @@ const Header = () => {
           </div>
         </div>
       </div>
-      {/* Logout Confirmation Modal using your Modal component */}
+
       <Modal
         isOpen={showLogoutConfirm}
-        onClose={cancelLogout}
+        onClose={() => setShowLogoutConfirm(false)}
         title="Confirm Logout"
       >
-        <div className="py-4">
+        <div className="py-4 text-center">
           <p className="text-gray-700 mb-6">
             Are you sure you want to log out?
           </p>
           <div className="flex justify-center space-x-4">
             <button
               onClick={handleLogout}
-              className="px-5 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500"
+              className="px-5 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
             >
               Yes, Logout
             </button>
             <button
-              onClick={cancelLogout}
-              className="px-5 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500"
+              onClick={() => setShowLogoutConfirm(false)}
+              className="px-5 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400"
             >
               Cancel
             </button>
