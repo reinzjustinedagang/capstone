@@ -32,8 +32,54 @@ const isDuplicateSeniorCitizen = async ({ firstName, lastName, birthdate }) => {
   return result.length > 0;
 };
 
-// Create
+// register
 // In your senior citizen service file
+exports.registerSeniorCitizen = async (data, ip) => {
+  try {
+    // 🔎 Check for duplicates
+    if (await isDuplicateSeniorCitizen(data)) {
+      const msg = `A senior citizen named '${data.firstName} ${data.lastName}' with birthdate '${data.birthdate}' already exists.`;
+      const err = new Error(msg);
+      err.code = 409; // Conflict
+      throw err;
+    }
+
+    // 📝 Prepare data for insert
+    const insertData = {
+      firstName: data.firstName,
+      lastName: data.lastName,
+      middleName: data.middleName || null,
+      suffix: data.suffix || null,
+      barangay_id: data.barangay_id || null, // Save the ID
+      form_data: JSON.stringify(data.form_data || {}),
+      registered: 0,
+    };
+
+    // 💾 Insert into DB
+    const result = await Connection(
+      `INSERT INTO senior_citizens SET ?`,
+      insertData
+    );
+
+    // 🗒️ Audit logging
+    if (result.affectedRows === 1 && user) {
+      await logAudit(
+        "",
+        "N/A",
+        "User",
+        "Register Senior", // 👈 clearer than "Apply"
+        `Registered new senior citizen: '${data.firstName} ${data.lastName}'.`,
+        ip
+      );
+    }
+
+    return result.insertId; // Return the new record's ID
+  } catch (error) {
+    if (error.code === 409) throw error; // Duplicate error
+    console.error("❌ Error creating senior citizen:", error);
+    throw new Error("Failed to register senior citizen.");
+  }
+};
 
 exports.createSeniorCitizen = async (data, user, ip) => {
   try {
@@ -128,7 +174,7 @@ exports.getPaginatedFilteredCitizens = async (options) => {
   const offset = (safePage - 1) * safeLimit;
 
   const params = [];
-  let where = "WHERE sc.deleted = 0 AND sc.age >= 60"; // Only active seniors
+  let where = "WHERE sc.deleted = 0 AND sc.age >= 60 AND registered = 1"; // Only active seniors
 
   // Search by name or barangay
   if (search) {
@@ -316,13 +362,28 @@ exports.permanentlyDeleteSeniorCitizen = async (id, user, ip) => {
   }
 };
 
+// Count not registered citizens
+exports.getRegisteredCount = async () => {
+  try {
+    const result = await Connection(
+      `SELECT COUNT(*) AS count 
+       FROM senior_citizens 
+       WHERE deleted = 0 AND age >= 60 AND registered = 0`
+    );
+    return result[0].count;
+  } catch (error) {
+    console.error("Error fetching citizen count:", error);
+    throw new Error("Failed to fetch citizen count.");
+  }
+};
+
 // Count active citizens
 exports.getCitizenCount = async () => {
   try {
     const result = await Connection(
       `SELECT COUNT(*) AS count 
        FROM senior_citizens 
-       WHERE deleted = 0 AND age >= 60`
+       WHERE deleted = 0 AND age >= 60 AND registered = 1`
     );
     return result[0].count;
   } catch (error) {
@@ -351,7 +412,7 @@ exports.getSmsRecipients = async (
       FROM senior_citizens sc
       WHERE (JSON_EXTRACT(sc.form_data, '$.mobileNumber') IS NOT NULL
           OR JSON_EXTRACT(sc.form_data, '$.emergencyContactNumber') IS NOT NULL)
-        AND sc.deleted = 0
+        AND sc.deleted = 0 AND registered = 1
     `;
 
     const params = [];

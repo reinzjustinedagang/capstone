@@ -21,6 +21,43 @@ router.get("/get/:id", async (req, res) => {
 // POST: Create new senior citizen (with duplicate check)
 // In your senior citizen routes file
 
+router.post("/register", async (req, res) => {
+  const ip = req.userIp;
+
+  try {
+    // Destructure all fields including barangay_id from frontend
+    const { firstName, lastName, middleName, suffix, form_data, barangay_id } =
+      req.body;
+
+    // Parse the dynamic form_data object
+    const dynamicData = JSON.parse(form_data);
+
+    // Include barangay_id in dynamicData
+    dynamicData.barangay_id = barangay_id;
+
+    const insertId = await seniorCitizenService.registerSeniorCitizen(
+      {
+        firstName,
+        lastName,
+        middleName,
+        suffix,
+        form_data: dynamicData,
+        birthdate: dynamicData.birthdate,
+        barangay_id,
+      },
+
+      ip
+    );
+
+    res.status(201).json({ message: "Senior citizen registered.", insertId });
+  } catch (error) {
+    if (error.code === 409) {
+      return res.status(409).json({ message: error.message });
+    }
+    res.status(500).json({ message: error.message });
+  }
+});
+
 router.post("/create", async (req, res) => {
   const user = req.session.user;
   const ip = req.userIp;
@@ -161,6 +198,17 @@ router.get("/page", async (req, res) => {
   } catch (err) {
     console.error("Error getting filtered citizens:", err);
     res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+// GET: Count not registered
+router.get("/register/all", async (req, res) => {
+  try {
+    const count = await seniorCitizenService.getRegisteredCount();
+    res.json({ count });
+  } catch (error) {
+    console.error("Error fetching senior citizen count:", error);
+    res.status(500).json({ message: "Failed to fetch senior citizen count" });
   }
 });
 

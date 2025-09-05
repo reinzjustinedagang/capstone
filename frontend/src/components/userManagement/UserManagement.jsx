@@ -683,7 +683,7 @@ const UserManagement = () => {
               Cancel
             </Button>
             <Button variant="primary" onClick={handleConfirmUpdate}>
-              Yes, Update
+              {formSubmitting ? "Updating..." : "Update"}
             </Button>
           </div>
         </div>

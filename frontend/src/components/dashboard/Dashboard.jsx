@@ -13,6 +13,7 @@ import {
 const Dashboard = () => {
   const [barangayCount, setBarangayCount] = useState(0);
   const [citizenCount, setCitizenCount] = useState(0);
+  const [registerCount, setRegisterCount] = useState(0);
   const [userCount, setUserCount] = useState(0);
   const [eventsCount, setEventsCount] = useState(0);
   const [benefitsCount, setBenefitsCount] = useState(0);
@@ -56,6 +57,17 @@ const Dashboard = () => {
     }
   };
 
+  const fetchRegisterCount = async () => {
+    try {
+      const res = await axios.get(
+        `${backendUrl}/api/senior-citizens/register/all`
+      );
+      setRegisterCount(res.data.count);
+    } catch (err) {
+      console.error("Failed to fetch senior citizen count", err);
+    }
+  };
+
   const fetchBenefitsCount = async () => {
     try {
       const res = await axios.get(`${backendUrl}/api/benefits/count/all`);
@@ -71,6 +83,7 @@ const Dashboard = () => {
     fetchUserCount();
     fetchEventsCount();
     fetchBenefitsCount();
+    fetchRegisterCount();
   }, []);
 
   return (
@@ -80,6 +93,14 @@ const Dashboard = () => {
           <Card
             title="Total Senior Citizens"
             value={citizenCount}
+            icon={<UsersIcon />}
+            color="blue"
+          />
+        </NavLink>
+        <NavLink to="/admin/senior-citizen-list">
+          <Card
+            title="Total Senior Citizens"
+            value={registerCount}
             icon={<UsersIcon />}
             color="blue"
           />

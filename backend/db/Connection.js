@@ -401,6 +401,7 @@ db.query(
       barangay_id  INT(100) NULL,
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
       updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+      registered TINYINT(1) DEFAULT 1,
       deleted TINYINT(1) DEFAULT 0,
       deleted_at TIMESTAMP NULL
   )

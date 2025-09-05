@@ -142,7 +142,7 @@ const RegisterSenior = ({ onSubmit, onCancel, onSuccess }) => {
         form_data: JSON.stringify(dynamicFields),
       };
 
-      await axios.post(`${backendUrl}/api/senior-citizens/create`, payload, {
+      await axios.post(`${backendUrl}/api/senior-citizens/register`, payload, {
         withCredentials: true,
       });
 
@@ -157,13 +157,6 @@ const RegisterSenior = ({ onSubmit, onCancel, onSuccess }) => {
     } finally {
       setIsSubmitting(false);
     }
-  };
-
-  const handleSuccessClose = () => {
-    setShowSuccessModal(false);
-    navigate("/admin/senior-citizen-list", {
-      state: { message: "New senior citizen added!" },
-    });
   };
 
   const toggleGroup = (groupName) => {
