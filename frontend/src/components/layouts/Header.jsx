@@ -72,14 +72,6 @@ const Header = () => {
     fetchUserData();
 
     // Listen for profile update events to refetch user info
-    const handleProfileUpdate = () => {
-      fetchUserData();
-    };
-    window.addEventListener("profileUpdated", handleProfileUpdate);
-
-    return () => {
-      window.removeEventListener("profileUpdated", handleProfileUpdate);
-    };
   }, []);
 
   const handleLogout = async () => {
