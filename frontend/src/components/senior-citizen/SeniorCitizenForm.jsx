@@ -18,7 +18,8 @@ const SeniorCitizenForm = ({ onSubmit, onCancel, onSuccess }) => {
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [saving, setSaving] = useState(false);
 
-  const backendUrl = "http://localhost:3000"; // replace with env
+  const backendUrl =
+    import.meta.env.VITE_API_BASE_URL || "http://localhost:3000"; // replace with env
   const navigate = useNavigate();
 
   useEffect(() => {
