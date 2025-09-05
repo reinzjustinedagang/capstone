@@ -93,19 +93,22 @@ const Dashboard = () => {
             color="green"
           />
         </NavLink>
-
-        <Card
-          title="SMS Sent (This Month)"
-          value="0"
-          icon={<MessageSquareIcon />}
-          color="indigo"
-        />
-        <Card
-          title="Total Benefits"
-          value={benefitsCount}
-          icon={<BellIcon />}
-          color="amber"
-        />
+        <NavLink to="/admin/sms-management">
+          <Card
+            title="SMS Sent (This Month)"
+            value="0"
+            icon={<MessageSquareIcon />}
+            color="indigo"
+          />
+        </NavLink>
+        <NavLink to="/admin/benefits">
+          <Card
+            title="Total Benefits"
+            value={benefitsCount}
+            icon={<BellIcon />}
+            color="amber"
+          />
+        </NavLink>
         <NavLink to="/admin/events">
           <Card
             title="Total Events"
