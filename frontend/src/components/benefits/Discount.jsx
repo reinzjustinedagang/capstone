@@ -42,18 +42,18 @@ const Discount = ({ onEdit }) => {
 
   const handleDelete = async () => {
     try {
-      setLoading(true); // Set loading to true while deleting
+      setLoading(true);
       await axios.delete(`${backendUrl}/api/benefits/${selectedId}`, {
         withCredentials: true,
       });
-      setDiscounts((prev) => prev.filter((type) => type.id !== selectedId));
+      setDiscounts((prev) => prev.filter((item) => item.id !== selectedId));
       setShowConfirmModal(false);
       setShowSuccessModal(true);
     } catch (err) {
       console.error("Error deleting benefits:", err);
       alert("Failed to delete");
     } finally {
-      setLoading(false); // Reset loading state
+      setLoading(false);
     }
   };
 
@@ -78,10 +78,10 @@ const Discount = ({ onEdit }) => {
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-          {discounts.map((type) => (
+          {discounts.map((item) => (
             <BenefitsCard
-              key={type.id}
-              type={type}
+              key={item.id}
+              type={item}
               icon={<PercentIcon className="w-5 h-5 text-blue-500" />}
               textColor="text-blue-700"
               textIcon="text-blue-500"

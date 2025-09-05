@@ -1,12 +1,14 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import axios from "axios";
-import Modal from "../../UI/Modal"; // ✅ Import your Modal
+import Modal from "../../UI/Modal";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 const Events = () => {
   const backendUrl = import.meta.env.VITE_API_BASE_URL;
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [selectedEvent, setSelectedEvent] = useState(null); // For modal
+  const [selectedEvent, setSelectedEvent] = useState(null);
+  const scrollRef = useRef(null);
 
   useEffect(() => {
     const fetchEvents = async () => {
@@ -25,8 +27,19 @@ const Events = () => {
   const openModal = (event) => setSelectedEvent(event);
   const closeModal = () => setSelectedEvent(null);
 
+  const scroll = (direction) => {
+    if (scrollRef.current) {
+      const { scrollLeft, clientWidth } = scrollRef.current;
+      const scrollAmount = direction === "left" ? -clientWidth : clientWidth;
+      scrollRef.current.scrollTo({
+        left: scrollLeft + scrollAmount,
+        behavior: "smooth",
+      });
+    }
+  };
+
   return (
-    <div className="bg-white py-8 rounded-lg shadow-md">
+    <div className="bg-white py-8 rounded-lg shadow-md relative">
       <div className="max-w-7xl mx-auto px-5 lg:px-8">
         {/* Header */}
         <div className="flex flex-col md:flex-row justify-center md:items-center mb-8">
@@ -46,43 +59,64 @@ const Events = () => {
             <p>Check back later for the latest news and updates.</p>
           </div>
         ) : (
-          /* Events Grid */
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
-            {events.map((event) => (
-              <div
-                key={event.id}
-                onClick={() => openModal(event)}
-                className="bg-gray-100 rounded-xl shadow-md overflow-hidden flex flex-col h-full cursor-pointer hover:shadow-lg transition"
-              >
-                {/* Image */}
-                <div className="relative">
-                  <img
-                    src={event.image_url || "https://placehold.co/300x200"}
-                    alt={event.title}
-                    className="w-full h-48 object-cover"
-                  />
-                </div>
+          <div className="relative">
+            {/* Left Arrow */}
+            <button
+              onClick={() => scroll("left")}
+              className="absolute left-0 top-1/2 -translate-y-1/2 bg-white p-2 rounded-full shadow-md hover:bg-gray-100 z-10"
+            >
+              <ChevronLeft className="w-5 h-5 text-gray-700" />
+            </button>
 
-                {/* Content */}
-                <div className="p-4 flex flex-col justify-between flex-grow">
-                  <div>
-                    <p className="text-sm text-gray-600 mb-1">
-                      {new Date(event.date).toLocaleDateString("en-US", {
-                        year: "numeric",
-                        month: "short",
-                        day: "numeric",
-                      })}
-                    </p>
-                    <h3 className="text-base font-semibold text-gray-900 mb-2 line-clamp-2">
-                      {event.title}
-                    </h3>
-                    <p className="text-gray-700 text-sm mb-4 line-clamp-3">
-                      {event.description}
-                    </p>
+            {/* Events Scrollable Row */}
+            <div
+              ref={scrollRef}
+              className="flex space-x-4 overflow-x-auto scrollbar-hide scroll-smooth px-2"
+            >
+              {events.map((event) => (
+                <div
+                  key={event.id}
+                  onClick={() => openModal(event)}
+                  className="min-w-[250px] max-w-[250px] bg-gray-100 rounded-xl shadow-md overflow-hidden flex-shrink-0 cursor-pointer hover:shadow-lg transition"
+                >
+                  {/* Image */}
+                  <div className="relative">
+                    <img
+                      src={event.image_url || "https://placehold.co/300x200"}
+                      alt={event.title}
+                      className="w-full h-40 object-cover"
+                    />
+                  </div>
+
+                  {/* Content */}
+                  <div className="p-4 flex flex-col justify-between flex-grow">
+                    <div>
+                      <p className="text-sm text-gray-600 mb-1">
+                        {new Date(event.date).toLocaleDateString("en-US", {
+                          year: "numeric",
+                          month: "short",
+                          day: "numeric",
+                        })}
+                      </p>
+                      <h3 className="text-base font-semibold text-gray-900 mb-2 line-clamp-2">
+                        {event.title}
+                      </h3>
+                      <p className="text-gray-700 text-sm mb-4 line-clamp-3">
+                        {event.description}
+                      </p>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
+
+            {/* Right Arrow */}
+            <button
+              onClick={() => scroll("right")}
+              className="absolute right-0 top-1/2 -translate-y-1/2 bg-white p-2 rounded-full shadow-md hover:bg-gray-100 z-10"
+            >
+              <ChevronRight className="w-5 h-5 text-gray-700" />
+            </button>
           </div>
         )}
 

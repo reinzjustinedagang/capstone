@@ -71,7 +71,7 @@ const Slideshow = () => {
 
   return (
     <section
-      className="relative h-[70vh] md:h-[60vh] flex items-center justify-center overflow-hidden shadow-lg mx-4 cursor-pointer"
+      className="relative h-[70vh] md:h-[60vh] flex items-center justify-center overflow-hidden shadow-lg  cursor-pointer"
       onClick={
         () => window.open(eventsData[currentIndex].image_url, "_blank") // 👈 open current image
       }

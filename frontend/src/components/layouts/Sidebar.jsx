@@ -59,9 +59,9 @@ const Sidebar = () => {
       label: "SMS Management",
       icon: MessageSquareIcon,
     },
-    { to: "/admin/benefits", label: "Benefits", icon: GiftIcon },
 
     { to: "/admin/reports", label: "Reports", icon: FileTextIcon },
+    { to: "/admin/benefits", label: "Benefits", icon: GiftIcon },
     { to: "/admin/events", label: "Events", icon: Calendar },
     { to: "/admin/osca-officials", label: "OSCA Officials", icon: UserCheck },
     { to: "/admin/audit-logs", label: "Audit Logs", icon: ClipboardListIcon },

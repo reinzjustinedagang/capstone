@@ -49,12 +49,12 @@ const RegistrationBanner = () => {
       <p className="text-lg md:text-xl font-semibold text-blue-700 mb-4">
         REGISTRANTS AS OF TODAY
       </p>
-      <p className="text-gray-600 max-w-2xl mx-auto mb-6">
+      <p className="text-gray-600 max-w-2xl mx-5 mb:mx-auto mb-6">
         Let us build a reliable database of all Senior Citizens in San Jose,
         Occidental Mindoro. Join the community, register, and be counted today!
       </p>
       <div className="flex flex-col sm:flex-row justify-center gap-4 mb-4">
-        <button className="px-6 py-3 bg-blue-700 text-white font-semibold rounded-md hover:bg-blue-800 transition">
+        <button className="m-5 px-6 py-3 bg-blue-700 text-white font-semibold rounded-md hover:bg-blue-800 transition">
           Register Now!
         </button>
       </div>

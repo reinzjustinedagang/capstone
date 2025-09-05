@@ -1,8 +1,11 @@
 const express = require("express");
 const router = express.Router();
 const benefitService = require("../service/benefitService");
+const upload = require("../middleware/upload");
+const cloudinary = require("../utils/cloudinary");
+const { isAuthenticated } = require("../middleware/authMiddleware");
 
-// GET benefit count
+// GET benefit counts
 router.get("/count/all", async (req, res) => {
   try {
     const count = await benefitService.getBenefitsCounts();
@@ -10,6 +13,16 @@ router.get("/count/all", async (req, res) => {
   } catch (error) {
     console.error("Error fetching benefit count:", error);
     res.status(500).json({ message: "Failed to fetch benefit count" });
+  }
+});
+
+// GET all benefits (limit 5)
+router.get("/", async (req, res) => {
+  try {
+    const data = await benefitService.getAll();
+    res.status(200).json(data);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
   }
 });
 
@@ -66,23 +79,20 @@ router.get("/republic-acts", async (req, res) => {
 // GET benefit by ID
 router.get("/:id", async (req, res) => {
   const { id } = req.params;
-  const user = req.session.user;
-
   try {
     const benefit = await benefitService.getBenefitsById(id);
-    if (!benefit || benefit.length === 0) {
+    if (!benefit || benefit.length === 0)
       return res.status(404).json({ message: "Benefit not found" });
-    }
 
-    res.status(200).json(benefit[0]); // return the first match
+    res.status(200).json(benefit[0]);
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: err.message });
   }
 });
 
-// POST create discount
-router.post("/", async (req, res) => {
+// POST create benefit
+router.post("/", isAuthenticated, upload.single("image"), async (req, res) => {
   const { type, title, description, location, provider, enacted_date } =
     req.body;
   const user = req.session.user;
@@ -91,46 +101,93 @@ router.post("/", async (req, res) => {
   if (!user) return res.status(401).json({ message: "Unauthorized" });
 
   try {
+    let image_url = null;
+    if (req.file) {
+      const result = await new Promise((resolve, reject) => {
+        const stream = cloudinary.uploader.upload_stream(
+          { folder: "benefits" },
+          (error, result) => {
+            if (error) reject(error);
+            else resolve(result);
+          }
+        );
+        stream.end(req.file.buffer);
+      });
+      image_url = result.secure_url;
+    }
+
     const inserted = await benefitService.create(
-      { type, title, description, location, provider, enacted_date },
+      { type, title, description, location, provider, enacted_date, image_url },
       user,
       ip
     );
-    res
-      .status(201)
-      .json({ message: "Benefits created", id: inserted.insertId });
+
+    res.status(201).json({ message: "Benefit created", id: inserted.insertId });
   } catch (err) {
+    console.error("Failed to create benefit:", err);
     res.status(500).json({ message: err.message });
   }
 });
 
-// PUT update discount
-router.put("/:id", async (req, res) => {
-  const { id } = req.params;
-  const { type, title, description, location, provider, enacted_date } =
-    req.body;
-  const user = req.session.user;
-  const ip = req.userIp;
+// PUT update benefit
+router.put(
+  "/:id",
+  isAuthenticated,
+  upload.single("image"),
+  async (req, res) => {
+    const { id } = req.params;
+    const { type, title, description, location, provider, enacted_date } =
+      req.body;
+    const user = req.session.user;
+    const ip = req.userIp;
 
-  if (!user) return res.status(401).json({ message: "Unauthorized" });
+    if (!user) return res.status(401).json({ message: "Unauthorized" });
 
-  try {
-    const updated = await benefitService.update(
-      id,
-      { type, title, description, location, provider, enacted_date },
-      user,
-      ip
-    );
-    if (!updated)
-      return res.status(404).json({ message: "Discount not found" });
-    res.status(200).json({ message: "Discount updated" });
-  } catch (err) {
-    res.status(500).json({ message: err.message });
+    try {
+      let image_url = req.body.image_url || null;
+
+      if (req.file) {
+        const result = await new Promise((resolve, reject) => {
+          const stream = cloudinary.uploader.upload_stream(
+            { folder: "benefits" },
+            (error, result) => {
+              if (error) reject(error);
+              else resolve(result);
+            }
+          );
+          stream.end(req.file.buffer);
+        });
+        image_url = result.secure_url;
+      }
+
+      const updated = await benefitService.update(
+        id,
+        {
+          type,
+          title,
+          description,
+          location,
+          provider,
+          enacted_date,
+          image_url,
+        },
+        user,
+        ip
+      );
+
+      if (!updated)
+        return res.status(404).json({ message: "Benefit not found" });
+
+      res.status(200).json({ message: "Benefit updated" });
+    } catch (err) {
+      console.error("Failed to update benefit:", err);
+      res.status(500).json({ message: err.message });
+    }
   }
-});
+);
 
-// DELETE discount
-router.delete("/:id", async (req, res) => {
+// DELETE benefit
+router.delete("/:id", isAuthenticated, async (req, res) => {
   const { id } = req.params;
   const user = req.session.user;
   const ip = req.userIp;
@@ -139,10 +196,11 @@ router.delete("/:id", async (req, res) => {
 
   try {
     const deleted = await benefitService.remove(id, user, ip);
-    if (!deleted)
-      return res.status(404).json({ message: "Discount not found" });
-    res.status(200).json({ message: "Discount deleted" });
+    if (!deleted) return res.status(404).json({ message: "Benefit not found" });
+
+    res.status(200).json({ message: "Benefit deleted" });
   } catch (err) {
+    console.error("Failed to delete benefit:", err);
     res.status(500).json({ message: err.message });
   }
 });

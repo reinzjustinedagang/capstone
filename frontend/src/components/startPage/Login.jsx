@@ -149,13 +149,13 @@ export default function Login() {
 
   return (
     <>
-      <div className="relative flex items-center justify-center m-0 py-12 sm:px-0 md:px-4 lg:px-8 bg-gradient-to-br from-blue-50 to-indigo-100 font-inter overflow-hidden">
+      <div className="relative flex items-center justify-center py-0 px-0 md:py-8 md:px-4 lg:px-8 bg-gradient-to-br from-blue-50 to-indigo-100 font-inter overflow-hidden">
         <div className="absolute inset-0 z-0 opacity-20">
           <div className="absolute w-72 h-72 bg-purple-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob top-1/4 left-1/4"></div>
           <div className="absolute w-64 h-64 bg-pink-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000 bottom-1/4 right-1/4"></div>
         </div>
 
-        <div className="relative z-10 w-full max-w-md space-y-8 p-8 bg-white rounded-xl shadow-2xl">
+        <div className="relative z-10 w-full max-w-full md:max-w-lg p-8 bg-white md:rounded-xl shadow-2xl">
           <div>
             <h2 className="mt-2 text-center text-3xl font-extrabold text-gray-900">
               Welcome to OSCA IMS
@@ -304,7 +304,7 @@ export default function Login() {
               handleDeveloperAccess();
               setShowDevModal(false);
             }}
-            className="px-4 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700"
+            className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700"
           >
             Access
           </button>

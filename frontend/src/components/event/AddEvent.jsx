@@ -5,6 +5,7 @@ import {
   CheckCircle,
   XCircle,
   ImagePlus,
+  PlusCircle,
 } from "lucide-react";
 import Button from "../UI/Button";
 import Modal from "../UI/Modal";
@@ -127,6 +128,9 @@ const AddEvent = ({ onEventAdded }) => {
       }}
       className="space-y-6"
     >
+      <h1 className="text-xl font-bold mb-4 text-gray-800 flex items-center gap-2">
+        <PlusCircle className="w-6 h-6 text-indigo-600" /> Add New Event
+      </h1>
       {/* Event Image */}
       <div>
         <label className="block text-sm font-medium">

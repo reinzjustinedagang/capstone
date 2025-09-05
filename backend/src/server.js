@@ -54,7 +54,7 @@ app.use(
     store: sessionStore,
     cookie: {
       httpOnly: true,
-      secure: false, //process.env.NODE_ENV === "production",
+      secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
       maxAge: 1000 * 60 * 60 * 24, // 1 day
     },
@@ -111,7 +111,11 @@ app.get("/api/test-session", (req, res) => {
   res.send(`Session views: ${req.session.views}`);
 });
 
+app.get("/api/health", (req, res) => {
+  res.json({ status: "ok", time: new Date() });
+});
+
 // Start the server
-app.listen(port, "::", () => {
-  console.log(`Server listening on [::]${port}`);
+app.listen(port, () => {
+  console.log(`Server listening on port ${port}`);
 });

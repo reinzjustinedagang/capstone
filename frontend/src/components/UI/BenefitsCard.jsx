@@ -1,23 +1,18 @@
 import React from "react";
-import { Info, MapPin, Edit, Trash2 } from "lucide-react";
+import { Info, Edit, Trash2 } from "lucide-react";
 
 const BenefitsCard = ({
   type,
   icon = <Info className="w-5 h-5 text-blue-500" />,
-  textColor,
-  textIcon,
+  textColor = "text-blue-700",
+  textIcon = "text-blue-500",
   onEdit,
   onDelete,
 }) => {
   return (
     <div className="bg-white rounded-2xl shadow p-4 border border-gray-200 hover:shadow-lg transition">
-      <div className="flex items-center justify-between">
-        <h2
-          className={`text-lg font-semibold ${textColor} flex items-center gap-2`}
-        >
-          {icon}
-          {type.title}
-        </h2>
+      {/* Action buttons */}
+      <div className="flex items-center justify-end mb-2">
         <div className="flex items-center gap-2">
           <button
             onClick={() => onEdit && onEdit(type.id)}
@@ -36,15 +31,26 @@ const BenefitsCard = ({
         </div>
       </div>
 
-      <p className="text-sm text-gray-600 mt-1">{type.description}</p>
+      {/* Image */}
+      {type.image_url ? (
+        <img
+          src={type.image_url}
+          alt={type.title || "Benefit Image"}
+          className="w-full h-32 object-cover rounded-lg mb-2"
+        />
+      ) : null}
 
-      <div className="mt-3 text-sm text-gray-500 flex items-center gap-2">
-        <MapPin className={`w-4 h-4 ${textIcon}`} />
-        {type.location}
-      </div>
-      <div className="text-xs text-gray-400 mt-1">
-        Provided by: {type.provider}
-      </div>
+      {/* Description */}
+      <p className={`text-sm font-medium flex items-center gap-2 ${textColor}`}>
+        {icon} {type.description}
+      </p>
+
+      {/* Provider */}
+      {type.provider && (
+        <div className="text-xs text-gray-400 mt-1">
+          Provided by: {type.provider}
+        </div>
+      )}
     </div>
   );
 };

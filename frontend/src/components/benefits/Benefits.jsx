@@ -16,7 +16,7 @@ import PerksAndPrev from "./PerksAndPrev";
 import RepublicActs from "./RepublicActs";
 import AddBenefit from "./AddBenefit";
 import Button from "../UI/Button";
-import UpdateBenefit from "./updateBenefit";
+import UpdateBenefit from "./UpdateBenefit";
 
 const Benefits = () => {
   const [activeTab, setActiveTab] = useState("discount");

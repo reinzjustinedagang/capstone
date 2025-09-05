@@ -282,6 +282,7 @@ db.query(
     provider VARCHAR(255),
     type VARCHAR(255),
     enacted_date DATE NULL,
+    image_url VARCHAR(500),
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     deleted TINYINT(1) DEFAULT 0,
@@ -732,7 +733,7 @@ db.query(
 
 db.query(
   `
-  CREATE TABLE IF NOT EXISTS system (
+  CREATE TABLE IF NOT EXISTS \`system\` (
     id INT PRIMARY KEY AUTO_INCREMENT,
     system_name VARCHAR(255) NOT NULL,
     municipality VARCHAR(255) NOT NULL,

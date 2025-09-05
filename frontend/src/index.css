@@ -42,6 +42,15 @@ html {
 .animate-fade-in-overlay {
   animation: fadeInOverlay 0.3s ease-out forwards;
 }
+.scrollbar-hide::-webkit-scrollbar {
+  display: none; /* Chrome, Safari */
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none; /* IE + Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
 @keyframes blob {
   0% {
     transform: translate(0px, 0px) scale(1);
