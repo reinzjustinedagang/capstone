@@ -111,10 +111,13 @@ router.put("/update/:id", async (req, res) => {
       .json({ message: "Unauthorized: No user session found." });
   }
   try {
-    const { firstName, lastName, form_data } = req.body;
+    // Accept all fields from req.body
+    const { firstName, lastName, middleName, suffix, barangay_id, form_data } =
+      req.body;
+
     const success = await seniorCitizenService.updateSeniorCitizen(
       req.params.id,
-      { firstName, lastName, form_data },
+      { firstName, lastName, middleName, suffix, barangay_id, form_data },
       user,
       ip
     );

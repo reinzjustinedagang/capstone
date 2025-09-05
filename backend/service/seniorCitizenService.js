@@ -130,6 +130,9 @@ exports.updateSeniorCitizen = async (id, updatedData, user, ip) => {
     const updateData = {
       firstName: updatedData.firstName,
       lastName: updatedData.lastName,
+      middleName: updatedData.middleName,
+      suffix: updatedData.suffix,
+      barangay_id: updatedData.barangay_id,
       form_data: JSON.stringify(updatedData.form_data || {}),
     };
     const result = await Connection(

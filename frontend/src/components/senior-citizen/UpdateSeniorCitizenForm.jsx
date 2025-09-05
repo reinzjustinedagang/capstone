@@ -5,7 +5,7 @@ import { ChevronDown, ChevronUp, Loader2 } from "lucide-react";
 import Button from "../UI/Button";
 import Modal from "../UI/Modal";
 
-const UpdateSeniorCitizenForm = ({ id, onSuccess }) => {
+const UpdateSeniorCitizenForm = ({ id, onSuccess, onCancel }) => {
   const [fields, setFields] = useState([]);
   const [groups, setGroups] = useState([]);
   const [system, setSystem] = useState([]);
@@ -65,12 +65,11 @@ const UpdateSeniorCitizenForm = ({ id, onSuccess }) => {
         const provinceValue = fetchedSystem.province || "";
 
         // Parse backend dynamic form data
-        let dynamicFormData = {};
-        if (citizenData.form_data) {
-          try {
-            dynamicFormData = JSON.parse(citizenData.form_data);
-          } catch {}
-        }
+        const dynamicFormData = citizenData.form_data
+          ? typeof citizenData.form_data === "string"
+            ? JSON.parse(citizenData.form_data)
+            : citizenData.form_data
+          : {};
 
         fetchedFields.forEach((f) => {
           if (f.field_name.toLowerCase().includes("municipal")) {
@@ -157,16 +156,21 @@ const UpdateSeniorCitizenForm = ({ id, onSuccess }) => {
     try {
       const { firstName, lastName, middleName, suffix, ...allFields } =
         formData;
-      // find barangay field
+
       const barangayField = fields.find((f) =>
         f.field_name.toLowerCase().includes("barangay")
       );
 
       const barangay_id = Number(formData[barangayField.field_name]);
 
-      // Remove barangay from dynamicFields
+      // Prepare dynamic fields for JSON
       const dynamicFields = { ...allFields };
       delete dynamicFields[barangayField.field_name];
+
+      // Ensure age and gender exist in JSON
+      if (!dynamicFields.age && formData.age) dynamicFields.age = formData.age;
+      if (!dynamicFields.gender && formData.gender)
+        dynamicFields.gender = formData.gender;
 
       const payload = {
         firstName,

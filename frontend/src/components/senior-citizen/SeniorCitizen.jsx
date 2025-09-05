@@ -87,6 +87,9 @@ const SeniorCitizen = () => {
           <UpdateSeniorCitizenForm
             id={selectedCitizenId}
             onSuccess={handleUpdateSuccess}
+            onCancel={() => {
+              setActiveTab("list");
+            }}
           />
         )}
       </div>
