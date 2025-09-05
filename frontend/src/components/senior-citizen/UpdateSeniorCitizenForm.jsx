@@ -41,7 +41,7 @@ const UpdateSeniorCitizenForm = ({ id, onSuccess }) => {
             axios.get(`${backendUrl}/api/barangays/all`, {
               withCredentials: true,
             }),
-            axios.get(`${backendUrl}/api/senior-citizens/${id}`, {
+            axios.get(`${backendUrl}/api/senior-citizens/get/${id}`, {
               withCredentials: true,
             }),
           ]);
@@ -100,7 +100,21 @@ const UpdateSeniorCitizenForm = ({ id, onSuccess }) => {
         setOriginalData(initialData);
         setCollapsedGroups(initialCollapsed);
       } catch (err) {
+        console.error("Error fetching senior citizen:", err);
+        if (err.response) {
+          console.error("Status:", err.response.status);
+          console.error("Data:", err.response.data);
+          if (err.response.status === 404) {
+            setFormError("Senior citizen not found.");
+            setFields([]);
+            setGroups([]);
+            setBarangays([]);
+            setLoading(false);
+            return;
+          }
+        }
         setFormError("Failed to load the form or senior citizen data.");
+        setLoading(false);
       } finally {
         setLoading(false);
       }
