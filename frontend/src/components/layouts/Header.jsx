@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useUser } from "./UserContext";
 import {
   BellIcon,
   MenuIcon,
@@ -21,6 +22,7 @@ const Header = () => {
   const [error, setError] = useState(null);
   const [showLogout, setShowLogout] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const user = useUser();
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -70,8 +72,6 @@ const Header = () => {
 
   useEffect(() => {
     fetchUserData();
-
-    // Listen for profile update events to refetch user info
   }, []);
 
   const handleLogout = async () => {
@@ -153,9 +153,11 @@ const Header = () => {
               ) : (
                 <>
                   <p className="text-sm font-medium text-blue-800">
-                    {userName}
+                    {user.username}
                   </p>
-                  <p className="text-xs text-gray-500 capitalize">{userRole}</p>
+                  <p className="text-xs text-gray-500 capitalize">
+                    {user.role}
+                  </p>
                 </>
               )}
             </div>
@@ -166,7 +168,7 @@ const Header = () => {
                 aria-label="Toggle profile menu"
               >
                 <img
-                  src={profilePicture || user}
+                  src={user.image || user}
                   alt="Profile"
                   className="w-full h-full object-cover"
                 />
