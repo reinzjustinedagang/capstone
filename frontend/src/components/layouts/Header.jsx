@@ -9,7 +9,6 @@ import {
 } from "lucide-react";
 import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import Modal from "../UI/Modal";
-import userPlaceholder from "../../assets/user.png";
 import { useUser } from "./UserContext";
 
 const Header = () => {
@@ -83,7 +82,7 @@ const Header = () => {
                 className="h-10 w-10 rounded-full overflow-hidden border-2 border-blue-500 group-hover:border-blue-400 transition-all duration-300 shadow focus:outline-none"
               >
                 <img
-                  src={user.image || userPlaceholder}
+                  src={user.image}
                   alt="Profile"
                   className="w-full h-full object-cover"
                 />
