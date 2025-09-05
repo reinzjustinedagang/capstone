@@ -495,3 +495,15 @@ exports.logout = async (userId, ip) => {
     throw error;
   }
 };
+
+exports.updateLastSeen = async (id) => {
+  try {
+    await Connection(
+      "UPDATE users SET last_seen = NOW(), status = 'active' WHERE id = ?",
+      [id]
+    );
+  } catch (error) {
+    console.error("Error updating last_seen:", error);
+    throw error;
+  }
+};

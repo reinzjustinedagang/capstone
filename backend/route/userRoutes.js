@@ -381,4 +381,10 @@ router.post(
   }
 );
 
+router.post("/ping", isAuthenticated, async (req, res) => {
+  const { id } = req.session.user; // use session instead of body
+  await userService.updateLastSeen(id);
+  res.json({ success: true });
+});
+
 module.exports = router;

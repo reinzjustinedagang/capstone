@@ -38,6 +38,16 @@ const Sidebar = () => {
       try {
         const res = await axios.get(`${backendUrl}/api/settings/`);
         setSystemSettings(res.data);
+
+        if (res.data.seal) {
+          const link =
+            document.querySelector("link[rel*='icon']") ||
+            document.createElement("link");
+          link.type = "image/x-icon";
+          link.rel = "icon";
+          link.href = res.data.seal;
+          document.getElementsByTagName("head")[0].appendChild(link);
+        }
       } catch (err) {
         console.error("Failed to fetch system settings:", err);
       }

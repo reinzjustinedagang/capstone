@@ -31,6 +31,7 @@ db.query(
     image TEXT DEFAULT NULL,
     blocked INT DEFAULT 0,
     last_login TIMESTAMP NULL DEFAULT NULL,
+    last_seen TIMESTAMP NULL,
     last_logout TIMESTAMP NULL DEFAULT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
   )

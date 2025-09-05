@@ -11,8 +11,10 @@ import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import Modal from "../UI/Modal";
 import defaultUser from "../../assets/user.png";
 import axios from "axios";
+import useHeartbeat from "../../utils/useHeartbeat";
 
 const Header = () => {
+  useHeartbeat();
   const [user, setUser] = useState({
     username: "Guest",
     role: "User",
