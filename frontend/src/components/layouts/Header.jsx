@@ -1,12 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {
-  BellIcon,
-  MenuIcon,
-  UserIcon,
-  LogOut,
-  Settings,
-  ChevronDown,
-} from "lucide-react";
+import { BellIcon, MenuIcon, UserIcon, LogOut, Settings } from "lucide-react";
 import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import Modal from "../UI/Modal";
 import defaultUser from "../../assets/user.png";
@@ -21,6 +14,7 @@ const Header = () => {
   const [loading, setLoading] = useState(true);
   const [showDropdown, setShowDropdown] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const [logoutLoading, setLogoutLoading] = useState(false); // ✅ new
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -51,6 +45,7 @@ const Header = () => {
   }, [backendUrl]);
 
   const handleLogout = async () => {
+    setLogoutLoading(true); // ✅ start loading
     try {
       await axios.post(
         `${backendUrl}/api/user/logout`,
@@ -62,6 +57,7 @@ const Header = () => {
     } finally {
       localStorage.clear();
       navigate("/login");
+      setLogoutLoading(false); // ✅ stop loading
     }
   };
 
@@ -165,6 +161,7 @@ const Header = () => {
         </div>
       </div>
 
+      {/* Logout Confirmation Modal */}
       <Modal
         isOpen={showLogoutConfirm}
         onClose={() => setShowLogoutConfirm(false)}
@@ -177,9 +174,14 @@ const Header = () => {
           <div className="flex justify-center space-x-4">
             <button
               onClick={handleLogout}
-              className="px-5 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
+              disabled={logoutLoading}
+              className={`px-5 py-2 rounded-md text-white ${
+                logoutLoading
+                  ? "bg-red-400 cursor-not-allowed"
+                  : "bg-red-600 hover:bg-red-700"
+              }`}
             >
-              Yes, Logout
+              {logoutLoading ? "Logging out..." : "Yes, Logout"}
             </button>
             <button
               onClick={() => setShowLogoutConfirm(false)}
