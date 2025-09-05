@@ -42,7 +42,7 @@ const Header = () => {
       }
     };
     fetchUser();
-  }, [backendUrl]);
+  }, []);
 
   const handleLogout = async () => {
     setLogoutLoading(true); // ✅ start loading
