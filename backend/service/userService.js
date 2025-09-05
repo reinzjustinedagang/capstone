@@ -85,6 +85,34 @@ exports.deleteUser = async (id, user, ip) => {
   }
 };
 
+// UNBLOCK USER SERVICE
+exports.unblockUser = async (id, user, ip) => {
+  try {
+    // Update the user to unblock (set blocked = 0)
+    const result = await Connection(
+      "UPDATE users SET blocked = 0 WHERE id = ?",
+      [id]
+    );
+
+    // Log audit if the update was successful
+    if (result.affectedRows === 1) {
+      await logAudit(
+        user.id, // admin performing the action
+        user.email,
+        user.role,
+        "UNBLOCK",
+        `'${user.username}' has been unblocked`,
+        ip
+      );
+    }
+
+    return result.affectedRows === 1; // return true if unblock succeeded
+  } catch (error) {
+    console.error("Error unblocking user:", error);
+    throw error;
+  }
+};
+
 exports.blockUser = async (id, user, ip) => {
   try {
     // Block only the user with the given id

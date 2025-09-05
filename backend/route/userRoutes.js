@@ -88,6 +88,21 @@ router.delete("/:id", async (req, res) => {
   }
 });
 
+router.put("/unblock/:id", async (req, res) => {
+  const { id } = req.params;
+  const user = req.session.user;
+  if (!user) {
+    return res.status(401).json({ message: "Unauthorized: Not logged in." });
+  }
+  try {
+    const success = await userService.unblockUser(id, user, ip);
+    if (!success) return res.status(404).json({ message: "User not found" });
+    res.json({ message: "User unblocked successfully" });
+  } catch (error) {
+    res.status(500).json({ message: "Failed to unblock user" });
+  }
+});
+
 router.put("/blocked/:id", async (req, res) => {
   const { id } = req.params;
   const user = req.session.user;
