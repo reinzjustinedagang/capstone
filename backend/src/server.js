@@ -88,6 +88,7 @@ const systemRoutes = require("../route/systemRoutes");
 const formFieldRoutes = require("../route/formFieldRoutes");
 const positionRoutes = require("../route/positionRoutes");
 const getUserIp = require("../middleware/getUserIp");
+const Connection = require("../db/Connection");
 
 app.use(getUserIp);
 app.use("/api/officials", officialRoutes);
@@ -122,7 +123,7 @@ app.get("/api/health", (req, res) => {
 
 app.get("/api/test-db", async (req, res) => {
   try {
-    const [rows] = await pool.query("SELECT 1+1 AS result");
+    const [rows] = await Connection("SELECT 1+1 AS result");
     res.json(rows);
   } catch (err) {
     console.error(err);
