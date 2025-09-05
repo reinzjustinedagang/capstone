@@ -80,7 +80,7 @@ const Header = () => {
     return () => {
       window.removeEventListener("profileUpdated", handleProfileUpdate);
     };
-  }, [backendUrl]);
+  }, []);
 
   const handleLogout = async () => {
     try {
