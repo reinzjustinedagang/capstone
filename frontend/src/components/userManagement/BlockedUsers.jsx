@@ -68,14 +68,21 @@ const BlockedUsers = () => {
           { withCredentials: true }
         );
       }
-      await fetchBlockedUsers(); // Refresh table
+      // Refresh table
+      await fetchBlockedUsers();
       setShowConfirmModal(false);
-    } catch (err) {
-      // Optionally show an error notification
-    } finally {
-      setActionLoading(false);
       setSelectedUser(null);
       setActionType("");
+    } catch (err) {
+      console.error("Action failed:", err);
+      alert(
+        `Failed to ${actionType === "unblock" ? "unblock" : "delete"} user: ${
+          err.response?.data?.message || err.message
+        }`
+      );
+      // Keep modal open, but allow buttons to be clickable again
+    } finally {
+      setActionLoading(false); // ✅ re-enable buttons even on failure
     }
   };
 
@@ -313,7 +320,7 @@ const BlockedUsers = () => {
             </span>
             ?
           </p>
-          <div className="flex justify-center gap-2">
+          <div className="flex justify-end gap-2">
             <Button
               variant={actionType === "delete" ? "danger" : "primary"}
               onClick={handleConfirmAction}
