@@ -77,7 +77,10 @@ const UpdateSeniorCitizenForm = ({ id, onSuccess, onCancel }) => {
           } else if (f.field_name.toLowerCase().includes("province")) {
             initialData[f.field_name] = provinceValue;
           } else if (f.field_name.toLowerCase().includes("barangay")) {
-            initialData[f.field_name] = citizenData.barangay_id || "";
+            // Convert to string to match <select> option values
+            initialData[f.field_name] = citizenData.barangay_id
+              ? String(citizenData.barangay_id)
+              : "";
           } else if (
             ["firstName", "lastName", "middleName", "suffix"].includes(
               f.field_name
@@ -233,7 +236,7 @@ const UpdateSeniorCitizenForm = ({ id, onSuccess, onCancel }) => {
             {barangayLoading ? "Loading barangays..." : `Select ${field.label}`}
           </option>
           {barangays.map((b) => (
-            <option key={b.id} value={b.id}>
+            <option key={b.id} value={String(b.id)}>
               {b.barangay_name}
             </option>
           ))}

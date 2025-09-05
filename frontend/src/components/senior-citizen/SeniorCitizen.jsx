@@ -14,6 +14,7 @@ import Button from "../UI/Button";
 import SeniorCitizenList from "./SeniorCitizenList";
 import SeniorCitizenForm from "./SeniorCitizenForm";
 import UpdateSeniorCitizenForm from "./UpdateSeniorCitizenForm";
+import UnregisteredSeniorList from "./UnregisteredSeniorList";
 
 const SeniorCitizen = () => {
   const [activeTab, setActiveTab] = useState("list");
@@ -77,9 +78,42 @@ const SeniorCitizen = () => {
           </Button>
         </div>
       </div>
+      <div className="bg-white rounded-t-lg shadow overflow-hidden">
+        <div className="border-b border-gray-200">
+          <nav className="flex flex-wrap -mb-px">
+            <button
+              onClick={() => setActiveTab("list")}
+              className={`py-4 px-6 text-center border-b-2 font-medium text-sm transition-colors duration-200
+                            ${
+                              activeTab === "list"
+                                ? "border-blue-500 text-blue-600"
+                                : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                            }`}
+            >
+              <PercentIcon className="inline-block h-4 w-4 mr-2" /> Registered
+              Senior Citizen
+            </button>
+            <button
+              onClick={() => setActiveTab("unregistered")}
+              className={`py-4 px-6 text-center border-b-2 font-medium text-sm transition-colors duration-200
+                            ${
+                              activeTab === "unregistered"
+                                ? "border-blue-500 text-blue-600"
+                                : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                            }`}
+            >
+              <PercentIcon className="inline-block h-4 w-4 mr-2" />
+              Not Registered Senior Citizen
+            </button>
+          </nav>
+        </div>
+      </div>
 
-      <div className="bg-white rounded-lg shadow overflow-hidden">
+      <div className="bg-white shadow overflow-hidden">
         {activeTab === "list" && <SeniorCitizenList onEdit={handleEdit} />}
+        {activeTab === "unregistered" && (
+          <UnregisteredSeniorList onEdit={handleEdit} />
+        )}
         {activeTab === "add" && (
           <SeniorCitizenForm onSuccess={handleAddSuccess} />
         )}
