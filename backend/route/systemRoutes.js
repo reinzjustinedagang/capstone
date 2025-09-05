@@ -23,27 +23,39 @@ router.get("/", async (req, res) => {
 router.post("/", isAuthenticated, upload.single("image"), async (req, res) => {
   try {
     const { systemName, municipality, province, existingSeal } = req.body;
-    let sealPath = existingSeal || null;
     const ip = req.userIp;
     const user = req.session.user;
 
-    if (req.file) {
-      const result = await new Promise((resolve, reject) => {
-        const stream = cloudinary.uploader.upload_stream(
-          { folder: "system/" },
-          (error, result) => {
-            if (error) reject(error);
-            else resolve(result);
-          }
-        );
-        stream.end(req.file.buffer);
+    // Validate required fields
+    if (!systemName || !municipality || !province) {
+      return res.status(400).json({
+        message: "systemName, municipality, and province are required",
       });
-      sealPath = result.secure_url;
     }
 
-    if (req.file && existingSeal?.includes("res.cloudinary.com")) {
-      const publicId = existingSeal.split("/").pop().split(".")[0]; // crude but works
-      await cloudinary.uploader.destroy(`system/${publicId}`);
+    let sealPath = existingSeal || null;
+
+    // Handle new seal upload
+    if (req.file) {
+      try {
+        const result = await new Promise((resolve, reject) => {
+          const stream = cloudinary.uploader.upload_stream(
+            { folder: "system/" },
+            (error, result) => (error ? reject(error) : resolve(result))
+          );
+          stream.end(req.file.buffer);
+        });
+        sealPath = result.secure_url;
+
+        // Delete old seal if exists
+        if (existingSeal?.includes("res.cloudinary.com")) {
+          const publicId = extractCloudinaryPublicId(existingSeal);
+          if (publicId) await safeCloudinaryDestroy(publicId);
+        }
+      } catch (err) {
+        console.error("Cloudinary error:", err);
+        return res.status(500).json({ message: "Failed to upload seal image" });
+      }
     }
 
     const result = await systemService.updateSystemSettings(
@@ -64,7 +76,9 @@ router.post("/", isAuthenticated, upload.single("image"), async (req, res) => {
     });
   } catch (err) {
     console.error("Error saving system settings:", err);
-    res.status(500).json({ message: "Failed to save system settings" });
+    res
+      .status(500)
+      .json({ message: "Failed to save system settings", error: err.message });
   }
 });
 
