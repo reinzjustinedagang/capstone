@@ -132,7 +132,6 @@ exports.updateSeniorCitizen = async (id, updatedData, user, ip) => {
       lastName: updatedData.lastName,
       form_data: JSON.stringify(updatedData.form_data || {}),
     };
-
     const result = await Connection(
       `UPDATE senior_citizens SET ? WHERE id = ? AND deleted = 0`,
       [updateData, id]

@@ -11,7 +11,6 @@ router.get("/get/:id", async (req, res) => {
     if (!citizen) {
       return res.status(404).json({ message: "Senior citizen not found." });
     }
-    // ✅ age comes from MySQL computed column, no need to recalc
     res.status(200).json(citizen);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -106,24 +105,19 @@ router.post("/create", async (req, res) => {
 router.put("/update/:id", async (req, res) => {
   const user = req.session.user;
   const ip = req.userIp;
-
   if (!user) {
     return res
       .status(401)
       .json({ message: "Unauthorized: No user session found." });
   }
-
   try {
-    // ✅ Only allow updating firstName, lastName, and form_data
     const { firstName, lastName, form_data } = req.body;
-
     const success = await seniorCitizenService.updateSeniorCitizen(
       req.params.id,
       { firstName, lastName, form_data },
       user,
       ip
     );
-
     if (!success) {
       return res
         .status(404)

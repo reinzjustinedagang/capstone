@@ -12,7 +12,6 @@ import {
 import Modal from "../../UI/Modal";
 
 import Button from "../../UI/Button";
-import AddSenior from "../../senior-citizen/AddSenior";
 import SeniorCitizenList from "../../senior-citizen/SeniorCitizenList";
 
 const SeniorCitizen = () => {

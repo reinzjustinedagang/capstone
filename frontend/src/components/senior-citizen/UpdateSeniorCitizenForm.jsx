@@ -1,15 +1,16 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import { ChevronDown, ChevronUp, CheckCircle, Loader2 } from "lucide-react";
+import { ChevronDown, ChevronUp, Loader2 } from "lucide-react";
 import Button from "../UI/Button";
 import Modal from "../UI/Modal";
 
-const SeniorCitizenForm = ({ onSubmit, onCancel, onSuccess }) => {
+const UpdateSeniorCitizenForm = ({ id, onSuccess }) => {
   const [fields, setFields] = useState([]);
   const [groups, setGroups] = useState([]);
   const [system, setSystem] = useState([]);
   const [formData, setFormData] = useState({});
+  const [originalData, setOriginalData] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formError, setFormError] = useState("");
   const [collapsedGroups, setCollapsedGroups] = useState({});
@@ -19,63 +20,76 @@ const SeniorCitizenForm = ({ onSubmit, onCancel, onSuccess }) => {
   const [loading, setLoading] = useState(true);
 
   const [showSuccessModal, setShowSuccessModal] = useState(false);
-  const [saving, setSaving] = useState(false);
 
   const backendUrl = import.meta.env.VITE_API_BASE_URL;
   const navigate = useNavigate();
 
+  // Fetch form schema, barangays, system, and current senior citizen data
   useEffect(() => {
-    const fetchFormData = async () => {
+    const fetchAllData = async () => {
       setLoading(true);
       try {
-        const [fieldsRes, groupsRes, systemRes] = await Promise.all([
-          axios.get(`${backendUrl}/api/form-fields/`, {
-            withCredentials: true,
-          }),
-          axios.get(`${backendUrl}/api/form-fields/group`, {
-            withCredentials: true,
-          }),
-          axios.get(`${backendUrl}/api/settings/`, { withCredentials: true }),
-        ]);
-
+        const [fieldsRes, groupsRes, systemRes, barangayRes, citizenRes] =
+          await Promise.all([
+            axios.get(`${backendUrl}/api/form-fields/`, {
+              withCredentials: true,
+            }),
+            axios.get(`${backendUrl}/api/form-fields/group`, {
+              withCredentials: true,
+            }),
+            axios.get(`${backendUrl}/api/settings/`, { withCredentials: true }),
+            axios.get(`${backendUrl}/api/barangays/all`, {
+              withCredentials: true,
+            }),
+            axios.get(`${backendUrl}/api/senior-citizens/${id}`, {
+              withCredentials: true,
+            }),
+          ]);
         const fetchedFields = fieldsRes.data;
         const fetchedGroups = groupsRes.data;
         const fetchedSystem = systemRes.data;
+        const barangaysData = barangayRes.data || [];
+        const citizenData = citizenRes.data;
 
         setFields(fetchedFields);
         setGroups(fetchedGroups);
         setSystem(fetchedSystem);
+        setBarangays(barangaysData);
 
-        // fetch barangays
-        try {
-          setBarangayLoading(true);
-          const barangayRes = await axios.get(
-            `${backendUrl}/api/barangays/all`,
-            { withCredentials: true }
-          );
-          setBarangays(barangayRes.data || []);
-        } catch (err) {
-          console.error("Failed to fetch barangays:", err);
-          setBarangays([]);
-          setFormError("Failed to load barangays. Please refresh the page.");
-        } finally {
-          setBarangayLoading(false);
-        }
-
-        // initialize form data
+        // Prepare initial form data:
         let initialData = {};
         const initialCollapsed = {};
 
+        // System values
         const municipalityValue = fetchedSystem.municipality || "";
         const provinceValue = fetchedSystem.province || "";
+
+        // Parse backend dynamic form data
+        let dynamicFormData = {};
+        if (citizenData.form_data) {
+          try {
+            dynamicFormData = JSON.parse(citizenData.form_data);
+          } catch {}
+        }
 
         fetchedFields.forEach((f) => {
           if (f.field_name.toLowerCase().includes("municipal")) {
             initialData[f.field_name] = municipalityValue;
           } else if (f.field_name.toLowerCase().includes("province")) {
             initialData[f.field_name] = provinceValue;
+          } else if (f.field_name.toLowerCase().includes("barangay")) {
+            initialData[f.field_name] = citizenData.barangay_id || "";
+          } else if (
+            ["firstName", "lastName", "middleName", "suffix"].includes(
+              f.field_name
+            )
+          ) {
+            initialData[f.field_name] = citizenData[f.field_name] || "";
+          } else if (f.type === "checkbox") {
+            // Checkbox: from dynamic or blank
+            initialData[f.field_name] = dynamicFormData[f.field_name] || [];
           } else {
-            initialData[f.field_name] = f.type === "checkbox" ? [] : "";
+            initialData[f.field_name] = dynamicFormData[f.field_name] || "";
           }
           if (!(f.group in initialCollapsed)) {
             initialCollapsed[f.group] = false;
@@ -83,17 +97,17 @@ const SeniorCitizenForm = ({ onSubmit, onCancel, onSuccess }) => {
         });
 
         setFormData(initialData);
+        setOriginalData(initialData);
         setCollapsedGroups(initialCollapsed);
       } catch (err) {
-        console.error("Failed to fetch form fields/groups:", err);
-        setFormError("Failed to load form. Please refresh the page.");
+        setFormError("Failed to load the form or senior citizen data.");
       } finally {
         setLoading(false);
       }
     };
 
-    fetchFormData();
-  }, [backendUrl]);
+    fetchAllData();
+  }, [backendUrl, id]);
 
   const handleChange = (e, field) => {
     const { type, value, checked } = e.target;
@@ -120,31 +134,23 @@ const SeniorCitizenForm = ({ onSubmit, onCancel, onSuccess }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    setShowConfirmModal(true); // open confirm first
+    setShowConfirmModal(true);
   };
 
   const handleFinalSubmit = async () => {
     setIsSubmitting(true);
     setFormError("");
-
     try {
       const { firstName, lastName, middleName, suffix, ...allFields } =
         formData;
-
       // find barangay field
       const barangayField = fields.find((f) =>
         f.field_name.toLowerCase().includes("barangay")
       );
 
-      if (!barangayField) {
-        setFormError("Barangay field is missing!");
-        setIsSubmitting(false);
-        return;
-      }
-
       const barangay_id = Number(formData[barangayField.field_name]);
 
-      // remove barangay from dynamicFields
+      // Remove barangay from dynamicFields
       const dynamicFields = { ...allFields };
       delete dynamicFields[barangayField.field_name];
 
@@ -157,17 +163,21 @@ const SeniorCitizenForm = ({ onSubmit, onCancel, onSuccess }) => {
         form_data: JSON.stringify(dynamicFields),
       };
 
-      await axios.post(`${backendUrl}/api/senior-citizens/create`, payload, {
-        withCredentials: true,
-      });
+      await axios.put(
+        `${backendUrl}/api/senior-citizens/update/${id}`,
+        payload,
+        {
+          withCredentials: true,
+        }
+      );
 
       setShowConfirmModal(false);
       setShowSuccessModal(true);
-      onSubmit?.();
       onSuccess?.();
     } catch (err) {
-      console.error(err);
-      setFormError(err.response?.data?.message || "Failed to submit form.");
+      setFormError(
+        err.response?.data?.message || "Failed to update senior citizen."
+      );
       setShowConfirmModal(false);
     } finally {
       setIsSubmitting(false);
@@ -177,7 +187,7 @@ const SeniorCitizenForm = ({ onSubmit, onCancel, onSuccess }) => {
   const handleSuccessClose = () => {
     setShowSuccessModal(false);
     navigate("/admin/senior-citizen-list", {
-      state: { message: "New senior citizen added!" },
+      state: { message: "Senior citizen updated successfully!" },
     });
   };
 
@@ -185,9 +195,9 @@ const SeniorCitizenForm = ({ onSubmit, onCancel, onSuccess }) => {
     setCollapsedGroups((prev) => ({ ...prev, [groupName]: !prev[groupName] }));
   };
 
-  // barangay special rendering kept
+  // barangay select rendering
   const renderBarangaySelect = (field) => {
-    const value = formData[field.field_name]; // will store id now
+    const value = formData[field.field_name];
     return (
       <div key={field.id}>
         <label className="block text-sm font-medium text-gray-700">
@@ -206,7 +216,7 @@ const SeniorCitizenForm = ({ onSubmit, onCancel, onSuccess }) => {
           </option>
           {barangays.map((b) => (
             <option key={b.id} value={b.id}>
-              {b.barangay_name} {/* display name */}
+              {b.barangay_name}
             </option>
           ))}
         </select>
@@ -224,6 +234,10 @@ const SeniorCitizenForm = ({ onSubmit, onCancel, onSuccess }) => {
       return renderBarangaySelect(field);
     }
 
+    // Province and Municipal fields are readonly, prefilled from system
+    const isMunicipal = field.field_name.toLowerCase().includes("municipal");
+    const isProvince = field.field_name.toLowerCase().includes("province");
+
     switch (field.type) {
       case "text":
       case "number":
@@ -240,6 +254,7 @@ const SeniorCitizenForm = ({ onSubmit, onCancel, onSuccess }) => {
               onChange={(e) => handleChange(e, field)}
               required={field.required}
               className="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+              readOnly={isMunicipal || isProvince}
             />
           </div>
         );
@@ -384,7 +399,6 @@ const SeniorCitizenForm = ({ onSubmit, onCancel, onSuccess }) => {
                     )}
                   </span>
                 </div>
-
                 {!collapsedGroups[g.group_key] && (
                   <div className="p-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                     {groupedFields[g.group_key]
@@ -410,17 +424,17 @@ const SeniorCitizenForm = ({ onSubmit, onCancel, onSuccess }) => {
               variant="primary"
               disabled={isSubmitting || barangayLoading}
             >
-              {isSubmitting ? "Saving..." : "Register Senior Citizen"}
+              {isSubmitting ? "Saving..." : "Update Senior Citizen"}
             </Button>
           </div>
 
           <Modal
             isOpen={showConfirmModal}
             onClose={() => setShowConfirmModal(false)}
-            title="Confirm Add"
+            title="Confirm Update"
           >
             <div className="mt-4 text-sm text-gray-700">
-              Are you sure you want to add this senior citizen?
+              Are you sure you want to update this senior citizen?
             </div>
             <div className="mt-6 flex justify-end space-x-4">
               <button
@@ -438,8 +452,40 @@ const SeniorCitizenForm = ({ onSubmit, onCancel, onSuccess }) => {
                     : "bg-blue-600 hover:bg-blue-700"
                 } text-white`}
               >
-                {isSubmitting ? "Saving..." : "Yes, Add"}
+                {isSubmitting ? "Saving..." : "Yes, Update"}
               </button>
+            </div>
+          </Modal>
+          <Modal
+            isOpen={showSuccessModal}
+            onClose={handleSuccessClose}
+            title="Success"
+          >
+            <div className="p-6 text-center">
+              <div className="mx-auto mb-4 w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                <svg
+                  className="w-8 h-8 text-green-500"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M9 12l2 2l4 -4"
+                  ></path>
+                </svg>
+              </div>
+              <h3 className="text-lg font-medium text-gray-800 mb-2">
+                Success
+              </h3>
+              <p className="text-sm text-gray-600 mb-4">
+                Senior citizen updated successfully.
+              </p>
+              <Button variant="primary" onClick={handleSuccessClose}>
+                OK
+              </Button>
             </div>
           </Modal>
         </form>
@@ -448,4 +494,4 @@ const SeniorCitizenForm = ({ onSubmit, onCancel, onSuccess }) => {
   );
 };
 
-export default SeniorCitizenForm;
+export default UpdateSeniorCitizenForm;

@@ -10,21 +10,32 @@ import {
   CheckCircle,
 } from "lucide-react";
 import Modal from "../UI/Modal";
-
 import Button from "../UI/Button";
-import AddSenior from "./AddSenior";
 import SeniorCitizenList from "./SeniorCitizenList";
 import SeniorCitizenForm from "./SeniorCitizenForm";
+import UpdateSeniorCitizenForm from "./UpdateSeniorCitizenForm";
 
 const SeniorCitizen = () => {
   const [activeTab, setActiveTab] = useState("list");
+  const [selectedCitizenId, setSelectedCitizenId] = useState(null);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [showUpdateModal, setShowUpdateModal] = useState(false);
 
   const navigate = useNavigate();
 
   const handleAddSuccess = () => {
     setActiveTab("list");
     setShowSuccessModal(true);
+  };
+
+  const handleUpdateSuccess = () => {
+    setActiveTab("list");
+    setShowUpdateModal(true);
+  };
+
+  const handleEdit = (id) => {
+    setSelectedCitizenId(id); // Set the ID of the benefit to be updated
+    setActiveTab("update"); // Switch to the update tab
   };
 
   return (
@@ -68,10 +79,15 @@ const SeniorCitizen = () => {
       </div>
 
       <div className="bg-white rounded-lg shadow overflow-hidden">
-        {activeTab === "list" && <SeniorCitizenList />}
-
+        {activeTab === "list" && <SeniorCitizenList onEdit={handleEdit} />}
         {activeTab === "add" && (
           <SeniorCitizenForm onSuccess={handleAddSuccess} />
+        )}
+        {activeTab === "update" && (
+          <UpdateSeniorCitizenForm
+            id={selectedCitizenId}
+            onSuccess={handleUpdateSuccess}
+          />
         )}
       </div>
 
@@ -89,6 +105,25 @@ const SeniorCitizen = () => {
             Senior Citizen Added successfully!
           </p>
           <Button variant="primary" onClick={() => setShowSuccessModal(false)}>
+            OK
+          </Button>
+        </div>
+      </Modal>
+
+      <Modal
+        isOpen={showUpdateModal}
+        onClose={() => setShowUpdateModal(false)}
+        title="Success"
+      >
+        <div className="p-6 text-center">
+          <div className="mx-auto mb-4 w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+            <CheckCircle className="w-6 h-6 text-green-500" />
+          </div>
+          <h3 className="text-lg font-medium text-gray-800 mb-2">Success</h3>
+          <p className="text-sm text-gray-600 mb-4">
+            Senior Citizen Updated successfully!
+          </p>
+          <Button variant="primary" onClick={() => setShowUpdateModal(false)}>
             OK
           </Button>
         </div>

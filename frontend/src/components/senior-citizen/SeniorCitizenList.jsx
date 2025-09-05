@@ -1,8 +1,6 @@
 import React, { useState, useMemo, useEffect } from "react";
-import { NavLink } from "react-router-dom";
 import Button from "../UI/Button";
 import Delete from "../UI/Button/Delete";
-import SeniorCitizenForm from "./SeniorCitizenForm";
 import Modal from "../UI/Modal"; // This will be your smaller modal (for notifications and delete confirmation)
 import Modal2 from "../UI/Modal2"; // This is your larger modal for the form
 import Pagination from "../UI/Component/Pagination";
@@ -20,9 +18,8 @@ import {
   X,
 } from "lucide-react";
 import axios from "axios";
-import AddSenior from "./AddSenior";
 
-const SeniorCitizenList = () => {
+const SeniorCitizenList = ({ onEdit }) => {
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -107,11 +104,6 @@ const SeniorCitizenList = () => {
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleEdit = (citizen) => {
-    setSelectedCitizen(citizen);
-    setShowEditModal(true);
   };
 
   const handleDelete = (citizen) => {
@@ -381,7 +373,7 @@ const SeniorCitizenList = () => {
                       {/* ... your actions buttons are fine ... */}
                       <div className="flex space-x-2">
                         <button
-                          onClick={() => handleEdit(citizen)}
+                          onClick={() => onEdit(citizen.id)}
                           className="text-blue-600 hover:text-blue-900"
                           aria-label={`Edit ${citizen.firstName} ${citizen.lastName}`}
                         >
@@ -435,27 +427,7 @@ const SeniorCitizenList = () => {
             ? "Register New Senior Citizen"
             : "Edit Senior Citizen Record"
         }
-      >
-        {/* <SeniorCitizenForm
-          citizen={selectedCitizen}
-          onSubmitSuccess={handleFormSuccess} // Pass success handler
-          onSubmitError={handleFormError} // Pass error handler
-          onCancel={() => {
-            setShowAddModal(false);
-            setShowEditModal(false);
-            setSelectedCitizen(null);
-          }}
-        /> */}
-        <AddSenior
-          onSubmitSuccess={handleFormSuccess} // Pass success handler
-          onSubmitError={handleFormError} // Pass error handler
-          onCancel={() => {
-            setShowAddModal(false);
-            setShowEditModal(false);
-            setSelectedCitizen(null);
-          }}
-        />
-      </Modal2>
+      ></Modal2>
 
       {/* Delete Confirmation Modal */}
       <Modal
