@@ -166,37 +166,39 @@ const AddBenefit = () => {
           setShowConfirmModal(true);
         }}
       >
-        {/* Image Upload */}
-        <div>
-          <label className="block text-sm font-medium">Benefit Image</label>
-          <div className="flex items-center gap-4 mt-2">
-            {imagePreview ? (
-              <img
-                src={imagePreview}
-                alt="Preview"
-                className="object-cover border rounded w-40 h-40"
+        {/* Image Upload - only show if type is NOT "republic acts" */}
+        {formData.type !== "republic acts" && (
+          <div>
+            <label className="block text-sm font-medium">Benefit Image</label>
+            <div className="flex items-center gap-4 mt-2">
+              {imagePreview ? (
+                <img
+                  src={imagePreview}
+                  alt="Preview"
+                  className="object-cover border rounded w-40 h-40"
+                />
+              ) : (
+                <div className="flex items-center justify-center text-gray-400 border rounded w-40 h-40">
+                  No Image
+                </div>
+              )}
+              <button
+                type="button"
+                onClick={() => fileInputRef.current.click()}
+                className="px-3 py-1 border rounded flex items-center gap-1 text-sm"
+              >
+                <ImagePlus size={16} /> {imagePreview ? "Change" : "Upload"}
+              </button>
+              <input
+                type="file"
+                ref={fileInputRef}
+                className="hidden"
+                accept="image/png, image/jpeg"
+                onChange={handleFileChange}
               />
-            ) : (
-              <div className="flex items-center justify-center text-gray-400 border rounded w-40 h-40">
-                No Image
-              </div>
-            )}
-            <button
-              type="button"
-              onClick={() => fileInputRef.current.click()}
-              className="px-3 py-1 border rounded flex items-center gap-1 text-sm"
-            >
-              <ImagePlus size={16} /> {imagePreview ? "Change" : "Upload"}
-            </button>
-            <input
-              type="file"
-              ref={fileInputRef}
-              className="hidden"
-              accept="image/png, image/jpeg"
-              onChange={handleFileChange}
-            />
+            </div>
           </div>
-        </div>
+        )}
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>

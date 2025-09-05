@@ -123,7 +123,7 @@ app.get("/api/health", (req, res) => {
 
 app.get("/api/test-db", async (req, res) => {
   try {
-    const [rows] = await Connection("SELECT 1+1 AS result");
+    const rows = await Connection("SELECT 1+1 AS result");
     res.json(rows);
   } catch (err) {
     console.error(err);
