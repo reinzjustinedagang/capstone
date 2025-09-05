@@ -732,7 +732,7 @@ db.query(
 
 db.query(
   `
-  CREATE TABLE IF NOT EXISTS \`system\` (
+  CREATE TABLE IF NOT EXISTS system_setting (
     id INT PRIMARY KEY AUTO_INCREMENT,
     system_name VARCHAR(255) NOT NULL,
     municipality VARCHAR(255) NOT NULL,
@@ -746,9 +746,9 @@ db.query(
   `,
   (err) => {
     if (err) {
-      console.error("❌ Failed to create system table:", err);
+      console.error("❌ Failed to create system_setting table:", err);
     } else {
-      console.log("✅ system table ready.");
+      console.log("✅ system_setting table ready.");
     }
   }
 );

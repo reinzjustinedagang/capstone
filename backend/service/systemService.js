@@ -31,7 +31,7 @@ const safeCloudinaryDestroy = async (publicId, retries = 3, delayMs = 1000) => {
 
 // Fetch system settings (only 1 record)
 exports.getSystemSettings = async () => {
-  const result = await Connection(`SELECT * FROM system WHERE id = 1`);
+  const result = await Connection(`SELECT * FROM system_setting WHERE id = 1`);
   return result.length > 0 ? result[0] : null;
 };
 
@@ -44,7 +44,9 @@ exports.updateSystemSettings = async (
   user,
   ip
 ) => {
-  const existingRows = await Connection(`SELECT * FROM system WHERE id = 1`);
+  const existingRows = await Connection(
+    `SELECT * FROM system_setting WHERE id = 1`
+  );
   const old = existingRows[0] || {};
   let actionType = existingRows.length === 0 ? "INSERT" : "UPDATE";
   const changes = [];
@@ -59,13 +61,13 @@ exports.updateSystemSettings = async (
 
   if (existingRows.length === 0) {
     await Connection(
-      `INSERT INTO system (id, system_name, municipality, province, seal) VALUES (1, ?, ?, ?, ?)`,
+      `INSERT INTO system_setting (id, system_name, municipality, province, seal) VALUES (1, ?, ?, ?, ?)`,
       [systemName, municipality, province, sealPath]
     );
     changes.push("Initial system settings created.");
   } else {
     await Connection(
-      `UPDATE system SET system_name = ?, municipality = ?, province = ?, seal = ? WHERE id = 1`,
+      `UPDATE system_setting SET system_name = ?, municipality = ?, province = ?, seal = ? WHERE id = 1`,
       [systemName, municipality, province, sealPath || old.seal]
     );
   }
@@ -96,7 +98,7 @@ exports.updateSystemSettings = async (
 
 exports.updateAbout = async (mission, vision, preamble, user, ip) => {
   const existing = await Connection(
-    `SELECT mission, vision, preamble FROM system WHERE id = 1`
+    `SELECT mission, vision, preamble FROM system_setting WHERE id = 1`
   );
   const old = existing[0] || {};
   const actionType = existing.length === 0 ? "INSERT" : "UPDATE";
@@ -104,13 +106,13 @@ exports.updateAbout = async (mission, vision, preamble, user, ip) => {
 
   if (existing.length === 0) {
     await Connection(
-      `INSERT INTO system (id, mission, vision, preamble) VALUES (1, ?, ?, ?)`,
+      `INSERT INTO system_setting (id, mission, vision, preamble) VALUES (1, ?, ?, ?)`,
       [mission, vision, preamble]
     );
     changes.push("Created initial About OSCA settings.");
   } else {
     await Connection(
-      `UPDATE system SET mission = ?, vision = ?, preamble = ? WHERE id = 1`,
+      `UPDATE system_setting SET mission = ?, vision = ?, preamble = ? WHERE id = 1`,
       [mission, vision, preamble]
     );
   }
