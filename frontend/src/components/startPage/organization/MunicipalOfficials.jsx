@@ -74,6 +74,10 @@ const MunicipalOfficials = ({ title }) => {
           <CheckCircle className="h-5 w-5 mr-2" />
           <span>{successMessage}</span>
         </div>
+      ) : officials.length === 0 ? (
+        <p className="col-span-full text-center text-gray-600 py-4">
+          No Federation officer found.
+        </p>
       ) : null}
 
       {!isLoading && !error && (

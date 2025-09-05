@@ -22,7 +22,7 @@ const Dashboard = () => {
   const fetchEventsCount = async () => {
     try {
       const res = await axios.get(`${backendUrl}/api/events/count/all`);
-      setEventsCount(res.data.count);
+      setEventsCount(res.data.count || 0);
     } catch (err) {
       console.error("Failed to fetch barangay count", err);
     }
@@ -31,7 +31,7 @@ const Dashboard = () => {
   const fetchUserCount = async () => {
     try {
       const res = await axios.get(`${backendUrl}/api/user/count/all`);
-      setUserCount(res.data.count);
+      setUserCount(res.data.count || 0);
     } catch (err) {
       console.error("Failed to fetch barangay count", err);
     }
@@ -40,7 +40,7 @@ const Dashboard = () => {
   const fetchBarangayCount = async () => {
     try {
       const res = await axios.get(`${backendUrl}/api/barangays/count/all`);
-      setBarangayCount(res.data.count);
+      setBarangayCount(res.data.count || 0);
     } catch (err) {
       console.error("Failed to fetch barangay count", err);
     }
@@ -51,7 +51,7 @@ const Dashboard = () => {
       const res = await axios.get(
         `${backendUrl}/api/senior-citizens/count/all`
       );
-      setCitizenCount(res.data.count);
+      setCitizenCount(res.data.count || 0);
     } catch (err) {
       console.error("Failed to fetch senior citizen count", err);
     }
@@ -62,7 +62,7 @@ const Dashboard = () => {
       const res = await axios.get(
         `${backendUrl}/api/senior-citizens/register/all`
       );
-      setRegisterCount(res.data.count);
+      setRegisterCount(res.data.count || 0);
     } catch (err) {
       console.error("Failed to fetch senior citizen count", err);
     }
@@ -71,7 +71,7 @@ const Dashboard = () => {
   const fetchBenefitsCount = async () => {
     try {
       const res = await axios.get(`${backendUrl}/api/benefits/count/all`);
-      setBenefitsCount(res.data.count);
+      setBenefitsCount(res.data.count || 0);
     } catch (err) {
       console.error("Failed to fetch senior citizen count", err);
     }
