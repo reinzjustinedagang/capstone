@@ -48,6 +48,21 @@ exports.getAllUsers = async () => {
   }
 };
 
+// GET ALL USERS SERVICE
+exports.getAllBlocked = async () => {
+  try {
+    const users = await Connection(`
+      SELECT id, username, email, cp_number, role, status, last_login
+      FROM users WHERE blocked = 1
+      ORDER BY username ASC
+    `);
+    return users;
+  } catch (error) {
+    console.error("Error fetching all users:", error);
+    throw error;
+  }
+};
+
 exports.deleteUser = async (id, user, ip) => {
   try {
     const result = await Connection("DELETE FROM users WHERE id = ?", [id]);

@@ -17,6 +17,7 @@ const Dashboard = () => {
   const [userCount, setUserCount] = useState(0);
   const [eventsCount, setEventsCount] = useState(0);
   const [benefitsCount, setBenefitsCount] = useState(0);
+  const [loading, setLoading] = useState(true);
   const backendUrl = import.meta.env.VITE_API_BASE_URL;
 
   const fetchEventsCount = async () => {
@@ -78,12 +79,19 @@ const Dashboard = () => {
   };
 
   useEffect(() => {
-    fetchBarangayCount();
-    fetchCitizenCount();
-    fetchUserCount();
-    fetchEventsCount();
-    fetchBenefitsCount();
-    fetchRegisterCount();
+    const fetchAllCounts = async () => {
+      setLoading(true);
+      await Promise.all([
+        fetchBarangayCount(),
+        fetchCitizenCount(),
+        fetchUserCount(),
+        fetchEventsCount(),
+        fetchBenefitsCount(),
+        fetchRegisterCount(),
+      ]);
+      setLoading(false);
+    };
+    fetchAllCounts();
   }, []);
 
   return (
@@ -92,7 +100,7 @@ const Dashboard = () => {
         <NavLink to="/admin/senior-citizen-list">
           <Card
             title="Total Senior Citizens"
-            value={citizenCount}
+            value={loading ? "—" : citizenCount}
             icon={<UsersIcon />}
             color="blue"
           />
@@ -100,7 +108,7 @@ const Dashboard = () => {
         <NavLink to="/admin/senior-citizen-list">
           <Card
             title="Register Senior Citizens"
-            value={registerCount}
+            value={loading ? "—" : registerCount}
             icon={<UsersIcon />}
             color="blue"
           />
@@ -109,7 +117,7 @@ const Dashboard = () => {
         <NavLink to="/admin/barangays">
           <Card
             title="No. of Barangay"
-            value={barangayCount}
+            value={loading ? "—" : barangayCount}
             icon={<HouseIcon />}
             color="green"
           />
@@ -125,7 +133,7 @@ const Dashboard = () => {
         <NavLink to="/admin/benefits">
           <Card
             title="Total Benefits"
-            value={benefitsCount}
+            value={loading ? "—" : benefitsCount}
             icon={<BellIcon />}
             color="amber"
           />
@@ -133,7 +141,7 @@ const Dashboard = () => {
         <NavLink to="/admin/events">
           <Card
             title="Total Events"
-            value={eventsCount}
+            value={loading ? "—" : eventsCount}
             icon={<BellIcon />}
             color="amber"
           />
@@ -141,7 +149,7 @@ const Dashboard = () => {
         <NavLink to="/admin/user-management">
           <Card
             title="Total User"
-            value={userCount}
+            value={loading ? "—" : userCount}
             icon={<BellIcon />}
             color="amber"
           />

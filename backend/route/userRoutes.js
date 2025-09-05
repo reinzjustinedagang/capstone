@@ -52,6 +52,16 @@ router.get("/", async (req, res) => {
   }
 });
 
+// Get all users
+router.get("/blocked", async (req, res) => {
+  try {
+    const users = await userService.getAllBlocked();
+    res.status(200).json(users);
+  } catch (error) {
+    res.status(500).json({ message: "Failed to fetch users." });
+  }
+});
+
 // Delete user
 router.delete("/:id", async (req, res) => {
   const { id } = req.params;

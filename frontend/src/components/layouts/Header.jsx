@@ -1,5 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { BellIcon, MenuIcon, UserIcon, LogOut, Settings } from "lucide-react";
+import {
+  BellIcon,
+  MenuIcon,
+  UserIcon,
+  LogOut,
+  Settings,
+  ChevronDown,
+} from "lucide-react";
 import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import Modal from "../UI/Modal";
 import defaultUser from "../../assets/user.png";
@@ -71,7 +78,7 @@ const Header = () => {
   return (
     <header className="bg-white border-b border-gray-200">
       <div className="flex justify-between items-center p-4">
-        <button className="md:hidden p-2 rounded-md text-gray-600 hover:bg-gray-100">
+        <button className="md:hidden p-2 rounded-md text-gray-600 hover:bg-gray-100 mr-3">
           <MenuIcon className="h-6 w-6" />
         </button>
 
@@ -109,6 +116,7 @@ const Header = () => {
             </div>
 
             <div className="relative group">
+              {/* Profile Button */}
               <button
                 onClick={() => setShowDropdown(!showDropdown)}
                 className="h-10 w-10 rounded-full overflow-hidden border-2 border-blue-500 shadow focus:outline-none"
@@ -120,6 +128,22 @@ const Header = () => {
                 />
               </button>
 
+              {/* Dropdown Icon */}
+              <div
+                className="
+      absolute bottom-0.5 right-0
+      bg-blue-500 text-white rounded-full p-0.1 cursor-pointer
+      shadow-lg hover:bg-blue-700
+      block lg:opacity-0 lg:group-hover:opacity-100
+      transition-all duration-300
+      flex items-center justify-center
+    "
+                onClick={() => setShowDropdown(!showDropdown)}
+              >
+                <ChevronDown className="h-4 w-4" />
+              </div>
+
+              {/* Dropdown Menu */}
               {showDropdown && (
                 <div className="absolute right-0 mt-2 bg-white border border-gray-200 rounded-md shadow-md w-44 z-50">
                   <button

@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { ChevronDown, ChevronUp, CheckCircle, Loader2 } from "lucide-react";
 import Button from "../UI/Button";
 import Modal from "../UI/Modal";
+import DocumentUpload from "./register/DocumentUpload";
 
 const RegisterSenior = () => {
   const [fields, setFields] = useState([]);
@@ -382,9 +383,11 @@ const RegisterSenior = () => {
               variant="primary"
               disabled={isSubmitting || barangayLoading}
             >
-              {isSubmitting ? "Saving..." : "Register Senior Citizen"}
+              {isSubmitting ? "Submitting..." : "Submit Application"}
             </Button>
           </div>
+
+          <DocumentUpload />
 
           <Modal
             isOpen={showConfirmModal}

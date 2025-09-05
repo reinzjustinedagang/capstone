@@ -15,6 +15,7 @@ import axios from "axios";
 const Header = () => {
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [faviconUrl, setFaviconUrl] = useState(null);
   const [systemSettings, setSystemSettings] = useState({
     system_name: "",
     municipality: "",
@@ -27,11 +28,24 @@ const Header = () => {
     const fetchSystemSettings = async () => {
       try {
         const res = await axios.get(`${backendUrl}/api/settings/`);
-        setSystemSettings(res.data || []);
+        const settings = res.data || {};
+        setSystemSettings(settings);
+
+        // Set favicon dynamically using the seal from backend
+        if (settings.seal) {
+          const link =
+            document.querySelector("link[rel*='icon']") ||
+            document.createElement("link");
+          link.type = "image/x-icon";
+          link.rel = "icon";
+          link.href = settings.seal;
+          document.getElementsByTagName("head")[0].appendChild(link);
+        }
       } catch (err) {
         console.error("Failed to fetch system settings:", err);
       }
     };
+
     fetchSystemSettings();
   }, []);
 
@@ -50,7 +64,7 @@ const Header = () => {
         {/* Logo */}
         <div className="flex items-center gap-2">
           <img
-            src={systemSettings.seal || logo}
+            src={systemSettings.seal || null}
             alt="OSCA Logo"
             className="h-20 w-auto object-contain"
           />
@@ -104,7 +118,7 @@ const Header = () => {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <img
-                  src={systemSettings.seal || logo}
+                  src={systemSettings.seal || null}
                   alt="OSCA Logo"
                   className="h-12 w-auto"
                 />
