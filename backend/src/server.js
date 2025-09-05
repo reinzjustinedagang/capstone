@@ -54,8 +54,8 @@ app.use(
     store: sessionStore,
     cookie: {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
+      secure: true,
+      sameSite: "none",
       maxAge: 1000 * 60 * 60 * 24, // 1 day
     },
   })
@@ -120,7 +120,16 @@ app.get("/api/health", (req, res) => {
   res.json({ status: "ok", time: new Date() });
 });
 
-// Start the server
-app.listen(port, () => {
-  console.log(`Server listening on port ${port}`);
+app.get("/api/test-db", async (req, res) => {
+  try {
+    const [rows] = await pool.query("SELECT 1+1 AS result");
+    res.json(rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.message });
+  }
 });
+
+// Start the server
+// remove app.listen
+module.exports = app;

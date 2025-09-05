@@ -103,6 +103,8 @@ router.post("/about", isAuthenticated, async (req, res) => {
 router.post("/save-key", async (req, res) => {
   try {
     const { key } = req.body;
+    console.log("Request body:", req.body);
+
     const result = await systemService.saveKey(key);
     res.status(200).json(result);
   } catch (err) {
