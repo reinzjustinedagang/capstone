@@ -73,15 +73,7 @@ exports.getBenefitsById = async (id) => {
 
 // CREATE benefit
 exports.create = async (data, user, ip) => {
-  const {
-    type,
-    title,
-    description,
-    location,
-    provider,
-    enacted_date,
-    image_url,
-  } = data;
+  const { type, title, description, provider, enacted_date, image_url } = data;
 
   if (
     !type ||
@@ -95,14 +87,13 @@ exports.create = async (data, user, ip) => {
   }
 
   const query = `
-    INSERT INTO benefits (type, title, description, location, provider, enacted_date, image_url)
-    VALUES (?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO benefits (type, title, description, provider, enacted_date, image_url)
+    VALUES (?, ?, ?, ?, ?, ?)
   `;
   const result = await Connection(query, [
     type,
     title,
     description,
-    location,
     provider,
     enacted_date,
     image_url,
@@ -122,15 +113,7 @@ exports.create = async (data, user, ip) => {
 
 // UPDATE benefit
 exports.update = async (id, data, user, ip) => {
-  const {
-    type,
-    title,
-    description,
-    location,
-    provider,
-    enacted_date,
-    image_url,
-  } = data;
+  const { type, title, description, provider, enacted_date, image_url } = data;
 
   // Fetch current benefit
   const benefits = await Connection(
@@ -149,14 +132,13 @@ exports.update = async (id, data, user, ip) => {
 
   const query = `
     UPDATE benefits
-    SET type = ?, title = ?, description = ?, location = ?, provider = ?, enacted_date = ?, image_url = ?
+    SET type = ?, title = ?, description = ?,  = ?, provider = ?, enacted_date = ?, image_url = ?
     WHERE id = ?
   `;
   const result = await Connection(query, [
     type,
     title,
     description,
-    location,
     provider,
     enacted_date,
     image_url,
