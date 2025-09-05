@@ -99,7 +99,7 @@ const Dashboard = () => {
         </NavLink>
         <NavLink to="/admin/senior-citizen-list">
           <Card
-            title="Total Senior Citizens"
+            title="Register Senior Citizens"
             value={registerCount}
             icon={<UsersIcon />}
             color="blue"

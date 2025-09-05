@@ -5,7 +5,7 @@ import { ChevronDown, ChevronUp, CheckCircle, Loader2 } from "lucide-react";
 import Button from "../UI/Button";
 import Modal from "../UI/Modal";
 
-const RegisterSenior = ({ onSubmit, onCancel, onSuccess }) => {
+const RegisterSenior = () => {
   const [fields, setFields] = useState([]);
   const [groups, setGroups] = useState([]);
   const [formData, setFormData] = useState({});
@@ -16,7 +16,9 @@ const RegisterSenior = ({ onSubmit, onCancel, onSuccess }) => {
   const [barangayLoading, setBarangayLoading] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [loading, setLoading] = useState(true);
-
+  const [successMessage, setSuccessMessage] = useState(
+    "Senior citizen has been registered successfully!"
+  );
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [saving, setSaving] = useState(false);
 
@@ -329,14 +331,8 @@ const RegisterSenior = ({ onSubmit, onCancel, onSuccess }) => {
       ) : fields.length === 0 ? (
         <div className="text-center p-8 border rounded-md bg-gray-50">
           <p className="text-gray-600 mb-4">
-            No fields available. Please add fields first.
+            No fields available. Please wait for admin to create fields.
           </p>
-          <Button
-            onClick={() => navigate("/admin/settings#senior-form")}
-            variant="primary"
-          >
-            Add New Field
-          </Button>
         </div>
       ) : (
         <form className="space-y-6 md:p-5" onSubmit={handleSubmit}>
@@ -378,11 +374,12 @@ const RegisterSenior = ({ onSubmit, onCancel, onSuccess }) => {
           <div className="flex justify-end gap-3">
             <Button
               variant="secondary"
-              onClick={onCancel}
+              onClick={() => navigate(-1)} // goes back
               disabled={isSubmitting}
             >
               Cancel
             </Button>
+
             <Button
               type="submit"
               variant="primary"
@@ -418,6 +415,25 @@ const RegisterSenior = ({ onSubmit, onCancel, onSuccess }) => {
               >
                 {isSubmitting ? "Saving..." : "Yes, Add"}
               </button>
+            </div>
+          </Modal>
+
+          <Modal
+            isOpen={showSuccessModal}
+            onClose={() => setShowSuccessModal(false)}
+            title=""
+          >
+            <div className="p-6 text-center">
+              <div className="mx-auto mb-4 w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                <CheckCircle className="w-6 h-6 text-green-500" />
+              </div>
+              <h3 className="text-lg font-medium text-gray-800 mb-2">
+                Success
+              </h3>
+              <p className="text-sm text-gray-600 mb-4">{successMessage}</p>
+              <Button variant="primary" onClick={() => navigate(-1)}>
+                OK
+              </Button>
             </div>
           </Modal>
         </form>
