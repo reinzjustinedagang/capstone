@@ -11,6 +11,9 @@ import {
   Loader2,
   Trash2,
   PlusCircle,
+  Edit,
+  Tag,
+  Save,
 } from "lucide-react";
 import Button from "../UI/Button";
 import Modal from "../UI/Modal";
@@ -32,6 +35,9 @@ const FormFieldsPage = () => {
   const [successMessage, setSuccessMessage] = useState("");
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+
+  const [editingField, setEditingField] = useState(null);
+  const [editFieldData, setEditFieldData] = useState(null);
 
   const [groups, setGroups] = useState([]);
   const [showGroupModal, setShowGroupModal] = useState(false);
@@ -261,6 +267,43 @@ const FormFieldsPage = () => {
     }
   };
 
+  // ----- EDIT FIELD -----
+  const handleEditClick = (field) => {
+    setEditingField(field);
+    setEditFieldData({ ...field, required: field.required === 1 });
+  };
+
+  const handleEditChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setEditFieldData((prev) => ({
+      ...prev,
+      [name]: type === "checkbox" ? checked : value,
+    }));
+  };
+
+  const handleUpdateField = async () => {
+    if (!editingField || !editFieldData) return;
+
+    try {
+      setLoading(true);
+      await axios.put(
+        `${backendUrl}/api/form-fields/${editingField.id}`,
+        { ...editFieldData, required: editFieldData.required ? 1 : 0 },
+        { withCredentials: true }
+      );
+      setShowSuccessModal(true);
+      setSuccessMessage("Field updated successfully!");
+      setEditingField(null);
+      setEditFieldData(null);
+      fetchFields();
+    } catch (err) {
+      console.error(err);
+      setError(err.response?.data?.message || "Failed to update field.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <form
@@ -287,7 +330,7 @@ const FormFieldsPage = () => {
           {/* Field Name */}
           <div>
             <label className="block text-sm font-medium text-gray-700">
-              Field Name *
+              Field Value (camelCase) *
             </label>
             <div className="mt-1 relative">
               <input
@@ -572,6 +615,14 @@ const FormFieldsPage = () => {
                                 </svg>
                               </button>
 
+                              <button
+                                onClick={() => handleEditClick(f)}
+                                className="p-2 border rounded hover:bg-yellow-50 hover:text-yellow-600"
+                                title="Edit"
+                              >
+                                <Edit className="w-4 h-4" />
+                              </button>
+
                               {/* Delete */}
                               <button
                                 onClick={() => handleDelete(f.id)}
@@ -660,18 +711,17 @@ const FormFieldsPage = () => {
       <Modal
         isOpen={showSuccessModal}
         onClose={() => setShowSuccessModal(false)}
-        title="Success!"
+        title=""
       >
-        <div className="flex items-center gap-2 text-green-600 text-sm mt-2">
-          <CheckCircle size={20} /> {successMessage}
-        </div>
-        <div className="mt-6 flex justify-end">
-          <button
-            onClick={() => setShowSuccessModal(false)}
-            className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 text-sm"
-          >
+        <div className="p-6 text-center">
+          <div className="mx-auto mb-4 w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+            <CheckCircle className="w-6 h-6 text-green-500" />
+          </div>
+          <h3 className="text-lg font-medium text-gray-800 mb-2">Success</h3>
+          <p className="text-sm text-gray-600 mb-4">{successMessage}</p>
+          <Button variant="primary" onClick={() => setShowSuccessModal(false)}>
             OK
-          </button>
+          </Button>
         </div>
       </Modal>
 
@@ -720,6 +770,130 @@ const FormFieldsPage = () => {
             Save Group
           </button>
         </div>
+      </Modal>
+
+      {/* EDIT MODAL */}
+      <Modal
+        isOpen={!!editingField}
+        onClose={() => {
+          setEditingField(null);
+          setEditFieldData(null);
+        }}
+        title="Edit Field"
+      >
+        {editFieldData && (
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700">
+                Field Value
+              </label>
+              <div className="mt-1 relative">
+                <input
+                  type="text"
+                  name="field_name"
+                  value={editFieldData.field_name}
+                  onChange={handleEditChange}
+                  className="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 pl-10 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                />
+                <Tag className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">
+                Label
+              </label>
+              <div className="mt-1 relative">
+                <input
+                  type="text"
+                  name="label"
+                  value={editFieldData.label}
+                  onChange={handleEditChange}
+                  className="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 pl-10 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                />
+                <Type className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">
+                Type
+              </label>
+              <div className="mt-1 relative">
+                <select
+                  name="type"
+                  value={editFieldData.type}
+                  onChange={handleEditChange}
+                  className="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 pl-10 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                >
+                  <option value="text">Text</option>
+                  <option value="number">Number</option>
+                  <option value="date">Date</option>
+                  <option value="textarea">Textarea</option>
+                  <option value="select">Select</option>
+                  <option value="radio">Radio</option>
+                  <option value="checkbox">Checkbox</option>
+                </select>
+                <Settings2 className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
+              </div>
+            </div>
+            {["select", "radio", "checkbox"].includes(editFieldData.type) && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                  Options
+                </label>
+                <div className="mt-1 relative">
+                  <input
+                    type="text"
+                    name="options"
+                    value={editFieldData.options}
+                    onChange={handleEditChange}
+                    className="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 pl-10 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  />
+                  <List className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
+                </div>
+              </div>
+            )}
+            <div className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                name="required"
+                checked={editFieldData.required}
+                onChange={handleEditChange}
+              />
+              <span className="block text-sm font-medium text-gray-700">
+                Required
+              </span>
+            </div>
+            <div className="flex justify-end gap-2">
+              <div className="flex justify-end items-center mt-6">
+                <button
+                  onClick={() => {
+                    setEditingField(null);
+                    setEditFieldData(null);
+                  }}
+                  className="px-3 py-1 bg-gray-200 rounded"
+                >
+                  Cancel
+                </button>
+              </div>
+              <div className="flex justify-end items-center mt-6">
+                <Button
+                  onClick={handleUpdateField}
+                  type="submit"
+                  disabled={loading}
+                  icon={
+                    loading ? (
+                      <Loader2 className="animate-spin w-4 h-4" />
+                    ) : (
+                      <Save />
+                    )
+                  }
+                >
+                  {loading ? "Saving..." : "Update Field"}
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
       </Modal>
     </div>
   );

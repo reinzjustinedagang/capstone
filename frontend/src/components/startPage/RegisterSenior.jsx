@@ -1,659 +1,436 @@
-// SeniorIntakeForm.jsx
-import React, { useState } from "react";
-import {
-  LineInput,
-  Section,
-  Radio,
-  Check,
-} from "../../components/senior-citizen/components/Add";
-import Header from "./Header";
+import React, { useEffect, useState } from "react";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
+import { ChevronDown, ChevronUp, CheckCircle, Loader2 } from "lucide-react";
+import Button from "../UI/Button";
+import Modal from "../UI/Modal";
 
-export default function RegisterSenior() {
-  const [data, setData] = useState({
-    // Header
-    province: "Occidental Mindoro",
-    municipality: "San Jose",
-    barangay: "",
+const RegisterSenior = ({ onSubmit, onCancel, onSuccess }) => {
+  const [fields, setFields] = useState([]);
+  const [groups, setGroups] = useState([]);
+  const [formData, setFormData] = useState({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formError, setFormError] = useState("");
+  const [collapsedGroups, setCollapsedGroups] = useState({});
+  const [barangays, setBarangays] = useState([]);
+  const [barangayLoading, setBarangayLoading] = useState(false);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-    // Identifying info
-    name: { last: "", suffix: "", first: "", middle: "" },
-    address: {
-      street: "",
-      barangay: "",
-      municipality: "",
-      province: "",
-      region: "",
-    },
-    dob: { year: "", month: "", day: "" },
-    sex: "",
-    placeOfBirth: "",
-    civilStatus: "",
-    programs: {
-      dswd: false,
-      pantawid: false,
-      aics: false,
-      localPension: false,
-      livelihood: false,
-      dateReceived: "",
-      others: "",
-    },
-    indigenousGroup: "",
-    education: "",
-    idNumbers: {
-      osca: "",
-      gsis: "",
-      tin: "",
-      sss: "",
-      philhealth: "",
-      comelec: "",
-      others: "",
-    },
-    monthlyIncome: "",
-    incomeSources: {
-      ownEarnings: false,
-      spouseSalary: false,
-      rentals: false,
-      ownPension: false,
-      ownPensionAmt: "",
-      insurances: false,
-      savings: false,
-      stocksDividends: false,
-      stocksDividendsAmt: "",
-      spousePension: false,
-      livestockOrchards: false,
-      dependentOnChildren: false,
-      others: "",
-    },
-    assets: {
-      house: false,
-      fishpondsResorts: false,
-      lot: false,
-      houseLot: false,
-      commercialBuilding: false,
-      farmland: false,
-      others: "",
-    },
-    livingWith: {
-      alone: false,
-      commonLawSpouse: false,
-      inLaws: false,
-      spouse: false,
-      grandchildren: false,
-      careInstitutions: false,
-      children: false,
-      relatives: false,
-      friends: false,
-      others: "",
-    },
-    skills: "",
-    community: {
-      medical: false,
-      neighborhoodSupport: false,
-      resourceVolunteer: false,
-      religious: false,
-      communityBeautification: false,
-      counselingReferral: false,
-      communityLeader: false,
-      sponsorship: false,
-      others: "",
-    },
-  });
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [saving, setSaving] = useState(false);
 
-  const set = (path, value) => {
-    // tiny helper to update nested state like set("name.last", "Doe")
-    setData((prev) => {
-      const copy = structuredClone(prev);
-      const keys = path.split(".");
-      let cur = copy;
-      for (let i = 0; i < keys.length - 1; i++) cur = cur[keys[i]];
-      cur[keys.at(-1)] = value;
-      return copy;
+  const backendUrl = import.meta.env.VITE_API_BASE_URL;
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchFormData = async () => {
+      setLoading(true);
+      try {
+        const [fieldsRes, groupsRes] = await Promise.all([
+          axios.get(`${backendUrl}/api/form-fields/`, {
+            withCredentials: true,
+          }),
+          axios.get(`${backendUrl}/api/form-fields/group`, {
+            withCredentials: true,
+          }),
+        ]);
+
+        const fetchedFields = fieldsRes.data;
+        const fetchedGroups = groupsRes.data;
+
+        setFields(fetchedFields);
+        setGroups(fetchedGroups);
+
+        // fetch barangays
+        try {
+          setBarangayLoading(true);
+          const barangayRes = await axios.get(
+            `${backendUrl}/api/barangays/all`,
+            { withCredentials: true }
+          );
+          setBarangays(barangayRes.data || []);
+        } catch (err) {
+          console.error("Failed to fetch barangays:", err);
+          setBarangays([]);
+          setFormError("Failed to load barangays. Please refresh the page.");
+        } finally {
+          setBarangayLoading(false);
+        }
+
+        // initialize form data
+        let initialData = {};
+        const initialCollapsed = {};
+        fetchedFields.forEach((f) => {
+          initialData[f.field_name] = f.type === "checkbox" ? [] : "";
+          if (!(f.group in initialCollapsed)) {
+            initialCollapsed[f.group] = false;
+          }
+        });
+        setFormData(initialData);
+        setCollapsedGroups(initialCollapsed);
+      } catch (err) {
+        console.error("Failed to fetch form fields/groups:", err);
+        setFormError("Failed to load form. Please refresh the page.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchFormData();
+  }, [backendUrl]);
+
+  const handleChange = (e, field) => {
+    const { type, value, checked } = e.target;
+    if (field.type === "checkbox") {
+      const prev = formData[field.field_name] || [];
+      const newVal = checked
+        ? [...prev, value]
+        : prev.filter((v) => v !== value);
+      setFormData({ ...formData, [field.field_name]: newVal });
+    } else if (field.type === "date") {
+      setFormData((prev) => ({ ...prev, [field.field_name]: value }));
+      if (field.field_name === "birthdate") {
+        const birthDate = new Date(value);
+        const today = new Date();
+        let age = today.getFullYear() - birthDate.getFullYear();
+        const m = today.getMonth() - birthDate.getMonth();
+        if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) age--;
+        setFormData((prev) => ({ ...prev, age: age >= 0 ? age : "" }));
+      }
+    } else {
+      setFormData({ ...formData, [field.field_name]: value });
+    }
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    setShowConfirmModal(true); // open confirm first
+  };
+
+  const handleFinalSubmit = async () => {
+    setIsSubmitting(true);
+    setFormError("");
+
+    try {
+      const { firstName, lastName, middleName, suffix, ...allFields } =
+        formData;
+
+      // find barangay field
+      const barangayField = fields.find((f) =>
+        f.field_name.toLowerCase().includes("barangay")
+      );
+
+      if (!barangayField) {
+        setFormError("Barangay field is missing!");
+        setIsSubmitting(false);
+        return;
+      }
+
+      const barangay_id = Number(formData[barangayField.field_name]);
+
+      // remove barangay from dynamicFields
+      const dynamicFields = { ...allFields };
+      delete dynamicFields[barangayField.field_name];
+
+      const payload = {
+        firstName,
+        lastName,
+        middleName,
+        suffix,
+        barangay_id,
+        form_data: JSON.stringify(dynamicFields),
+      };
+
+      await axios.post(`${backendUrl}/api/senior-citizens/create`, payload, {
+        withCredentials: true,
+      });
+
+      setShowConfirmModal(false);
+      setShowSuccessModal(true);
+      onSubmit?.();
+      onSuccess?.();
+    } catch (err) {
+      console.error(err);
+      setFormError(err.response?.data?.message || "Failed to submit form.");
+      setShowConfirmModal(false);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleSuccessClose = () => {
+    setShowSuccessModal(false);
+    navigate("/admin/senior-citizen-list", {
+      state: { message: "New senior citizen added!" },
     });
   };
 
-  const onCheck = (path) => (e) => set(path, e.target.checked);
-  const onChange = (path) => (e) => set(path, e.target.value);
-
-  const submit = (e) => {
-    e.preventDefault();
-    console.log("Form data:", data);
-    alert("Form captured! Check console for JSON.");
+  const toggleGroup = (groupName) => {
+    setCollapsedGroups((prev) => ({ ...prev, [groupName]: !prev[groupName] }));
   };
+
+  // barangay special rendering kept
+  const renderBarangaySelect = (field) => {
+    const value = formData[field.field_name]; // will store id now
+    return (
+      <div key={field.id}>
+        <label className="block text-sm font-medium text-gray-700">
+          {field.label}
+          {field.required ? <span className="text-red-600"> *</span> : null}
+        </label>
+        <select
+          value={value || ""}
+          onChange={(e) => handleChange(e, field)}
+          required={field.required}
+          disabled={barangayLoading}
+          className="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:ring-blue-500 focus:border-blue-500 sm:text-sm disabled:bg-gray-100 disabled:cursor-not-allowed"
+        >
+          <option value="">
+            {barangayLoading ? "Loading barangays..." : `Select ${field.label}`}
+          </option>
+          {barangays.map((b) => (
+            <option key={b.id} value={b.id}>
+              {b.barangay_name} {/* display name */}
+            </option>
+          ))}
+        </select>
+      </div>
+    );
+  };
+
+  const renderField = (field) => {
+    const value = formData[field.field_name];
+
+    if (
+      field.field_name.toLowerCase().includes("barangay") ||
+      field.label.toLowerCase().includes("barangay")
+    ) {
+      return renderBarangaySelect(field);
+    }
+
+    switch (field.type) {
+      case "text":
+      case "number":
+      case "date":
+        return (
+          <div key={field.id}>
+            <label className="block text-sm font-medium text-gray-700">
+              {field.label}
+              {field.required ? <span className="text-red-600"> *</span> : null}
+            </label>
+            <input
+              type={field.type}
+              value={value || ""}
+              onChange={(e) => handleChange(e, field)}
+              required={field.required}
+              className="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+            />
+          </div>
+        );
+      case "textarea":
+        return (
+          <div key={field.id}>
+            <label className="block text-sm font-medium text-gray-700">
+              {field.label}
+            </label>
+            <textarea
+              value={value || ""}
+              onChange={(e) => handleChange(e, field)}
+              className="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+            />
+          </div>
+        );
+      case "select":
+        return (
+          <div key={field.id}>
+            <label className="block text-sm font-medium text-gray-700">
+              {field.label}
+              {field.required ? <span className="text-red-600"> *</span> : null}
+            </label>
+            <select
+              value={value || ""}
+              onChange={(e) => handleChange(e, field)}
+              required={field.required}
+              className="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+            >
+              <option value="">Select {field.label}</option>
+              {field.options?.split(",").map((opt) => (
+                <option key={opt.trim()} value={opt.trim()}>
+                  {opt.trim()}
+                </option>
+              ))}
+            </select>
+          </div>
+        );
+      case "radio":
+        return (
+          <div key={field.id}>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              {field.label}
+              {field.required ? <span className="text-red-600"> *</span> : null}
+            </label>
+            <div className="space-y-2">
+              {field.options?.split(",").map((opt) => (
+                <label
+                  key={opt.trim()}
+                  className="flex items-center text-sm text-gray-700"
+                >
+                  <input
+                    type="radio"
+                    value={opt.trim()}
+                    checked={value === opt.trim()}
+                    onChange={(e) => handleChange(e, field)}
+                    required={field.required}
+                    className="mr-2"
+                  />
+                  {opt.trim()}
+                </label>
+              ))}
+            </div>
+          </div>
+        );
+      case "checkbox":
+        return (
+          <div key={field.id}>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              {field.label}
+            </label>
+            <div className="space-y-2">
+              {field.options?.split(",").map((opt) => (
+                <label
+                  key={opt.trim()}
+                  className="flex items-center text-sm text-gray-700"
+                >
+                  <input
+                    type="checkbox"
+                    value={opt.trim()}
+                    checked={(value || []).includes(opt.trim())}
+                    onChange={(e) => handleChange(e, field)}
+                    className="mr-2"
+                  />
+                  {opt.trim()}
+                </label>
+              ))}
+            </div>
+          </div>
+        );
+      default:
+        return null;
+    }
+  };
+
+  const groupedFields = fields.reduce((acc, field) => {
+    if (!acc[field.group]) acc[field.group] = [];
+    acc[field.group].push(field);
+    return acc;
+  }, {});
 
   return (
     <>
-      <Header />
-      <div className="max-w-4xl mx-auto p-6 print:p-0 text-gray-900">
-        {/* Top heading */}
-        <div className="text-center mb-4">
-          <div className="text-sm">Republic of the Philippines</div>
-          <div className="grid grid-cols-3 gap-3 mt-2">
-            <LineInput
-              label="Barangay"
-              value={data.barangay}
-              onChange={onChange("barangay")}
-            />
-            <LineInput
-              label="Municipality"
-              value={data.municipality}
-              onChange={onChange("municipality")}
-            />
-            <LineInput
-              label="Province"
-              value={data.province}
-              onChange={onChange("province")}
-            />
-          </div>
-          <h2 className="mt-4 font-bold text-lg tracking-wide">
-            SENIOR CITIZENS GENERAL INTAKE SHEET
-          </h2>
-          <p className="text-xs text-gray-600">
-            (Please answer appropriately and legibly)
-          </p>
+      {loading ? (
+        <div className="flex justify-center items-center h-64">
+          <Loader2 className="animate-spin rounded-full h-10 w-10 text-blue-600" />
+          <span className="ml-3 text-gray-600 font-bold">Loading ...</span>
         </div>
-
-        <form onSubmit={submit} className="bg-white">
-          {/* I. Identifying Information */}
-          <Section title="I. IDENTIFYING INFORMATION">
-            {/* Name row */}
-            <div className="grid grid-cols-4 gap-3">
-              <LineInput
-                label="Last Name"
-                value={data.name.last}
-                onChange={onChange("name.last")}
-              />
-              <LineInput
-                label="Suffix"
-                value={data.name.suffix}
-                onChange={onChange("name.suffix")}
-              />
-              <LineInput
-                label="First Name"
-                value={data.name.first}
-                onChange={onChange("name.first")}
-              />
-              <LineInput
-                label="Middle Name"
-                value={data.name.middle}
-                onChange={onChange("name.middle")}
-              />
-            </div>
-
-            {/* Address */}
-            <div className="grid grid-cols-3 gap-3">
-              <LineInput
-                label="House No. & Street Name"
-                value={data.address.street}
-                onChange={onChange("address.street")}
-                className="col-span-3 sm:col-span-1"
-              />
-              <LineInput
-                label="Barangay/District"
-                value={data.address.barangay}
-                onChange={onChange("address.barangay")}
-              />
-              <LineInput
-                label="Municipality/City"
-                value={data.address.municipality}
-                onChange={onChange("address.municipality")}
-              />
-              <LineInput
-                label="Province"
-                value={data.address.province}
-                onChange={onChange("address.province")}
-              />
-              <LineInput
-                label="Region"
-                value={data.address.region}
-                onChange={onChange("address.region")}
-              />
-            </div>
-
-            {/* DOB + Sex */}
-            <div className="grid grid-cols-6 gap-3">
-              <LineInput
-                label="Date of Birth (Year)"
-                value={data.dob.year}
-                onChange={onChange("dob.year")}
-              />
-              <LineInput
-                label="Month"
-                value={data.dob.month}
-                onChange={onChange("dob.month")}
-              />
-              <LineInput
-                label="Day"
-                value={data.dob.day}
-                onChange={onChange("dob.day")}
-              />
-              <div className="col-span-3">
-                <div className="text-[11px] text-gray-700 mb-1">Sex</div>
-                <Radio
-                  name="sex"
-                  value={data.sex}
-                  setValue={(v) => set("sex", v)}
-                  options={["Male", "Female"]}
-                />
-              </div>
-            </div>
-
-            <LineInput
-              label="Place of Birth"
-              value={data.placeOfBirth}
-              onChange={onChange("placeOfBirth")}
-            />
-
-            <div>
-              <div className="text-[11px] text-gray-700 mb-1">Civil Status</div>
-              <Radio
-                name="civil"
-                value={data.civilStatus}
-                setValue={(v) => set("civilStatus", v)}
-                options={["Single", "Married", "Widow/Widower", "Separated"]}
-              />
-            </div>
-
-            {/* Programs and services */}
-            <div>
-              <div className="text-[11px] text-gray-700 mb-1">
-                Programs & Services Received
-              </div>
-              <div className="grid sm:grid-cols-2 gap-2">
-                <Check
-                  label="DSWD Social Pension"
-                  checked={data.programs.dswd}
-                  onChange={onCheck("programs.dswd")}
-                />
-                <Check
-                  label="Pantawid"
-                  checked={data.programs.pantawid}
-                  onChange={onCheck("programs.pantawid")}
-                />
-                <Check
-                  label="AICS (financial, burial, medical & transportation)"
-                  checked={data.programs.aics}
-                  onChange={onCheck("programs.aics")}
-                />
-                <Check
-                  label="Local Social Pension"
-                  checked={data.programs.localPension}
-                  onChange={onCheck("programs.localPension")}
-                />
-                <Check
-                  label="Livelihood Assistance"
-                  checked={data.programs.livelihood}
-                  onChange={onCheck("programs.livelihood")}
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-3 mt-2">
-                <LineInput
-                  label="Date received"
-                  value={data.programs.dateReceived}
-                  onChange={onChange("programs.dateReceived")}
-                />
-                <LineInput
-                  label="Others (please specify)"
-                  value={data.programs.others}
-                  onChange={onChange("programs.others")}
-                />
-              </div>
-            </div>
-
-            <LineInput
-              label="Indigenous People Group (please specify)"
-              value={data.indigenousGroup}
-              onChange={onChange("indigenousGroup")}
-            />
-
-            <div>
-              <div className="text-[11px] text-gray-700 mb-1">
-                Educational Attainment
-              </div>
-              <Radio
-                name="education"
-                value={data.education}
-                setValue={(v) => set("education", v)}
-                options={[
-                  "Elementary Level",
-                  "Elementary Graduate",
-                  "High School Level",
-                  "High School Graduate",
-                  "College Level",
-                  "College Graduate",
-                  "Vocational",
-                  "Post Graduate",
-                  "Not Attended Any School",
-                ]}
-              />
-            </div>
-
-            {/* ID Numbers */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-              <LineInput
-                label="OSCA"
-                value={data.idNumbers.osca}
-                onChange={onChange("idNumbers.osca")}
-              />
-              <LineInput
-                label="GSIS"
-                value={data.idNumbers.gsis}
-                onChange={onChange("idNumbers.gsis")}
-              />
-              <LineInput
-                label="TIN"
-                value={data.idNumbers.tin}
-                onChange={onChange("idNumbers.tin")}
-              />
-              <LineInput
-                label="SSS"
-                value={data.idNumbers.sss}
-                onChange={onChange("idNumbers.sss")}
-              />
-              <LineInput
-                label="PhilHealth"
-                value={data.idNumbers.philhealth}
-                onChange={onChange("idNumbers.philhealth")}
-              />
-              <LineInput
-                label="ComElec"
-                value={data.idNumbers.comelec}
-                onChange={onChange("idNumbers.comelec")}
-              />
-              <LineInput
-                label="Others"
-                value={data.idNumbers.others}
-                onChange={onChange("idNumbers.others")}
-                className="sm:col-span-3"
-              />
-            </div>
-
-            {/* Monthly income */}
-            <LineInput
-              label="Monthly Income (in Philippine Peso)"
-              value={data.monthlyIncome}
-              onChange={onChange("monthlyIncome")}
-            />
-
-            <div>
-              <div className="text-[11px] text-gray-700 mb-1">
-                Source of Income & Assistance (check all applicable)
-              </div>
-              <div className="grid sm:grid-cols-2 gap-2">
-                <Check
-                  label="Own earnings, salaries/wages"
-                  checked={data.incomeSources.ownEarnings}
-                  onChange={onCheck("incomeSources.ownEarnings")}
-                />
-                <Check
-                  label="Spouse's salary"
-                  checked={data.incomeSources.spouseSalary}
-                  onChange={onCheck("incomeSources.spouseSalary")}
-                />
-                <Check
-                  label="Rentals/Sharecrops"
-                  checked={data.incomeSources.rentals}
-                  onChange={onCheck("incomeSources.rentals")}
-                />
-                <Check
-                  label="Own pension"
-                  checked={data.incomeSources.ownPension}
-                  onChange={onCheck("incomeSources.ownPension")}
+      ) : fields.length === 0 ? (
+        <div className="text-center p-8 border rounded-md bg-gray-50">
+          <p className="text-gray-600 mb-4">
+            No fields available. Please add fields first.
+          </p>
+          <Button
+            onClick={() => navigate("/admin/settings#senior-form")}
+            variant="primary"
+          >
+            Add New Field
+          </Button>
+        </div>
+      ) : (
+        <form className="space-y-6 md:p-5" onSubmit={handleSubmit}>
+          {groups
+            .filter((g) => groupedFields[g.group_key])
+            .map((g) => (
+              <div
+                key={g.group_key}
+                className="bg-gray-50 rounded-md border border-gray-200"
+              >
+                <div
+                  onClick={() => toggleGroup(g.group_key)}
+                  className="cursor-pointer flex justify-between items-center p-4 bg-gray-100"
                 >
-                  {data.incomeSources.ownPension && (
-                    <input
-                      className="ml-2 border-b border-gray-500 focus:outline-none text-sm"
-                      placeholder="specify amt."
-                      value={data.incomeSources.ownPensionAmt}
-                      onChange={onChange("incomeSources.ownPensionAmt")}
-                    />
-                  )}
-                </Check>
-                <Check
-                  label="Insurances"
-                  checked={data.incomeSources.insurances}
-                  onChange={onCheck("incomeSources.insurances")}
-                />
-                <Check
-                  label="Savings"
-                  checked={data.incomeSources.savings}
-                  onChange={onCheck("incomeSources.savings")}
-                />
-                <Check
-                  label="Stocks/Dividends"
-                  checked={data.incomeSources.stocksDividends}
-                  onChange={onCheck("incomeSources.stocksDividends")}
-                >
-                  {data.incomeSources.stocksDividends && (
-                    <input
-                      className="ml-2 border-b border-gray-500 focus:outline-none text-sm"
-                      placeholder="specify amt."
-                      value={data.incomeSources.stocksDividendsAmt}
-                      onChange={onChange("incomeSources.stocksDividendsAmt")}
-                    />
-                  )}
-                </Check>
-                <Check
-                  label="Spouse pension"
-                  checked={data.incomeSources.spousePension}
-                  onChange={onCheck("incomeSources.spousePension")}
-                />
-                <Check
-                  label="Livestock/Orchards"
-                  checked={data.incomeSources.livestockOrchards}
-                  onChange={onCheck("incomeSources.livestockOrchards")}
-                />
-                <Check
-                  label="Dependent on children/relatives"
-                  checked={data.incomeSources.dependentOnChildren}
-                  onChange={onCheck("incomeSources.dependentOnChildren")}
-                />
-              </div>
-              <LineInput
-                className="mt-2"
-                label="Others (please specify)"
-                value={data.incomeSources.others}
-                onChange={onChange("incomeSources.others")}
-              />
-            </div>
-          </Section>
+                  <h3 className="text-base font-semibold text-gray-800">
+                    {g.group_label}
+                  </h3>
+                  <span className="text-gray-600">
+                    {collapsedGroups[g.group_key] ? (
+                      <ChevronUp />
+                    ) : (
+                      <ChevronDown />
+                    )}
+                  </span>
+                </div>
 
-          {/* III. Economic Status */}
-          <Section title="III. ECONOMIC STATUS">
-            {/* A. Assets & Properties */}
-            <div>
-              <div className="text-[11px] text-gray-700 mb-1">
-                A. Assets & Properties (check all applicable)
+                {!collapsedGroups[g.group_key] && (
+                  <div className="p-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    {groupedFields[g.group_key]
+                      .sort((a, b) => a.order - b.order)
+                      .map((field) => renderField(field))}
+                  </div>
+                )}
               </div>
-              <div className="grid sm:grid-cols-2 gap-2">
-                <Check
-                  label="House"
-                  checked={data.assets.house}
-                  onChange={onCheck("assets.house")}
-                />
-                <Check
-                  label="Fishponds/Resorts"
-                  checked={data.assets.fishpondsResorts}
-                  onChange={onCheck("assets.fishpondsResorts")}
-                />
-                <Check
-                  label="Lot"
-                  checked={data.assets.lot}
-                  onChange={onCheck("assets.lot")}
-                />
-                <Check
-                  label="House & Lot"
-                  checked={data.assets.houseLot}
-                  onChange={onCheck("assets.houseLot")}
-                />
-                <Check
-                  label="Commercial Building"
-                  checked={data.assets.commercialBuilding}
-                  onChange={onCheck("assets.commercialBuilding")}
-                />
-                <Check
-                  label="Farmland"
-                  checked={data.assets.farmland}
-                  onChange={onCheck("assets.farmland")}
-                />
-              </div>
-              <LineInput
-                className="mt-2"
-                label="Others, specify"
-                value={data.assets.others}
-                onChange={onChange("assets.others")}
-              />
-            </div>
+            ))}
 
-            {/* B. Living / Residing With */}
-            <div>
-              <div className="text-[11px] text-gray-700 mb-1">
-                B. Living / Residing With (check all applicable)
-              </div>
-              <div className="grid sm:grid-cols-3 gap-2">
-                <Check
-                  label="Alone"
-                  checked={data.livingWith.alone}
-                  onChange={onCheck("livingWith.alone")}
-                />
-                <Check
-                  label="Common Law Spouse"
-                  checked={data.livingWith.commonLawSpouse}
-                  onChange={onCheck("livingWith.commonLawSpouse")}
-                />
-                <Check
-                  label="In laws"
-                  checked={data.livingWith.inLaws}
-                  onChange={onCheck("livingWith.inLaws")}
-                />
-                <Check
-                  label="Spouse"
-                  checked={data.livingWith.spouse}
-                  onChange={onCheck("livingWith.spouse")}
-                />
-                <Check
-                  label="Grandchildren"
-                  checked={data.livingWith.grandchildren}
-                  onChange={onCheck("livingWith.grandchildren")}
-                />
-                <Check
-                  label="Care Institutions"
-                  checked={data.livingWith.careInstitutions}
-                  onChange={onCheck("livingWith.careInstitutions")}
-                />
-                <Check
-                  label="Children"
-                  checked={data.livingWith.children}
-                  onChange={onCheck("livingWith.children")}
-                />
-                <Check
-                  label="Relatives"
-                  checked={data.livingWith.relatives}
-                  onChange={onCheck("livingWith.relatives")}
-                />
-                <Check
-                  label="Friends"
-                  checked={data.livingWith.friends}
-                  onChange={onCheck("livingWith.friends")}
-                />
-              </div>
-              <LineInput
-                className="mt-2"
-                label="Others, specify"
-                value={data.livingWith.others}
-                onChange={onChange("livingWith.others")}
-              />
-            </div>
+          {formError && <p className="text-red-600">{formError}</p>}
 
-            {/* C. Areas of Specialization / Skills */}
-            <LineInput
-              label="C. Areas of Specialization / Skills (please specify)"
-              value={data.skills}
-              onChange={onChange("skills")}
-            />
-
-            {/* D. Community Activities */}
-            <div>
-              <div className="text-[11px] text-gray-700 mb-1">
-                D. Involvement in Community Activities (check all applicable)
-              </div>
-              <div className="grid sm:grid-cols-2 gap-2">
-                <Check
-                  label="Medical"
-                  checked={data.community.medical}
-                  onChange={onCheck("community.medical")}
-                />
-                <Check
-                  label="Neighborhood Support Services"
-                  checked={data.community.neighborhoodSupport}
-                  onChange={onCheck("community.neighborhoodSupport")}
-                />
-                <Check
-                  label="Resource Volunteer"
-                  checked={data.community.resourceVolunteer}
-                  onChange={onCheck("community.resourceVolunteer")}
-                />
-                <Check
-                  label="Religious"
-                  checked={data.community.religious}
-                  onChange={onCheck("community.religious")}
-                />
-                <Check
-                  label="Community Beautification"
-                  checked={data.community.communityBeautification}
-                  onChange={onCheck("community.communityBeautification")}
-                />
-                <Check
-                  label="Counseling / Referral"
-                  checked={data.community.counselingReferral}
-                  onChange={onCheck("community.counselingReferral")}
-                />
-                <Check
-                  label="Community / Organizational Leader"
-                  checked={data.community.communityLeader}
-                  onChange={onCheck("community.communityLeader")}
-                />
-                <Check
-                  label="Sponsorship"
-                  checked={data.community.sponsorship}
-                  onChange={onCheck("community.sponsorship")}
-                />
-              </div>
-              <LineInput
-                className="mt-2"
-                label="Others, specify"
-                value={data.community.others}
-                onChange={onChange("community.others")}
-              />
-            </div>
-          </Section>
-
-          {/* Actions */}
-          <div className="flex items-center justify-end gap-2 mb-8 print:hidden">
-            <button
-              type="button"
-              onClick={() => window.print()}
-              className="px-4 py-2 text-sm rounded border"
+          <div className="flex justify-end gap-3">
+            <Button
+              variant="secondary"
+              onClick={onCancel}
+              disabled={isSubmitting}
             >
-              Print
-            </button>
-            <button
+              Cancel
+            </Button>
+            <Button
               type="submit"
-              className="px-4 py-2 text-sm rounded bg-blue-600 text-white"
+              variant="primary"
+              disabled={isSubmitting || barangayLoading}
             >
-              Register
-            </button>
+              {isSubmitting ? "Saving..." : "Register Senior Citizen"}
+            </Button>
           </div>
-        </form>
 
-        {/* Minimal print styles */}
-        <style>{`
-        @media print {
-          input, label, button { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-          .print\\:hidden { display: none !important; }
-          .border { border-color: #000 !important; }
-        }
-      `}</style>
-      </div>
+          <Modal
+            isOpen={showConfirmModal}
+            onClose={() => setShowConfirmModal(false)}
+            title="Confirm Add"
+          >
+            <div className="mt-4 text-sm text-gray-700">
+              Are you sure you want to add this senior citizen?
+            </div>
+            <div className="mt-6 flex justify-end space-x-4">
+              <button
+                onClick={() => setShowConfirmModal(false)}
+                className="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 text-sm"
+              >
+                Cancel
+              </button>
+              <button
+                disabled={isSubmitting}
+                onClick={handleFinalSubmit}
+                className={`px-4 py-2 rounded text-sm ${
+                  isSubmitting
+                    ? "bg-blue-400 cursor-not-allowed"
+                    : "bg-blue-600 hover:bg-blue-700"
+                } text-white`}
+              >
+                {isSubmitting ? "Saving..." : "Yes, Add"}
+              </button>
+            </div>
+          </Modal>
+        </form>
+      )}
     </>
   );
-}
+};
+
+export default RegisterSenior;

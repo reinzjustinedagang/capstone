@@ -48,7 +48,8 @@ const UserManagement = () => {
   const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
   const currentUserId = currentUser.id;
 
-  const backendUrl = "http://localhost:3000";
+  const backendUrl =
+    import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
   const navigate = useNavigate();
 
   const fetchUsers = async () => {

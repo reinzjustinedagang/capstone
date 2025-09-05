@@ -13,6 +13,7 @@ export default function Register() {
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState(""); // ✅ new state
   const [cp_number, setPhoneNumber] = useState("");
   const [role, setRole] = useState("staff");
 
@@ -110,6 +111,15 @@ export default function Register() {
       return;
     }
 
+    if (password !== confirmPassword) {
+      // ✅ check confirm password
+      setStatus("error");
+      setNotificationMessage("Passwords do not match.");
+      setShowNotification(true);
+      setLoading(false);
+      return;
+    }
+
     try {
       const backendUrl = import.meta.env.VITE_API_BASE_URL;
       await axios.post(
@@ -132,6 +142,7 @@ export default function Register() {
       setLastName("");
       setEmail("");
       setPassword("");
+      setConfirmPassword("");
       setPhoneNumber("");
       setRole("staff");
 
@@ -274,7 +285,7 @@ export default function Register() {
                     setPassword(e.target.value);
                     setPasswordStrength(checkPasswordStrength(e.target.value));
                   }}
-                  className="block w-full rounded-lg border border-gray-300 px-4 py-2.5 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-600"
+                  className="block w-full rounded-lg border border-gray-300 px-4 py-2.5"
                 />
                 {password && (
                   <p
@@ -287,6 +298,29 @@ export default function Register() {
                     }`}
                   >
                     Password strength: {passwordStrength}
+                  </p>
+                )}
+              </div>
+
+              {/* ✅ Confirm Password */}
+              <div>
+                <label
+                  htmlFor="confirmPassword"
+                  className="block text-sm font-medium text-gray-800 mb-1"
+                >
+                  Confirm Password
+                </label>
+                <input
+                  id="confirmPassword"
+                  type="password"
+                  value={confirmPassword}
+                  placeholder="******"
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  className="block w-full rounded-lg border border-gray-300 px-4 py-2.5"
+                />
+                {confirmPassword && confirmPassword !== password && (
+                  <p className="text-sm text-red-500 mt-1">
+                    Passwords do not match
                   </p>
                 )}
               </div>

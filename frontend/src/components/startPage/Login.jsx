@@ -286,7 +286,7 @@ export default function Login() {
         title="Enter Developer Key"
       >
         <input
-          type="text"
+          type="password"
           value={devKey}
           onChange={(e) => setDevKey(e.target.value)}
           placeholder="Developer Key"

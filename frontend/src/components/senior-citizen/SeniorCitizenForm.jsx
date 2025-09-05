@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import { ChevronDown, ChevronUp, CheckCircle } from "lucide-react";
+import { ChevronDown, ChevronUp, CheckCircle, Loader2 } from "lucide-react";
 import Button from "../UI/Button";
 import Modal from "../UI/Modal";
 
@@ -15,6 +15,8 @@ const SeniorCitizenForm = ({ onSubmit, onCancel, onSuccess }) => {
   const [barangays, setBarangays] = useState([]);
   const [barangayLoading, setBarangayLoading] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [loading, setLoading] = useState(true);
+
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [saving, setSaving] = useState(false);
 
@@ -23,8 +25,8 @@ const SeniorCitizenForm = ({ onSubmit, onCancel, onSuccess }) => {
 
   useEffect(() => {
     const fetchFormData = async () => {
+      setLoading(true);
       try {
-        // Fetch fields and groups concurrently
         const [fieldsRes, groupsRes] = await Promise.all([
           axios.get(`${backendUrl}/api/form-fields/`, {
             withCredentials: true,
@@ -40,7 +42,7 @@ const SeniorCitizenForm = ({ onSubmit, onCancel, onSuccess }) => {
         setFields(fetchedFields);
         setGroups(fetchedGroups);
 
-        // Fetch barangays separately
+        // fetch barangays
         try {
           setBarangayLoading(true);
           const barangayRes = await axios.get(
@@ -56,22 +58,22 @@ const SeniorCitizenForm = ({ onSubmit, onCancel, onSuccess }) => {
           setBarangayLoading(false);
         }
 
-        // Prepare initial form data (empty but with all fields initialized)
+        // initialize form data
         let initialData = {};
         const initialCollapsed = {};
-
         fetchedFields.forEach((f) => {
           initialData[f.field_name] = f.type === "checkbox" ? [] : "";
           if (!(f.group in initialCollapsed)) {
-            initialCollapsed[f.group] = false; // expand by default
+            initialCollapsed[f.group] = false;
           }
         });
-
         setFormData(initialData);
         setCollapsedGroups(initialCollapsed);
       } catch (err) {
         console.error("Failed to fetch form fields/groups:", err);
         setFormError("Failed to load form. Please refresh the page.");
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -324,97 +326,110 @@ const SeniorCitizenForm = ({ onSubmit, onCancel, onSuccess }) => {
     return acc;
   }, {});
 
-  if (fields.length === 0) {
-    return (
-      <div className="text-center p-8 border rounded-md bg-gray-50">
-        <p className="text-gray-600 mb-4">
-          No fields available. Please add fields first.
-        </p>
-        <Button
-          onClick={() => navigate("/admin/settings#senior-form")}
-          variant="primary"
-        >
-          Add New Field
-        </Button>
-      </div>
-    );
-  }
-
   return (
-    <form className="space-y-6 md:p-4" onSubmit={handleSubmit}>
-      {groups
-        .filter((g) => groupedFields[g.group_key])
-        .map((g) => (
-          <div
-            key={g.group_key}
-            className="bg-gray-50 rounded-md border border-gray-200"
+    <>
+      {loading ? (
+        <div className="flex justify-center items-center h-64">
+          <Loader2 className="animate-spin rounded-full h-10 w-10 text-blue-600" />
+          <span className="ml-3 text-gray-600 font-bold">Loading ...</span>
+        </div>
+      ) : fields.length === 0 ? (
+        <div className="text-center p-8 border rounded-md bg-gray-50">
+          <p className="text-gray-600 mb-4">
+            No fields available. Please add fields first.
+          </p>
+          <Button
+            onClick={() => navigate("/admin/settings#senior-form")}
+            variant="primary"
           >
-            <div
-              onClick={() => toggleGroup(g.group_key)}
-              className="cursor-pointer flex justify-between items-center p-4 bg-gray-100"
-            >
-              <h3 className="text-base font-semibold text-gray-800">
-                {g.group_label}
-              </h3>
-              <span className="text-gray-600">
-                {collapsedGroups[g.group_key] ? <ChevronUp /> : <ChevronDown />}
-              </span>
-            </div>
+            Add New Field
+          </Button>
+        </div>
+      ) : (
+        <form className="space-y-6 md:p-4" onSubmit={handleSubmit}>
+          {groups
+            .filter((g) => groupedFields[g.group_key])
+            .map((g) => (
+              <div
+                key={g.group_key}
+                className="bg-gray-50 rounded-md border border-gray-200"
+              >
+                <div
+                  onClick={() => toggleGroup(g.group_key)}
+                  className="cursor-pointer flex justify-between items-center p-4 bg-gray-100"
+                >
+                  <h3 className="text-base font-semibold text-gray-800">
+                    {g.group_label}
+                  </h3>
+                  <span className="text-gray-600">
+                    {collapsedGroups[g.group_key] ? (
+                      <ChevronUp />
+                    ) : (
+                      <ChevronDown />
+                    )}
+                  </span>
+                </div>
 
-            {!collapsedGroups[g.group_key] && (
-              <div className="p-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                {groupedFields[g.group_key]
-                  .sort((a, b) => a.order - b.order)
-                  .map((field) => renderField(field))}
+                {!collapsedGroups[g.group_key] && (
+                  <div className="p-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    {groupedFields[g.group_key]
+                      .sort((a, b) => a.order - b.order)
+                      .map((field) => renderField(field))}
+                  </div>
+                )}
               </div>
-            )}
+            ))}
+
+          {formError && <p className="text-red-600">{formError}</p>}
+
+          <div className="flex justify-end gap-3">
+            <Button
+              variant="secondary"
+              onClick={onCancel}
+              disabled={isSubmitting}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              variant="primary"
+              disabled={isSubmitting || barangayLoading}
+            >
+              {isSubmitting ? "Saving..." : "Register Senior Citizen"}
+            </Button>
           </div>
-        ))}
 
-      {formError && <p className="text-red-600">{formError}</p>}
-
-      <div className="flex justify-end gap-3">
-        <Button variant="secondary" onClick={onCancel} disabled={isSubmitting}>
-          Cancel
-        </Button>
-        <Button
-          type="submit"
-          variant="primary"
-          disabled={isSubmitting || barangayLoading}
-        >
-          {isSubmitting ? "Saving..." : "Register Senior Citizen"}
-        </Button>
-      </div>
-
-      <Modal
-        isOpen={showConfirmModal}
-        onClose={() => setShowConfirmModal(false)}
-        title="Confirm Add"
-      >
-        <div className="mt-4 text-sm text-gray-700">
-          Are you sure you want to add this senior citizen?
-        </div>
-        <div className="mt-6 flex justify-end space-x-4">
-          <button
-            onClick={() => setShowConfirmModal(false)}
-            className="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 text-sm"
+          <Modal
+            isOpen={showConfirmModal}
+            onClose={() => setShowConfirmModal(false)}
+            title="Confirm Add"
           >
-            Cancel
-          </button>
-          <button
-            disabled={isSubmitting}
-            onClick={handleFinalSubmit}
-            className={`px-4 py-2 rounded text-sm ${
-              isSubmitting
-                ? "bg-blue-400 cursor-not-allowed"
-                : "bg-blue-600 hover:bg-blue-700"
-            } text-white`}
-          >
-            {isSubmitting ? "Saving..." : "Yes, Add"}
-          </button>
-        </div>
-      </Modal>
-    </form>
+            <div className="mt-4 text-sm text-gray-700">
+              Are you sure you want to add this senior citizen?
+            </div>
+            <div className="mt-6 flex justify-end space-x-4">
+              <button
+                onClick={() => setShowConfirmModal(false)}
+                className="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 text-sm"
+              >
+                Cancel
+              </button>
+              <button
+                disabled={isSubmitting}
+                onClick={handleFinalSubmit}
+                className={`px-4 py-2 rounded text-sm ${
+                  isSubmitting
+                    ? "bg-blue-400 cursor-not-allowed"
+                    : "bg-blue-600 hover:bg-blue-700"
+                } text-white`}
+              >
+                {isSubmitting ? "Saving..." : "Yes, Add"}
+              </button>
+            </div>
+          </Modal>
+        </form>
+      )}
+    </>
   );
 };
 
