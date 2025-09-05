@@ -15,6 +15,7 @@ const Dashboard = () => {
   const [citizenCount, setCitizenCount] = useState(0);
   const [userCount, setUserCount] = useState(0);
   const [eventsCount, setEventsCount] = useState(0);
+  const [benefitsCount, setBenefitsCount] = useState(0);
   const backendUrl = import.meta.env.VITE_API_BASE_URL;
 
   const fetchEventsCount = async () => {
@@ -55,11 +56,21 @@ const Dashboard = () => {
     }
   };
 
+  const fetchBenefitsCount = async () => {
+    try {
+      const res = await axios.get(`${backendUrl}/api/benefits/count/all`);
+      setBenefitsCount(res.data.count);
+    } catch (err) {
+      console.error("Failed to fetch senior citizen count", err);
+    }
+  };
+
   useEffect(() => {
     fetchBarangayCount();
     fetchCitizenCount();
     fetchUserCount();
     fetchEventsCount();
+    fetchBenefitsCount();
   }, []);
 
   return (
@@ -91,7 +102,7 @@ const Dashboard = () => {
         />
         <Card
           title="Total Benefits"
-          value="12"
+          value={benefitsCount}
           icon={<BellIcon />}
           color="amber"
         />

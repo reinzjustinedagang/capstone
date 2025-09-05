@@ -9,19 +9,13 @@ const {
 // Get total number of benefits grouped by type
 exports.getBenefitsCounts = async () => {
   const query = `
-    SELECT type, COUNT(*) AS count
+    SELECT COUNT(*) AS total
     FROM benefits
     WHERE type <> 'republic acts'
-    GROUP BY type
   `;
   const [rows] = await Connection(query);
 
-  const counts = rows.reduce((acc, row) => {
-    acc[row.type] = row.count;
-    return acc;
-  }, {});
-
-  return counts;
+  return rows[0]?.total || 0;
 };
 
 // Get all benefits (limit 5)
