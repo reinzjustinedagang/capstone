@@ -27,7 +27,7 @@ const Header = () => {
     const fetchSystemSettings = async () => {
       try {
         const res = await axios.get(`${backendUrl}/api/settings/`);
-        setSystemSettings(res.data);
+        setSystemSettings(res.data || []);
       } catch (err) {
         console.error("Failed to fetch system settings:", err);
       }

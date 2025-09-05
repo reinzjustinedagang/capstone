@@ -28,6 +28,7 @@ const RegisterSenior = () => {
   useEffect(() => {
     const fetchFormData = async () => {
       setLoading(true);
+
       try {
         const [fieldsRes, groupsRes] = await Promise.all([
           axios.get(`${backendUrl}/api/form-fields/`, {
@@ -52,6 +53,7 @@ const RegisterSenior = () => {
             { withCredentials: true }
           );
           setBarangays(barangayRes.data || []);
+          setFormError("");
         } catch (err) {
           console.error("Failed to fetch barangays:", err);
           setBarangays([]);
@@ -149,9 +151,12 @@ const RegisterSenior = () => {
       });
 
       setShowConfirmModal(false);
-      setShowSuccessModal(true);
-      onSubmit?.();
-      onSuccess?.();
+      setShowSuccessModal(true); // ✅ this should trigger modal
+
+      setTimeout(() => {
+        onSubmit?.();
+        onSuccess?.();
+      }, 500);
     } catch (err) {
       console.error(err);
       setFormError(err.response?.data?.message || "Failed to submit form.");
@@ -335,7 +340,7 @@ const RegisterSenior = () => {
           </p>
         </div>
       ) : (
-        <form className="space-y-6 md:p-5" onSubmit={handleSubmit}>
+        <form className="space-y-6 md:p-5 lg:p-20" onSubmit={handleSubmit}>
           {groups
             .filter((g) => groupedFields[g.group_key])
             .map((g) => (
@@ -372,14 +377,6 @@ const RegisterSenior = () => {
           {formError && <p className="text-red-600">{formError}</p>}
 
           <div className="flex justify-end gap-3">
-            <Button
-              variant="secondary"
-              onClick={() => navigate(-1)} // goes back
-              disabled={isSubmitting}
-            >
-              Cancel
-            </Button>
-
             <Button
               type="submit"
               variant="primary"
@@ -431,7 +428,10 @@ const RegisterSenior = () => {
                 Success
               </h3>
               <p className="text-sm text-gray-600 mb-4">{successMessage}</p>
-              <Button variant="primary" onClick={() => navigate(-1)}>
+              <Button
+                variant="primary"
+                onClick={() => setShowSuccessModal(false)}
+              >
                 OK
               </Button>
             </div>
