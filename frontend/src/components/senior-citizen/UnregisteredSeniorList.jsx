@@ -25,11 +25,11 @@ const UnregisteredSeniorList = ({ onView, onRegister }) => {
         { withCredentials: true }
       );
 
-      const citizens = Array.isArray(response.data) ? response.data : [];
+      const { citizens, total, totalPages } = response.data;
 
-      setSeniorCitizens(citizens);
-      setTotalCount(citizens.length);
-      setTotalPages(Math.ceil(citizens.length / limit));
+      setSeniorCitizens(citizens || []);
+      setTotalCount(total || 0);
+      setTotalPages(totalPages || 1);
     } catch (err) {
       console.error(err);
       setError("Failed to load unregistered senior citizens.");

@@ -20,16 +20,15 @@ router.get("/get/:id", async (req, res) => {
 // GET: Unregistered citizens (list)
 router.get("/unregistered", async (req, res) => {
   try {
-    const citizens = await seniorCitizenService.getUnregisteredCitizens();
-    const total = citizens.length;
+    const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
-    const totalPages = Math.ceil(total / limit);
 
-    res.status(200).json({
-      citizens,
-      total,
-      totalPages,
+    const result = await seniorCitizenService.getUnregisteredCitizens({
+      page,
+      limit,
     });
+
+    res.status(200).json(result);
   } catch (error) {
     console.error("Error fetching unregistered citizens:", error);
     res.status(500).json({ message: "Internal server error" });
