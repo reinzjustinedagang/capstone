@@ -7,7 +7,6 @@ const MySQLStore = require("express-mysql-session")(session);
 require("dotenv").config(); // Load environment variables
 const cron = require("node-cron");
 const seniorCitizenService = require("../service/seniorCitizenService");
-require("../cron/statusjob");
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -67,19 +66,8 @@ app.use(
   cors({
     origin: [
       "http://localhost:5173",
-      process.env.FRONTEND_URL, // must be exact frontend URL
+      "https://capstone-oscaims.vercel.app", // must be exact frontend URL
     ],
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-    credentials: true,
-  })
-);
-
-// Preflight handler
-app.options(
-  "*",
-  cors({
-    origin: ["http://localhost:5173", process.env.FRONTEND_URL],
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
