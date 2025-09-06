@@ -18,6 +18,32 @@ exports.getSeniorCitizenById = async (id) => {
   }
 };
 
+// Get all unregistered citizens (registered = 0)
+exports.getUnregisteredCitizens = async () => {
+  try {
+    const result = await Connection(
+      `SELECT sc.id, sc.firstName, sc.middleName, sc.lastName, sc.suffix,
+              sc.age, sc.gender, sc.form_data, sc.created_at,
+              sc.barangay_id, b.barangay_name
+       FROM senior_citizens sc
+       LEFT JOIN barangays b ON sc.barangay_id = b.id
+       WHERE sc.deleted = 0 AND sc.age >= 60 AND sc.registered = 0
+       ORDER BY sc.lastName ASC, sc.firstName ASC`
+    );
+
+    return result.map((citizen) => ({
+      ...citizen,
+      form_data:
+        typeof citizen.form_data === "string"
+          ? JSON.parse(citizen.form_data || "{}")
+          : citizen.form_data || {},
+    }));
+  } catch (error) {
+    console.error("Error fetching unregistered citizens:", error);
+    throw new Error("Failed to fetch unregistered citizens.");
+  }
+};
+
 // Check duplicate (firstName, lastName, birthdate inside JSON)
 const isDuplicateSeniorCitizen = async ({ firstName, lastName, birthdate }) => {
   const result = await Connection(

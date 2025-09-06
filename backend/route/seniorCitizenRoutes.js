@@ -17,6 +17,17 @@ router.get("/get/:id", async (req, res) => {
   }
 });
 
+// GET: Unregistered citizens (list)
+router.get("/unregistered", async (req, res) => {
+  try {
+    const unregistered = await seniorCitizenService.getUnregisteredCitizens();
+    res.status(200).json(unregistered);
+  } catch (error) {
+    console.error("Error fetching unregistered citizens:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
 // POST: Create new senior citizen (with duplicate check)
 // In your senior citizen routes file
 
