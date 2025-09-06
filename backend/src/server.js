@@ -67,8 +67,19 @@ app.use(
   cors({
     origin: [
       "http://localhost:5173",
-      "https://capstone-oscaims.vercel.app", // must be exact frontend URL
+      process.env.FRONTEND_URL, // must be exact frontend URL
     ],
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: true,
+  })
+);
+
+// Preflight handler
+app.options(
+  "*",
+  cors({
+    origin: ["http://localhost:5173", process.env.FRONTEND_URL],
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
