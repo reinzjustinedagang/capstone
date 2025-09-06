@@ -22,7 +22,7 @@ router.get("/unregistered", async (req, res) => {
   try {
     const citizens = await seniorCitizenService.getUnregisteredCitizens();
     const total = citizens.length;
-    const limit = 10; // or take from query params
+    const limit = parseInt(req.query.limit) || 10;
     const totalPages = Math.ceil(total / limit);
 
     res.status(200).json({

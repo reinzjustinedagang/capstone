@@ -7,7 +7,7 @@ const MySQLStore = require("express-mysql-session")(session);
 require("dotenv").config(); // Load environment variables
 const cron = require("node-cron");
 const seniorCitizenService = require("../service/seniorCitizenService");
-require("../cron/statusJob");
+require("../cron/statusjob");
 
 const app = express();
 const port = process.env.PORT || 3000;
