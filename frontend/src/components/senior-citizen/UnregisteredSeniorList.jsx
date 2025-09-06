@@ -21,24 +21,24 @@ const UnregisteredSeniorList = ({ onView, onRegister }) => {
     setError("");
     try {
       const response = await axios.get(
-        `${backendUrl}/api/senior-citizens/unregistered`,
-        { params: { page, limit }, withCredentials: true }
+        `${backendUrl}/api/senior-citizens/unregistered?page=${page}&limit=${limit}`,
+        { withCredentials: true }
       );
 
-      setSeniorCitizens(
-        response.data.citizens.map((citizen) => ({
-          ...citizen,
-          form_data:
-            typeof citizen.form_data === "string"
-              ? JSON.parse(citizen.form_data || "{}")
-              : citizen.form_data || {},
-        }))
-      );
+      // Defensive checks
+      const citizens = Array.isArray(response.data?.citizens)
+        ? response.data.citizens
+        : [];
 
-      setTotalCount(response.data.total);
-      setTotalPages(response.data.totalPages);
+      setSeniorCitizens(citizens);
+      setTotalCount(Number(response.data?.total) || 0);
+      setTotalPages(Number(response.data?.totalPages) || 1);
     } catch (err) {
+      console.error(err);
       setError("Failed to load unregistered senior citizens.");
+      setSeniorCitizens([]);
+      setTotalCount(0);
+      setTotalPages(1);
     } finally {
       setLoading(false);
     }
@@ -69,7 +69,7 @@ const UnregisteredSeniorList = ({ onView, onRegister }) => {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {seniorCitizens && seniorCitizens.length > 0 ? (
+              {seniorCitizens.length > 0 ? (
                 seniorCitizens.map((citizen) => (
                   <tr key={citizen.id}>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
@@ -116,7 +116,7 @@ const UnregisteredSeniorList = ({ onView, onRegister }) => {
                   >
                     {loading
                       ? "Loading unregistered senior citizens..."
-                      : "No unregistered senior citizens found."}
+                      : error || "No unregistered senior citizens found."}
                   </td>
                 </tr>
               )}
@@ -124,6 +124,7 @@ const UnregisteredSeniorList = ({ onView, onRegister }) => {
           </table>
         </div>
 
+        {/* Pagination */}
         <Pagination
           page={page}
           limit={limit}
