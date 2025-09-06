@@ -29,8 +29,6 @@ router.get("/unregistered", async (req, res) => {
 });
 
 // POST: Create new senior citizen (with duplicate check)
-// In your senior citizen routes file
-
 router.post("/register", async (req, res) => {
   const ip = req.userIp;
 
