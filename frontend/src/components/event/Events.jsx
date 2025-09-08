@@ -31,7 +31,7 @@ const Events = () => {
           icon={<Plus className="h-4 w-4 mr-2" />}
           onClick={() => setActiveTab("addevent")}
         >
-          Add New Event
+          Add Event
         </Button>
       </div>
 

@@ -65,11 +65,8 @@ app.use(
 // CORS configuration
 app.use(
   cors({
-    origin: [
-      "http://localhost:5173",
-      "https://capstone-oscaims.vercel.app", // must be exact frontend URL
-    ],
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    origin: ["http://localhost:5173", process.env.FRONTEND_URL],
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
   })
@@ -133,5 +130,4 @@ app.get("/api/test-db", async (req, res) => {
 });
 
 // Start the server
-// remove app.listen
 module.exports = app;
