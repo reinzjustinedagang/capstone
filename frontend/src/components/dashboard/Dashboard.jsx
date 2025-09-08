@@ -99,7 +99,7 @@ const Dashboard = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <NavLink to="/admin/senior-citizen-list">
           <Card
-            title="Total Senior Citizens"
+            title="Total Registered Senior Citizens"
             value={loading ? "—" : citizenCount}
             icon={<UsersIcon />}
             color="blue"
@@ -107,7 +107,7 @@ const Dashboard = () => {
         </NavLink>
         <NavLink to="/admin/senior-citizen-list">
           <Card
-            title="Register Senior Citizens"
+            title="Not Registered Senior Citizens"
             value={loading ? "—" : registerCount}
             icon={<UsersIcon />}
             color="blue"

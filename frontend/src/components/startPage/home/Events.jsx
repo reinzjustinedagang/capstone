@@ -39,13 +39,11 @@ const Events = () => {
   };
 
   return (
-    <div className="bg-white py-8 rounded-lg shadow-md relative">
+    <div className="bg-white py-8 relative">
       <div className="max-w-7xl mx-auto px-5 lg:px-8">
         {/* Header */}
         <div className="flex flex-col md:flex-row justify-center md:items-center mb-8">
-          <h2 className="text-2xl font-semibold text-blue-700 mb-4">
-            Latest Events
-          </h2>
+          <h2 className="text-2xl font-semibold text-blue-700 mb-4">Events</h2>
         </div>
 
         {/* Loading / Empty State */}

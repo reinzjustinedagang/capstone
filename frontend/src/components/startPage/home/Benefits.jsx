@@ -45,7 +45,7 @@ const Benefits = () => {
         {/* Header */}
         <div className="flex flex-col md:flex-row justify-center md:items-center mb-8">
           <h2 className="text-2xl font-semibold text-blue-700 mb-4">
-            Latest Benefits
+            Benefits
           </h2>
         </div>
 

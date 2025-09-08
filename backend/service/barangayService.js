@@ -7,7 +7,7 @@ exports.getPaginatedBarangays = async (page = 1, limit = 10) => {
   const offset = (page - 1) * limit;
 
   const data = await Connection(
-    "SELECT id, barangay_name, created_at FROM barangays ORDER BY id DESC LIMIT ? OFFSET ?",
+    "SELECT id, barangay_name, created_at FROM barangays ORDER BY barangay_name ASC LIMIT ? OFFSET ?",
     [parseInt(limit), parseInt(offset)]
   );
 

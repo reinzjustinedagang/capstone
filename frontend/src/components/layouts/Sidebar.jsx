@@ -25,6 +25,7 @@ import {
 const Sidebar = () => {
   const navigate = useNavigate();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [loaded, setLoaded] = useState(false);
   const [systemSettings, setSystemSettings] = useState({
     system_name: "",
     municipality: "",
@@ -129,11 +130,16 @@ const Sidebar = () => {
         </div>
 
         <div className="p-6 flex flex-col items-center text-center">
-          <img
-            src={systemSettings.seal || null}
-            alt="OSCA Logo"
-            className="h-20 w-auto object-contain border-2 rounded-full border-blue-800"
-          />
+          {systemSettings.seal && (
+            <img
+              src={systemSettings.seal}
+              alt="OSCA Logo"
+              className={`h-20 w-20 object-contain rounded-full border-2 border-blue-800 transition-opacity duration-500 ${
+                loaded ? "opacity-100" : "opacity-0"
+              }`}
+              onLoad={() => setLoaded(true)}
+            />
+          )}
           <h1 className="text-xl font-bold text-blue-800">
             {systemSettings.system_name ||
               "Office of the Senior Citizen Affairs"}
