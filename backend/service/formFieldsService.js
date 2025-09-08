@@ -181,3 +181,32 @@ exports.reorder = async (fields, user, ip) => {
 
   return true;
 };
+
+exports.deleteGroupWithFields = async (groupKey, user, ip) => {
+  try {
+    // Delete related form fields
+    await Connection("DELETE FROM form_fields WHERE `group` = ?", [groupKey]);
+
+    // Delete the group itself
+    await Connection("DELETE FROM field_groups WHERE group_key = ?", [
+      groupKey,
+    ]);
+
+    // ✅ Audit log
+    if (user) {
+      await logAudit(
+        user.id,
+        user.email,
+        user.role,
+        "DELETE",
+        `Deleted group '${groupKey}' and all its related fields`,
+        ip
+      );
+    }
+
+    return { message: "Group and all related fields deleted successfully!" };
+  } catch (err) {
+    console.error("❌ Error deleting group:", err);
+    throw new Error("Failed to delete group.");
+  }
+};

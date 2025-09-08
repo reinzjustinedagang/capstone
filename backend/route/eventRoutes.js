@@ -149,4 +149,19 @@ router.delete("/:id", async (req, res) => {
   }
 });
 
+// DELETE /api/form-fields/group/:groupKey
+router.delete("/group/:groupKey", async (req, res) => {
+  const { groupKey } = req.params;
+  try {
+    await Connection("DELETE FROM form_fields WHERE `group` = ?", [groupKey]);
+    await Connection("DELETE FROM field_groups WHERE group_key = ?", [
+      groupKey,
+    ]);
+    res.json({ message: "Group and all related fields deleted successfully!" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Failed to delete group." });
+  }
+});
+
 module.exports = router;

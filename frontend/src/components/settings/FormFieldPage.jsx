@@ -43,6 +43,9 @@ const FormFieldsPage = () => {
   const [showGroupModal, setShowGroupModal] = useState(false);
   const [newGroupKey, setNewGroupKey] = useState("");
   const [newGroupLabel, setNewGroupLabel] = useState("");
+  const [groupToDelete, setGroupToDelete] = useState(null);
+  const [showDeleteGroupConfirm, setShowDeleteGroupConfirm] = useState(false);
+  const [showDeleteGroupSuccess, setShowDeleteGroupSuccess] = useState(false);
 
   const backendUrl = import.meta.env.VITE_API_BASE_URL;
 
@@ -186,6 +189,31 @@ const FormFieldsPage = () => {
     } catch (err) {
       console.error(err);
       setError(err.response?.data?.message || "Failed to create group.");
+    }
+  };
+
+  const handleDeleteGroup = (groupKey) => {
+    setGroupToDelete(groupKey);
+    setShowDeleteGroupConfirm(true);
+  };
+
+  const confirmDeleteGroup = async () => {
+    if (!groupToDelete) return;
+    try {
+      await axios.delete(
+        `${backendUrl}/api/form-fields/group/${groupToDelete}`,
+        {
+          withCredentials: true,
+        }
+      );
+      await fetchGroups();
+      await fetchFields();
+      setShowDeleteGroupConfirm(false);
+      setShowDeleteGroupSuccess(true);
+      setGroupToDelete(null);
+    } catch (err) {
+      console.error(err);
+      setError(err.response?.data?.message || "Failed to delete group.");
     }
   };
 
@@ -509,10 +537,20 @@ const FormFieldsPage = () => {
                         <Layers className="w-4 h-4 mr-2 text-gray-600" />
                         {g.group_label}
                       </h4>
-                      <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2 py-1 rounded-full">
-                        {groupFields.length} field
-                        {groupFields.length !== 1 ? "s" : ""}
-                      </span>
+                      <div className="flex items-center gap-2">
+                        <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2 py-1 rounded-full">
+                          {groupFields.length} field
+                          {groupFields.length !== 1 ? "s" : ""}
+                        </span>
+                        {/* Delete Group Button */}
+                        <button
+                          onClick={() => handleDeleteGroup(g.group_key)}
+                          className="text-red-600 hover:text-red-900"
+                          title="Delete Group"
+                        >
+                          <Trash2 className="w-5 h-5" />
+                        </button>
+                      </div>
                     </div>
                   </div>
 
@@ -562,7 +600,7 @@ const FormFieldsPage = () => {
                             </div>
 
                             {/* Actions */}
-                            <div className="flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                            <div className="flex items-center space-x-1">
                               {/* Move Up */}
                               <button
                                 onClick={() => handleMoveField(f.id, -1)}
@@ -615,21 +653,22 @@ const FormFieldsPage = () => {
                                 </svg>
                               </button>
 
+                              {/* Edit */}
                               <button
                                 onClick={() => handleEditClick(f)}
-                                className="p-2 border rounded hover:bg-yellow-50 hover:text-yellow-600"
+                                className="text-blue-600 hover:text-blue-900"
                                 title="Edit"
                               >
-                                <Edit className="w-4 h-4" />
+                                <Edit className="w-5 h-5" />
                               </button>
 
                               {/* Delete */}
                               <button
                                 onClick={() => handleDelete(f.id)}
-                                className="p-2 rounded-md text-xs font-medium bg-white hover:bg-red-50 text-gray-600 hover:text-red-600 border border-gray-300 hover:border-red-300 transition-colors duration-200"
+                                className="text-red-600 hover:text-red-900 "
                                 title="Delete field"
                               >
-                                <Trash2 className="w-4 h-4" />
+                                <Trash2 className="w-5 h-5" />
                               </button>
                             </div>
                           </div>
@@ -894,6 +933,50 @@ const FormFieldsPage = () => {
             </div>
           </div>
         )}
+      </Modal>
+      <Modal
+        isOpen={showDeleteGroupConfirm}
+        onClose={() => setShowDeleteGroupConfirm(false)}
+        title="Confirm Delete Group"
+      >
+        <div className="mt-4 text-sm text-gray-700">
+          Are you sure you want to delete this group and all its fields?
+        </div>
+        <div className="mt-6 flex justify-end space-x-4">
+          <button
+            onClick={() => setShowDeleteGroupConfirm(false)}
+            className="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 text-sm"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={confirmDeleteGroup}
+            className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 text-sm"
+          >
+            Yes, Delete
+          </button>
+        </div>
+      </Modal>
+      <Modal
+        isOpen={showDeleteGroupSuccess}
+        onClose={() => setShowDeleteGroupSuccess(false)}
+        title=""
+      >
+        <div className="p-6 text-center">
+          <div className="mx-auto mb-4 w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+            <CheckCircle className="w-6 h-6 text-green-500" />
+          </div>
+          <h3 className="text-lg font-medium text-gray-800 mb-2">Success</h3>
+          <p className="text-sm text-gray-600 mb-4">
+            Group and all related fields deleted successfully!
+          </p>
+          <Button
+            variant="primary"
+            onClick={() => setShowDeleteGroupSuccess(false)}
+          >
+            OK
+          </Button>
+        </div>
       </Modal>
     </div>
   );

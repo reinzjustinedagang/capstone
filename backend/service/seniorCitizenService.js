@@ -60,14 +60,14 @@ exports.getUnregisteredCitizens = async ({ page = 1, limit = 10 } = {}) => {
   }
 };
 
-// Check duplicate (firstName, lastName, birthdate inside JSON)
+// Check duplicate (firstName, lastName, birthdate in columns)
 const isDuplicateSeniorCitizen = async ({ firstName, lastName, birthdate }) => {
   const result = await Connection(
     `SELECT id 
      FROM senior_citizens 
      WHERE firstName = ? 
        AND lastName = ? 
-       AND JSON_UNQUOTE(JSON_EXTRACT(form_data, '$.birthdate')) = ?
+       AND birthdate = ?
        AND deleted = 0`,
     [firstName, lastName, birthdate]
   );
@@ -138,7 +138,11 @@ exports.createSeniorCitizen = async (data, user, ip) => {
       lastName: data.lastName,
       middleName: data.middleName || null,
       suffix: data.suffix || null,
-      barangay_id: data.barangay_id || null, // save the ID
+      barangay_id: data.barangay_id || null,
+      // ✅ Save to columns
+      gender: data.form_data.gender || null,
+      age: data.form_data.age ? parseInt(data.form_data.age) : null,
+      birthdate: data.form_data.birthdate || null,
       form_data: JSON.stringify(data.form_data || {}),
     };
 
@@ -172,11 +176,18 @@ exports.updateSeniorCitizen = async (id, updatedData, user, ip) => {
     const updateData = {
       firstName: updatedData.firstName,
       lastName: updatedData.lastName,
-      middleName: updatedData.middleName,
-      suffix: updatedData.suffix,
-      barangay_id: updatedData.barangay_id,
+      middleName: updatedData.middleName || null,
+      suffix: updatedData.suffix || null,
+      barangay_id: updatedData.barangay_id || null,
+      // ✅ Save to columns
+      gender: updatedData.form_data.gender || null,
+      age: updatedData.form_data.age
+        ? parseInt(updatedData.form_data.age)
+        : null,
+      birthdate: updatedData.form_data.birthdate || null,
       form_data: JSON.stringify(updatedData.form_data || {}),
     };
+
     const result = await Connection(
       `UPDATE senior_citizens SET ? WHERE id = ? AND deleted = 0`,
       [updateData, id]

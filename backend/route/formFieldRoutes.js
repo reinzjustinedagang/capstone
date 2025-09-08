@@ -119,4 +119,29 @@ router.delete("/:id", async (req, res) => {
   }
 });
 
+router.delete("/group/:groupKey", async (req, res) => {
+  const { groupKey } = req.params;
+  const user = req.session.user;
+  const ip = req.userIp;
+
+  if (!user) {
+    return res.status(401).json({ message: "Unauthorized" });
+  }
+
+  if (!groupKey) {
+    return res.status(400).json({ message: "Group key is required." });
+  }
+
+  try {
+    const result = await formFieldService.deleteGroupWithFields(
+      groupKey,
+      user,
+      ip
+    );
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ message: err.message || "Failed to delete group." });
+  }
+});
+
 module.exports = router;

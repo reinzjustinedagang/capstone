@@ -130,7 +130,7 @@ const Sidebar = () => {
 
         <div className="p-6 flex flex-col items-center text-center">
           <img
-            src={systemSettings.seal || logo}
+            src={systemSettings.seal || null}
             alt="OSCA Logo"
             className="h-20 w-auto object-contain border-2 rounded-full border-blue-800"
           />

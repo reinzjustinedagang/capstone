@@ -111,7 +111,7 @@ const OrgChart = () => {
               <div className="w-0.5 h-6 bg-blue-400"></div>
               <div className="absolute top-6 h-0.5 w-2/3 bg-blue-400"></div>
             </div>
-            <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full place-items-center">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full place-items-center">
               {members.map((m) => (
                 <OrgCard
                   key={m.id}
