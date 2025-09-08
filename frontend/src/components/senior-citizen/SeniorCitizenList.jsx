@@ -27,6 +27,7 @@ const SeniorCitizenList = ({ onEdit }) => {
   const [showNotificationModal, setShowNotificationModal] = useState(false);
   const [notificationMessage, setNotificationMessage] = useState("");
   const [notificationType, setNotificationType] = useState("success");
+  const [deleting, setDeleting] = useState(false);
 
   const backendUrl =
     import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
@@ -84,6 +85,7 @@ const SeniorCitizenList = ({ onEdit }) => {
   };
 
   const handleDeleteConfirm = async () => {
+    setDeleting(true);
     try {
       await axios.patch(
         `${backendUrl}/api/senior-citizens/soft-delete/${selectedCitizen.id}`,
@@ -100,6 +102,8 @@ const SeniorCitizenList = ({ onEdit }) => {
       setNotificationMessage("Failed to delete senior citizen record.");
       setNotificationType("error");
       setShowNotificationModal(true);
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -335,6 +339,7 @@ const SeniorCitizenList = ({ onEdit }) => {
           selectedCitizen={selectedCitizen}
           setShowDeleteModal={setShowDeleteModal}
           handleDeleteConfirm={handleDeleteConfirm}
+          deleting={deleting}
         />
       </Modal>
 

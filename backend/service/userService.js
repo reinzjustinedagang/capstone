@@ -143,7 +143,7 @@ exports.blockUser = async (id, user, ip) => {
 exports.login = async (email, password, ip) => {
   try {
     const results = await Connection(
-      "SELECT id, username, email, password, cp_number, role, status, last_logout, image, last_login FROM users WHERE email = ? AND blocked = 0",
+      "SELECT id, username, email, password, cp_number, role, status, last_logout, image, last_login FROM users WHERE email = ? AND blocked = 0 AND status = 'inactive' ",
       [email]
     );
 

@@ -321,15 +321,33 @@ exports.getPaginatedFilteredCitizens = async (options) => {
 };
 
 // Soft delete (mark as deleted, set deleted_at)
+// Soft delete (mark as deleted, set deleted_at)
 exports.softDeleteSeniorCitizen = async (id, user, ip) => {
   try {
-    const result = await Connection(
-      `UPDATE senior_citizens 
-       SET deleted = 1, deleted_at = NOW() 
-       WHERE id = ? AND deleted = 0`,
+    // First check if the senior exists
+    const [senior] = await Connection(
+      `SELECT id, deleted FROM senior_citizens WHERE id = ?`,
       [id]
     );
 
+    if (!senior) {
+      return false; // not found
+    }
+
+    // If already deleted, just return true (idempotent)
+    if (senior.deleted === 1) {
+      return true;
+    }
+
+    // Perform soft delete
+    const result = await Connection(
+      `UPDATE senior_citizens 
+       SET deleted = 1, deleted_at = NOW() 
+       WHERE id = ?`,
+      [id]
+    );
+
+    // Audit log only if successful
     if (result.affectedRows > 0 && user) {
       await logAudit(
         user.id,
@@ -340,9 +358,10 @@ exports.softDeleteSeniorCitizen = async (id, user, ip) => {
         ip
       );
     }
+
     return result.affectedRows > 0;
   } catch (error) {
-    console.error(`Error soft deleting senior citizen with ID ${id}:`, error);
+    console.error(`❌ Error soft deleting senior citizen ID ${id}:`, error);
     throw new Error("Failed to soft delete senior citizen.");
   }
 };
