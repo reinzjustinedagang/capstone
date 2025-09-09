@@ -161,8 +161,6 @@ exports.createSeniorCitizen = async (data, user, ip) => {
       middleName: data.middleName || null,
       suffix: data.suffix || null,
       barangay_id: data.barangay_id || null,
-      // ✅ Save to columns
-      gender: data.form_data.gender || null,
       age: data.form_data.age ? parseInt(data.form_data.age) : null,
       birthdate: data.form_data.birthdate || null,
       form_data: JSON.stringify(data.form_data || {}),
@@ -202,7 +200,6 @@ exports.updateSeniorCitizen = async (id, updatedData, user, ip) => {
       suffix: updatedData.suffix || null,
       barangay_id: updatedData.barangay_id || null,
       // ✅ Save to columns
-      gender: updatedData.form_data.gender || null,
       age: updatedData.form_data.age
         ? parseInt(updatedData.form_data.age)
         : null,
