@@ -188,9 +188,7 @@ exports.deleteGroupWithFields = async (groupKey, user, ip) => {
     await Connection("DELETE FROM form_fields WHERE `group` = ?", [groupKey]);
 
     // Delete the group itself
-    await Connection("DELETE FROM field_groups WHERE group_key = ?", [
-      groupKey,
-    ]);
+    await Connection("DELETE FROM form_group WHERE group_key = ?", [groupKey]);
 
     // ✅ Audit log
     if (user) {

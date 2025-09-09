@@ -15,6 +15,7 @@ import {
   X,
   Trash2,
   CheckCircle,
+  MoreVertical,
 } from "lucide-react";
 import axios from "axios";
 
@@ -252,9 +253,9 @@ export default function AuditLogs() {
             <div className="relative">
               <button
                 onClick={() => setShowActions(!showActions)}
-                className="p-2 rounded-md border border-gray-300 text-gray-600 hover:bg-gray-100"
+                className="p-2  text-gray-600 hover:bg-gray-100"
               >
-                ⋮
+                <MoreVertical className="w-5 h-5 text-gray-600" />
               </button>
 
               {showActions && (
