@@ -504,27 +504,34 @@ exports.getSmsRecipients = async (
           JSON_UNQUOTE(JSON_EXTRACT(sc.form_data, '$.emergencyContactNumber'))
         ) AS contact,
         JSON_UNQUOTE(JSON_EXTRACT(sc.form_data, '$.barangay')) AS barangay,
-        sc.barangay_id
+        sc.barangay_id,
+        TIMESTAMPDIFF(
+          YEAR,
+          STR_TO_DATE(JSON_UNQUOTE(JSON_EXTRACT(sc.form_data, '$.birthdate')), '%Y-%m-%d'),
+          CURDATE()
+        ) AS age
       FROM senior_citizens sc
       WHERE (JSON_EXTRACT(sc.form_data, '$.mobileNumber') IS NOT NULL
           OR JSON_EXTRACT(sc.form_data, '$.emergencyContactNumber') IS NOT NULL)
-        AND sc.deleted = 0 AND registered = 1
+        AND sc.deleted = 0 
+        AND registered = 1
+        AND TIMESTAMPDIFF(
+              YEAR,
+              STR_TO_DATE(JSON_UNQUOTE(JSON_EXTRACT(sc.form_data, '$.birthdate')), '%Y-%m-%d'),
+              CURDATE()
+            ) >= 60
     `;
 
     const params = [];
 
-    // Filter by barangay_id
     if (barangay_id && barangay_id.trim() !== "") {
       sql += ` AND sc.barangay_id = ?`;
       params.push(barangay_id);
-    }
-    // Filter by barangay name
-    else if (barangay && barangay.trim() !== "") {
+    } else if (barangay && barangay.trim() !== "") {
       sql += ` AND JSON_UNQUOTE(JSON_EXTRACT(sc.form_data, '$.barangay')) = ?`;
       params.push(barangay);
     }
 
-    // Search by name or contact
     if (search && search.trim() !== "") {
       sql += ` AND (
         CONCAT_WS(' ', sc.firstName, sc.middleName, sc.lastName, sc.suffix) LIKE ? 

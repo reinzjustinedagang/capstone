@@ -53,7 +53,7 @@ const FormFieldsPage = () => {
   const [showDeleteFieldConfirm, setShowDeleteFieldConfirm] = useState(false);
   const [showDeleteFieldSuccess, setShowDeleteFieldSuccess] = useState(false);
   const [deletingField, setDeletingField] = useState(false);
-
+  const [creatingGroup, setCreatingGroup] = useState(false);
   const [showUpdateFieldConfirm, setShowUpdateFieldConfirm] = useState(false);
   const [showUpdateFieldSuccess, setShowUpdateFieldSuccess] = useState(false);
 
@@ -199,6 +199,7 @@ const FormFieldsPage = () => {
   const handleAddGroup = async () => {
     if (!newGroupKey || !newGroupLabel) return;
 
+    setCreatingGroup(true);
     try {
       await axios.post(
         `${backendUrl}/api/form-fields/group`,
@@ -213,6 +214,8 @@ const FormFieldsPage = () => {
     } catch (err) {
       console.error(err);
       setError(err.response?.data?.message || "Failed to create group.");
+    } finally {
+      setCreatingGroup(false);
     }
   };
 
@@ -839,9 +842,15 @@ const FormFieldsPage = () => {
           </button>
           <button
             onClick={handleAddGroup}
-            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm"
+            disabled={creatingGroup}
+            className={`px-4 py-2 rounded text-sm flex items-center gap-2 ${
+              creatingGroup
+                ? "bg-blue-400 cursor-not-allowed"
+                : "bg-blue-600 hover:bg-blue-700"
+            } text-white`}
           >
-            Save Group
+            {creatingGroup && <Loader2 className="w-4 h-4 animate-spin" />}
+            {creatingGroup ? "Creating..." : "Save Group"}
           </button>
         </div>
       </Modal>
