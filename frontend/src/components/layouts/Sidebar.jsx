@@ -87,7 +87,7 @@ const Sidebar = () => {
   return (
     <>
       {/* Burger menu button for small screens */}
-      <div className="md:hidden fixed top-4 left-4 z-50">
+      <div className="md:hidden fixed top-5 left-4 z-50">
         {!isSidebarOpen && (
           <button
             onClick={() => setIsSidebarOpen(true)}
@@ -129,28 +129,34 @@ const Sidebar = () => {
           </button>
         </div>
 
+        {/* Sidebar Logo & Info */}
         <div className="p-6 flex flex-col items-center text-center">
-          {systemSettings.seal && (
-            <img
-              src={systemSettings.seal}
-              alt="OSCA Logo"
-              className={`h-20 w-20 object-contain rounded-full border-2 border-blue-800 transition-opacity duration-500 ${
-                loaded ? "opacity-100" : "opacity-50"
-              }`}
-              onLoad={() => setLoaded(true)}
-            />
-          )}
+          <div className="h-20 w-20 rounded-full border-2 border-blue-800 flex items-center justify-center overflow-hidden">
+            {!loaded && (
+              <div className="h-full w-full animate-pulse bg-gray-100 rounded-full"></div>
+            )}
+            {systemSettings.seal && (
+              <img
+                src={systemSettings.seal}
+                alt="OSCA Logo"
+                className={`h-full w-full object-contain rounded-full transition-opacity duration-500 ${
+                  loaded ? "opacity-100" : "opacity-0 absolute"
+                }`}
+                onLoad={() => setLoaded(true)}
+              />
+            )}
+          </div>
           <h1 className="text-xl font-bold text-blue-800">
             {systemSettings.system_name ||
               "Office of the Senior Citizen Affairs"}
           </h1>
           <p className="text-sm font-medium text-gray-800">
-            {systemSettings.municipality || "San Jose"}
-            {", "}
+            {systemSettings.municipality || "San Jose"},{" "}
             {systemSettings.province || "Occidental Mindoro"}
           </p>
         </div>
 
+        {/* Navigation */}
         <nav className="mt-6">
           {menuItems.map(({ to, label, icon: Icon }) => (
             <NavLink
