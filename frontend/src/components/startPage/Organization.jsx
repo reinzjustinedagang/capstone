@@ -6,33 +6,9 @@ import Footer from "./Footer";
 import OrgChart from "./organization/OrgChart";
 import MunicipalOfficials from "./organization/MunicipalOfficials";
 import BarangayOfficials from "./organization/BarangayOfficials";
-
-ChartJS.register(ArcElement, Tooltip, Legend);
-
-// Example Officials Data
-
-// Example Demographics Data
-const demographics = [
-  { name: "Barangay 1", value: 120 },
-  { name: "Barangay 2", value: 95 },
-  { name: "Barangay 3", value: 60 },
-  { name: "Barangay 4", value: 80 },
-];
-
-const COLORS = ["#8884d8", "#82ca9d", "#ffc658", "#ff7f50"];
+import BarangayDistribution from "../reports/chart/BarangayDistribution";
 
 const Organization = () => {
-  const data = {
-    labels: demographics.map((d) => d.name),
-    datasets: [
-      {
-        data: demographics.map((d) => d.value),
-        backgroundColor: COLORS,
-        hoverOffset: 10,
-      },
-    ],
-  };
-
   return (
     <div>
       <Header />
@@ -81,14 +57,7 @@ const Organization = () => {
       </div>
 
       {/* Demographics Chart */}
-      <div className="bg-white px-5 py-6 md:px-8 lg:px-25">
-        <h3 className="text-2xl font-semibold text-gray-900 mb-6 text-center">
-          Senior Citizens Demographics
-        </h3>
-        <div className="w-full max-w-md mx-auto">
-          <Pie data={data} />
-        </div>
-      </div>
+      <BarangayDistribution />
 
       <Footer />
     </div>
