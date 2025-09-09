@@ -8,9 +8,9 @@ const Modal = ({ isOpen, onClose, title, children }) => {
     <div className="fixed z-50 inset-0 flex items-center justify-center">
       {/* Overlay with blur effect */}
       <div
-        className="fixed inset-0 backdrop-blur-sm" // Added backdrop-blur-sm
+        className="fixed inset-0 backdrop-blur-sm"
         aria-hidden="true"
-        onClick={onClose} // Optional: Close modal when clicking outside
+        onClick={onClose}
       ></div>
 
       <div
@@ -19,8 +19,8 @@ const Modal = ({ isOpen, onClose, title, children }) => {
         aria-modal="true"
         aria-labelledby="modal-headline"
       >
-        <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-          <div className="flex justify-between items-center pb-3 border-b border-gray-200">
+        <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4 max-h-[90vh] overflow-y-auto">
+          <div className="flex justify-between items-center pb-3 border-b border-gray-200 top-0 bg-white z-10">
             <h3
               className="text-lg leading-6 font-medium text-gray-900"
               id="modal-headline"
@@ -34,7 +34,8 @@ const Modal = ({ isOpen, onClose, title, children }) => {
               <XIcon className="h-6 w-6" />
             </button>
           </div>
-          {children}
+          {/* Scrollable content */}
+          <div className="mt-4">{children}</div>
         </div>
       </div>
     </div>

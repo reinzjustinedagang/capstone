@@ -116,7 +116,7 @@ export default function AddUser() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 p-6">
       <div className="">
         <h1 className="text-xl font-bold mb-4 text-gray-800 flex items-center gap-2">
           <PlusCircle className="w-6 h-6 text-indigo-600" /> Add New User

@@ -133,7 +133,7 @@ router.delete("/group/:groupKey", async (req, res) => {
   }
 
   try {
-    const result = await formFieldService.deleteGroupWithFields(
+    const result = await formFieldsService.deleteGroupWithFields(
       groupKey,
       user,
       ip

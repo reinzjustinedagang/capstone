@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { NavLink } from "react-router-dom";
 
 const RegistrationBanner = () => {
   const [animatedCount, setAnimatedCount] = useState(0);
@@ -55,9 +56,11 @@ const RegistrationBanner = () => {
       </p>
 
       <div className="flex flex-col sm:flex-row justify-center gap-4 mb-4">
-        <button className="m-5 px-6 py-3 bg-blue-700 text-white font-semibold rounded-md hover:bg-blue-800 transition">
-          Register Now!
-        </button>
+        <NavLink to="/register-senior">
+          <button className="m-5 px-6 py-3 bg-blue-700 text-white font-semibold rounded-md hover:bg-blue-800 transition">
+            Register Now!
+          </button>
+        </NavLink>
       </div>
       <div className="flex flex-col sm:flex-row justify-center gap-8 mt-4 text-gray-700">
         <div>
@@ -72,9 +75,12 @@ const RegistrationBanner = () => {
         </div>
         <div>
           <p className="font-semibold">View Registration Count</p>
-          <a href="#" className="underline hover:text-blue-700 text-sm">
+          <NavLink
+            to="/organization#demographics"
+            className="underline hover:text-blue-700 text-sm"
+          >
             Registration Distribution by Barangay
-          </a>
+          </NavLink>
         </div>
       </div>
     </section>

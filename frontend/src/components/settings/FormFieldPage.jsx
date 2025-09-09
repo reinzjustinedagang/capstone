@@ -46,6 +46,16 @@ const FormFieldsPage = () => {
   const [groupToDelete, setGroupToDelete] = useState(null);
   const [showDeleteGroupConfirm, setShowDeleteGroupConfirm] = useState(false);
   const [showDeleteGroupSuccess, setShowDeleteGroupSuccess] = useState(false);
+  const [deletingGroup, setDeletingGroup] = useState(false);
+
+  // New states for field deletion and update confirmations
+  const [fieldToDelete, setFieldToDelete] = useState(null);
+  const [showDeleteFieldConfirm, setShowDeleteFieldConfirm] = useState(false);
+  const [showDeleteFieldSuccess, setShowDeleteFieldSuccess] = useState(false);
+  const [deletingField, setDeletingField] = useState(false);
+
+  const [showUpdateFieldConfirm, setShowUpdateFieldConfirm] = useState(false);
+  const [showUpdateFieldSuccess, setShowUpdateFieldSuccess] = useState(false);
 
   const backendUrl = import.meta.env.VITE_API_BASE_URL;
 
@@ -159,16 +169,30 @@ const FormFieldsPage = () => {
     }
   };
 
-  const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this field?")) return;
+  // Updated delete field handler with confirmation
+  const handleDeleteClick = (field) => {
+    setFieldToDelete(field);
+    setShowDeleteFieldConfirm(true);
+  };
+
+  const confirmDeleteField = async () => {
+    if (!fieldToDelete) return;
+
+    setDeletingField(true);
     try {
-      await axios.delete(`${backendUrl}/api/form-fields/${id}`, {
+      await axios.delete(`${backendUrl}/api/form-fields/${fieldToDelete.id}`, {
         withCredentials: true,
       });
+
+      setShowDeleteFieldConfirm(false);
+      setShowDeleteFieldSuccess(true);
+      setFieldToDelete(null);
       fetchFields();
     } catch (err) {
       console.error(err);
       setError("Failed to delete field.");
+    } finally {
+      setDeletingField(false);
     }
   };
 
@@ -199,6 +223,8 @@ const FormFieldsPage = () => {
 
   const confirmDeleteGroup = async () => {
     if (!groupToDelete) return;
+
+    setDeletingGroup(true);
     try {
       await axios.delete(
         `${backendUrl}/api/form-fields/group/${groupToDelete}`,
@@ -214,6 +240,8 @@ const FormFieldsPage = () => {
     } catch (err) {
       console.error(err);
       setError(err.response?.data?.message || "Failed to delete group.");
+    } finally {
+      setDeletingGroup(false);
     }
   };
 
@@ -309,6 +337,10 @@ const FormFieldsPage = () => {
     }));
   };
 
+  const handleUpdateFieldClick = () => {
+    setShowUpdateFieldConfirm(true);
+  };
+
   const handleUpdateField = async () => {
     if (!editingField || !editFieldData) return;
 
@@ -319,7 +351,9 @@ const FormFieldsPage = () => {
         { ...editFieldData, required: editFieldData.required ? 1 : 0 },
         { withCredentials: true }
       );
-      setShowSuccessModal(true);
+
+      setShowUpdateFieldConfirm(false);
+      setShowUpdateFieldSuccess(true);
       setSuccessMessage("Field updated successfully!");
       setEditingField(null);
       setEditFieldData(null);
@@ -664,7 +698,7 @@ const FormFieldsPage = () => {
 
                               {/* Delete */}
                               <button
-                                onClick={() => handleDelete(f.id)}
+                                onClick={() => handleDeleteClick(f)}
                                 className="text-red-600 hover:text-red-900 "
                                 title="Delete field"
                               >
@@ -713,7 +747,7 @@ const FormFieldsPage = () => {
         )}
       </div>
 
-      {/* Confirm Modal */}
+      {/* Confirm Modal for Adding Field */}
       <Modal
         isOpen={showConfirmModal}
         onClose={() => setShowConfirmModal(false)}
@@ -764,6 +798,7 @@ const FormFieldsPage = () => {
         </div>
       </Modal>
 
+      {/* Create Group Modal */}
       <Modal
         isOpen={showGroupModal}
         onClose={() => setShowGroupModal(false)}
@@ -903,37 +938,29 @@ const FormFieldsPage = () => {
               </span>
             </div>
             <div className="flex justify-end gap-2">
-              <div className="flex justify-end items-center mt-6">
-                <button
-                  onClick={() => {
-                    setEditingField(null);
-                    setEditFieldData(null);
-                  }}
-                  className="px-3 py-1 bg-gray-200 rounded"
-                >
-                  Cancel
-                </button>
-              </div>
-              <div className="flex justify-end items-center mt-6">
-                <Button
-                  onClick={handleUpdateField}
-                  type="submit"
-                  disabled={loading}
-                  icon={
-                    loading ? (
-                      <Loader2 className="animate-spin w-4 h-4" />
-                    ) : (
-                      <Save />
-                    )
-                  }
-                >
-                  {loading ? "Saving..." : "Update Field"}
-                </Button>
-              </div>
+              <button
+                onClick={() => {
+                  setEditingField(null);
+                  setEditFieldData(null);
+                }}
+                className="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 text-sm"
+              >
+                Cancel
+              </button>
+              <Button
+                onClick={handleUpdateFieldClick}
+                type="button"
+                disabled={loading}
+                icon={<Save />}
+              >
+                Update Field
+              </Button>
             </div>
           </div>
         )}
       </Modal>
+
+      {/* Delete Group Confirmation Modal */}
       <Modal
         isOpen={showDeleteGroupConfirm}
         onClose={() => setShowDeleteGroupConfirm(false)}
@@ -951,12 +978,20 @@ const FormFieldsPage = () => {
           </button>
           <button
             onClick={confirmDeleteGroup}
-            className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 text-sm"
+            disabled={deletingGroup}
+            className={`px-4 py-2 rounded text-sm flex items-center gap-2 ${
+              deletingGroup
+                ? "bg-red-400 cursor-not-allowed"
+                : "bg-red-600 hover:bg-red-700"
+            } text-white`}
           >
-            Yes, Delete
+            {deletingGroup && <Loader2 className="w-4 h-4 animate-spin" />}
+            {deletingGroup ? "Deleting..." : "Yes, Delete"}
           </button>
         </div>
       </Modal>
+
+      {/* Delete Group Success Modal */}
       <Modal
         isOpen={showDeleteGroupSuccess}
         onClose={() => setShowDeleteGroupSuccess(false)}
@@ -973,6 +1008,114 @@ const FormFieldsPage = () => {
           <Button
             variant="primary"
             onClick={() => setShowDeleteGroupSuccess(false)}
+          >
+            OK
+          </Button>
+        </div>
+      </Modal>
+
+      {/* Delete Field Confirmation Modal */}
+      <Modal
+        isOpen={showDeleteFieldConfirm}
+        onClose={() => setShowDeleteFieldConfirm(false)}
+        title="Confirm Delete Field"
+      >
+        <div className="mt-4 text-sm text-gray-700">
+          Are you sure you want to delete the field "{fieldToDelete?.label}"?
+        </div>
+        <div className="mt-6 flex justify-end space-x-4">
+          <button
+            onClick={() => setShowDeleteFieldConfirm(false)}
+            className="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 text-sm"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={confirmDeleteField}
+            disabled={deletingField}
+            className={`px-4 py-2 rounded text-sm flex items-center gap-2 ${
+              deletingField
+                ? "bg-red-400 cursor-not-allowed"
+                : "bg-red-600 hover:bg-red-700"
+            } text-white`}
+          >
+            {deletingField && <Loader2 className="w-4 h-4 animate-spin" />}
+            {deletingField ? "Deleting..." : "Yes, Delete"}
+          </button>
+        </div>
+      </Modal>
+
+      {/* Delete Field Success Modal */}
+      <Modal
+        isOpen={showDeleteFieldSuccess}
+        onClose={() => setShowDeleteFieldSuccess(false)}
+        title=""
+      >
+        <div className="p-6 text-center">
+          <div className="mx-auto mb-4 w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+            <CheckCircle className="w-6 h-6 text-green-500" />
+          </div>
+          <h3 className="text-lg font-medium text-gray-800 mb-2">Success</h3>
+          <p className="text-sm text-gray-600 mb-4">
+            Field deleted successfully!
+          </p>
+          <Button
+            variant="primary"
+            onClick={() => setShowDeleteFieldSuccess(false)}
+          >
+            OK
+          </Button>
+        </div>
+      </Modal>
+
+      {/* Update Field Confirmation Modal */}
+      <Modal
+        isOpen={showUpdateFieldConfirm}
+        onClose={() => setShowUpdateFieldConfirm(false)}
+        title="Confirm Update Field"
+      >
+        <div className="mt-4 text-sm text-gray-700">
+          Are you sure you want to update this field?
+        </div>
+        <div className="mt-6 flex justify-end space-x-4">
+          <button
+            onClick={() => setShowUpdateFieldConfirm(false)}
+            className="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 text-sm"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={handleUpdateField}
+            disabled={loading}
+            className={`px-4 py-2 rounded text-sm flex items-center gap-2 ${
+              loading
+                ? "bg-blue-400 cursor-not-allowed"
+                : "bg-blue-600 hover:bg-blue-700"
+            } text-white`}
+          >
+            {loading && <Loader2 className="w-4 h-4 animate-spin" />}
+            {loading ? "Updating..." : "Yes, Update"}
+          </button>
+        </div>
+      </Modal>
+
+      {/* Update Field Success Modal */}
+      <Modal
+        isOpen={showUpdateFieldSuccess}
+        onClose={() => setShowUpdateFieldSuccess(false)}
+        title=""
+      >
+        <div className="p-6 text-center">
+          <div className="mx-auto mb-4 w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+            <CheckCircle className="w-6 h-6 text-green-500" />
+          </div>
+          <h3 className="text-lg font-medium text-gray-800 mb-2">Success</h3>
+          <p className="text-sm text-gray-600 mb-4">
+            Field updated successfully!
+          </p>
+          <Button
+            variant="primary"
+            onClick={() => setShowUpdateFieldSuccess(false)}
           >
             OK
           </Button>
