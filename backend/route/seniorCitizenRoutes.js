@@ -73,6 +73,7 @@ router.post("/register", async (req, res) => {
   }
 });
 
+// seniorCitizenRoutes.js
 router.post("/create", async (req, res) => {
   const user = req.session.user;
   const ip = req.userIp;
@@ -84,14 +85,9 @@ router.post("/create", async (req, res) => {
   }
 
   try {
-    // Destructure all fields including barangay_id from frontend
     const { firstName, lastName, middleName, suffix, form_data, barangay_id } =
       req.body;
-
-    // Parse the dynamic form_data object
     const dynamicData = JSON.parse(form_data);
-
-    // Include barangay_id in dynamicData
     dynamicData.barangay_id = barangay_id;
 
     const insertId = await seniorCitizenService.createSeniorCitizen(
@@ -102,7 +98,7 @@ router.post("/create", async (req, res) => {
         suffix,
         form_data: dynamicData,
         birthdate: dynamicData.birthdate,
-        barangay_id, // pass separately if needed
+        barangay_id,
       },
       user,
       ip
@@ -110,10 +106,7 @@ router.post("/create", async (req, res) => {
 
     res.status(201).json({ message: "Senior citizen created.", insertId });
   } catch (error) {
-    if (error.code === 409) {
-      return res.status(409).json({ message: error.message });
-    }
-    res.status(500).json({ message: error.message });
+    res.status(error.code === 409 ? 409 : 500).json({ message: error.message });
   }
 });
 
@@ -291,9 +284,19 @@ router.patch("/soft-delete/:id", async (req, res) => {
 // GET: List soft-deleted
 router.get("/deleted", async (req, res) => {
   try {
-    const deletedCitizens =
-      await seniorCitizenService.getDeletedSeniorCitizens();
-    res.status(200).json(deletedCitizens);
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const offset = (page - 1) * limit;
+
+    const { items, total } =
+      await seniorCitizenService.getDeletedSeniorCitizens(page, limit, offset);
+
+    res.status(200).json({
+      items,
+      total,
+      page,
+      totalPages: Math.ceil(total / limit),
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

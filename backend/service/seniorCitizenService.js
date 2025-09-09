@@ -138,10 +138,9 @@ exports.registerSeniorCitizen = async (data, ip) => {
 // CREATE
 exports.createSeniorCitizen = async (data, user, ip) => {
   try {
-    // normalize birthdate
-    const cleanBirthdate = normalize(data.form_data.birthdate);
+    const cleanBirthdate = normalize(data.form_data?.birthdate);
 
-    // duplicate check
+    // Duplicate check
     if (
       await isDuplicateSeniorCitizen({ ...data, birthdate: cleanBirthdate })
     ) {
@@ -159,7 +158,6 @@ exports.createSeniorCitizen = async (data, user, ip) => {
       middleName: normalize(data.middleName),
       suffix: normalize(data.suffix),
       barangay_id: normalize(data.barangay_id),
-
       form_data: JSON.stringify(data.form_data || {}),
     };
 
@@ -380,14 +378,25 @@ exports.softDeleteSeniorCitizen = async (id, user, ip) => {
 };
 
 // Get all soft-deleted citizens
-exports.getDeletedSeniorCitizens = async () => {
+exports.getDeletedSeniorCitizens = async (page, limit, offset) => {
   try {
-    return await Connection(
+    // Get paginated records
+    const items = await Connection(
       `SELECT id, firstName, middleName, lastName, suffix, age, gender, form_data, deleted_at
        FROM senior_citizens
        WHERE deleted = 1
-       ORDER BY deleted_at DESC`
+       ORDER BY deleted_at DESC
+       LIMIT ? OFFSET ?`,
+      [limit, offset]
     );
+
+    // Get total count
+    const totalResult = await Connection(
+      `SELECT COUNT(*) AS count FROM senior_citizens WHERE deleted = 1`
+    );
+    const total = totalResult[0].count;
+
+    return { items, total };
   } catch (error) {
     console.error("Error fetching deleted senior citizens:", error);
     throw new Error("Failed to fetch deleted senior citizens.");

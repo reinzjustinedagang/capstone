@@ -1,44 +1,51 @@
 import React, { useState, useEffect } from "react";
+import axios from "axios";
 import Button from "../UI/Button";
 import Delete from "../UI/Button/Delete";
 import Modal from "../UI/Modal";
 import Pagination from "../UI/Component/Pagination";
 import SearchAndFilterBar from "../UI/Component/SearchAndFilterBar";
-import { Edit, Trash2, ArrowDown, ArrowUp } from "lucide-react";
-import axios from "axios";
+import { Edit, Trash2, ArrowDown, ArrowUp, CheckCircle } from "lucide-react";
 
 const SeniorCitizenList = ({ onEdit }) => {
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [selectedCitizen, setSelectedCitizen] = useState(null);
+  const backendUrl =
+    import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
 
+  // Data states
+  const [seniorCitizens, setSeniorCitizens] = useState([]);
+  const [barangayMap, setBarangayMap] = useState({});
+  const [barangayOptions, setBarangayOptions] = useState([]);
+
+  // Pagination
+  const [page, setPage] = useState(1);
+  const [limit] = useState(10);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
+
+  // Filters
   const [searchTerm, setSearchTerm] = useState("");
   const [filterBarangay, setFilterBarangay] = useState("All Barangays");
   const [filterHealthStatus, setFilterHealthStatus] =
     useState("All Health Status");
   const [filterAge, setFilterAge] = useState("All");
   const [filterGender, setFilterGender] = useState("All");
-  const [barangayOptions, setBarangayOptions] = useState([]);
   const [sortBy, setSortBy] = useState("lastName");
   const [sortOrder, setSortOrder] = useState("asc");
   const [showFilters, setShowFilters] = useState(false);
 
+  // UI States
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [showNotificationModal, setShowNotificationModal] = useState(false);
-  const [notificationMessage, setNotificationMessage] = useState("");
-  const [notificationType, setNotificationType] = useState("success");
+
+  // Delete states
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [selectedCitizen, setSelectedCitizen] = useState(null);
   const [deleting, setDeleting] = useState(false);
 
-  const backendUrl =
-    import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
+  // Success modal
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
 
-  const [seniorCitizens, setSeniorCitizens] = useState([]);
-  const [page, setPage] = useState(1);
-  const [limit] = useState(10);
-  const [totalPages, setTotalPages] = useState(1);
-  const [totalCount, setTotalCount] = useState(0);
-  const [barangayMap, setBarangayMap] = useState({});
-
+  // Fetch Citizens
   const fetchCitizens = async () => {
     setLoading(true);
     setError("");
@@ -57,7 +64,10 @@ const SeniorCitizenList = ({ onEdit }) => {
 
       const response = await axios.get(
         `${backendUrl}/api/senior-citizens/page`,
-        { params, withCredentials: true }
+        {
+          params,
+          withCredentials: true,
+        }
       );
 
       setSeniorCitizens(
@@ -69,16 +79,34 @@ const SeniorCitizenList = ({ onEdit }) => {
               : citizen.form_data || {},
         }))
       );
-
       setTotalCount(response.data.total);
       setTotalPages(response.data.totalPages);
-    } catch (err) {
+    } catch {
       setError("Failed to load senior citizens. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
+  // Fetch Barangays
+  const fetchBarangays = async () => {
+    try {
+      const response = await axios.get(`${backendUrl}/api/barangays/all`);
+      const map = {};
+      response.data.forEach((b) => {
+        map[b.id] = b.barangay_name;
+      });
+      setBarangayMap(map);
+      setBarangayOptions([
+        "All Barangays",
+        ...response.data.map((b) => b.barangay_name),
+      ]);
+    } catch {
+      // ignore errors
+    }
+  };
+
+  // Handle delete
   const handleDelete = (citizen) => {
     setSelectedCitizen(citizen);
     setShowDeleteModal(true);
@@ -95,33 +123,15 @@ const SeniorCitizenList = ({ onEdit }) => {
       await fetchCitizens();
       setShowDeleteModal(false);
       setSelectedCitizen(null);
-      setNotificationMessage("Senior Citizen deleted successfully!");
-      setNotificationType("success");
-      setShowNotificationModal(true);
-    } catch (err) {
-      setNotificationMessage("Failed to delete senior citizen record.");
-      setNotificationType("error");
-      setShowNotificationModal(true);
+      setShowSuccessModal(true);
+    } catch {
+      setError("Failed to delete senior citizen record.");
     } finally {
       setDeleting(false);
     }
   };
 
-  const fetchBarangays = async () => {
-    try {
-      const response = await axios.get(`${backendUrl}/api/barangays/all`);
-      const map = {};
-      response.data.forEach((b) => {
-        map[b.id] = b.barangay_name;
-      });
-      setBarangayMap(map);
-      setBarangayOptions([
-        "All Barangays",
-        ...response.data.map((b) => b.barangay_name),
-      ]);
-    } catch (error) {}
-  };
-
+  // Sorting
   const toggleSortOrder = (column) => {
     if (sortBy === column) {
       setSortOrder(sortOrder === "asc" ? "desc" : "asc");
@@ -131,6 +141,7 @@ const SeniorCitizenList = ({ onEdit }) => {
     }
   };
 
+  // Clear filters
   const clearFilters = () => {
     setSearchTerm("");
     setFilterBarangay("All Barangays");
@@ -140,6 +151,7 @@ const SeniorCitizenList = ({ onEdit }) => {
     setShowFilters(false);
   };
 
+  // Options
   const healthStatusOptions = [
     "All Health Status",
     "Good",
@@ -147,9 +159,7 @@ const SeniorCitizenList = ({ onEdit }) => {
     "Needs Medical Attention",
     "Bedridden",
   ];
-
   const genderOptions = ["All", "Male", "Female"];
-
   const AgeOptions = [
     "All",
     "60 - 69",
@@ -159,6 +169,7 @@ const SeniorCitizenList = ({ onEdit }) => {
     "100 - 100+",
   ];
 
+  // Effects
   useEffect(() => {
     fetchCitizens();
   }, [
@@ -170,7 +181,6 @@ const SeniorCitizenList = ({ onEdit }) => {
     filterGender,
     sortBy,
     sortOrder,
-    backendUrl,
   ]);
 
   useEffect(() => {
@@ -184,6 +194,7 @@ const SeniorCitizenList = ({ onEdit }) => {
   return (
     <div>
       <div className="bg-white rounded-lg shadow overflow-hidden">
+        {/* Search and Filters */}
         <SearchAndFilterBar
           searchTerm={searchTerm}
           setSearchTerm={setSearchTerm}
@@ -204,6 +215,7 @@ const SeniorCitizenList = ({ onEdit }) => {
           healthStatusOptions={healthStatusOptions}
         />
 
+        {/* Table */}
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
@@ -242,7 +254,7 @@ const SeniorCitizenList = ({ onEdit }) => {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {seniorCitizens && seniorCitizens.length > 0 ? (
+              {seniorCitizens.length > 0 ? (
                 seniorCitizens.map((citizen) => (
                   <tr key={citizen.id}>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
@@ -343,24 +355,21 @@ const SeniorCitizenList = ({ onEdit }) => {
         />
       </Modal>
 
-      {/* Notification Modal */}
+      {/* Success Modal */}
       <Modal
-        isOpen={showNotificationModal}
-        onClose={() => setShowNotificationModal(false)}
-        title={notificationType === "success" ? "Success" : "Error"}
+        isOpen={showSuccessModal}
+        onClose={() => setShowSuccessModal(false)}
+        title="Success"
       >
         <div className="p-6 text-center">
-          <div
-            className={`text-lg font-semibold mb-4 ${
-              notificationType === "success" ? "text-green-600" : "text-red-600"
-            }`}
-          >
-            {notificationMessage}
+          <div className="mx-auto mb-4 w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+            <CheckCircle className="w-6 h-6 text-green-500" />
           </div>
-          <Button
-            variant={notificationType === "success" ? "primary" : "danger"}
-            onClick={() => setShowNotificationModal(false)}
-          >
+          <h3 className="text-lg font-medium text-gray-800 mb-2">Success</h3>
+          <p className="text-sm text-gray-600 mb-4">
+            Senior Citizen deleted successfully!
+          </p>
+          <Button variant="primary" onClick={() => setShowSuccessModal(false)}>
             OK
           </Button>
         </div>
