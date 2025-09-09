@@ -188,14 +188,14 @@ exports.createSeniorCitizen = async (data, user, ip) => {
 // UPDATE
 exports.updateSeniorCitizen = async (id, updatedData, user, ip) => {
   try {
-    const cleanBirthdate = normalize(updatedData.form_data.birthdate);
-
     const updateData = {
       firstName: updatedData.firstName,
       lastName: updatedData.lastName,
       middleName: normalize(updatedData.middleName),
       suffix: normalize(updatedData.suffix),
-      barangay_id: normalize(updatedData.barangay_id),
+      barangay_id: normalize(
+        updatedData.barangay_id || updatedData.form_data?.barangay_id
+      ),
       form_data: JSON.stringify(updatedData.form_data || {}),
     };
 
