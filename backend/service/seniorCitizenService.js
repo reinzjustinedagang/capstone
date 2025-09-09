@@ -159,9 +159,7 @@ exports.createSeniorCitizen = async (data, user, ip) => {
       middleName: normalize(data.middleName),
       suffix: normalize(data.suffix),
       barangay_id: normalize(data.barangay_id),
-      gender: normalize(data.form_data.gender),
-      age: data.form_data.age ? parseInt(data.form_data.age) : null,
-      birthdate: cleanBirthdate,
+
       form_data: JSON.stringify(data.form_data || {}),
     };
 
@@ -200,11 +198,6 @@ exports.updateSeniorCitizen = async (id, updatedData, user, ip) => {
       middleName: normalize(updatedData.middleName),
       suffix: normalize(updatedData.suffix),
       barangay_id: normalize(updatedData.barangay_id),
-      gender: normalize(updatedData.form_data.gender),
-      age: updatedData.form_data.age
-        ? parseInt(updatedData.form_data.age)
-        : null,
-      birthdate: cleanBirthdate,
       form_data: JSON.stringify(updatedData.form_data || {}),
     };
 
