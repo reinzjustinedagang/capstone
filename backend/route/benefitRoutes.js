@@ -27,9 +27,9 @@ router.get("/", async (req, res) => {
 });
 
 // GET discounts
-router.get("/discount", async (req, res) => {
+router.get("/national", async (req, res) => {
   try {
-    const data = await benefitService.getDiscounts();
+    const data = await benefitService.getNational();
     res.status(200).json(data);
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -37,39 +37,9 @@ router.get("/discount", async (req, res) => {
 });
 
 // GET
-router.get("/financial-assistance", async (req, res) => {
+router.get("/local", async (req, res) => {
   try {
-    const data = await benefitService.getFinancial();
-    res.status(200).json(data);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-});
-
-// GET
-router.get("/medical-benefits", async (req, res) => {
-  try {
-    const data = await benefitService.getMedical();
-    res.status(200).json(data);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-});
-
-// GET
-router.get("/privilege-and-perks", async (req, res) => {
-  try {
-    const data = await benefitService.getPrivilege();
-    res.status(200).json(data);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-});
-
-// GET
-router.get("/republic-acts", async (req, res) => {
-  try {
-    const data = await benefitService.getRA();
+    const data = await benefitService.getLocal();
     res.status(200).json(data);
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -93,8 +63,7 @@ router.get("/:id", async (req, res) => {
 
 // POST create benefit
 router.post("/", isAuthenticated, upload.single("image"), async (req, res) => {
-  const { type, title, description, location, provider, enacted_date } =
-    req.body;
+  const { type, description, location, provider, enacted_date } = req.body;
   const user = req.session.user;
   const ip = req.userIp;
 
@@ -117,7 +86,7 @@ router.post("/", isAuthenticated, upload.single("image"), async (req, res) => {
     }
 
     const inserted = await benefitService.create(
-      { type, title, description, location, provider, enacted_date, image_url },
+      { type, description, location, provider, enacted_date, image_url },
       user,
       ip
     );
@@ -136,8 +105,7 @@ router.put(
   upload.single("image"),
   async (req, res) => {
     const { id } = req.params;
-    const { type, title, description, location, provider, enacted_date } =
-      req.body;
+    const { type, description, location, provider, enacted_date } = req.body;
     const user = req.session.user;
     const ip = req.userIp;
 
@@ -164,7 +132,6 @@ router.put(
         id,
         {
           type,
-          title,
           description,
           location,
           provider,

@@ -31,33 +31,15 @@ exports.getAll = async () => {
 };
 
 // Get benefits by type
-exports.getDiscounts = async () => {
+exports.getNational = async () => {
   return await Connection(
-    `SELECT * FROM benefits WHERE type = 'discount' ORDER BY created_at DESC`
+    `SELECT * FROM benefits WHERE type = 'national' ORDER BY created_at DESC`
   );
 };
 
-exports.getFinancial = async () => {
+exports.getLocal = async () => {
   return await Connection(
-    `SELECT * FROM benefits WHERE type = 'financial assistance' ORDER BY created_at DESC`
-  );
-};
-
-exports.getMedical = async () => {
-  return await Connection(
-    `SELECT * FROM benefits WHERE type = 'medical benefits' ORDER BY created_at DESC`
-  );
-};
-
-exports.getPrivilege = async () => {
-  return await Connection(
-    `SELECT * FROM benefits WHERE type = 'privileges and perks' ORDER BY created_at DESC`
-  );
-};
-
-exports.getRA = async () => {
-  return await Connection(
-    `SELECT * FROM benefits WHERE type = 'republic acts' ORDER BY created_at DESC`
+    `SELECT * FROM benefits WHERE type = 'local' ORDER BY created_at DESC`
   );
 };
 
@@ -67,26 +49,20 @@ exports.getBenefitsById = async (id) => {
 
 // CREATE benefit
 exports.create = async (data, user, ip) => {
-  const { type, title, description, provider, enacted_date, image_url } = data;
+  const { type, description, provider, enacted_date, image_url } = data;
 
-  if (
-    !type ||
-    !title ||
-    !description ||
-    (!image_url && type !== "republic acts")
-  ) {
+  if (!type || !description || (!image_url && type !== "republic acts")) {
     throw new Error(
       "Type, title, description, and image (for non-RA) are required"
     );
   }
 
   const query = `
-    INSERT INTO benefits (type, title, description, provider, enacted_date, image_url)
-    VALUES (?, ?, ?, ?, ?, ?)
+    INSERT INTO benefits (type, description, provider, enacted_date, image_url)
+    VALUES (?, ?, ?, ?, ?)
   `;
   const result = await Connection(query, [
     type,
-    title,
     description,
     provider,
     enacted_date,
@@ -107,7 +83,7 @@ exports.create = async (data, user, ip) => {
 
 // UPDATE benefit
 exports.update = async (id, data, user, ip) => {
-  const { type, title, description, provider, enacted_date, image_url } = data;
+  const { type, description, provider, enacted_date, image_url } = data;
 
   // Fetch current benefit
   const benefits = await Connection(
@@ -126,12 +102,11 @@ exports.update = async (id, data, user, ip) => {
 
   const query = `
     UPDATE benefits
-    SET type = ?, title = ?, description = ?,  = ?, provider = ?, enacted_date = ?, image_url = ?
+    SET type = ?, description = ?,  = ?, provider = ?, enacted_date = ?, image_url = ?
     WHERE id = ?
   `;
   const result = await Connection(query, [
     type,
-    title,
     description,
     provider,
     enacted_date,
@@ -156,7 +131,7 @@ exports.update = async (id, data, user, ip) => {
 // DELETE benefit
 exports.remove = async (id, user, ip) => {
   const benefits = await Connection(
-    `SELECT title, image_url FROM benefits WHERE id = ?`,
+    `SELECT image_url FROM benefits WHERE id = ?`,
     [id]
   );
   const benefit = benefits[0];

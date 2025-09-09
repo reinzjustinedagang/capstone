@@ -14,6 +14,7 @@ import {
   CheckCircle,
   Calendar,
   ImagePlus,
+  List,
 } from "lucide-react";
 
 const AddBenefit = () => {
@@ -169,7 +170,7 @@ const AddBenefit = () => {
         {/* Image Upload - only show if type is NOT "republic acts" */}
         {formData.type !== "republic acts" && (
           <div>
-            <label className="block text-sm font-medium">Benefit Image</label>
+            <label className="block text-sm font-medium">Benefits Image</label>
             <div className="flex items-center gap-4 mt-2">
               {imagePreview ? (
                 <img
@@ -205,20 +206,21 @@ const AddBenefit = () => {
             <label className="block text-sm font-medium text-gray-700">
               Type
             </label>
-            <select
-              name="type"
-              value={formData.type}
-              onChange={handleChange}
-              required
-              className="mt-1 w-full border rounded-md px-3 py-2 focus:ring-blue-500 focus:outline-none"
-            >
-              <option value="">-- Select Type --</option>
-              <option value="discount">Discount</option>
-              <option value="financial assistance">Financial Assistance</option>
-              <option value="medical benefits">Medical Benefits</option>
-              <option value="privileges and perks">Privileges and Perks</option>
-              <option value="republic acts">Republic Acts</option>
-            </select>
+            <div className="mt-1 relative">
+              <select
+                name="type"
+                value={formData.type}
+                onChange={handleChange}
+                required
+                className="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 pl-10 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+              >
+                <option value="">-- Select Type --</option>
+                <option value="local">Local Benefits</option>
+                <option value="national">National Benefits</option>
+                <option value="republic acts">Republic Acts</option>
+              </select>
+              <List className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
+            </div>
           </div>
 
           {typeFields.map((field) => (

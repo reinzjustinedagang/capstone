@@ -7,19 +7,20 @@ import {
   Plus,
   BookOpenTextIcon,
   CheckCircle,
+  PhilippinePeso,
+  Map,
+  Landmark,
 } from "lucide-react";
 import Modal from "../UI/Modal";
-import Discount from "./Discount";
-import FinancialAssistance from "./FinancialAssistance";
-import MedicalBenefits from "./MedicalBenefits";
-import PerksAndPrev from "./PerksAndPrev";
+import National from "./National";
+import Local from "./Local";
 import RepublicActs from "./RepublicActs";
 import AddBenefit from "./AddBenefit";
 import Button from "../UI/Button";
 import UpdateBenefit from "./UpdateBenefit";
 
 const Benefits = () => {
-  const [activeTab, setActiveTab] = useState("discount");
+  const [activeTab, setActiveTab] = useState("local");
   const [selectedBenefitId, setSelectedBenefitId] = useState(null);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
 
@@ -30,7 +31,7 @@ const Benefits = () => {
   };
 
   const handleUpdateSuccess = () => {
-    setActiveTab("discount");
+    setActiveTab("local");
     setSelectedBenefitId(null);
     setShowSuccessModal(true);
   };
@@ -51,51 +52,27 @@ const Benefits = () => {
         <div className="border-b border-gray-200">
           <nav className="flex flex-wrap -mb-px">
             <button
-              onClick={() => setActiveTab("discount")}
+              onClick={() => setActiveTab("local")}
               className={`py-4 px-6 text-center border-b-2 font-medium text-sm transition-colors duration-200
                 ${
-                  activeTab === "discount"
+                  activeTab === "local"
                     ? "border-blue-500 text-blue-600"
                     : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
                 }`}
             >
-              <PercentIcon className="inline-block h-4 w-4 mr-2" /> Discount
+              <Landmark className="inline-block h-4 w-4 mr-2" />
+              Local Benefits
             </button>
             <button
-              onClick={() => setActiveTab("financialAssistance")}
+              onClick={() => setActiveTab("national")}
               className={`py-4 px-6 text-center border-b-2 font-medium text-sm transition-colors duration-200
                 ${
-                  activeTab === "financialAssistance"
+                  activeTab === "national"
                     ? "border-blue-500 text-blue-600"
                     : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
                 }`}
             >
-              <HandCoins className="inline-block h-4 w-4 mr-2" /> Financial
-              Assistance
-            </button>
-            <button
-              onClick={() => setActiveTab("medicalBenefits")}
-              className={`py-4 px-6 text-center border-b-2 font-medium text-sm transition-colors duration-200
-                ${
-                  activeTab === "medicalBenefits"
-                    ? "border-blue-500 text-blue-600"
-                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-                }`}
-            >
-              <Stethoscope className="inline-block h-4 w-4 mr-2" /> Medical
-              Benefits
-            </button>
-            <button
-              onClick={() => setActiveTab("perksAndPrev")}
-              className={`py-4 px-6 text-center border-b-2 font-medium text-sm transition-colors duration-200
-                ${
-                  activeTab === "perksAndPrev"
-                    ? "border-blue-500 text-blue-600"
-                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-                }`}
-            >
-              <ShieldCheck className="inline-block h-4 w-4 mr-2" />
-              Privileges and Perks
+              <Map className="inline-block h-4 w-4 mr-2" /> National Benefits
             </button>
             <button
               onClick={() => setActiveTab("ra")}
@@ -113,14 +90,8 @@ const Benefits = () => {
         </div>
         <div className="p-6">
           {/* Pass the handleEdit function as a prop to the components that render BenefitsCards */}
-          {activeTab === "discount" && <Discount onEdit={handleEdit} />}
-          {activeTab === "financialAssistance" && (
-            <FinancialAssistance onEdit={handleEdit} />
-          )}
-          {activeTab === "medicalBenefits" && (
-            <MedicalBenefits onEdit={handleEdit} />
-          )}
-          {activeTab === "perksAndPrev" && <PerksAndPrev onEdit={handleEdit} />}
+          {activeTab === "local" && <Local onEdit={handleEdit} />}
+          {activeTab === "national" && <National onEdit={handleEdit} />}
           {activeTab === "ra" && <RepublicActs onEdit={handleEdit} />}
 
           {activeTab === "addbenefits" && <AddBenefit />}

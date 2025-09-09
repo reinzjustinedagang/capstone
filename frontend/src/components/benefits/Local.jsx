@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { PercentIcon, CheckCircle } from "lucide-react";
+import { Landmark, Info, MapPin, CheckCircle } from "lucide-react";
 import BenefitsCard from "../UI/BenefitsCard";
 import Modal from "../UI/Modal";
 import Button from "../UI/Button";
 import axios from "axios";
 
-const Discount = ({ onEdit }) => {
-  const [discounts, setDiscounts] = useState([]);
+const Local = ({ onEdit }) => {
+  const [financial, setFinancial] = useState([]);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
@@ -17,74 +17,82 @@ const Discount = ({ onEdit }) => {
     import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
 
   useEffect(() => {
-    fetchDiscounts();
+    fetchLocal();
   }, []);
 
-  const fetchDiscounts = async () => {
+  const fetchLocal = async () => {
     try {
       setLoading(true);
       setError("");
-      const response = await axios.get(`${backendUrl}/api/benefits/discount`);
-      setDiscounts(response.data);
+      const response = await axios.get(`${backendUrl}/api/benefits/local`);
+      setFinancial(response.data);
     } catch (error) {
-      console.error("Failed to fetch Discounts: ", error);
-      setError(error.message || "Failed to fetch discounts");
-      setDiscounts([]);
+      console.error("Failed to fetch Financial Assistance Programs: ", error);
+      setError(
+        error.message || "Failed to fetch financial assistance programs"
+      );
+      setFinancial([]);
     } finally {
       setLoading(false);
     }
   };
 
   const confirmDelete = (id) => {
-    setSelectedId(id);
+    setSelectedId(id); // This line is the fix
     setShowConfirmModal(true);
   };
 
   const handleDelete = async () => {
     try {
-      setLoading(true);
+      setLoading(true); // Set loading to true while deleting
       await axios.delete(`${backendUrl}/api/benefits/${selectedId}`, {
         withCredentials: true,
       });
-      setDiscounts((prev) => prev.filter((item) => item.id !== selectedId));
+      setFinancial((prev) => prev.filter((type) => type.id !== selectedId));
       setShowConfirmModal(false);
       setShowSuccessModal(true);
     } catch (err) {
       console.error("Error deleting benefits:", err);
       alert("Failed to delete");
     } finally {
-      setLoading(false);
+      setLoading(false); // Reset loading state
     }
+  };
+
+  const confirmEdit = (id) => {
+    setSelectedId(id);
+    setShowEditModal(true);
+    console.log("Editing benefit with ID:", id);
   };
 
   return (
     <>
       <h1 className="text-lg font-medium mb-4 text-gray-800 flex items-center gap-2">
-        <PercentIcon className="w-6 h-6 text-blue-600" />
-        Senior Citizen Discounts in San Jose, Occidental Mindoro
+        <Landmark className="w-6 h-6 text-green-600" />
+        Local Benefits of Senior Citizens
       </h1>
 
       {loading ? (
         <div className="flex justify-center items-center h-32">
-          <p className="text-gray-500">Loading discounts...</p>
+          <p className="text-gray-500">Loading benefits...</p>
         </div>
       ) : error ? (
         <div className="flex justify-center items-center h-32">
           <p className="text-red-500">{error}</p>
         </div>
-      ) : discounts.length === 0 ? (
+      ) : financial.length === 0 ? (
         <div className="flex justify-center items-center h-32">
-          <p className="text-gray-500">No discounts available at the moment.</p>
+          <p className="text-gray-500">No benefits available at the moment.</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-          {discounts.map((item) => (
+          {financial.map((type) => (
             <BenefitsCard
-              key={item.id}
-              type={item}
-              icon={<PercentIcon className="w-5 h-5 text-blue-500" />}
-              textColor="text-blue-700"
-              textIcon="text-blue-500"
+              key={type.id}
+              type={type}
+              icon={<Landmark className="w-5 h-5 text-green-500" />}
+              textColor="text-green-700"
+              textIcon="text-green-500"
               onDelete={confirmDelete}
               onEdit={onEdit}
             />
@@ -145,4 +153,4 @@ const Discount = ({ onEdit }) => {
   );
 };
 
-export default Discount;
+export default Local;

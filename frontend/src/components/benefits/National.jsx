@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { ShieldCheck, CheckCircle } from "lucide-react";
+import { PercentIcon, CheckCircle, MapIcon } from "lucide-react";
 import BenefitsCard from "../UI/BenefitsCard";
 import Modal from "../UI/Modal";
 import Button from "../UI/Button";
 import axios from "axios";
 
-const PerksAndPrev = ({ onEdit }) => {
-  const [perks, setPerks] = useState([]);
+const National = ({ onEdit }) => {
+  const [discounts, setDiscounts] = useState([]);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
@@ -17,88 +17,74 @@ const PerksAndPrev = ({ onEdit }) => {
     import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
 
   useEffect(() => {
-    fetchPerks();
+    fetchDiscounts();
   }, []);
 
-  const fetchPerks = async () => {
+  const fetchDiscounts = async () => {
     try {
       setLoading(true);
       setError("");
-      const response = await axios.get(
-        `${backendUrl}/api/benefits/privilege-and-perks`
-      );
-      setPerks(response.data);
+      const response = await axios.get(`${backendUrl}/api/benefits/national`);
+      setDiscounts(response.data);
     } catch (error) {
-      console.error(
-        "Failed to fetch Perks and Preventive Care Programs: ",
-        error
-      );
-      setError(
-        error.message || "Failed to fetch perks and preventive care programs"
-      );
-      setPerks([]);
+      console.error("Failed to fetch Discounts: ", error);
+      setError(error.message || "Failed to fetch discounts");
+      setDiscounts([]);
     } finally {
       setLoading(false);
     }
   };
 
   const confirmDelete = (id) => {
-    setSelectedId(id); // This line is the fix
+    setSelectedId(id);
     setShowConfirmModal(true);
   };
 
   const handleDelete = async () => {
     try {
-      setLoading(true); // Set loading to true while deleting
+      setLoading(true);
       await axios.delete(`${backendUrl}/api/benefits/${selectedId}`, {
         withCredentials: true,
       });
-      setPerks((prev) => prev.filter((type) => type.id !== selectedId));
+      setDiscounts((prev) => prev.filter((item) => item.id !== selectedId));
       setShowConfirmModal(false);
       setShowSuccessModal(true);
     } catch (err) {
       console.error("Error deleting benefits:", err);
       alert("Failed to delete");
     } finally {
-      setLoading(false); // Reset loading state
+      setLoading(false);
     }
-  };
-
-  const confirmEdit = (id) => {
-    setSelectedId(id);
-    setShowEditModal(true);
-    console.log("Editing benefit with ID:", id);
   };
 
   return (
     <>
       <h1 className="text-lg font-medium mb-4 text-gray-800 flex items-center gap-2">
-        <ShieldCheck className="w-6 h-6 text-indigo-600" />
-        Senior Citizen Perks & Preventive Care Programs
+        <MapIcon className="w-6 h-6 text-blue-600" />
+        National Benefits of Senior Citizen
       </h1>
+
       {loading ? (
         <div className="flex justify-center items-center h-32">
-          <p className="text-gray-500">Loading perks and preventive care...</p>
+          <p className="text-gray-500">Loading benefits...</p>
         </div>
       ) : error ? (
         <div className="flex justify-center items-center h-32">
           <p className="text-red-500">{error}</p>
         </div>
-      ) : perks.length === 0 ? (
+      ) : discounts.length === 0 ? (
         <div className="flex justify-center items-center h-32">
-          <p className="text-gray-500">
-            No perks or preventive care programs available at the moment.
-          </p>
+          <p className="text-gray-500">No benefits available at the moment.</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-          {perks.map((type) => (
+          {discounts.map((item) => (
             <BenefitsCard
-              key={type.id}
-              type={type}
-              icon={<ShieldCheck className="w-5 h-5 text-indigo-500" />}
-              textColor="text-indigo-700"
-              textIcon="text-indigo-500"
+              key={item.id}
+              type={item}
+              icon={<MapIcon className="w-5 h-5 text-blue-500" />}
+              textColor="text-blue-700"
+              textIcon="text-blue-500"
               onDelete={confirmDelete}
               onEdit={onEdit}
             />
@@ -159,4 +145,4 @@ const PerksAndPrev = ({ onEdit }) => {
   );
 };
 
-export default PerksAndPrev;
+export default National;

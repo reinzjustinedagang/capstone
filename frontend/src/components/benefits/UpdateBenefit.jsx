@@ -186,7 +186,7 @@ const UpdateBenefit = ({ benefitId, onSuccess }) => {
         {/* Image Upload - only show if type is NOT "republic acts" */}
         {formData.type !== "republic acts" && (
           <div>
-            <label className="block text-sm font-medium">Benefit Image</label>
+            <label className="block text-sm font-medium">Benefits Image</label>
             <div className="flex items-center gap-4 mt-2">
               {imagePreview ? (
                 <img
@@ -231,10 +231,8 @@ const UpdateBenefit = ({ benefitId, onSuccess }) => {
               className="mt-1 w-full border rounded-md px-3 py-2 focus:ring-blue-500 focus:outline-none"
             >
               <option value="">-- Select Type --</option>
-              <option value="discount">Discount</option>
-              <option value="financial assistance">Financial Assistance</option>
-              <option value="medical benefits">Medical Benefits</option>
-              <option value="privileges and perks">Privileges and Perks</option>
+              <option value="local">Local Benefits</option>
+              <option value="national">National Benefits</option>
               <option value="republic acts">Republic Acts</option>
             </select>
           </div>

@@ -7,10 +7,7 @@ import {
   Plus,
   BookOpenTextIcon,
 } from "lucide-react";
-import Discount from "../../benefits/Discount";
-import FinancialAssistance from "../../benefits/FinancialAssistance";
-import MedicalBenefits from "../../benefits/MedicalBenefits";
-import PerksAndPrev from "../../benefits/PerksAndPrev";
+
 import RepublicActs from "../../benefits/RepublicActs";
 
 const Benefits = () => {
