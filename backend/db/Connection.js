@@ -390,7 +390,7 @@ db.query(
       lastName VARCHAR(255) NOT NULL,
       middleName VARCHAR(255),
       suffix VARCHAR(50),
-      
+      birtdate DATE NULL, 
       -- Dynamic form fields stored here
       form_data JSON NOT NULL,
       

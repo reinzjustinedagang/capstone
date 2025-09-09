@@ -9,7 +9,6 @@ import {
   LogIn,
   Building,
 } from "lucide-react";
-import logo from "../../assets/osca-logo.png";
 import axios from "axios";
 
 const Header = () => {

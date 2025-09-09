@@ -73,26 +73,24 @@ const UpdateSeniorCitizenForm = ({ id, onSuccess, onCancel }) => {
 
         fetchedFields.forEach((f) => {
           if (f.field_name.toLowerCase().includes("municipal")) {
-            initialData[f.field_name] = municipalityValue;
+            initialData[f.field_name] = fetchedSystem.municipality || "";
           } else if (f.field_name.toLowerCase().includes("province")) {
-            initialData[f.field_name] = provinceValue;
+            initialData[f.field_name] = fetchedSystem.province || "";
           } else if (f.field_name.toLowerCase().includes("barangay")) {
-            // Convert to string to match <select> option values
-            initialData[f.field_name] = citizenData.barangay_id
-              ? String(citizenData.barangay_id)
-              : "";
+            initialData[f.field_name] = citizenData.barangay_id || "";
           } else if (
             ["firstName", "lastName", "middleName", "suffix"].includes(
               f.field_name
             )
           ) {
             initialData[f.field_name] = citizenData[f.field_name] || "";
-          } else if (f.type === "checkbox") {
-            // Checkbox: from dynamic or blank
-            initialData[f.field_name] = dynamicFormData[f.field_name] || [];
           } else {
-            initialData[f.field_name] = dynamicFormData[f.field_name] || "";
+            // use dynamic form_data
+            initialData[f.field_name] =
+              dynamicFormData[f.field_name] ||
+              (f.type === "checkbox" ? [] : "");
           }
+
           if (!(f.group in initialCollapsed)) {
             initialCollapsed[f.group] = false;
           }
@@ -227,16 +225,21 @@ const UpdateSeniorCitizenForm = ({ id, onSuccess, onCancel }) => {
         </label>
         <select
           value={value || ""}
-          onChange={(e) => handleChange(e, field)}
+          onChange={(e) =>
+            setFormData({
+              ...formData,
+              [field.field_name]: Number(e.target.value),
+            })
+          }
           required={field.required}
           disabled={barangayLoading}
-          className="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:ring-blue-500 focus:border-blue-500 sm:text-sm disabled:bg-gray-100 disabled:cursor-not-allowed"
+          className="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3"
         >
           <option value="">
             {barangayLoading ? "Loading barangays..." : `Select ${field.label}`}
           </option>
           {barangays.map((b) => (
-            <option key={b.id} value={String(b.id)}>
+            <option key={b.id} value={b.id}>
               {b.barangay_name}
             </option>
           ))}

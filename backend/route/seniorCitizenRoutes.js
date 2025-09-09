@@ -127,16 +127,27 @@ router.put("/update/:id", async (req, res) => {
       .json({ message: "Unauthorized: No user session found." });
   }
   try {
-    // Accept all fields from req.body
     const { firstName, lastName, middleName, suffix, barangay_id, form_data } =
       req.body;
 
+    // 🔑 Ensure form_data is an object
+    const dynamicData =
+      typeof form_data === "string" ? JSON.parse(form_data) : form_data;
+
     const success = await seniorCitizenService.updateSeniorCitizen(
       req.params.id,
-      { firstName, lastName, middleName, suffix, barangay_id, form_data },
+      {
+        firstName,
+        lastName,
+        middleName,
+        suffix,
+        barangay_id,
+        form_data: dynamicData,
+      },
       user,
       ip
     );
+
     if (!success) {
       return res
         .status(404)
