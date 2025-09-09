@@ -134,3 +134,14 @@ exports.getLoginTrailsByUserId = async (userId) => {
     throw err;
   }
 };
+
+// Truncate all audit logs
+exports.truncateAuditLogs = async () => {
+  try {
+    await Connection(`TRUNCATE TABLE audit_logs`);
+    return { message: "All audit logs have been cleared successfully." };
+  } catch (err) {
+    console.error("❌ Failed to truncate audit logs:", err);
+    throw err;
+  }
+};

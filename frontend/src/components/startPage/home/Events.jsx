@@ -44,7 +44,7 @@ const Events = () => {
         {/* Header */}
         {/* Header */}
         <div className="flex flex-col md:flex-row justify-center items-center mb-8">
-          <h2 className="text-2xl font-semibold text-blue-700 mb-4 text-center">
+          <h2 className="text-2xl font-semibold text-gray-900 mb-4 text-center">
             Events
           </h2>
         </div>

@@ -1,4 +1,6 @@
 import React, { useState, useMemo, useEffect } from "react";
+import Button from "../UI/Button";
+import Modal from "../UI/Modal";
 import {
   Search,
   Filter,
@@ -11,6 +13,8 @@ import {
   XCircle,
   ChevronDown,
   X,
+  Trash2,
+  CheckCircle,
 } from "lucide-react";
 import axios from "axios";
 
@@ -28,6 +32,9 @@ export default function AuditLogs() {
   const [filterActionType, setFilterActionType] = useState("All");
   const [sortBy, setSortBy] = useState("timestamp");
   const [sortOrder, setSortOrder] = useState("desc");
+  const [showActions, setShowActions] = useState(false);
+  const [confirmTruncate, setConfirmTruncate] = useState(false);
+  const [showTruncateSuccess, setShowTruncateSuccess] = useState(false);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -175,6 +182,28 @@ export default function AuditLogs() {
     );
   };
 
+  const handleTruncateClick = () => {
+    setConfirmTruncate(true);
+  };
+
+  const confirmTruncateLogs = async () => {
+    setLoading(true);
+    try {
+      await axios.delete(`${backendUrl}/api/audit-logs/truncate`);
+      setAuditLogs([]);
+      setTotalCount(0);
+      setTotalPages(1);
+      setPage(1);
+      setConfirmTruncate(false);
+      setShowTruncateSuccess(true); // ✅ open success modal
+    } catch (err) {
+      console.error("Failed to truncate audit logs:", err);
+      alert("❌ Failed to clear audit logs. Try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="bg-gray-100 min-h-screen rounded-lg font-inter">
       <div className="bg-white rounded-lg shadow-lg overflow-hidden">
@@ -208,6 +237,7 @@ export default function AuditLogs() {
                 }`}
               />
             </button>
+
             {hasFilters && (
               <button
                 onClick={clearFilters}
@@ -217,6 +247,31 @@ export default function AuditLogs() {
                 Clear
               </button>
             )}
+
+            {/* More Actions Dropdown */}
+            <div className="relative">
+              <button
+                onClick={() => setShowActions(!showActions)}
+                className="p-2 rounded-md border border-gray-300 text-gray-600 hover:bg-gray-100"
+              >
+                ⋮
+              </button>
+
+              {showActions && (
+                <div className="absolute right-0 mt-2 w-40 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
+                  <button
+                    onClick={() => {
+                      setShowActions(false);
+                      handleTruncateClick();
+                    }}
+                    className="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+                  >
+                    <XCircle className="h-4 w-4 mr-2" />
+                    Truncate Logs
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
@@ -452,6 +507,65 @@ export default function AuditLogs() {
           </div>
         </div>
       </div>
+      <Modal
+        isOpen={confirmTruncate}
+        onClose={() => !loading && setConfirmTruncate(false)}
+        title="Confirm Clear Logs"
+      >
+        <div className="p-6">
+          <p className="mb-4 text-gray-700">
+            Are you sure you want to clear all{" "}
+            <span className="font-semibold text-red-600">audit logs</span>? This
+            action cannot be undone.
+          </p>
+          <div className="flex justify-end space-x-3">
+            <Button
+              variant="secondary"
+              onClick={() => setConfirmTruncate(false)}
+              disabled={loading}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="danger"
+              onClick={confirmTruncateLogs}
+              disabled={loading}
+              icon={
+                loading ? (
+                  <Loader2 className="animate-spin w-4 h-4" />
+                ) : (
+                  <Trash2 className="w-4 h-4" />
+                )
+              }
+            >
+              {loading ? "Clearing..." : "Clear Logs"}
+            </Button>
+          </div>
+        </div>
+      </Modal>
+      <Modal
+        isOpen={showTruncateSuccess}
+        onClose={() => setShowTruncateSuccess(false)}
+        title=""
+      >
+        <div className="p-6 text-center">
+          <div className="mx-auto mb-4 w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+            <CheckCircle className="w-6 h-6 text-green-500" />
+          </div>
+          <h3 className="text-lg font-medium text-gray-800 mb-2">
+            Logs Cleared
+          </h3>
+          <p className="text-sm text-gray-600 mb-4">
+            All audit logs have been successfully cleared!
+          </p>
+          <Button
+            variant="primary"
+            onClick={() => setShowTruncateSuccess(false)}
+          >
+            OK
+          </Button>
+        </div>
+      </Modal>
     </div>
   );
 }

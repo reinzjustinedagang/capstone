@@ -32,13 +32,13 @@ const Header = () => {
 
         // Set favicon dynamically using the seal from backend
         if (settings.seal) {
-          const link =
-            document.querySelector("link[rel*='icon']") ||
-            document.createElement("link");
-          link.type = "image/x-icon";
-          link.rel = "icon";
+          let link = document.querySelector("link[rel='icon']");
+          if (!link) {
+            link = document.createElement("link");
+            link.rel = "icon";
+            document.head.appendChild(link);
+          }
           link.href = settings.seal;
-          document.getElementsByTagName("head")[0].appendChild(link);
         }
       } catch (err) {
         console.error("Failed to fetch system settings:", err);
@@ -47,6 +47,11 @@ const Header = () => {
 
     fetchSystemSettings();
   }, []);
+  useEffect(() => {
+    if (systemSettings.system_name) {
+      document.title = systemSettings.system_name;
+    }
+  }, [systemSettings.system_name]);
 
   const navItems = [
     { to: "/", label: "Home", icon: HomeIcon },
@@ -73,7 +78,9 @@ const Header = () => {
                 "Office of the Senior Citizen Affairs"}
             </h1>
             <p className="text-base font-medium">
-              {systemSettings.municipality}, {systemSettings.province}
+              {[systemSettings.municipality, systemSettings.province]
+                .filter(Boolean)
+                .join(", ")}
             </p>
           </div>
         </div>

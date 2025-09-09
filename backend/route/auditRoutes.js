@@ -54,4 +54,15 @@ router.get("/:id", async (req, res) => {
   }
 });
 
+// DELETE /api/audit-logs/truncate → Clear all audit logs
+router.delete("/truncate", async (req, res) => {
+  try {
+    const result = await auditService.truncateAuditLogs();
+    res.status(200).json(result);
+  } catch (err) {
+    console.error("Error in DELETE /audit-logs/truncate:", err);
+    res.status(500).json({ message: "Failed to clear audit logs." });
+  }
+});
+
 module.exports = router;

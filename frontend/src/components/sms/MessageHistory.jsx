@@ -2,22 +2,29 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Loader2 } from "lucide-react";
 
+const backendUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
+
 const MessageHistory = () => {
-  const backendUrl = import.meta.env.VITE_API_BASE_URL;
   const [logs, setLogs] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  // Pagination
   const [page, setPage] = useState(1);
   const [limit] = useState(10);
-  const [total, setTotal] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
 
   const fetchHistory = async () => {
+    setLoading(true);
     try {
-      setLoading(true);
-      const res = await axios.get(
-        `${backendUrl}/api/sms/history?page=${page}&limit=${limit}`
-      );
-      setLogs(res.data.logs);
-      setTotal(res.data.total);
+      const res = await axios.get(`${backendUrl}/api/sms/history`, {
+        params: { page, limit },
+        withCredentials: true,
+      });
+
+      setLogs(res.data.logs || []);
+      setTotalCount(res.data.total || 0);
+      setTotalPages(res.data.totalPages || 1);
     } catch (err) {
       console.error("Failed to fetch SMS history", err);
     } finally {
@@ -29,90 +36,175 @@ const MessageHistory = () => {
     fetchHistory();
   }, [page]);
 
-  const handlePrev = () => setPage((p) => Math.max(p - 1, 1));
-  const handleNext = () => setPage((p) => (p * limit < total ? p + 1 : p));
+  /** Render numbered page buttons with ellipsis */
+  const renderPageButtons = () => {
+    const visiblePages = [];
+    const maxVisible = 5;
+
+    if (totalPages <= maxVisible) {
+      for (let i = 1; i <= totalPages; i++) visiblePages.push(i);
+    } else {
+      visiblePages.push(1);
+
+      if (page > 3) visiblePages.push("ellipsis-prev");
+
+      const start = Math.max(2, page - 1);
+      const end = Math.min(totalPages - 1, page + 1);
+
+      for (let i = start; i <= end; i++) {
+        if (i !== 1 && i !== totalPages) visiblePages.push(i);
+      }
+
+      if (page < totalPages - 2) visiblePages.push("ellipsis-next");
+
+      visiblePages.push(totalPages);
+    }
+
+    return visiblePages.map((p, index) =>
+      p === "ellipsis-prev" || p === "ellipsis-next" ? (
+        <span
+          key={`ellipsis-${index}`}
+          className="px-2 py-2 text-gray-500 text-sm select-none"
+        >
+          ...
+        </span>
+      ) : (
+        <button
+          key={p}
+          onClick={() => setPage(p)}
+          className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${
+            page === p
+              ? "z-10 bg-blue-50 border-blue-500 text-blue-600"
+              : "bg-white border-gray-300 text-gray-700 hover:bg-gray-50"
+          }`}
+        >
+          {p}
+        </button>
+      )
+    );
+  };
 
   return (
-    <div className="p-6">
-      <h2 className="text-lg font-medium mb-4">Message History</h2>
-      {loading ? (
-        <div className="flex items-center justify-center py-10">
-          <Loader2 className="animate-spin h-6 w-6 mr-2" />
-          Loading...
-        </div>
-      ) : logs.length === 0 ? (
-        <p>No messages found.</p>
-      ) : (
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">
-                  Recipient
-                </th>
-                <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">
-                  Message
-                </th>
-                <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">
-                  Status
-                </th>
-                <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">
-                  Sent At
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {logs.map((log) => (
-                <tr key={log.id}>
-                  <td className="px-4 py-2 text-sm text-gray-700">
-                    {log.recipients}
-                  </td>
-                  <td className="px-4 py-2 text-sm text-gray-700">
-                    {log.message}
-                  </td>
-                  <td className="px-4 py-2 text-sm">
-                    <span
-                      className={`px-2 py-1 rounded-full text-white text-xs font-semibold ${
-                        log.status === "Sent"
-                          ? "bg-green-500"
-                          : log.status === "Failed"
-                          ? "bg-red-500"
-                          : "bg-yellow-500"
-                      }`}
-                    >
-                      {log.status}
-                    </span>
-                  </td>
-                  <td className="px-4 py-2 text-sm text-gray-500">
-                    {new Date(log.created_at).toLocaleString()}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+    <div className="p-6 space-y-6">
+      <h2 className="text-lg font-medium">Message History</h2>
 
-          {/* Pagination */}
-          <div className="flex justify-between mt-4">
-            <button
-              onClick={handlePrev}
-              disabled={page === 1}
-              className="px-3 py-1 rounded bg-gray-200 hover:bg-gray-300 disabled:opacity-50"
-            >
-              Previous
-            </button>
-            <span>
-              Page {page} of {Math.ceil(total / limit)}
-            </span>
-            <button
-              onClick={handleNext}
-              disabled={page * limit >= total}
-              className="px-3 py-1 rounded bg-gray-200 hover:bg-gray-300 disabled:opacity-50"
-            >
-              Next
-            </button>
+      <div className="bg-white rounded-lg shadow overflow-hidden">
+        {loading ? (
+          <div className="flex justify-center items-center h-48">
+            <Loader2 className="animate-spin h-6 w-6 mr-2 text-gray-500" />
+            <span className="text-gray-600">Loading messages...</span>
           </div>
-        </div>
-      )}
+        ) : logs.length === 0 ? (
+          <div className="text-center py-12">
+            <p className="text-gray-500">No messages found.</p>
+          </div>
+        ) : (
+          <>
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Recipients
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Message
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Status
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Sent At
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {logs.map((log) => {
+                    const recipientCount = Array.isArray(log.recipients)
+                      ? log.recipients.length
+                      : log.recipients
+                          ?.split(",")
+                          .filter((r) => r.trim() !== "").length || 0;
+
+                    return (
+                      <tr key={log.id}>
+                        <td className="px-6 py-4 text-sm text-gray-700">
+                          {recipientCount} recipient
+                          {recipientCount !== 1 ? "s" : ""}
+                        </td>
+                        <td className="px-6 py-4 text-sm text-gray-700">
+                          {log.message}
+                        </td>
+                        <td className="px-6 py-4 text-sm">
+                          <span
+                            className={`px-2 py-1 rounded-full text-white text-xs font-semibold ${
+                              log.status === "Sent"
+                                ? "bg-green-500"
+                                : log.status === "Failed"
+                                ? "bg-red-500"
+                                : "bg-yellow-500"
+                            }`}
+                          >
+                            {log.status}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 text-sm text-gray-500">
+                          {new Date(log.created_at).toLocaleString()}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Pagination */}
+            <div className="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
+              <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+                <div>
+                  <p className="text-sm text-gray-700">
+                    Showing{" "}
+                    <span className="font-medium">
+                      {(page - 1) * limit + 1}
+                    </span>{" "}
+                    to{" "}
+                    <span className="font-medium">
+                      {Math.min(page * limit, totalCount)}
+                    </span>{" "}
+                    of <span className="font-medium">{totalCount}</span> results
+                  </p>
+                </div>
+                <div>
+                  <nav
+                    className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px"
+                    aria-label="Pagination"
+                  >
+                    <button
+                      onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
+                      disabled={page === 1}
+                      className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
+                    >
+                      Previous
+                    </button>
+
+                    {renderPageButtons()}
+
+                    <button
+                      onClick={() =>
+                        setPage((prev) => Math.min(prev + 1, totalPages))
+                      }
+                      disabled={page === totalPages}
+                      className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
+                    >
+                      Next
+                    </button>
+                  </nav>
+                </div>
+              </div>
+            </div>
+          </>
+        )}
+      </div>
     </div>
   );
 };

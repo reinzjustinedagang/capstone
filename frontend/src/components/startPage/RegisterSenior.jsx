@@ -375,9 +375,11 @@ const RegisterSenior = () => {
               </div>
             ))}
 
+          <DocumentUpload formData={formData} setFormData={setFormData} />
+
           {formError && <p className="text-red-600">{formError}</p>}
 
-          <div className="flex justify-end gap-3">
+          <div className="mx-4 md:mx-0 flex justify-end gap-3">
             <Button
               type="submit"
               variant="primary"
@@ -386,8 +388,6 @@ const RegisterSenior = () => {
               {isSubmitting ? "Submitting..." : "Submit Application"}
             </Button>
           </div>
-
-          <DocumentUpload />
 
           <Modal
             isOpen={showConfirmModal}
