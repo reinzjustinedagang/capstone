@@ -18,8 +18,8 @@ const DemographicReports = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <AgeDistribution />
         <GenderDistribution />
-        <HealthStatus />
-        <ActivityStatus />
+        {/* <HealthStatus />
+        <ActivityStatus /> */}
         <StatisticalSummary />
       </div>
     </div>

@@ -9,6 +9,7 @@ import {
   UserPlusIcon,
   HouseIcon,
 } from "lucide-react";
+import BarangayDistribution from "../reports/chart/BarangayDistribution";
 
 const Dashboard = () => {
   const [barangayCount, setBarangayCount] = useState(0);
@@ -154,6 +155,9 @@ const Dashboard = () => {
             color="amber"
           />
         </NavLink>
+      </div>
+      <div>
+        <BarangayDistribution />
       </div>
       {/* <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="bg-white rounded-lg shadow p-6">

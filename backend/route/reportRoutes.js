@@ -14,4 +14,23 @@ router.get("/barangay", async (req, res) => {
   }
 });
 
+// GET /api/charts/gender → Gender distribution
+router.get("/gender", async (req, res) => {
+  try {
+    const result = await reportService.getGenderDistribution();
+    res.status(200).json(result);
+  } catch (err) {
+    res.status(500).json({ message: "Failed to fetch gender distribution." });
+  }
+});
+
+router.get("/age", async (req, res) => {
+  try {
+    const result = await chartService.getAgeDistribution();
+    res.status(200).json(result);
+  } catch (err) {
+    res.status(500).json({ message: "Failed to fetch age distribution." });
+  }
+});
+
 module.exports = router;
