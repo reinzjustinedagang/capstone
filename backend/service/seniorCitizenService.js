@@ -60,36 +60,26 @@ exports.getUnregisteredCitizens = async ({ page = 1, limit = 10 } = {}) => {
   }
 };
 
-const normalizeDate = (value) => {
-  if (!value || value.trim() === "") return null;
-  return value;
+const normalize = (val) => {
+  if (val === undefined || val === null) return null;
+  if (typeof val === "string" && val.trim() === "") return null;
+  return val;
 };
 
-// Check duplicate (firstName, lastName, birthdate in columns)
+// check duplicate by firstName + lastName + birthdate (null-safe)
 const isDuplicateSeniorCitizen = async ({ firstName, lastName, birthdate }) => {
-  const cleanBirthdate = normalizeDate(birthdate);
-
   let sql, params;
 
-  if (cleanBirthdate === null) {
-    // No birthdate provided → check only by name
-    sql = `
-      SELECT id 
-      FROM senior_citizens 
-      WHERE firstName = ? 
-        AND lastName = ? 
-        AND birthdate IS NULL
-        AND deleted = 0`;
+  if (!birthdate) {
+    sql = `SELECT id FROM senior_citizens
+           WHERE firstName = ? AND lastName = ? 
+             AND birthdate IS NULL AND deleted = 0`;
     params = [firstName, lastName];
   } else {
-    sql = `
-      SELECT id 
-      FROM senior_citizens 
-      WHERE firstName = ? 
-        AND lastName = ? 
-        AND birthdate = ?
-        AND deleted = 0`;
-    params = [firstName, lastName, cleanBirthdate];
+    sql = `SELECT id FROM senior_citizens
+           WHERE firstName = ? AND lastName = ? 
+             AND birthdate = ? AND deleted = 0`;
+    params = [firstName, lastName, birthdate];
   }
 
   const result = await Connection(sql, params);
@@ -145,11 +135,19 @@ exports.registerSeniorCitizen = async (data, ip) => {
   }
 };
 
+// CREATE
 exports.createSeniorCitizen = async (data, user, ip) => {
   try {
-    // Check for duplicates
-    if (await isDuplicateSeniorCitizen(data)) {
-      const msg = `A senior citizen named '${data.firstName} ${data.lastName}' with birthdate '${data.birthdate}' already exists.`;
+    // normalize birthdate
+    const cleanBirthdate = normalize(data.form_data.birthdate);
+
+    // duplicate check
+    if (
+      await isDuplicateSeniorCitizen({ ...data, birthdate: cleanBirthdate })
+    ) {
+      const msg = `A senior citizen named '${data.firstName} ${
+        data.lastName
+      }' with birthdate '${cleanBirthdate || "NULL"}' already exists.`;
       const err = new Error(msg);
       err.code = 409;
       throw err;
@@ -158,11 +156,12 @@ exports.createSeniorCitizen = async (data, user, ip) => {
     const insertData = {
       firstName: data.firstName,
       lastName: data.lastName,
-      middleName: data.middleName || null,
-      suffix: data.suffix || null,
-      barangay_id: data.barangay_id || null,
+      middleName: normalize(data.middleName),
+      suffix: normalize(data.suffix),
+      barangay_id: normalize(data.barangay_id),
+      gender: normalize(data.form_data.gender),
       age: data.form_data.age ? parseInt(data.form_data.age) : null,
-      birthdate: data.form_data.birthdate || null,
+      birthdate: cleanBirthdate,
       form_data: JSON.stringify(data.form_data || {}),
     };
 
@@ -190,20 +189,22 @@ exports.createSeniorCitizen = async (data, user, ip) => {
   }
 };
 
-// Update
+// UPDATE
 exports.updateSeniorCitizen = async (id, updatedData, user, ip) => {
   try {
+    const cleanBirthdate = normalize(updatedData.form_data.birthdate);
+
     const updateData = {
       firstName: updatedData.firstName,
       lastName: updatedData.lastName,
-      middleName: updatedData.middleName || null,
-      suffix: updatedData.suffix || null,
-      barangay_id: updatedData.barangay_id || null,
-      // ✅ Save to columns
+      middleName: normalize(updatedData.middleName),
+      suffix: normalize(updatedData.suffix),
+      barangay_id: normalize(updatedData.barangay_id),
+      gender: normalize(updatedData.form_data.gender),
       age: updatedData.form_data.age
         ? parseInt(updatedData.form_data.age)
         : null,
-      birthdate: updatedData.form_data.birthdate || null,
+      birthdate: cleanBirthdate,
       form_data: JSON.stringify(updatedData.form_data || {}),
     };
 
