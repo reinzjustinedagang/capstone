@@ -6,7 +6,7 @@ const reportService = require("../service/reportService");
 // Barangay distribution (with optional gender filter)
 router.get("/barangay", async (req, res) => {
   try {
-    const result = await chartService.getBarangayDistribution();
+    const result = await reportService.getBarangayDistribution();
     res.json(result);
   } catch (err) {
     console.error("Failed to fetch barangay distribution:", err);
