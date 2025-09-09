@@ -184,10 +184,18 @@ exports.reorder = async (fields, user, ip) => {
 
 exports.deleteGroupWithFields = async (groupKey, user, ip) => {
   try {
-    await Connection("DELETE FROM form_fields WHERE `group` = ?", [groupKey]);
+    // First delete all fields that belong to this group
+    await Connection(
+      `DELETE f 
+       FROM form_fields f
+       JOIN form_group g ON f.\`group\` = g.group_key
+       WHERE g.group_key = ?`,
+      [groupKey]
+    );
+
+    // Then delete the group itself
     await Connection("DELETE FROM form_group WHERE group_key = ?", [groupKey]);
 
-    // ✅ Audit log
     if (user) {
       await logAudit(
         user.id,
@@ -202,6 +210,6 @@ exports.deleteGroupWithFields = async (groupKey, user, ip) => {
     return { message: "Group and all related fields deleted successfully!" };
   } catch (err) {
     console.error("❌ Error deleting group:", err.sqlMessage || err.message);
-    throw err; // don't wrap, just rethrow
+    throw err;
   }
 };
