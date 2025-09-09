@@ -60,17 +60,39 @@ exports.getUnregisteredCitizens = async ({ page = 1, limit = 10 } = {}) => {
   }
 };
 
+const normalizeDate = (value) => {
+  if (!value || value.trim() === "") return null;
+  return value;
+};
+
 // Check duplicate (firstName, lastName, birthdate in columns)
 const isDuplicateSeniorCitizen = async ({ firstName, lastName, birthdate }) => {
-  const result = await Connection(
-    `SELECT id 
-     FROM senior_citizens 
-     WHERE firstName = ? 
-       AND lastName = ? 
-       AND birthdate = ?
-       AND deleted = 0`,
-    [firstName, lastName, birthdate]
-  );
+  const cleanBirthdate = normalizeDate(birthdate);
+
+  let sql, params;
+
+  if (cleanBirthdate === null) {
+    // No birthdate provided → check only by name
+    sql = `
+      SELECT id 
+      FROM senior_citizens 
+      WHERE firstName = ? 
+        AND lastName = ? 
+        AND birthdate IS NULL
+        AND deleted = 0`;
+    params = [firstName, lastName];
+  } else {
+    sql = `
+      SELECT id 
+      FROM senior_citizens 
+      WHERE firstName = ? 
+        AND lastName = ? 
+        AND birthdate = ?
+        AND deleted = 0`;
+    params = [firstName, lastName, cleanBirthdate];
+  }
+
+  const result = await Connection(sql, params);
   return result.length > 0;
 };
 
