@@ -34,19 +34,6 @@ const Reports = () => {
 
   return (
     <>
-      {/* Summary Cards section */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-        {/* Card to display the total number of events */}
-        <Card title="Reports" value="2" icon={<ImageIcon />} color="purple" />
-        {/* Card for registered senior citizens (hardcoded value) */}
-        <Card
-          title="Registered Senior Citizens"
-          value="3,215"
-          icon={<FileTextIcon />}
-          color="green"
-        />
-      </div>
-
       {/* Tabbed navigation for different reports */}
       <div className="bg-white rounded-lg shadow overflow-hidden">
         <div className="border-b border-gray-300">

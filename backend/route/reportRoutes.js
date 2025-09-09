@@ -3,14 +3,15 @@ const express = require("express");
 const router = express.Router();
 const reportService = require("../service/reportService");
 
-// GET /api/charts/barangay
+// Barangay distribution (with optional gender filter)
 router.get("/barangay", async (req, res) => {
   try {
-    const results = await reportService.getBarangayDistribution();
-    res.json(results);
+    const { gender } = req.query; // "Male", "Female", or undefined
+    const result = await chartService.getBarangayDistribution(gender);
+    res.json(result);
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "Failed to fetch barangay distribution." });
+    console.error("Failed to fetch barangay distribution:", err);
+    res.status(500).json({ error: "Failed to fetch barangay distribution" });
   }
 });
 
