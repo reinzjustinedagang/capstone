@@ -43,7 +43,7 @@ const SeniorCitizen = () => {
     <>
       <div className="mb-4 flex flex-col sm:flex-row justify-between items-center space-y-3 sm:space-y-0">
         <div className="relative w-full sm:w-64">
-          {activeTab === "add" ? (
+          {activeTab === "add" || activeTab === "update" ? (
             <div
               className="flex items-center cursor-pointer text-gray-600 hover:text-gray-900 transition-colors"
               onClick={() => setActiveTab("list")}
@@ -115,7 +115,12 @@ const SeniorCitizen = () => {
           <UnregisteredSeniorList onEdit={handleEdit} />
         )}
         {activeTab === "add" && (
-          <SeniorCitizenForm onSuccess={handleAddSuccess} />
+          <SeniorCitizenForm
+            onSuccess={handleAddSuccess}
+            onCancel={() => {
+              setActiveTab("list");
+            }}
+          />
         )}
         {activeTab === "update" && (
           <UpdateSeniorCitizenForm

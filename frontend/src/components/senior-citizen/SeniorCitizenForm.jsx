@@ -389,6 +389,9 @@ const SeniorCitizenForm = ({ onSubmit, onCancel, onSuccess }) => {
       {formError && <p className="text-red-600">{formError}</p>}
 
       <div className="flex justify-end gap-3">
+        <Button variant="secondary" onClick={onCancel} disabled={isSubmitting}>
+          Cancel
+        </Button>
         <Button
           type="submit"
           variant="primary"

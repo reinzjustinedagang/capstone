@@ -135,7 +135,7 @@ const Sidebar = () => {
               src={systemSettings.seal}
               alt="OSCA Logo"
               className={`h-20 w-20 object-contain rounded-full border-2 border-blue-800 transition-opacity duration-500 ${
-                loaded ? "opacity-100" : "opacity-0"
+                loaded ? "opacity-100" : "opacity-50"
               }`}
               onLoad={() => setLoaded(true)}
             />

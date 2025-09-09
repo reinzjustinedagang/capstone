@@ -46,16 +46,8 @@ const Slideshow = () => {
   // If no events available
   if (eventsData.length === 0) {
     return (
-      <section
-        className="relative h-[60vh] md:h-[70vh] flex items-center justify-center"
-        onClick={() => window.open(slider4, "_blank")}
-      >
-        <div
-          className="absolute inset-0 bg-cover bg-center transition-all duration-700"
-          style={{
-            backgroundImage: `url(${slider4})`,
-          }}
-        />
+      <section className="relative h-[60vh] md:h-[70vh] flex items-center justify-center">
+        <div className="absolute inset-0 bg-cover bg-center transition-all duration-700" />
       </section>
     );
   }
