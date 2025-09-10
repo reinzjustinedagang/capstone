@@ -11,7 +11,7 @@ exports.getBenefitsCounts = async () => {
   const query = `
     SELECT COUNT(*) AS total
     FROM benefits
-    WHERE type <> 'republic acts'
+    WHERE type <> 'republic-acts'
   `;
   const [rows] = await Connection(query);
 
