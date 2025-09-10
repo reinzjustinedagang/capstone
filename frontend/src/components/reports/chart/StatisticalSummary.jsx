@@ -5,12 +5,11 @@ const StatisticalSummary = () => {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const backendUrl = import.meta.env.VITE_API_BASE_URL;
 
   useEffect(() => {
     const fetchSummary = async () => {
       try {
-        const res = await axios.get(`${backendUrl}/api/charts/summary`);
+        const res = await axios.get("/api/charts/summary");
         setData(res.data);
       } catch (err) {
         console.error("❌ Failed to fetch summary:", err);
@@ -43,17 +42,17 @@ const StatisticalSummary = () => {
   // Extract gender counts
   const { male_count, female_count, unknown_count } = data.gender || {};
 
-  // Total senior citizens (male + female + unknown)
+  // Total senior citizens
   const totalSeniors =
     (male_count || 0) + (female_count || 0) + (unknown_count || 0);
 
-  // Active Members estimation (you can adjust if you have a flag in DB)
-  const activeMembers = Math.round(totalSeniors * 0.8); // assume ~80% active
+  // Active Members estimation (placeholder: ~80% of total)
+  const activeMembers = Math.round(totalSeniors * 0.8);
 
-  // Calculate average age (based on age distribution buckets)
+  // Calculate average age
   const ageDist = data.age || {};
   const totalInBuckets = Object.values(ageDist).reduce(
-    (sum, val) => sum + val,
+    (sum, val) => sum + (val || 0),
     0
   );
 
