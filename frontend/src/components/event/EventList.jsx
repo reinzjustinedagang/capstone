@@ -10,6 +10,7 @@ const EventList = () => {
   const [loading, setLoading] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showDeletedModal, setShowDeletedModal] = useState(false);
+  const [showDetailModal, setShowDetailModal] = useState(false);
 
   const backendUrl =
     import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
@@ -61,9 +62,13 @@ const EventList = () => {
           {events.map((event) => (
             <div
               key={event.id}
-              className="bg-white rounded-lg shadow-md overflow-hidden flex flex-col"
+              className="bg-white rounded-lg shadow-md overflow-hidden flex flex-col cursor-pointer hover:shadow-lg transition"
+              onClick={() => {
+                setSelectedEvent(event);
+                setShowDetailModal(true);
+              }}
             >
-              {/* Image Container with aspect ratio */}
+              {/* Image Container */}
               <div className="relative w-full aspect-[4/3] bg-gray-100">
                 {event.image_url ? (
                   <img
@@ -79,8 +84,9 @@ const EventList = () => {
 
                 {/* Delete Button */}
                 <button
-                  className="absolute top-2 right-2 bg-white/90 hover:bg-white text-red-500 hover:text-red-600 p-2 rounded-full shadow"
-                  onClick={() => {
+                  className="absolute top-2 right-2 bg-white/90 hover:bg-white text-red-500 hover:text-red-600 p-2 rounded-full shadow z-10"
+                  onClick={(e) => {
+                    e.stopPropagation(); // prevent triggering detail modal
                     setSelectedEvent(event);
                     setShowDeleteModal(true);
                   }}
@@ -109,6 +115,31 @@ const EventList = () => {
           ))}
         </div>
       )}
+
+      {/* Detail Modal */}
+      <Modal
+        isOpen={showDetailModal}
+        onClose={() => setShowDetailModal(false)}
+        title={selectedEvent?.title}
+      >
+        {selectedEvent && (
+          <div>
+            <img
+              src={selectedEvent.image_url || "https://placehold.co/600x400"}
+              alt={selectedEvent.title}
+              className="w-full h-64 object-cover rounded-lg mb-4"
+            />
+            <p className="text-sm text-gray-600 mb-2">
+              {new Date(selectedEvent.date).toLocaleDateString("en-US", {
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+              })}
+            </p>
+            <p className="text-gray-700">{selectedEvent.description}</p>
+          </div>
+        )}
+      </Modal>
 
       {/* Delete Confirmation Modal */}
       <Modal

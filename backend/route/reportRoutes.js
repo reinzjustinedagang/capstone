@@ -33,4 +33,23 @@ router.get("/age", async (req, res) => {
   }
 });
 
+router.get("/summary", async (req, res) => {
+  try {
+    const [gender, barangay, age] = await Promise.all([
+      reportService.getGenderDistribution(),
+      reportService.getBarangayDistribution(),
+      reportService.getAgeDistribution(),
+    ]);
+
+    res.status(200).json({
+      gender,
+      barangay,
+      age,
+    });
+  } catch (err) {
+    console.error("❌ Failed to fetch statistical summary:", err);
+    res.status(500).json({ message: "Failed to fetch statistical summary." });
+  }
+});
+
 module.exports = router;

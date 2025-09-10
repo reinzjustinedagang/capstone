@@ -12,7 +12,6 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [showSuccessModal, setShowSuccessModal] = useState(false);
 
   // 🔒 Max attempt state
   const maxAttempts = 3;
@@ -90,26 +89,23 @@ export default function Login() {
       const { user } = response.data;
       localStorage.setItem("user", JSON.stringify(user));
 
-      // Show success modal
-      setShowSuccessModal(true);
-
-      // Reset attempts
-      setAttempts(0);
-      localStorage.setItem("loginAttempts", "0");
-
-      // Navigate after 2 seconds
-      setTimeout(() => {
-        setShowSuccessModal(false);
-
-        if (user && user.role) {
-          const role = user.role.toLowerCase();
-          if (role === "admin") navigate("/admin/dashboard");
-          else if (role === "staff") navigate("/staff/dashboard");
-          else navigate("/");
+      if (user && user.role) {
+        const role = user.role.toLowerCase();
+        if (role === "admin") {
+          navigate("/admin/dashboard");
+        } else if (role === "staff") {
+          navigate("/staff/dashboard");
         } else {
+          setError("Login successful, but user role not recognized.");
           navigate("/");
         }
-      }, 2000);
+      } else {
+        setError("Login successful, but user role not found.");
+      }
+
+      // ✅ Reset attempts on success
+      setAttempts(0);
+      localStorage.setItem("loginAttempts", "0");
     } catch (err) {
       console.error("Login error:", err);
       setError(
@@ -313,16 +309,6 @@ export default function Login() {
             Access
           </button>
         </div>
-      </Modal>
-      {/* Success Modal */}
-      <Modal
-        isOpen={showSuccessModal}
-        onClose={() => setShowSuccessModal(false)}
-        title="Login Successful"
-      >
-        <p className="text-center text-green-600 font-semibold">
-          You have logged in successfully!
-        </p>
       </Modal>
     </>
   );
