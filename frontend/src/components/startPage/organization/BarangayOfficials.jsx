@@ -47,10 +47,6 @@ const BarangayOfficials = ({ title }) => {
         </div>
       ) : (
         <>
-          {error && <p className="text-red-500 text-center mb-4">{error}</p>}
-          {successMessage && (
-            <p className="text-green-500 text-center mb-4">{successMessage}</p>
-          )}
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 place-items-center">
             {barangays.length === 0 ? (
               <p className="col-span-full text-center text-gray-600 py-4">

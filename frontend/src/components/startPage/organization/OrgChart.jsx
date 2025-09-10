@@ -65,16 +65,6 @@ const OrgChart = () => {
           <Loader2 className="animate-spin h-8 w-8 text-blue-500" />
           <p className="ml-3 text-gray-600">Processing request...</p>
         </div>
-      ) : error ? (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg mx-auto mb-4 flex items-center">
-          <XCircle className="h-5 w-5 mr-2" />
-          <span>{error}</span>
-        </div>
-      ) : successMessage ? (
-        <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg mx-auto mb-4 flex items-center">
-          <CheckCircle className="h-5 w-5 mr-2" />
-          <span>{successMessage}</span>
-        </div>
       ) : positions.length === 0 ? (
         <p className="col-span-full text-center text-gray-600 py-4">
           No Organization officer found.

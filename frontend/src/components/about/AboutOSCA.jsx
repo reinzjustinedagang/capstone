@@ -11,6 +11,7 @@ import {
   CheckCircle,
   XCircle,
 } from "lucide-react";
+import AboutUs from "./AboutUs";
 
 const AboutOSCA = () => {
   const backendUrl = import.meta.env.VITE_API_BASE_URL;
@@ -55,80 +56,84 @@ const AboutOSCA = () => {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
-      <div className="space-y-6">
-        {/* Mission */}
-        <div className="mt-4">
-          <label className="block text-base font-medium text-gray-700">
-            Mission
-          </label>
-          <div className="mt-1 relative">
-            <textarea
-              value={settings.mission}
-              onChange={(e) =>
-                setSettings({ ...settings, mission: e.target.value })
-              }
-              className="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 pl-10 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-              rows={3}
-            />
-            <Target className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
+    <>
+      <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
+        <div className="space-y-6">
+          {/* Preamble */}
+          <div className="mt-4">
+            <label className="block text-base font-medium text-gray-700">
+              Preamble
+            </label>
+            <div className="mt-1 relative">
+              <textarea
+                value={settings.preamble}
+                onChange={(e) =>
+                  setSettings({ ...settings, preamble: e.target.value })
+                }
+                className="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 pl-10 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                rows={4}
+              />
+              <ScrollText className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
+            </div>
           </div>
-        </div>
 
-        {/* Vision */}
-        <div className="mt-4">
-          <label className="block text-base font-medium text-gray-700">
-            Vision
-          </label>
-          <div className="mt-1 relative">
-            <textarea
-              value={settings.vision}
-              onChange={(e) =>
-                setSettings({ ...settings, vision: e.target.value })
-              }
-              className="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 pl-10 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-              rows={3}
-            />
-            <Eye className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
+          {/* Mission */}
+          <div className="mt-4">
+            <label className="block text-base font-medium text-gray-700">
+              Mission
+            </label>
+            <div className="mt-1 relative">
+              <textarea
+                value={settings.mission}
+                onChange={(e) =>
+                  setSettings({ ...settings, mission: e.target.value })
+                }
+                className="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 pl-10 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                rows={3}
+              />
+              <Target className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
+            </div>
           </div>
-        </div>
 
-        {/* Preamble */}
-        <div className="mt-4">
-          <label className="block text-base font-medium text-gray-700">
-            Preamble
-          </label>
-          <div className="mt-1 relative">
-            <textarea
-              value={settings.preamble}
-              onChange={(e) =>
-                setSettings({ ...settings, preamble: e.target.value })
-              }
-              className="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 pl-10 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-              rows={4}
-            />
-            <ScrollText className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
+          {/* Vision */}
+          <div className="mt-4">
+            <label className="block text-base font-medium text-gray-700">
+              Vision
+            </label>
+            <div className="mt-1 relative">
+              <textarea
+                value={settings.vision}
+                onChange={(e) =>
+                  setSettings({ ...settings, vision: e.target.value })
+                }
+                className="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 pl-10 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                rows={3}
+              />
+              <Eye className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
+            </div>
           </div>
-        </div>
 
-        {/* Save Button */}
-        <div className="flex justify-end">
-          <Button
-            onClick={() => setShowConfirmModal(true)} // Open confirm modal
-            variant="primary"
-            icon={
-              loading ? (
-                <Loader2 className="animate-spin h-4 w-4 mr-2" />
-              ) : (
-                <SaveIcon className="h-4 w-4 mr-2" />
-              )
-            }
-            disabled={loading}
-          >
-            {loading ? "Saving..." : "Save"}
-          </Button>
+          {/* Save Button */}
+          <div className="flex justify-end">
+            <Button
+              onClick={() => setShowConfirmModal(true)} // Open confirm modal
+              variant="primary"
+              icon={
+                loading ? (
+                  <Loader2 className="animate-spin h-4 w-4 mr-2" />
+                ) : (
+                  <SaveIcon className="h-4 w-4 mr-2" />
+                )
+              }
+              disabled={loading}
+            >
+              {loading ? "Saving..." : "Save"}
+            </Button>
+          </div>
         </div>
       </div>
+
+      <AboutUs />
 
       {/* Confirm Modal */}
       <Modal
@@ -179,7 +184,7 @@ const AboutOSCA = () => {
           </Button>
         </div>
       </Modal>
-    </div>
+    </>
   );
 };
 

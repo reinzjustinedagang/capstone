@@ -104,7 +104,7 @@ const EventSlideshow = () => {
           className="mt-3 px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg flex items-center gap-2 mx-auto"
         >
           <Trash2 className="h-4 w-4" />
-          Delete Event
+          Delete Slideshow
         </button>
       </div>
 
