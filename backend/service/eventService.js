@@ -51,9 +51,8 @@ exports.create = async (data, user, ip) => {
   if (type === "slideshow") {
     // Assign a default title if empty
     if (!title || title.trim() === "") title = "Slideshow";
-    if (!description || description.trim() === "") description = "slideshow";
-    if (!date || date.trim() === "")
-      date = new Date().toISOString().split("T")[0];
+    if (!description || description.trim() === "") description = "Slideshow";
+    if (!date || date.trim() === "") date = "2025-05-31";
     if (!image_url) {
       throw new Error("Image is required for slideshow.");
     }
