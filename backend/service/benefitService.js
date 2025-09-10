@@ -59,6 +59,10 @@ exports.create = async (data, user, ip) => {
     throw new Error("Title is required for Republic Acts");
   }
 
+  if (type === "republic acts" && !enacted_date) {
+    throw new Error("Enacted date is required for Republic Acts");
+  }
+
   // if (type !== "republic acts" && !image_url) {
   //   throw new Error("Image is required for non-Republic Acts");
   // }
@@ -67,12 +71,16 @@ exports.create = async (data, user, ip) => {
     INSERT INTO benefits (type, title, description, provider, enacted_date, image_url)
     VALUES (?, ?, ?, ?, ?, ?)
   `;
+
+  const enacted_date_safe =
+    enacted_date && enacted_date !== "" ? enacted_date : null;
+
   const result = await Connection(query, [
     type,
     title,
     description,
     provider,
-    enacted_date,
+    enacted_date_safe,
     image_url,
   ]);
 
