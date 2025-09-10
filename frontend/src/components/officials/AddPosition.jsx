@@ -196,7 +196,7 @@ const AddPosition = () => {
               >
                 <option value="">-- Select Category --</option>
                 <option value="orgchart">Organization Chart</option>
-                <option value="federation">Municipal Federation</option>
+                <option value="federation">Federation Officer</option>
               </select>
               <Tags className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
             </div>

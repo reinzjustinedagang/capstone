@@ -25,7 +25,7 @@ const Events = () => {
 
   return (
     <>
-      <div className="flex flex-col sm:flex-row justify-end sm:items-center mb-4">
+      <div className="mt-4 mb-4 md:mt-0 flex flex-col sm:flex-row justify-end sm:items-center ">
         <Button
           variant="primary"
           icon={<Plus className="h-4 w-4 mr-2" />}

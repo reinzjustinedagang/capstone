@@ -23,7 +23,7 @@ exports.getAll = async () => {
   const query = `
     SELECT type, description, provider, image_url
     FROM benefits
-    WHERE type != 'republic acts'
+    WHERE type != 'republic-acts'
     ORDER BY created_at ASC
     LIMIT 5
   `;

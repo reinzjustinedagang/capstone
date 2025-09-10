@@ -11,7 +11,7 @@ const Officials = () => {
   const [activeTab, setActiveTab] = useState("barangay");
   return (
     <>
-      <div className="flex flex-col sm:flex-row justify-end sm:items-center mb-4">
+      <div className="mt-4 md:mt-0 flex flex-col sm:flex-row justify-end sm:items-center mb-4">
         <Button
           variant="primary"
           icon={<Plus className="h-4 w-4 mr-2" />}
@@ -45,7 +45,7 @@ const Officials = () => {
                 }`}
             >
               <User className="inline-block h-4 w-4 mr-2" />
-              Municipal Federation Officer
+              Federation Officer
             </button>
             <button
               onClick={() => setActiveTab("organizational")}

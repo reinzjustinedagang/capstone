@@ -93,7 +93,9 @@ const Benefits = () => {
                   {/* Content */}
                   <div className="p-4">
                     <p className="text-sm text-gray-600 mb-1 capitalize">
-                      {benefit.type}
+                      {benefit.type === "national"
+                        ? "National Benefits"
+                        : "Local Benefits"}
                     </p>
                     <h3 className="text-base font-semibold text-gray-900 mb-2 line-clamp-2">
                       {benefit.provider}
