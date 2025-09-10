@@ -220,6 +220,9 @@ const SeniorCitizenList = ({ onEdit }) => {
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  ID
+                </th>
                 {[
                   { label: "Name", key: "lastName" },
                   { label: "Age", key: "age" },
@@ -246,7 +249,7 @@ const SeniorCitizenList = ({ onEdit }) => {
                   Contact Number
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Health Status
+                  Remarks
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Actions
@@ -257,6 +260,9 @@ const SeniorCitizenList = ({ onEdit }) => {
               {seniorCitizens.length > 0 ? (
                 seniorCitizens.map((citizen) => (
                   <tr key={citizen.id}>
+                    <td className="px-6 py-4 text-sm text-gray-500">
+                      {citizen.form_data?.idNumber}
+                    </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                       {`${citizen.lastName}, ${citizen.firstName} ${
                         citizen.middleName || ""
@@ -280,23 +286,7 @@ const SeniorCitizenList = ({ onEdit }) => {
                     <td className="px-6 py-4 text-sm text-gray-500">
                       {citizen.form_data?.mobileNumber}
                     </td>
-                    <td className="px-6 py-4">
-                      <span
-                        className={`px-2 inline-flex text-sm leading-5 font-semibold rounded-md ${
-                          citizen.form_data?.healthStatus === "Good"
-                            ? "bg-green-100 text-green-800"
-                            : citizen.form_data?.healthStatus ===
-                              "With Maintenance Meds"
-                            ? "bg-blue-100 text-blue-800"
-                            : citizen.form_data?.healthStatus ===
-                              "Needs Medical Attention"
-                            ? "bg-yellow-100 text-yellow-800"
-                            : "bg-red-100 text-red-800"
-                        }`}
-                      >
-                        {citizen.form_data?.healthStatus}
-                      </span>
-                    </td>
+                    <td className="px-6 py-4">{citizen.form_data?.remarks}</td>
                     <td className="px-6 py-4 text-sm font-xs">
                       <div className="flex space-x-2">
                         <button

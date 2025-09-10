@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Info, Edit, Trash2 } from "lucide-react";
-import Modal from "../UI/Modal"; // reuse your modal
+import Modal from "../UI/Modal";
 
 const BenefitsCard = ({
   type,
@@ -13,20 +13,43 @@ const BenefitsCard = ({
 
   return (
     <>
-      <div className="bg-white rounded-2xl shadow p-4 border border-gray-200 hover:shadow-lg transition flex flex-col">
-        {/* Action buttons */}
-        <div className="flex items-center justify-end mb-2">
-          <div className="flex items-center gap-2">
+      {/* Card */}
+      <div
+        className="bg-white rounded-lg shadow-md overflow-hidden flex flex-col cursor-pointer hover:shadow-lg transition"
+        onClick={() => setShowDetailModal(true)}
+      >
+        {/* Image */}
+        <div className="relative w-full aspect-[4/3] bg-gray-100">
+          {type.image_url ? (
+            <img
+              src={type.image_url}
+              alt={type.title || "Benefit Image"}
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <div className="flex items-center justify-center w-full h-full text-gray-500">
+              No Image
+            </div>
+          )}
+
+          {/* Action buttons */}
+          <div className="absolute top-2 right-2 flex gap-2 z-10">
             <button
-              onClick={() => onEdit && onEdit(type.id)}
-              className="text-blue-500 hover:text-blue-700 transition"
+              onClick={(e) => {
+                e.stopPropagation(); // prevent opening modal
+                onEdit && onEdit(type.id);
+              }}
+              className="bg-white/90 hover:bg-white text-blue-500 hover:text-blue-700 p-2 rounded-full shadow"
               title="Edit"
             >
               <Edit className="w-4 h-4" />
             </button>
             <button
-              onClick={() => onDelete && onDelete(type.id)}
-              className="text-red-500 hover:text-red-700 transition"
+              onClick={(e) => {
+                e.stopPropagation(); // prevent opening modal
+                onDelete && onDelete(type.id);
+              }}
+              className="bg-white/90 hover:bg-white text-red-500 hover:text-red-700 p-2 rounded-full shadow"
               title="Delete"
             >
               <Trash2 className="w-4 h-4" />
@@ -34,38 +57,31 @@ const BenefitsCard = ({
           </div>
         </div>
 
-        {/* Image */}
-        {type.image_url && (
-          <img
-            src={type.image_url}
-            alt={type.title || "Benefit Image"}
-            className="w-full h-32 object-cover rounded-lg mb-2"
-          />
-        )}
-
-        {/* Description (clickable to expand) */}
-        <p
-          onClick={() => setShowDetailModal(true)}
-          className={`text-sm font-medium flex items-center gap-2 cursor-pointer ${textColor}`}
-          style={{
-            display: "-webkit-box",
-            WebkitLineClamp: 3,
-            WebkitBoxOrient: "vertical",
-            overflow: "hidden",
-          }}
-        >
-          {icon} {type.description}
-        </p>
-
-        {/* Provider */}
-        {type.provider && (
-          <div className="text-xs text-gray-400 mt-1">
-            Provided by: {type.provider}
-          </div>
-        )}
+        {/* Content */}
+        <div className="p-4 flex flex-col flex-grow">
+          <h3 className="text-base font-semibold text-gray-900 mb-2 truncate">
+            {type.title}
+          </h3>
+          <p
+            className={`text-sm flex items-center gap-2 ${textColor}`}
+            style={{
+              display: "-webkit-box",
+              WebkitLineClamp: 3,
+              WebkitBoxOrient: "vertical",
+              overflow: "hidden",
+            }}
+          >
+            {icon} {type.description}
+          </p>
+          {type.provider && (
+            <div className="text-xs text-gray-400 mt-1">
+              Provided by: {type.provider}
+            </div>
+          )}
+        </div>
       </div>
 
-      {/* Detail Modal for full description */}
+      {/* Detail Modal */}
       <Modal
         isOpen={showDetailModal}
         onClose={() => setShowDetailModal(false)}
@@ -76,7 +92,7 @@ const BenefitsCard = ({
             <img
               src={type.image_url}
               alt={type.title || "Benefit Image"}
-              className="w-full h-48 object-cover rounded-lg mb-4"
+              className="w-full h-64 object-cover rounded-lg mb-4"
             />
           )}
           <p className="text-gray-700 text-sm mb-2">{type.description}</p>
