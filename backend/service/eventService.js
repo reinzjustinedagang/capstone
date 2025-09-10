@@ -42,7 +42,7 @@ exports.getFive = async () => {
 };
 
 exports.create = async (data, user, ip) => {
-  const { title, type, description, date, image_url } = data;
+  let { title, type, description, date, image_url } = data;
 
   // Validation
   if (!type) {
@@ -50,6 +50,7 @@ exports.create = async (data, user, ip) => {
   }
 
   if (type === "slideshow") {
+    title = "Slideshow";
     if (!image_url) {
       throw new Error("Image is required for slideshow.");
     }
