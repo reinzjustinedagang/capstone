@@ -90,30 +90,25 @@ export default function Login() {
       const { user } = response.data;
       localStorage.setItem("user", JSON.stringify(user));
 
-      if (user && user.role) {
-        const role = user.role.toLowerCase();
-        if (role === "admin") {
-          navigate("/admin/dashboard");
-        } else if (role === "staff") {
-          navigate("/staff/dashboard");
-        } else {
-          setError("Login successful, but user role not recognized.");
-          navigate("/");
-        }
-      } else {
-        setError("Login successful, but user role not found.");
-      }
-
-      // After login success
-      setAttempts(0);
-      localStorage.setItem("loginAttempts", "0");
-
       // Show success modal
       setShowSuccessModal(true);
 
-      // Optional: auto-close after 2 seconds
+      // Reset attempts
+      setAttempts(0);
+      localStorage.setItem("loginAttempts", "0");
+
+      // Navigate after 2 seconds
       setTimeout(() => {
         setShowSuccessModal(false);
+
+        if (user && user.role) {
+          const role = user.role.toLowerCase();
+          if (role === "admin") navigate("/admin/dashboard");
+          else if (role === "staff") navigate("/staff/dashboard");
+          else navigate("/");
+        } else {
+          navigate("/");
+        }
       }, 2000);
     } catch (err) {
       console.error("Login error:", err);
