@@ -12,8 +12,8 @@ import {
 import Modal from "../UI/Modal";
 import Button from "../UI/Button";
 import SeniorCitizenList from "./SeniorCitizenList";
-import SeniorCitizenForm from "./SeniorCitizenForm";
-import UpdateSeniorCitizenForm from "./UpdateSeniorCitizenForm";
+import SeniorCitizenForm from "./form/SeniorCitizenForm";
+import UpdateSeniorCitizenForm from "./form/UpdateSeniorCitizenForm";
 import UnregisteredSeniorList from "./UnregisteredSeniorList";
 
 const SeniorCitizen = () => {

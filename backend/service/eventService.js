@@ -44,29 +44,43 @@ exports.getFive = async () => {
 exports.create = async (data, user, ip) => {
   const { title, type, description, date, image_url } = data;
 
-  if (!title || !type || !description || !date || !image_url) {
-    throw new Error("All fields including image are required");
+  // Validation
+  if (!type) {
+    throw new Error("Event type is required.");
   }
 
+  if (type === "slideshow") {
+    if (!image_url) {
+      throw new Error("Image is required for slideshow.");
+    }
+  } else {
+    // type === "event"
+    if (!title || !description || !date || !image_url) {
+      throw new Error("All fields including image are required for an event.");
+    }
+  }
+
+  // Insert query
   const query = `
     INSERT INTO events (title, type, description, date, image_url)
     VALUES (?, ?, ?, ?, ?)
   `;
 
   const result = await Connection(query, [
-    title,
+    title || null,
     type,
-    description,
-    date,
+    description || null,
+    date || null,
     image_url,
   ]);
 
+  // Log audit
   await logAudit(
     user.id,
     user.email,
     user.role,
     "CREATE",
-    `Added event: '${title}'`,
+    `Added event: '${title || "Slideshow"}'`,
     ip
   );
 
@@ -76,15 +90,23 @@ exports.create = async (data, user, ip) => {
 exports.update = async (id, data, user, ip) => {
   const { title, type, description, date, image_url } = data;
 
-  // Fetch current event to check if old image exists
-  const events = await Connection(`SELECT image_url FROM events WHERE id = ?`, [
-    id,
-  ]);
+  // Fetch current event
+  const events = await Connection(`SELECT * FROM events WHERE id = ?`, [id]);
   const currentEvent = events[0];
-
   if (!currentEvent) throw new Error("Event not found");
 
-  // If a new image is provided and it’s different from the old one, delete old image
+  // Validation
+  if (!type) throw new Error("Event type is required");
+
+  if (type === "slideshow") {
+    if (!image_url) throw new Error("Image is required for slideshow");
+  } else {
+    if (!title || !description || !date || !image_url) {
+      throw new Error("All fields including image are required for an event");
+    }
+  }
+
+  // Handle image replacement
   if (
     image_url &&
     currentEvent.image_url &&
@@ -98,6 +120,7 @@ exports.update = async (id, data, user, ip) => {
     }
   }
 
+  // Update query
   const query = `
     UPDATE events
     SET title = ?, type = ?, description = ?, date = ?, image_url = ?
@@ -105,10 +128,10 @@ exports.update = async (id, data, user, ip) => {
   `;
 
   const result = await Connection(query, [
-    title,
+    title || null,
     type,
-    description,
-    date,
+    description || null,
+    date || null,
     image_url,
     id,
   ]);
@@ -119,7 +142,7 @@ exports.update = async (id, data, user, ip) => {
       user.email,
       user.role,
       "UPDATE",
-      `Updated event ID ${id}: '${title}'`,
+      `Updated event ID ${id}: '${title || "Slideshow"}'`,
       ip
     );
   }

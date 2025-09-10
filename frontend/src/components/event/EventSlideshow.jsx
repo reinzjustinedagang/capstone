@@ -91,20 +91,10 @@ const EventSlideshow = () => {
       />
 
       {/* Overlay */}
-      <div className="absolute inset-0 bg-black/40 rounded-xl" />
+      <div className="absolute inset-0 rounded-xl" />
 
       {/* Event info */}
       <div className="absolute bottom-12 left-1/2 -translate-x-1/2 text-center text-white px-6 max-w-2xl">
-        <h2 className="text-2xl font-bold">{currentEvent.title}</h2>
-        <p className="text-sm mt-2 line-clamp-3">{currentEvent.description}</p>
-        <p className="text-xs mt-1">
-          {new Date(currentEvent.date).toLocaleDateString("en-US", {
-            year: "numeric",
-            month: "short",
-            day: "numeric",
-          })}
-        </p>
-
         {/* Delete button */}
         <button
           onClick={() => {

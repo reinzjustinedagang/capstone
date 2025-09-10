@@ -3,8 +3,8 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { ChevronDown, ChevronUp, Loader2 } from "lucide-react";
-import Button from "../UI/Button";
-import Modal from "../UI/Modal";
+import Button from "../../UI/Button";
+import Modal from "../../UI/Modal";
 
 const UpdateSeniorCitizenForm = ({ id, onSuccess, onCancel }) => {
   const [fields, setFields] = useState([]);

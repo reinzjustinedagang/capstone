@@ -87,10 +87,18 @@ const AddEvent = ({ onEventAdded }) => {
     try {
       const { title, type, description, date } = formData;
 
-      if (!title || !type || !description || !date || !imageFile) {
-        setError("All fields including image are required.");
-        setLoading(false);
-        return;
+      if (type === "slideshow") {
+        if (!type || !imageFile) {
+          setError("All fields including image are required.");
+          setLoading(false);
+          return;
+        }
+      } else {
+        if (!title || !type || !description || !date || !imageFile) {
+          setError("All fields including image are required.");
+          setLoading(false);
+          return;
+        }
       }
 
       const formPayload = new FormData();
@@ -173,19 +181,6 @@ const AddEvent = ({ onEventAdded }) => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
           <label className="block text-sm font-medium text-gray-700">
-            Title
-          </label>
-          <input
-            type="text"
-            name="title"
-            value={formData.title}
-            onChange={handleChange}
-            className="mt-1 w-full border rounded-md px-3 py-2 focus:ring-blue-500 focus:outline-none"
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700">
             Event Type
           </label>
           <select
@@ -200,31 +195,49 @@ const AddEvent = ({ onEventAdded }) => {
           </select>
         </div>
 
-        <div className="md:col-span-2">
-          <label className="block text-sm font-medium text-gray-700">
-            Description
-          </label>
-          <textarea
-            name="description"
-            value={formData.description}
-            onChange={handleChange}
-            className="mt-1 w-full border rounded-md px-3 py-2 focus:ring-blue-500 focus:outline-none"
-            rows={3}
-          />
-        </div>
+        {/* Only show the following fields if type is "event" */}
+        {formData.type === "event" && (
+          <>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">
+                Title
+              </label>
+              <input
+                type="text"
+                name="title"
+                value={formData.title}
+                onChange={handleChange}
+                className="mt-1 w-full border rounded-md px-3 py-2 focus:ring-blue-500 focus:outline-none"
+              />
+            </div>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700">
-            Date
-          </label>
-          <input
-            type="date"
-            name="date"
-            value={formData.date}
-            onChange={handleChange}
-            className="mt-1 w-full border rounded-md px-3 py-2 focus:ring-blue-500 focus:outline-none"
-          />
-        </div>
+            <div className="md:col-span-2">
+              <label className="block text-sm font-medium text-gray-700">
+                Description
+              </label>
+              <textarea
+                name="description"
+                value={formData.description}
+                onChange={handleChange}
+                className="mt-1 w-full border rounded-md px-3 py-2 focus:ring-blue-500 focus:outline-none"
+                rows={3}
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700">
+                Date
+              </label>
+              <input
+                type="date"
+                name="date"
+                value={formData.date}
+                onChange={handleChange}
+                className="mt-1 w-full border rounded-md px-3 py-2 focus:ring-blue-500 focus:outline-none"
+              />
+            </div>
+          </>
+        )}
       </div>
 
       {/* Error Message */}
