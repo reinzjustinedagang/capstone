@@ -15,6 +15,7 @@ import SeniorCitizenList from "./SeniorCitizenList";
 import SeniorCitizenForm from "./form/SeniorCitizenForm";
 import UpdateSeniorCitizenForm from "./form/UpdateSeniorCitizenForm";
 import UnregisteredSeniorList from "./UnregisteredSeniorList";
+import GetUnregisteredSenior from "./form/GetUnregisteredSenior";
 
 const SeniorCitizen = () => {
   const [activeTab, setActiveTab] = useState("list");
@@ -39,20 +40,32 @@ const SeniorCitizen = () => {
     setActiveTab("update"); // Switch to the update tab
   };
 
+  const onView = (id) => {
+    setSelectedCitizenId(id); // Set the ID of the benefit to be
+    setActiveTab("view");
+  };
+
+  const onRegister = (id) => {
+    setSelectedCitizenId(id);
+    setActiveTab("view"); // or "register" if you want a different flow
+  };
+
   return (
     <>
       <div className="mt-4 mb-4 md:mt-0 flex flex-col sm:flex-row justify-between items-center space-y-3 sm:space-y-0">
         <div className="relative w-full sm:w-64">
-          {activeTab === "add" || activeTab === "update" ? (
+          {activeTab !== "list" && (
             <div
               className="flex items-center cursor-pointer text-gray-600 hover:text-gray-900 transition-colors"
-              onClick={() => setActiveTab("list")}
+              onClick={() =>
+                activeTab === "view" && selectedCitizenId
+                  ? setActiveTab("unregistered")
+                  : setActiveTab("list")
+              }
             >
               <ArrowUp className="h-5 w-5 mr-2 -rotate-90" />
               Back to Senior Citizens
             </div>
-          ) : (
-            <></>
           )}
         </div>
 
@@ -120,7 +133,7 @@ const SeniorCitizen = () => {
       <div className="bg-white shadow overflow-hidden">
         {activeTab === "list" && <SeniorCitizenList onEdit={handleEdit} />}
         {activeTab === "unregistered" && (
-          <UnregisteredSeniorList onEdit={handleEdit} />
+          <UnregisteredSeniorList onView={onView} onRegister={onRegister} />
         )}
         {activeTab === "add" && (
           <SeniorCitizenForm
@@ -136,6 +149,15 @@ const SeniorCitizen = () => {
             onSuccess={handleUpdateSuccess}
             onCancel={() => {
               setActiveTab("list");
+            }}
+          />
+        )}
+        {activeTab === "view" && (
+          <GetUnregisteredSenior
+            id={selectedCitizenId}
+            onSuccess={handleUpdateSuccess}
+            onCancel={() => {
+              setActiveTab("unregistered");
             }}
           />
         )}

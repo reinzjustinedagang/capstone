@@ -88,7 +88,7 @@ const isDuplicateSeniorCitizen = async ({ firstName, lastName, birthdate }) => {
 
 // register
 // In your senior citizen service file
-exports.registerSeniorCitizen = async (data, ip) => {
+exports.applySeniorCitizen = async (data, ip) => {
   try {
     // 🔎 Check for duplicates
     if (await isDuplicateSeniorCitizen(data)) {
@@ -131,6 +131,52 @@ exports.registerSeniorCitizen = async (data, ip) => {
   } catch (error) {
     if (error.code === 409) throw error; // Duplicate error
     console.error("❌ Error creating senior citizen:", error);
+    throw new Error("Failed to register senior citizen.");
+  }
+};
+
+// Mark senior citizen as registered
+exports.registerSeniorCitizen = async (id, user, ip) => {
+  try {
+    // Check if the senior exists
+    const [senior] = await Connection(
+      `SELECT id, registered FROM senior_citizens WHERE id = ?`,
+      [id]
+    );
+
+    if (!senior) {
+      return false; // not found
+    }
+
+    // If already registered, just return true (idempotent)
+    if (senior.registered === 1) {
+      return true;
+    }
+
+    // Mark as registered
+    const result = await Connection(
+      `UPDATE senior_citizens 
+       SET registered = 1,
+           updated_at = NOW()
+       WHERE id = ?`,
+      [id]
+    );
+
+    // Audit log only if successful
+    if (result.affectedRows > 0 && user) {
+      await logAudit(
+        user.id,
+        user.email,
+        user.role,
+        "Register",
+        `Registered Senior Citizen ID: ${id}`,
+        ip
+      );
+    }
+
+    return result.affectedRows > 0;
+  } catch (error) {
+    console.error(`❌ Error registering senior citizen ID ${id}:`, error);
     throw new Error("Failed to register senior citizen.");
   }
 };
@@ -331,7 +377,6 @@ exports.getPaginatedFilteredCitizens = async (options) => {
   }
 };
 
-// Soft delete (mark as deleted, set deleted_at)
 // Soft delete (mark as deleted, set deleted_at)
 exports.softDeleteSeniorCitizen = async (id, user, ip) => {
   try {

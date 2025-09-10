@@ -3,6 +3,7 @@ import Button from "../UI/Button";
 import Modal from "../UI/Modal";
 import Pagination from "../UI/Component/Pagination";
 import axios from "axios";
+import { CheckCircle, Trash2 } from "lucide-react";
 
 const UnregisteredSeniorList = ({ onView, onRegister }) => {
   const [loading, setLoading] = useState(false);
@@ -12,6 +13,11 @@ const UnregisteredSeniorList = ({ onView, onRegister }) => {
   const [limit] = useState(10);
   const [totalPages, setTotalPages] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
+
+  // Delete state
+  const [deleteTarget, setDeleteTarget] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
 
   const backendUrl =
     import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
@@ -44,6 +50,30 @@ const UnregisteredSeniorList = ({ onView, onRegister }) => {
   useEffect(() => {
     fetchUnregisteredCitizens();
   }, [page]);
+
+  /** --------------------------
+   * Delete senior citizen
+   * -------------------------- */
+  const confirmDelete = (citizen) => setDeleteTarget(citizen);
+
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    setIsDeleting(true);
+    try {
+      await axios.delete(
+        `${backendUrl}/api/senior-citizens/permanent-delete/${deleteTarget.id}`,
+        { withCredentials: true }
+      );
+      setDeleteTarget(null);
+      setShowSuccessModal(true); // show success modal
+      fetchUnregisteredCitizens(); // refresh list
+    } catch (err) {
+      console.error("Failed to delete senior citizen:", err);
+      alert("Failed to delete senior citizen.");
+    } finally {
+      setIsDeleting(false);
+    }
+  };
 
   return (
     <div>
@@ -95,12 +125,13 @@ const UnregisteredSeniorList = ({ onView, onRegister }) => {
                         >
                           View
                         </Button>
-                        <Button
-                          variant="primary"
-                          onClick={() => onRegister(citizen.id)}
+                        <button
+                          onClick={() => confirmDelete(citizen)}
+                          className="text-red-600 hover:text-red-900"
+                          aria-label={`Delete ${citizen.firstName} ${citizen.lastName}`}
                         >
-                          Register
-                        </Button>
+                          <Trash2 className="h-5 w-5" />
+                        </button>
                       </div>
                     </td>
                   </tr>
@@ -129,6 +160,53 @@ const UnregisteredSeniorList = ({ onView, onRegister }) => {
           setPage={setPage}
         />
       </div>
+
+      {/* Confirm Delete Modal */}
+      <Modal
+        isOpen={!!deleteTarget}
+        onClose={() => setDeleteTarget(null)}
+        title="Confirm Delete"
+      >
+        <div className="p-4 text-gray-700">
+          Are you sure you want to permanently delete{" "}
+          <strong>
+            {deleteTarget?.firstName} {deleteTarget?.lastName}
+          </strong>
+          ?
+        </div>
+        <div className="flex justify-end space-x-3 p-4">
+          <Button
+            variant="secondary"
+            onClick={() => setDeleteTarget(null)}
+            disabled={isDeleting}
+          >
+            Cancel
+          </Button>
+          <Button variant="danger" onClick={handleDelete} disabled={isDeleting}>
+            {isDeleting ? "Deleting..." : "Delete"}
+          </Button>
+        </div>
+      </Modal>
+
+      {/* Success Modal */}
+      <Modal
+        isOpen={showSuccessModal}
+        onClose={() => setShowSuccessModal(false)}
+        title="Success"
+      >
+        <div className="p-6 text-center">
+          <div className="mx-auto mb-4 w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
+            <Trash2 className="h-5 w-5 text-red-600" />
+          </div>
+          <h3 className="text-lg font-medium text-gray-800 mb-2">Deleted</h3>
+          <p className="text-sm text-gray-600 mb-4">
+            Senior citizen deleted successfully.
+          </p>
+          <Button variant="primary" onClick={() => setShowSuccessModal(false)}>
+            OK
+          </Button>
+        </div>
+      </Modal>
     </div>
   );
 };

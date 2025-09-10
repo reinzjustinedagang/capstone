@@ -147,7 +147,7 @@ const RegisterSenior = () => {
         form_data: JSON.stringify(dynamicFields),
       };
 
-      await axios.post(`${backendUrl}/api/senior-citizens/register`, payload, {
+      await axios.post(`${backendUrl}/api/senior-citizens/apply`, payload, {
         withCredentials: true,
       });
 
@@ -375,7 +375,7 @@ const RegisterSenior = () => {
               </div>
             ))}
 
-          <DocumentUpload formData={formData} setFormData={setFormData} />
+          {/* <DocumentUpload formData={formData} setFormData={setFormData} /> */}
 
           {formError && <p className="text-red-600">{formError}</p>}
 

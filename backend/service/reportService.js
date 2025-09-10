@@ -27,18 +27,29 @@ exports.getBarangayDistribution = async () => {
 exports.getGenderDistribution = async () => {
   try {
     const sql = `
-  SELECT 
-    CAST(SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(form_data, '$.gender')) = 'Male' THEN 1 ELSE 0 END) AS UNSIGNED) AS male_count,
-    CAST(SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(form_data, '$.gender')) = 'Female' THEN 1 ELSE 0 END) AS UNSIGNED) AS female_count,
-    CAST(SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(form_data, '$.gender')) IS NULL 
-                  OR JSON_UNQUOTE(JSON_EXTRACT(form_data, '$.gender')) = '' 
-                 THEN 1 ELSE 0 END) AS UNSIGNED) AS unknown_count
-  FROM senior_citizens
-  WHERE deleted = 0 AND registered = 1
-`;
+      SELECT 
+        CAST(SUM(CASE 
+          WHEN JSON_UNQUOTE(JSON_EXTRACT(form_data, '$.gender')) = 'Male' THEN 1 
+          ELSE 0 
+        END) AS UNSIGNED) AS male_count,
+        CAST(SUM(CASE 
+          WHEN JSON_UNQUOTE(JSON_EXTRACT(form_data, '$.gender')) = 'Female' THEN 1 
+          ELSE 0 
+        END) AS UNSIGNED) AS female_count,
+        CAST(SUM(CASE 
+          WHEN JSON_UNQUOTE(JSON_EXTRACT(form_data, '$.gender')) IS NULL 
+            OR JSON_UNQUOTE(JSON_EXTRACT(form_data, '$.gender')) = '' 
+            OR JSON_UNQUOTE(JSON_EXTRACT(form_data, '$.gender')) NOT IN ('Male','Female')
+          THEN 1 
+          ELSE 0 
+        END) AS UNSIGNED) AS unknown_count,
+        COUNT(*) AS total_seniors
+      FROM senior_citizens
+      WHERE deleted = 0 AND registered = 1
+    `;
 
     const result = await Connection(sql);
-    return result[0];
+    return result[0]; // { male_count, female_count, unknown_count, total_seniors }
   } catch (err) {
     console.error("❌ Error fetching gender distribution:", err);
     throw err;

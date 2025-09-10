@@ -36,7 +36,7 @@ router.get("/unregistered", async (req, res) => {
 });
 
 // POST: Create new senior citizen (with duplicate check)
-router.post("/register", async (req, res) => {
+router.post("/apply", async (req, res) => {
   const ip = req.userIp;
 
   try {
@@ -50,7 +50,7 @@ router.post("/register", async (req, res) => {
     // Include barangay_id in dynamicData
     dynamicData.barangay_id = barangay_id;
 
-    const insertId = await seniorCitizenService.registerSeniorCitizen(
+    const insertId = await seniorCitizenService.applySeniorCitizen(
       {
         firstName,
         lastName,
@@ -70,6 +70,32 @@ router.post("/register", async (req, res) => {
       return res.status(409).json({ message: error.message });
     }
     res.status(500).json({ message: error.message });
+  }
+});
+
+// Register senior citizen (set registered = 1)
+router.patch("/register/:id", async (req, res) => {
+  const { id } = req.params;
+  const user = req.session.user;
+  const ip = req.userIp;
+
+  try {
+    const success = await seniorCitizenService.registerSeniorCitizen(
+      id,
+      user,
+      ip
+    );
+
+    if (success) {
+      return res
+        .status(200)
+        .json({ message: "Senior citizen registered successfully" });
+    } else {
+      return res.status(404).json({ message: "Senior citizen not found" });
+    }
+  } catch (error) {
+    console.error("❌ Error in register route:", error);
+    return res.status(500).json({ message: "Internal server error" });
   }
 });
 
