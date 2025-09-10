@@ -44,44 +44,41 @@ exports.getFive = async () => {
 exports.create = async (data, user, ip) => {
   let { title, type, description, date, image_url } = data;
 
-  // Validation
   if (!type) {
     throw new Error("Event type is required.");
   }
 
   if (type === "slideshow") {
-    title = "Slideshow";
+    // Assign a default title if empty
+    if (!title || title.trim() === "") title = "Slideshow";
     if (!image_url) {
       throw new Error("Image is required for slideshow.");
     }
   } else {
-    // type === "event"
     if (!title || !description || !date || !image_url) {
       throw new Error("All fields including image are required for an event.");
     }
   }
 
-  // Insert query
   const query = `
     INSERT INTO events (title, type, description, date, image_url)
     VALUES (?, ?, ?, ?, ?)
   `;
 
   const result = await Connection(query, [
-    title || null,
+    title,
     type,
     description || null,
     date || null,
     image_url,
   ]);
 
-  // Log audit
   await logAudit(
     user.id,
     user.email,
     user.role,
     "CREATE",
-    `Added event: '${title || "Slideshow"}'`,
+    `Added event: '${title}'`,
     ip
   );
 
