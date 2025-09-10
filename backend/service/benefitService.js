@@ -6,16 +6,11 @@ const {
   deleteLocalImage,
 } = require("../utils/serviceHelpers");
 
-// Get total number of benefits grouped by type
 exports.getBenefitsCounts = async () => {
-  const query = `
-    SELECT COUNT(*) AS total
-    FROM benefits
-    WHERE type != 'republic-acts'
-  `;
-  const [rows] = await Connection(query);
-
-  return rows[0]?.total || 0;
+  const [result] = await Connection(
+    "SELECT COUNT(*) AS count FROM benefits WHERE type != 'republic-acts'"
+  );
+  return result.count;
 };
 
 // Get all benefits (limit 5)
