@@ -106,6 +106,22 @@ exports.create = async (data, user, ip) => {
 exports.update = async (id, data, user, ip) => {
   const { type, title, description, provider, enacted_date, image_url } = data;
 
+  if (!type || !description) {
+    throw new Error("Type and description are required");
+  }
+
+  if (type === "republic acts" && !title) {
+    throw new Error("Title is required for Republic Acts");
+  }
+
+  if (type === "republic acts" && !enacted_date) {
+    throw new Error("Enacted date is required for Republic Acts");
+  }
+
+  // if (type !== "republic acts" && !image_url) {
+  //   throw new Error("Image is required for non-Republic Acts");
+  // }
+
   // Fetch current benefit
   const benefits = await Connection(
     `SELECT image_url FROM benefits WHERE id = ?`,
@@ -121,6 +137,9 @@ exports.update = async (id, data, user, ip) => {
     else await deleteLocalImage(current.image_url);
   }
 
+  const enacted_date_safe =
+    enacted_date && enacted_date !== "" ? enacted_date : null;
+
   const query = `
     UPDATE benefits
     SET type = ?, title = ?, description = ?, provider = ?, enacted_date = ?, image_url = ?
@@ -131,7 +150,7 @@ exports.update = async (id, data, user, ip) => {
     title,
     description,
     provider,
-    enacted_date,
+    enacted_date_safe,
     image_url,
     id,
   ]);

@@ -31,6 +31,8 @@ const UpdateBenefit = ({ benefitId, onSuccess }) => {
   const [message, setMessage] = useState("");
   const [showCropper, setShowCropper] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+
   const fileInputRef = useRef(null);
 
   const backendUrl =
@@ -92,8 +94,16 @@ const UpdateBenefit = ({ benefitId, onSuccess }) => {
 
   // Update benefit
   const handleUpdate = async () => {
-    if (!formData.type || !formData.title || !formData.description) {
-      setMessage("Type, title, and description are required.");
+    if (!formData.type || !formData.description) {
+      setMessage("Type and description are required.");
+      return;
+    }
+    if (formData.type === "republic-acts" && !formData.title) {
+      setMessage("Title is required for Republic Acts.");
+      return;
+    }
+    if (formData.type === "republic-acts" && !formData.enacted_date) {
+      setMessage("Enacted date is required for Republic Acts.");
       return;
     }
 
@@ -113,7 +123,7 @@ const UpdateBenefit = ({ benefitId, onSuccess }) => {
         withCredentials: true,
       });
 
-      setMessage("Benefit updated successfully!");
+      setShowSuccessModal(true); // ✅ show success modal
       if (onSuccess) onSuccess();
     } catch (err) {
       console.error("Failed to update benefit:", err);
@@ -318,6 +328,29 @@ const UpdateBenefit = ({ benefitId, onSuccess }) => {
             >
               {saving ? "Updating..." : "Yes, Update"}
             </button>
+          </div>
+        </Modal>
+
+        {/* Success Modal */}
+        <Modal
+          isOpen={showSuccessModal}
+          onClose={() => setShowSuccessModal(false)}
+          title=""
+        >
+          <div className="p-6 text-center">
+            <div className="mx-auto mb-4 w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+              <CheckCircle className="w-6 h-6 text-green-500" />
+            </div>
+            <h3 className="text-lg font-medium text-gray-800 mb-2">Success</h3>
+            <p className="text-sm text-gray-600 mb-4">
+              The Benefit was updated successfully!
+            </p>
+            <Button
+              variant="primary"
+              onClick={() => setShowSuccessModal(false)}
+            >
+              OK
+            </Button>
           </div>
         </Modal>
 

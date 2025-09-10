@@ -193,9 +193,7 @@ exports.updateSeniorCitizen = async (id, updatedData, user, ip) => {
       lastName: updatedData.lastName,
       middleName: normalize(updatedData.middleName),
       suffix: normalize(updatedData.suffix),
-      barangay_id: normalize(
-        updatedData.barangay_id || updatedData.form_data?.barangay_id
-      ),
+      barangay_id: normalize(updatedData.barangay_id), // ✅ never fallback to form_data
       form_data: JSON.stringify(updatedData.form_data || {}),
     };
 
