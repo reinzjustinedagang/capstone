@@ -215,7 +215,7 @@ const AddBenefit = () => {
                 <option value="">-- Select Type --</option>
                 <option value="local">Local Benefits</option>
                 <option value="national">National Benefits</option>
-                <option value="republic acts">Republic Acts</option>
+                <option value="republic-acts">Republic Acts</option>
               </select>
               <List className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
             </div>

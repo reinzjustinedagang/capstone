@@ -46,6 +46,15 @@ router.get("/local", async (req, res) => {
   }
 });
 
+router.get("/ra", async (req, res) => {
+  try {
+    const data = await benefitService.getRa();
+    res.status(200).json(data);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 // GET benefit by ID
 router.get("/:id", async (req, res) => {
   const { id } = req.params;

@@ -83,8 +83,8 @@ const National = ({ onEdit }) => {
               key={item.id}
               type={item}
               icon={<MapIcon className="w-5 h-5 text-blue-500" />}
-              textColor="text-blue-700"
-              textIcon="text-blue-500"
+              textColor="text-gray-800"
+              textIcon="text-gray-500"
               onDelete={confirmDelete}
               onEdit={onEdit}
             />

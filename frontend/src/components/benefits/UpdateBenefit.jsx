@@ -232,7 +232,7 @@ const UpdateBenefit = ({ benefitId, onSuccess }) => {
               <option value="">-- Select Type --</option>
               <option value="local">Local Benefits</option>
               <option value="national">National Benefits</option>
-              <option value="republic acts">Republic Acts</option>
+              <option value="republic-acts">Republic Acts</option>
             </select>
           </div>
 

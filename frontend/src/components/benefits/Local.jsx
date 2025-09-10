@@ -68,7 +68,7 @@ const Local = ({ onEdit }) => {
   return (
     <>
       <h1 className="text-lg font-medium mb-4 text-gray-800 flex items-center gap-2">
-        <Landmark className="w-6 h-6 text-green-600" />
+        <Landmark className="w-6 h-6 text-blue-600" />
         Local Benefits of Senior Citizens
       </h1>
 
@@ -90,9 +90,9 @@ const Local = ({ onEdit }) => {
             <BenefitsCard
               key={type.id}
               type={type}
-              icon={<Landmark className="w-5 h-5 text-green-500" />}
-              textColor="text-green-700"
-              textIcon="text-green-500"
+              icon={<Landmark className="w-5 h-5 text-blue-500" />}
+              textColor="text-gray-800"
+              textIcon="text-gray-500"
               onDelete={confirmDelete}
               onEdit={onEdit}
             />
