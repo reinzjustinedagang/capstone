@@ -168,7 +168,7 @@ const UpdateSeniorCitizenForm = ({ id, onSuccess, onCancel }) => {
         middleName,
         lastName,
         suffix,
-        barangay_id, // ✅ store separately
+        barangay_id,
         form_data: JSON.stringify(dynamicFields), // ✅ barangay_id not duplicated
       };
       await axios.put(

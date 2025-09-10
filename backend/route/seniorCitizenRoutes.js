@@ -8,37 +8,47 @@ router.get("/get/:id", async (req, res) => {
     const citizen = await seniorCitizenService.getSeniorCitizenById(
       req.params.id
     );
-    if (!citizen)
+    if (!citizen) {
       return res.status(404).json({ message: "Senior citizen not found." });
+    }
     res.status(200).json(citizen);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 });
 
-// GET: Unregistered citizens
+// GET: Unregistered citizens (list)
 router.get("/unregistered", async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
+
     const result = await seniorCitizenService.getUnregisteredCitizens({
       page,
       limit,
     });
+
     res.status(200).json(result);
   } catch (error) {
+    console.error("Error fetching unregistered citizens:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 });
 
-// POST: Register (for seniors applying themselves, no session user required)
+// POST: Create new senior citizen (with duplicate check)
 router.post("/register", async (req, res) => {
   const ip = req.userIp;
+
   try {
+    // Destructure all fields including barangay_id from frontend
     const { firstName, lastName, middleName, suffix, form_data, barangay_id } =
       req.body;
-    const dynamicData =
-      typeof form_data === "string" ? JSON.parse(form_data) : form_data;
+
+    // Parse the dynamic form_data object
+    const dynamicData = JSON.parse(form_data);
+
+    // Include barangay_id in dynamicData
+    dynamicData.barangay_id = barangay_id;
 
     const insertId = await seniorCitizenService.registerSeniorCitizen(
       {
@@ -46,30 +56,37 @@ router.post("/register", async (req, res) => {
         lastName,
         middleName,
         suffix,
-        form_data: dynamicData,
+        form_data: dynamicData, // barangay_id not included here
         birthdate: dynamicData.birthdate,
-        barangay_id,
+        barangay_id, // ✅ stored in DB column
       },
       ip
     );
 
     res.status(201).json({ message: "Senior citizen registered.", insertId });
   } catch (error) {
-    res.status(error.code === 409 ? 409 : 500).json({ message: error.message });
+    if (error.code === 409) {
+      return res.status(409).json({ message: error.message });
+    }
+    res.status(500).json({ message: error.message });
   }
 });
 
-// POST: Create (admin creates with session)
+// seniorCitizenRoutes.js
 router.post("/create", async (req, res) => {
   const user = req.session.user;
   const ip = req.userIp;
-  if (!user) return res.status(401).json({ message: "Unauthorized" });
+
+  if (!user) {
+    return res
+      .status(401)
+      .json({ message: "Unauthorized: No user session found." });
+  }
 
   try {
     const { firstName, lastName, middleName, suffix, form_data, barangay_id } =
       req.body;
-    const dynamicData =
-      typeof form_data === "string" ? JSON.parse(form_data) : form_data;
+    const dynamicData = JSON.parse(form_data);
 
     const insertId = await seniorCitizenService.createSeniorCitizen(
       {
@@ -91,15 +108,20 @@ router.post("/create", async (req, res) => {
   }
 });
 
-// PUT: Update
+// PUT: Update senior citizen
 router.put("/update/:id", async (req, res) => {
   const user = req.session.user;
   const ip = req.userIp;
-  if (!user) return res.status(401).json({ message: "Unauthorized" });
-
+  if (!user) {
+    return res
+      .status(401)
+      .json({ message: "Unauthorized: No user session found." });
+  }
   try {
     const { firstName, lastName, middleName, suffix, barangay_id, form_data } =
       req.body;
+
+    // 🔑 Ensure form_data is an object
     const dynamicData =
       typeof form_data === "string" ? JSON.parse(form_data) : form_data;
 
@@ -117,118 +139,102 @@ router.put("/update/:id", async (req, res) => {
       ip
     );
 
-    if (!success)
-      return res.status(404).json({ message: "Not found or not updated" });
+    if (!success) {
+      return res
+        .status(404)
+        .json({ message: "Senior citizen not found or not updated." });
+    }
     res.status(200).json({ message: "Senior citizen updated." });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 });
 
-// PATCH: Soft delete
-router.patch("/soft-delete/:id", async (req, res) => {
+// DELETE: Remove senior citizen
+router.delete("/delete/:id", async (req, res) => {
   const user = req.session.user;
   const ip = req.userIp;
-  if (!user) return res.status(401).json({ message: "Unauthorized" });
 
+  if (!user) {
+    return res
+      .status(401)
+      .json({ message: "Unauthorized: No user session found." });
+  }
   try {
-    const success = await seniorCitizenService.softDeleteSeniorCitizen(
+    const success = await seniorCitizenService.deleteSeniorCitizen(
       req.params.id,
       user,
       ip
     );
-    if (!success) return res.status(404).json({ message: "Not found" });
-    res.status(200).json({ message: "Soft deleted successfully" });
+    if (!success) {
+      return res
+        .status(404)
+        .json({ message: "Senior citizen not found or not deleted." });
+    }
+    res.status(200).json({ message: "Senior citizen deleted." });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 });
 
-// GET: Soft-deleted
-router.get("/deleted", async (req, res) => {
-  try {
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
-    const offset = (page - 1) * limit;
-
-    const { items, total } =
-      await seniorCitizenService.getDeletedSeniorCitizens(page, limit, offset);
-    res
-      .status(200)
-      .json({ items, total, page, totalPages: Math.ceil(total / limit) });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-});
-
-// PATCH: Restore
-router.patch("/restore/:id", async (req, res) => {
-  const user = req.session.user;
-  const ip = req.userIp;
-  if (!user) return res.status(401).json({ message: "Unauthorized" });
-
-  try {
-    const success = await seniorCitizenService.restoreSeniorCitizen(
-      req.params.id,
-      user,
-      ip
-    );
-    if (!success) return res.status(404).json({ message: "Not restored" });
-    res.status(200).json({ message: "Restored successfully" });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-});
-
-// DELETE: Permanent delete
-router.delete("/permanent-delete/:id", async (req, res) => {
-  const user = req.session.user;
-  const ip = req.userIp;
-  if (!user) return res.status(401).json({ message: "Unauthorized" });
-
-  try {
-    const success = await seniorCitizenService.permanentlyDeleteSeniorCitizen(
-      req.params.id,
-      user,
-      ip
-    );
-    if (!success)
-      return res.status(404).json({ message: "Not permanently deleted" });
-    res.status(200).json({ message: "Permanently deleted." });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-});
-
-// GET: Paginated citizens
+// GET: Paginated list
 router.get("/page", async (req, res) => {
+  const {
+    page = 1,
+    limit = 10,
+    search = "",
+    barangay = "All",
+    gender = "All",
+    ageRange = "All",
+    healthStatus = "All",
+    sortBy = "lastName",
+    sortOrder = "asc",
+  } = req.query;
+
   try {
-    const result = await seniorCitizenService.getPaginatedFilteredCitizens(
-      req.query
-    );
-    res.status(200).json(result);
+    const result = await seniorCitizenService.getPaginatedFilteredCitizens({
+      page: parseInt(page, 10),
+      limit: parseInt(limit, 10),
+      search,
+      barangay,
+      gender,
+      ageRange,
+      healthStatus,
+      sortBy,
+      sortOrder,
+    });
+
+    // ✅ Return exactly what the frontend expects
+    res.status(200).json({
+      citizens: result.citizens,
+      total: result.total,
+      totalPages: result.totalPages,
+    });
   } catch (err) {
+    console.error("Error getting filtered citizens:", err);
     res.status(500).json({ message: "Internal server error" });
   }
 });
 
-// GET: Count unregistered
+// GET: Count not registered
 router.get("/register/all", async (req, res) => {
   try {
     const count = await seniorCitizenService.getRegisteredCount();
     res.json({ count });
-  } catch {
-    res.status(500).json({ message: "Failed to fetch count" });
+  } catch (error) {
+    console.error("Error fetching senior citizen count:", error);
+    res.status(500).json({ message: "Failed to fetch senior citizen count" });
   }
 });
 
-// GET: Count active
+// GET: Count all
 router.get("/count/all", async (req, res) => {
   try {
     const count = await seniorCitizenService.getCitizenCount();
     res.json({ count });
-  } catch {
-    res.status(500).json({ message: "Failed to fetch count" });
+  } catch (error) {
+    console.error("Error fetching senior citizen count:", error);
+    res.status(500).json({ message: "Failed to fetch senior citizen count" });
   }
 });
 
@@ -242,8 +248,104 @@ router.get("/sms-citizens", async (req, res) => {
       search
     );
     res.status(200).json(recipients);
-  } catch {
+  } catch (error) {
+    console.error("Error fetching SMS recipients:", error);
     res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+// PATCH: Soft delete
+router.patch("/soft-delete/:id", async (req, res) => {
+  const { id } = req.params;
+  const user = req.session.user;
+  const ip = req.userIp;
+
+  try {
+    const success = await seniorCitizenService.softDeleteSeniorCitizen(
+      id,
+      user,
+      ip
+    );
+    if (success) {
+      return res
+        .status(200)
+        .json({ message: "Senior citizen soft deleted successfully" });
+    } else {
+      return res.status(404).json({ message: "Senior citizen not found" });
+    }
+  } catch (error) {
+    console.error("Error in soft delete route:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+// GET: List soft-deleted
+router.get("/deleted", async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const offset = (page - 1) * limit;
+
+    const { items, total } =
+      await seniorCitizenService.getDeletedSeniorCitizens(page, limit, offset);
+
+    res.status(200).json({
+      items,
+      total,
+      page,
+      totalPages: Math.ceil(total / limit),
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// PATCH: Restore from recycle bin
+router.patch("/restore/:id", async (req, res) => {
+  const { id } = req.params;
+  const user = req.session.user;
+  const ip = req.userIp;
+
+  if (!user) return res.status(401).json({ message: "Unauthorized" });
+
+  try {
+    const success = await seniorCitizenService.restoreSeniorCitizen(
+      id,
+      user,
+      ip
+    );
+    if (!success) {
+      return res
+        .status(404)
+        .json({ message: "Senior citizen not found or not restored." });
+    }
+    res.status(200).json({ message: "Senior citizen restored." });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// DELETE: Permanent delete
+router.delete("/permanent-delete/:id", async (req, res) => {
+  const user = req.session.user;
+  const ip = req.userIp;
+
+  if (!user) return res.status(401).json({ message: "Unauthorized" });
+
+  try {
+    const success = await seniorCitizenService.permanentlyDeleteSeniorCitizen(
+      req.params.id,
+      user,
+      ip
+    );
+    if (!success) {
+      return res.status(404).json({
+        message: "Senior citizen not found or not permanently deleted.",
+      });
+    }
+    res.status(200).json({ message: "Senior citizen permanently deleted." });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 });
 

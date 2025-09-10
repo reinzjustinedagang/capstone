@@ -86,58 +86,56 @@ const isDuplicateSeniorCitizen = async ({ firstName, lastName, birthdate }) => {
   return result.length > 0;
 };
 
-// REGISTER (public self-registration, registered = 0)
+// register
+// In your senior citizen service file
 exports.registerSeniorCitizen = async (data, ip) => {
   try {
-    const cleanBirthdate = normalize(data.form_data?.birthdate);
-
-    // Duplicate check
-    if (
-      await isDuplicateSeniorCitizen({ ...data, birthdate: cleanBirthdate })
-    ) {
-      const msg = `A senior citizen named '${data.firstName} ${
-        data.lastName
-      }' with birthdate '${cleanBirthdate || "NULL"}' already exists.`;
+    // 🔎 Check for duplicates
+    if (await isDuplicateSeniorCitizen(data)) {
+      const msg = `A senior citizen named '${data.firstName} ${data.lastName}' with birthdate '${data.birthdate}' already exists.`;
       const err = new Error(msg);
-      err.code = 409;
+      err.code = 409; // Conflict
       throw err;
     }
 
+    // 📝 Prepare data for insert
     const insertData = {
       firstName: data.firstName,
       lastName: data.lastName,
-      middleName: normalize(data.middleName),
-      suffix: normalize(data.suffix),
-      barangay_id: normalize(data.barangay_id),
+      middleName: data.middleName || null,
+      suffix: data.suffix || null,
+      barangay_id: data.barangay_id || null, // Save the ID
       form_data: JSON.stringify(data.form_data || {}),
-      registered: 0, // self-registered, pending verification
+      registered: 0,
     };
 
+    // 💾 Insert into DB
     const result = await Connection(
       `INSERT INTO senior_citizens SET ?`,
       insertData
     );
 
-    if (result.affectedRows === 1) {
+    // 🗒️ Audit logging
+    if (result.affectedRows === 1 && user) {
       await logAudit(
-        null,
-        "SYSTEM",
-        "PUBLIC",
-        "REGISTER",
-        `New self-registered Senior Citizen: '${data.firstName} ${data.lastName}'.`,
+        "",
+        "N/A",
+        "User",
+        "Register Senior", // 👈 clearer than "Apply"
+        `Registered new senior citizen: '${data.firstName} ${data.lastName}'.`,
         ip
       );
     }
 
-    return result.insertId;
+    return result.insertId; // Return the new record's ID
   } catch (error) {
-    if (error.code === 409) throw error;
-    console.error("Error registering senior citizen:", error);
+    if (error.code === 409) throw error; // Duplicate error
+    console.error("❌ Error creating senior citizen:", error);
     throw new Error("Failed to register senior citizen.");
   }
 };
 
-// CREATE (admin-created, registered = 1)
+// CREATE
 exports.createSeniorCitizen = async (data, user, ip) => {
   try {
     const cleanBirthdate = normalize(data.form_data?.birthdate);
@@ -161,7 +159,6 @@ exports.createSeniorCitizen = async (data, user, ip) => {
       suffix: normalize(data.suffix),
       barangay_id: normalize(data.barangay_id),
       form_data: JSON.stringify(data.form_data || {}),
-      registered: 1, // admin verified
     };
 
     const result = await Connection(
@@ -175,7 +172,7 @@ exports.createSeniorCitizen = async (data, user, ip) => {
         user.email,
         user.role,
         "CREATE",
-        `New Senior Citizen (Admin): '${data.firstName} ${data.lastName}'.`,
+        `New Senior Citizen: '${data.firstName} ${data.lastName}'.`,
         ip
       );
     }
@@ -196,7 +193,7 @@ exports.updateSeniorCitizen = async (id, updatedData, user, ip) => {
       lastName: updatedData.lastName,
       middleName: normalize(updatedData.middleName),
       suffix: normalize(updatedData.suffix),
-      barangay_id: normalize(updatedData.barangay_id), // ✅ no fallback to form_data
+      barangay_id: normalize(updatedData.barangay_id), // ✅ never fallback to form_data
       form_data: JSON.stringify(updatedData.form_data || {}),
     };
 
@@ -332,16 +329,34 @@ exports.getPaginatedFilteredCitizens = async (options) => {
   }
 };
 
-//Soft-delete
+// Soft delete (mark as deleted, set deleted_at)
+// Soft delete (mark as deleted, set deleted_at)
 exports.softDeleteSeniorCitizen = async (id, user, ip) => {
   try {
-    const result = await Connection(
-      `UPDATE senior_citizens 
-       SET deleted = 1, deleted_at = NOW() 
-       WHERE id = ? AND deleted = 0`,
+    // First check if the senior exists
+    const [senior] = await Connection(
+      `SELECT id, deleted FROM senior_citizens WHERE id = ?`,
       [id]
     );
 
+    if (!senior) {
+      return false; // not found
+    }
+
+    // If already deleted, just return true (idempotent)
+    if (senior.deleted === 1) {
+      return true;
+    }
+
+    // Perform soft delete
+    const result = await Connection(
+      `UPDATE senior_citizens 
+       SET deleted = 1, deleted_at = NOW() 
+       WHERE id = ?`,
+      [id]
+    );
+
+    // Audit log only if successful
     if (result.affectedRows > 0 && user) {
       await logAudit(
         user.id,
@@ -352,9 +367,10 @@ exports.softDeleteSeniorCitizen = async (id, user, ip) => {
         ip
       );
     }
+
     return result.affectedRows > 0;
   } catch (error) {
-    console.error(`Error soft-deleting senior citizen with ID ${id}:`, error);
+    console.error(`❌ Error soft deleting senior citizen ID ${id}:`, error);
     throw new Error("Failed to soft delete senior citizen.");
   }
 };
@@ -385,11 +401,13 @@ exports.getDeletedSeniorCitizens = async (page, limit, offset) => {
   }
 };
 
-// RESTORE
+// Restore soft-deleted citizen
 exports.restoreSeniorCitizen = async (id, user, ip) => {
   try {
     const result = await Connection(
-      `UPDATE senior_citizens SET deleted = 0 WHERE id = ? AND deleted = 1`,
+      `UPDATE senior_citizens 
+       SET deleted = 0, deleted_at = NULL 
+       WHERE id = ? AND deleted = 1`,
       [id]
     );
 
@@ -410,11 +428,11 @@ exports.restoreSeniorCitizen = async (id, user, ip) => {
   }
 };
 
-// PERMANENT DELETE
+// Permanent delete (hard remove from DB)
 exports.permanentlyDeleteSeniorCitizen = async (id, user, ip) => {
   try {
     const result = await Connection(
-      `DELETE FROM senior_citizens WHERE id = ? AND deleted = 1`,
+      `DELETE FROM senior_citizens WHERE id = ?`,
       [id]
     );
 
@@ -437,6 +455,7 @@ exports.permanentlyDeleteSeniorCitizen = async (id, user, ip) => {
     throw new Error("Failed to permanently delete senior citizen.");
   }
 };
+
 // Count not registered citizens
 exports.getRegisteredCount = async () => {
   try {
