@@ -253,9 +253,9 @@ db.query(
   CREATE TABLE IF NOT EXISTS events (
     id INT AUTO_INCREMENT PRIMARY KEY,
     title VARCHAR(255),
-    type ENUM('event', 'slideshow') NOT NULL,
-    description TEXT NOT NULL,
-    date DATE NOT NULL,
+    type ENUM('event', 'slideshow'),
+    description TEXT,
+    date DATE,
     image_url VARCHAR(500),
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
