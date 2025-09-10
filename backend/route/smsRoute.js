@@ -1,7 +1,17 @@
 const express = require("express");
 const smsService = require("../service/smsService");
-
 const router = express.Router();
+
+// ✅ Get SMS counts (success, failed, pending, total)
+router.get("/count", async (req, res) => {
+  try {
+    const counts = await smsService.getSmsCounts();
+    res.json(counts);
+  } catch (error) {
+    console.error("Error fetching SMS counts:", error);
+    res.status(500).json({ message: "Failed to fetch SMS counts" });
+  }
+});
 
 // ✅ Send SMS to one or multiple numbers
 router.post("/send-sms", async (req, res) => {

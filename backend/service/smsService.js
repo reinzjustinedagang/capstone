@@ -144,3 +144,28 @@ exports.getPaginatedSMSHistory = async (limit, offset) => {
 
   return { logs, total };
 };
+
+exports.getSmsCounts = async () => {
+  try {
+    const result = await Connection(`
+      SELECT 
+        SUM(CASE WHEN status = 'Success' THEN 1 ELSE 0 END) AS success_count,
+        SUM(CASE WHEN status = 'Failed' THEN 1 ELSE 0 END) AS failed_count,
+        SUM(CASE WHEN status = 'Pending' THEN 1 ELSE 0 END) AS pending_count,
+        COUNT(*) AS total
+      FROM sms_logs
+    `);
+
+    return (
+      result[0] || {
+        success_count: 0,
+        failed_count: 0,
+        pending_count: 0,
+        total: 0,
+      }
+    );
+  } catch (err) {
+    console.error("Error fetching SMS counts:", err);
+    throw err;
+  }
+};

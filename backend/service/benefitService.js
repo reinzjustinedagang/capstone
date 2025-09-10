@@ -49,20 +49,27 @@ exports.getBenefitsById = async (id) => {
 
 // CREATE benefit
 exports.create = async (data, user, ip) => {
-  const { type, description, provider, enacted_date, image_url } = data;
+  const { type, title, description, provider, enacted_date, image_url } = data;
 
-  if (!type || !description || (!image_url && type !== "republic acts")) {
-    throw new Error(
-      "Type, title, description, and image (for non-RA) are required"
-    );
+  if (!type || !description) {
+    throw new Error("Type and description are required");
   }
 
+  if (type === "republic acts" && !title) {
+    throw new Error("Title is required for Republic Acts");
+  }
+
+  // if (type !== "republic acts" && !image_url) {
+  //   throw new Error("Image is required for non-Republic Acts");
+  // }
+
   const query = `
-    INSERT INTO benefits (type, description, provider, enacted_date, image_url)
-    VALUES (?, ?, ?, ?, ?)
+    INSERT INTO benefits (type, title, description, provider, enacted_date, image_url)
+    VALUES (?, ?, ?, ?, ?, ?)
   `;
   const result = await Connection(query, [
     type,
+    title,
     description,
     provider,
     enacted_date,
@@ -83,7 +90,7 @@ exports.create = async (data, user, ip) => {
 
 // UPDATE benefit
 exports.update = async (id, data, user, ip) => {
-  const { type, description, provider, enacted_date, image_url } = data;
+  const { type, title, description, provider, enacted_date, image_url } = data;
 
   // Fetch current benefit
   const benefits = await Connection(
@@ -102,11 +109,12 @@ exports.update = async (id, data, user, ip) => {
 
   const query = `
     UPDATE benefits
-    SET type = ?, description = ?,  = ?, provider = ?, enacted_date = ?, image_url = ?
+    SET type = ?, title = ?, description = ?, provider = ?, enacted_date = ?, image_url = ?
     WHERE id = ?
   `;
   const result = await Connection(query, [
     type,
+    title,
     description,
     provider,
     enacted_date,
@@ -131,7 +139,7 @@ exports.update = async (id, data, user, ip) => {
 // DELETE benefit
 exports.remove = async (id, user, ip) => {
   const benefits = await Connection(
-    `SELECT image_url FROM benefits WHERE id = ?`,
+    `SELECT title, image_url FROM benefits WHERE id = ?`,
     [id]
   );
   const benefit = benefits[0];

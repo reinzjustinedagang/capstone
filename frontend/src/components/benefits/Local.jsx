@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Landmark, Info, MapPin, CheckCircle } from "lucide-react";
-import BenefitsCard from "../UI/BenefitsCard";
+import BenefitsCard from "./BenefitsCard";
 import Modal from "../UI/Modal";
 import Button from "../UI/Button";
 import axios from "axios";

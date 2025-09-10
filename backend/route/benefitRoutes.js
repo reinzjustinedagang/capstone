@@ -63,7 +63,7 @@ router.get("/:id", async (req, res) => {
 
 // POST create benefit
 router.post("/", isAuthenticated, upload.single("image"), async (req, res) => {
-  const { type, description, location, provider, enacted_date } = req.body;
+  const { type, title, description, provider, enacted_date } = req.body;
   const user = req.session.user;
   const ip = req.userIp;
 
@@ -86,7 +86,7 @@ router.post("/", isAuthenticated, upload.single("image"), async (req, res) => {
     }
 
     const inserted = await benefitService.create(
-      { type, description, location, provider, enacted_date, image_url },
+      { type, title, description, provider, enacted_date, image_url },
       user,
       ip
     );
@@ -105,7 +105,7 @@ router.put(
   upload.single("image"),
   async (req, res) => {
     const { id } = req.params;
-    const { type, description, location, provider, enacted_date } = req.body;
+    const { type, title, description, provider, enacted_date } = req.body;
     const user = req.session.user;
     const ip = req.userIp;
 
@@ -132,8 +132,8 @@ router.put(
         id,
         {
           type,
+          title,
           description,
-          location,
           provider,
           enacted_date,
           image_url,

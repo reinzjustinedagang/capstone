@@ -13,6 +13,7 @@ import BarangayDistribution from "../reports/chart/BarangayDistribution";
 
 const Dashboard = () => {
   const [barangayCount, setBarangayCount] = useState(0);
+  const [smsCount, setSmsCount] = useState(0);
   const [citizenCount, setCitizenCount] = useState(0);
   const [registerCount, setRegisterCount] = useState(0);
   const [userCount, setUserCount] = useState(0);
@@ -79,6 +80,15 @@ const Dashboard = () => {
     }
   };
 
+  const fetchSmsCount = async () => {
+    try {
+      const res = await axios.get(`${backendUrl}/api/sms/count`);
+      setSmsCount(res.data.success_count || 0); // only successful sent
+    } catch (err) {
+      console.error("Failed to fetch SMS count", err);
+    }
+  };
+
   useEffect(() => {
     const fetchAllCounts = async () => {
       setLoading(true);
@@ -89,6 +99,7 @@ const Dashboard = () => {
         fetchEventsCount(),
         fetchBenefitsCount(),
         fetchRegisterCount(),
+        fetchSmsCount(),
       ]);
       setLoading(false);
     };
@@ -126,7 +137,7 @@ const Dashboard = () => {
         <NavLink to="/admin/sms-management">
           <Card
             title="SMS Sent (This Month)"
-            value="0"
+            value={loading ? "—" : smsCount}
             icon={<MessageSquareIcon />}
             color="indigo"
           />

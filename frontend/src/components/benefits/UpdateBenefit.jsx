@@ -20,7 +20,6 @@ const UpdateBenefit = ({ benefitId, onSuccess }) => {
     type: "",
     title: "",
     description: "",
-    location: "",
     provider: "",
     enacted_date: "",
   });

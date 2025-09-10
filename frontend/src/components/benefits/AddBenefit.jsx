@@ -22,7 +22,6 @@ const AddBenefit = () => {
     type: "",
     title: "",
     description: "",
-    location: "",
     provider: "",
     enacted_date: "",
   });
@@ -95,7 +94,6 @@ const AddBenefit = () => {
         type: "",
         title: "",
         description: "",
-        location: "",
         provider: "",
         enacted_date: "",
       });
