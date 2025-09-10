@@ -161,7 +161,7 @@ const UpdateSeniorCitizenForm = ({ id, onSuccess, onCancel }) => {
 
       const barangay_id = Number(formData[barangayField.field_name]);
       const dynamicFields = { ...allFields };
-      delete dynamicFields[barangayField.field_name]; // ✅ remove it from JSON
+      delete dynamicFields[barangayField.field_name];
 
       const payload = {
         firstName,
@@ -169,8 +169,9 @@ const UpdateSeniorCitizenForm = ({ id, onSuccess, onCancel }) => {
         lastName,
         suffix,
         barangay_id,
-        form_data: JSON.stringify(dynamicFields), // ✅ barangay_id not duplicated
+        form_data: JSON.stringify(dynamicFields),
       };
+
       await axios.put(
         `${backendUrl}/api/senior-citizens/update/${id}`,
         payload,

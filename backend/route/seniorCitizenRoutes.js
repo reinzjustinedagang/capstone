@@ -56,10 +56,11 @@ router.post("/register", async (req, res) => {
         lastName,
         middleName,
         suffix,
-        form_data: dynamicData, // barangay_id not included here
+        form_data: dynamicData,
         birthdate: dynamicData.birthdate,
-        barangay_id, // ✅ stored in DB column
+        barangay_id,
       },
+
       ip
     );
 
@@ -87,6 +88,7 @@ router.post("/create", async (req, res) => {
     const { firstName, lastName, middleName, suffix, form_data, barangay_id } =
       req.body;
     const dynamicData = JSON.parse(form_data);
+    dynamicData.barangay_id = barangay_id;
 
     const insertId = await seniorCitizenService.createSeniorCitizen(
       {
