@@ -43,6 +43,12 @@ exports.getLocal = async () => {
   );
 };
 
+exports.getRa = async () => {
+  return await Connection(
+    `SELECT * FROM benefits WHERE type = 'republic-acts' ORDER BY created_at DESC`
+  );
+};
+
 exports.getBenefitsById = async (id) => {
   return await Connection(`SELECT * FROM benefits WHERE id = ? LIMIT 1`, [id]);
 };

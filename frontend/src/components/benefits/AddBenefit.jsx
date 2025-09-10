@@ -110,7 +110,7 @@ const AddBenefit = () => {
   };
 
   const typeFields =
-    formData.type === "republic acts"
+    formData.type === "republic-acts"
       ? [
           {
             name: "title",
