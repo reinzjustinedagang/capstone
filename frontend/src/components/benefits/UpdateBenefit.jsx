@@ -9,6 +9,7 @@ import {
   Text,
   Loader2,
   ImagePlus,
+  CheckCircle,
 } from "lucide-react";
 import Button from "../UI/Button";
 import Modal from "../UI/Modal";
