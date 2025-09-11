@@ -203,6 +203,35 @@ router.post("/register", async (req, res) => {
   }
 });
 
+router.post("/register/internal", async (req, res) => {
+  try {
+    const { username, email, password, cp_number, role } = req.body;
+    const ip = req.userIp;
+
+    const result = await userService.registerInternal(
+      username,
+      email,
+      password,
+      cp_number,
+      role,
+      ip
+    );
+
+    if (result) {
+      res.status(201).json({ message: "Registered successfully" });
+    } else {
+      res
+        .status(400)
+        .json({ message: "Registration failed. User might already exist." });
+    }
+  } catch (err) {
+    console.error("Registration error:", err);
+    res
+      .status(err.statusCode || 500)
+      .json({ message: err.message || "Server error during registration." });
+  }
+});
+
 // Update profile (username, email, cp_number only)
 router.put("/updateProfile/:id", async (req, res) => {
   const { username, email, cp_number } = req.body;

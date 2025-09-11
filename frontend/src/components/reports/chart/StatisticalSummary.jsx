@@ -41,13 +41,11 @@ const StatisticalSummary = () => {
 
   if (!data) return null;
 
-  // Extract gender counts
   const male_count = data.gender?.male_count ?? 0;
   const female_count = data.gender?.female_count ?? 0;
-  const unknown_count = data.gender?.unknown_count ?? 0;
 
-  // Total senior citizens
-  const totalSeniors = male_count + female_count + unknown_count;
+  // Total senior citizens = only Male + Female
+  const totalSeniors = male_count + female_count;
 
   // Active Members estimation (placeholder: ~80% of total)
   const activeMembers = Math.round(totalSeniors * 0.8);
@@ -80,9 +78,6 @@ const StatisticalSummary = () => {
     female_count > male_count
       ? "Female seniors slightly outnumber male seniors"
       : "Male seniors slightly outnumber female seniors",
-    `${((activeMembers / totalSeniors) * 100).toFixed(
-      1
-    )}% of seniors are actively participating in programs`,
     (() => {
       if (data.barangay?.length) {
         const topBarangay = [...data.barangay].sort(
@@ -107,14 +102,6 @@ const StatisticalSummary = () => {
           <div>
             <p className="text-sm text-gray-500">Average Age</p>
             <p className="text-2xl font-semibold">{avgAge}</p>
-          </div>
-          <div>
-            <p className="text-sm text-gray-500">Active Members</p>
-            <p className="text-2xl font-semibold">{activeMembers}</p>
-          </div>
-          <div>
-            <p className="text-sm text-gray-500">With Health Issues</p>
-            <p className="text-2xl font-semibold">—</p>
           </div>
         </div>
         <div className="mt-4">

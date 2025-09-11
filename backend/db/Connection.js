@@ -258,6 +258,13 @@ async function initTables() {
       
       -- Metadata
       barangay_id  INT(100) NULL,
+      socpen_date DATE NULL,
+      nonsocpen_date DATE NULL,
+      deceased_date DATE NULL,
+      transferee_date DATE NULL,
+      pdl_date DATE NULL,
+      utp_date DATE NULL,
+      booklet_date DATE NULL,
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
       updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
       registered TINYINT(1) DEFAULT 1,

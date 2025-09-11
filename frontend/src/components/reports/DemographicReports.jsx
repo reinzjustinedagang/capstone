@@ -1,9 +1,7 @@
 import React from "react";
 import AgeDistribution from "./chart/AgeDistribution";
 import GenderDistribution from "./chart/GenderDistribution";
-import HealthStatus from "./chart/HealthStatus";
 import BarangayDistribution from "./chart/BarangayDistribution";
-import ActivityStatus from "./chart/ActivityStatus";
 import StatisticalSummary from "./chart/StatisticalSummary";
 
 const DemographicReports = () => {

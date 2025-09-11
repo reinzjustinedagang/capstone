@@ -81,7 +81,7 @@ export default function AddUser() {
     try {
       const backendUrl = import.meta.env.VITE_API_BASE_URL;
       await axios.post(
-        `${backendUrl}/api/user/register`,
+        `${backendUrl}/api/user/register/internal`,
         { username, email, password, cp_number, role },
         {
           headers: { "Content-Type": "application/json" },
@@ -101,8 +101,6 @@ export default function AddUser() {
       setConfirmPassword("");
       setPhoneNumber("");
       setRole("staff");
-
-      setTimeout(() => navigate("/admin/users"), 2000);
     } catch (err) {
       console.error("Add user error:", err);
       setStatus("error");

@@ -5,7 +5,15 @@ import Delete from "../UI/Button/Delete";
 import Modal from "../UI/Modal";
 import Pagination from "../UI/Component/Pagination";
 import SearchAndFilterBar from "../UI/Component/SearchAndFilterBar";
-import { Edit, Trash2, ArrowDown, ArrowUp, CheckCircle } from "lucide-react";
+import {
+  Edit,
+  Trash2,
+  ArrowDown,
+  ArrowUp,
+  CheckCircle,
+  MoreVertical,
+  XCircle,
+} from "lucide-react";
 
 const SeniorCitizenList = ({ onEdit }) => {
   const backendUrl =
@@ -44,6 +52,8 @@ const SeniorCitizenList = ({ onEdit }) => {
 
   // Success modal
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [showActions, setShowActions] = useState(false);
+  const [openDropdownId, setOpenDropdownId] = useState(null);
 
   // Fetch Citizens
   const fetchCitizens = async () => {
@@ -303,6 +313,50 @@ const SeniorCitizenList = ({ onEdit }) => {
                         >
                           <Trash2 className="h-5 w-5" />
                         </button>
+
+                        {/* More options dropdown */}
+                        <div className="relative">
+                          <button
+                            onClick={() =>
+                              setOpenDropdownId(
+                                openDropdownId === citizen.id
+                                  ? null
+                                  : citizen.id
+                              )
+                            }
+                            className="p-2 text-gray-600 hover:bg-gray-100 rounded"
+                          >
+                            {openDropdownId === citizen.id ? (
+                              <ArrowUp className="w-5 h-5 text-gray-600" />
+                            ) : (
+                              <MoreVertical className="w-5 h-5 text-gray-600" />
+                            )}
+                          </button>
+
+                          {openDropdownId === citizen.id && (
+                            <div className="absolute right-0 mt-2 w-44 bg-white border border-gray-200 rounded-lg shadow-lg z-50 transition ease-in-out">
+                              <button
+                                onClick={() => {
+                                  setOpenDropdownId(null);
+                                  handleMarkDeceased(citizen);
+                                }}
+                                className="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+                              >
+                                Deceased
+                              </button>
+
+                              <button
+                                onClick={() => {
+                                  setOpenDropdownId(null);
+                                  handleForReports(citizen);
+                                }}
+                                className="flex items-center w-full px-4 py-2 text-sm text-blue-600 hover:bg-blue-50"
+                              >
+                                Reports
+                              </button>
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </td>
                   </tr>

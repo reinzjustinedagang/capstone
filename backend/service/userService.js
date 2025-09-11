@@ -185,6 +185,59 @@ exports.login = async (email, password, ip) => {
   }
 };
 
+exports.registerInternal = async (
+  username,
+  email,
+  password,
+  cp_number,
+  role,
+  ip
+) => {
+  try {
+    // Check if email already exists
+    const existingUsers = await Connection(
+      "SELECT * FROM users WHERE email = ?",
+      [email]
+    );
+    if (existingUsers.length > 0) {
+      const error = new Error("User with this email already exists.");
+      error.statusCode = 409;
+      throw error;
+    }
+
+    const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
+
+    const query = `
+      INSERT INTO users (id, username, email, password, cp_number, role)
+      VALUES (NULL, ?, ?, ?, ?, ?)
+    `;
+    const result = await Connection(query, [
+      username,
+      email,
+      hashedPassword,
+      cp_number,
+      role,
+    ]);
+
+    // Log audit
+    if (result.affectedRows === 1) {
+      await logAudit(
+        result.insertId,
+        email,
+        role,
+        "REGISTER",
+        `New user '${username}' registered.`,
+        ip
+      );
+    }
+
+    return result.affectedRows === 1;
+  } catch (error) {
+    console.error("Error in internal register service:", error);
+    throw error;
+  }
+};
+
 // REGISTER SERVICE
 exports.register = async (
   username,

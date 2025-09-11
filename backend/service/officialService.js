@@ -118,8 +118,7 @@ exports.updateMunicipalOfficial = async (
       if (old.position !== position)
         changes.push(`position: '${old.position}' → '${position}'`);
       if (old.type !== type) changes.push(`type: '${old.type}' → '${type}'`);
-      if (old.image !== finalImage)
-        changes.push(`image: '${old.image}' → '${finalImage}'`);
+      if (old.image !== finalImage) changes.push(`Officer Image Updated`);
 
       if (changes.length > 0) {
         await logAudit(
@@ -280,10 +279,7 @@ exports.updateBarangayOfficial = async (
         changes.push(
           `position: '${old.position || "none"}' → '${position || "none"}'`
         );
-      if (old.image !== finalImage)
-        changes.push(
-          `image: '${old.image || "none"}' → '${finalImage || "none"}'`
-        );
+      if (old.image !== finalImage) changes.push(`Officer Image Updated'`);
 
       await logAudit(
         user.id,
@@ -411,8 +407,7 @@ exports.updateOrgChart = async (id, name, position, type, image, user, ip) => {
       if (old.position !== position)
         changes.push(`position: '${old.position}' → '${position}'`);
       if (old.type !== type) changes.push(`type: '${old.type}' → '${type}'`);
-      if (old.image !== finalImage)
-        changes.push(`image: '${old.image}' → '${finalImage}'`);
+      if (old.image !== finalImage) changes.push(`Officer Image Updated`);
 
       if (changes.length > 0) {
         await logAudit(
