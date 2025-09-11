@@ -32,7 +32,7 @@ const RegisterSenior = () => {
 
       try {
         const [fieldsRes, groupsRes] = await Promise.all([
-          axios.get(`${backendUrl}/api/form-fields/`, {
+          axios.get(`${backendUrl}/api/form-fields/register-field`, {
             withCredentials: true,
           }),
           axios.get(`${backendUrl}/api/form-fields/group`, {

@@ -13,6 +13,16 @@ router.get("/", async (req, res) => {
 });
 
 // GET all form fields
+router.get("/register-field", async (req, res) => {
+  try {
+    const fields = await formFieldsService.getOutside();
+    res.status(200).json(fields);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// GET all form fields
 router.get("/group", async (req, res) => {
   try {
     const fields = await formFieldsService.getGroup();

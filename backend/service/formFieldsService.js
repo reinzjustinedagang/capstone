@@ -6,6 +6,11 @@ exports.getAll = async () => {
   return await Connection(query);
 };
 
+exports.getOutside = async () => {
+  const query = `SELECT * FROM form_fields WHERE show_outside = 1 ORDER BY \`group\`, \`order\``;
+  return await Connection(query);
+};
+
 exports.getById = async (id) => {
   const query = `SELECT * FROM form_fields WHERE id = ? LIMIT 1`;
   const result = await Connection(query, [id]);
