@@ -15,14 +15,14 @@ exports.getBenefitsCounts = async () => {
 
 exports.getThreeRa = async () => {
   return await Connection(
-    `SELECT * FROM benefits WHERE type = 'republic-acts' ORDER BY created_at DESC LIMIT 3`
+    `SELECT type, title, enacted_date, description FROM benefits WHERE type = 'republic-acts' ORDER BY created_at DESC LIMIT 3`
   );
 };
 
 // Get all benefits (limit 5)
 exports.getAll = async () => {
   const query = `
-    SELECT type, title, enacted_date, description,
+    SELECT type, description, provider, image_url
     FROM benefits
     WHERE type != 'republic-acts'
     ORDER BY created_at ASC
