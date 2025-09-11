@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
-import Modal from "../UI/Modal";
+import Modal from "../../UI/Modal";
 import { ChevronLeft, ChevronRight, BookOpenTextIcon } from "lucide-react";
 
 const RepublicActs = () => {
