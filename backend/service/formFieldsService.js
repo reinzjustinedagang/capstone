@@ -21,6 +21,7 @@ exports.create = async (data, user, ip) => {
     required = 0,
     group = "",
     order = 0,
+    show_outside = 0,
   } = data;
 
   // 1. Check for duplicate field_name
@@ -35,8 +36,8 @@ exports.create = async (data, user, ip) => {
 
   // 2. Insert new field
   const query = `
-    INSERT INTO form_fields (field_name, label, type, options, required, \`group\`, \`order\`)
-    VALUES (?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO form_fields (field_name, label, type, options, required, \`group\`, \`order\`, show_outside)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
   `;
   const result = await Connection(query, [
     field_name,
@@ -46,6 +47,7 @@ exports.create = async (data, user, ip) => {
     required,
     group,
     order,
+    show_outside,
   ]);
 
   // 3. Log audit
@@ -70,10 +72,11 @@ exports.update = async (id, data, user, ip) => {
     required = 0,
     group = "",
     order = 0,
+    show_outside = 0,
   } = data;
   const query = `
     UPDATE form_fields
-    SET field_name = ?, label = ?, type = ?, options = ?, required = ?, \`group\` = ?, \`order\` = ?
+    SET field_name = ?, label = ?, type = ?, options = ?, required = ?, \`group\` = ?, \`order\` = ?, show_outside = ?
     WHERE id = ?
   `;
   const result = await Connection(query, [
@@ -84,6 +87,7 @@ exports.update = async (id, data, user, ip) => {
     required,
     group,
     order,
+    show_outside,
     id,
   ]);
 
