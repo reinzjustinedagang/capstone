@@ -13,7 +13,7 @@ const RepublicActs = () => {
   useEffect(() => {
     const fetchActs = async () => {
       try {
-        const res = await axios.get(`${backendUrl}/api/benefits/three-ra`);
+        const res = await axios.get(`${backendUrl}/api/benefits/front-ra`);
         setActs(res.data);
       } catch (err) {
         console.error("Error fetching Republic Acts:", err);
