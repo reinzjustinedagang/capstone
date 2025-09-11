@@ -1,8 +1,8 @@
 import React from "react";
 import { Edit, Trash2 } from "lucide-react";
-import user from "../../../assets/user.png";
+import user from "../../../../assets/user.png";
 
-const BarangayCard = ({ official }) => {
+const BarangayCard = ({ official, onEdit, onDelete }) => {
   return (
     <div className="relative flex flex-col items-center bg-white p-4 rounded-2xl shadow-md w-48 transition-transform transform ">
       {/* Barangay Name */}

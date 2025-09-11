@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import MunicipalOfficials from "./MunicipalOfficials";
 import BarangayOfficials from "./BarangayOfficials";
+import OrgChart from "./OrgChart";
 import { Landmark, User, ListTree } from "lucide-react";
 
 const Officials = () => {

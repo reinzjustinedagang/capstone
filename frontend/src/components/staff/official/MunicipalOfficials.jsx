@@ -7,42 +7,24 @@ import {
   SaveIcon,
   TrashIcon,
 } from "lucide-react";
-import MunicipalCard from "./MunicipalCard";
-import Modal from "../../UI/Modal";
+import MunicipalCard from "./card/MunicipalCard";
 import axios from "axios";
 
 const MunicipalOfficials = ({ title }) => {
   const [officials, setOfficials] = useState([]);
-  const [showFormModal, setShowFormModal] = useState(false);
-  const [imageFile, setImageFile] = useState(null);
-  const [confirmModal, setConfirmModal] = useState({
-    open: false,
-    type: "",
-    id: null,
-    payload: null,
-  });
-  const [formData, setFormData] = useState({
-    name: "",
-    position: "",
-    type: "officer",
-    existingImage: "",
-  });
-  const [editingId, setEditingId] = useState(null);
+
   const [isLoading, setIsLoading] = useState(true);
   const [crudLoading, setCrudLoading] = useState(false);
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
-  const [selectedOfficial, setSelectedOfficial] = useState(null);
   const backendUrl =
     import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
 
-  const head = officials.find((m) => m.type === "head");
-  const vice = officials.find((m) => m.type === "vice");
-  const others = officials.filter((m) => m.type === "officer");
-  const isHeadOccupied = !!head;
-  const isViceOccupied = !!vice;
+  const head = officials.find((m) => m.type === "top");
+  const vice = officials.find((m) => m.type === "mid");
+  const others = officials.filter((m) => m.type === "bottom");
 
-  const fetchOfficials = useCallback(async () => {
+  const fetchOfficials = async () => {
     setIsLoading(true);
     setError("");
     setSuccessMessage("");
@@ -60,11 +42,11 @@ const MunicipalOfficials = ({ title }) => {
     } finally {
       setIsLoading(false);
     }
-  }, [backendUrl]);
+  };
 
   useEffect(() => {
     fetchOfficials();
-  }, [fetchOfficials]);
+  }, []);
 
   if (isLoading) {
     return (
@@ -76,54 +58,67 @@ const MunicipalOfficials = ({ title }) => {
   }
 
   return (
-    <div>
+    <>
       {crudLoading ? (
         <div className="flex justify-center items-center py-10">
           <Loader2 className="animate-spin h-8 w-8 text-blue-500" />
           <p className="ml-3 text-gray-600">Processing request...</p>
         </div>
-      ) : error ? (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg mx-auto mb-4 flex items-center">
-          <XCircle className="h-5 w-5 mr-2" />
-          <span>{error}</span>
-        </div>
-      ) : successMessage ? (
-        <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg mx-auto mb-4 flex items-center">
-          <CheckCircle className="h-5 w-5 mr-2" />
-          <span>{successMessage}</span>
-        </div>
+      ) : officials.length === 0 ? (
+        <p className="col-span-full text-center text-gray-600 py-4">
+          No Federation officer found.
+        </p>
       ) : null}
 
       {!isLoading && !error && (
         <div className="flex flex-col items-center space-y-0">
           {/* Head */}
-          {head && <MunicipalCard official={head} isHead />}
+          {head && (
+            <MunicipalCard
+              official={head}
+              onEdit={() => openEditModal(head)}
+              onDelete={() => openDeleteConfirmation(head)}
+              isHead
+              backendUrl={backendUrl}
+            />
+          )}
 
           {/* Vice */}
           {vice && (
             <>
-              <div className="w-1 h-6 bg-blue-400"></div>
-              <MunicipalCard official={vice} />
+              <div className="w-0.5 h-6 bg-blue-400"></div>
+              <MunicipalCard
+                official={vice}
+                onEdit={() => openEditModal(vice)}
+                onDelete={() => openDeleteConfirmation(vice)}
+                backendUrl={backendUrl}
+              />
             </>
           )}
 
           {/* Others */}
           {others.length > 0 && (
             <>
-              <div className="relative flex justify-center items-center w-full mb-2">
-                <div className="w-1 h-6 bg-blue-400"></div>
-                <div className="absolute top-6 h-1 w-2/3 bg-blue-400"></div>
+              <div className="relative flex justify-center items-center w-full mb-5">
+                <div className="w-0.5 h-6 bg-blue-400"></div>
+                <div className="absolute top-6 h-0.5 w-3/4 bg-blue-400"></div>
               </div>
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 w-full place-items-center">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 w-full place-items-center">
                 {others.map((o) => (
-                  <MunicipalCard key={o.id} official={o} />
+                  <MunicipalCard
+                    key={o.id}
+                    official={o}
+                    onEdit={() => openEditModal(o)}
+                    onDelete={() => openDeleteConfirmation(o)}
+                    backendUrl={backendUrl}
+                  />
                 ))}
               </div>
             </>
           )}
         </div>
       )}
-    </div>
+    </>
   );
 };
 

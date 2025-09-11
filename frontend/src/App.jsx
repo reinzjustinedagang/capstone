@@ -45,7 +45,7 @@ import { StaffLoginTrailPage } from "./pages/staff/StaffLoginTrailPage.jsx";
 import { StaffAboutPage } from "./pages/staff/StaffAboutPage.jsx";
 import { StaffProfilePage } from "./pages/staff/StaffProfilePage.jsx";
 import { StaffOfficialPage } from "./pages/staff/StaffOfficialPage.jsx";
-import { StaffNewsPage } from "./pages/staff/StaffNewsPage.jsx";
+import { StaffEventsPage } from "./pages/staff/StaffEventsPage.jsx";
 
 function App() {
   return (
@@ -337,10 +337,10 @@ function App() {
         }
       />
       <Route
-        path="/staff/news"
+        path="/staff/events"
         element={
           <ProtectedRoute role="Staff">
-            <StaffNewsPage />
+            <StaffEventsPage />
           </ProtectedRoute>
         }
       />

@@ -13,25 +13,46 @@ import Modal from "../../UI/Modal";
 
 import Button from "../../UI/Button";
 import SeniorCitizenList from "../../senior-citizen/SeniorCitizenList";
+import SeniorCitizenForm from "../../senior-citizen/form/SeniorCitizenForm";
+import UpdateSeniorCitizenForm from "../../senior-citizen/form/UpdateSeniorCitizenForm";
 
 const SeniorCitizen = () => {
   const [activeTab, setActiveTab] = useState("list");
+  const [selectedCitizenId, setSelectedCitizenId] = useState(null);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [showUpdateModal, setShowUpdateModal] = useState(false);
+
+  const handleAddSuccess = () => {
+    setActiveTab("list");
+    setShowSuccessModal(true);
+  };
+
+  const handleUpdateSuccess = () => {
+    setActiveTab("list");
+    setShowUpdateModal(true);
+  };
+
+  const handleEdit = (id) => {
+    setSelectedCitizenId(id); // Set the ID of the benefit to be updated
+    setActiveTab("update"); // Switch to the update tab
+  };
 
   return (
     <>
       <div className="mb-4 flex flex-col sm:flex-row justify-between items-center space-y-3 sm:space-y-0">
         <div className="relative w-full sm:w-64">
-          {activeTab === "add" ? (
+          {activeTab !== "list" && (
             <div
               className="flex items-center cursor-pointer text-gray-600 hover:text-gray-900 transition-colors"
-              onClick={() => setActiveTab("list")}
+              onClick={() =>
+                activeTab === "view" && selectedCitizenId
+                  ? setActiveTab("unregistered")
+                  : setActiveTab("list")
+              }
             >
               <ArrowUp className="h-5 w-5 mr-2 -rotate-90" />
               Back to Senior Citizens
             </div>
-          ) : (
-            <></>
           )}
         </div>
 
@@ -47,13 +68,23 @@ const SeniorCitizen = () => {
       </div>
 
       <div className="bg-white rounded-lg shadow overflow-hidden">
-        {activeTab === "list" && <SeniorCitizenList />}
+        {activeTab === "list" && <SeniorCitizenList onEdit={handleEdit} />}
 
-        {activeTab === "add" && <AddSenior />}
-        {activeTab === "updatebenefits" && (
-          <UpdateBenefit
-            benefitId={selectedBenefitId}
+        {activeTab === "update" && (
+          <UpdateSeniorCitizenForm
+            id={selectedCitizenId}
             onSuccess={handleUpdateSuccess}
+            onCancel={() => {
+              setActiveTab("list");
+            }}
+          />
+        )}
+        {activeTab === "add" && (
+          <SeniorCitizenForm
+            onSuccess={handleAddSuccess}
+            onCancel={() => {
+              setActiveTab("list");
+            }}
           />
         )}
       </div>

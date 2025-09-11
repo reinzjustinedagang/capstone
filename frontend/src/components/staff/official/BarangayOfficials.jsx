@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import Button from "../../UI/Button";
-import BarangayCard from "./BarangayCard";
+import BarangayCard from "./card/BarangayCard";
 import StatusMessage from "../../officials/StatusMessage";
 import { PlusIcon, Loader2 } from "lucide-react";
 

@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { NavLink } from "react-router-dom";
 import axios from "axios";
-import logo from "../../../assets/osca-logo.png";
 import {
   HomeIcon,
   UsersIcon,
@@ -19,6 +18,7 @@ import {
 
 const StaffSidebar = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [loaded, setLoaded] = useState(false);
   const [systemSettings, setSystemSettings] = useState({
     system_name: "",
     municipality: "",
@@ -31,6 +31,16 @@ const StaffSidebar = () => {
       try {
         const res = await axios.get(`${backendUrl}/api/settings/`);
         setSystemSettings(res.data);
+
+        if (res.data.seal) {
+          const link =
+            document.querySelector("link[rel*='icon']") ||
+            document.createElement("link");
+          link.type = "image/x-icon";
+          link.rel = "icon";
+          link.href = res.data.seal;
+          document.getElementsByTagName("head")[0].appendChild(link);
+        }
       } catch (err) {
         console.error("Failed to fetch system settings:", err);
       }
@@ -52,6 +62,7 @@ const StaffSidebar = () => {
       icon: MessageSquareIcon,
     },
     { to: "/staff/benefits", label: "Benefits", icon: GiftIcon },
+    { to: "/staff/events", label: "Events", icon: Calendar },
     { to: "/staff/official", label: "Official", icon: UserCheck },
     { to: "/staff/login-trails", label: "Login Trails", icon: History },
     { to: "/staff/about", label: "About OSCA", icon: InfoIcon },
@@ -101,11 +112,21 @@ const StaffSidebar = () => {
 
         {/* Header */}
         <div className="p-6 flex flex-col items-center text-center">
-          <img
-            src={systemSettings.seal || logo}
-            alt="OSCA Logo"
-            className="h-20 w-auto object-contain border-2 rounded-full border-blue-800"
-          />
+          <div className="h-20 w-20 rounded-full border-2 border-blue-800 flex items-center justify-center overflow-hidden">
+            {!loaded && (
+              <div className="h-full w-full animate-pulse bg-gray-100 rounded-full"></div>
+            )}
+            {systemSettings.seal && (
+              <img
+                src={systemSettings.seal}
+                alt="OSCA Logo"
+                className={`h-full w-full object-contain rounded-full transition-opacity duration-500 ${
+                  loaded ? "opacity-100" : "opacity-0 absolute"
+                }`}
+                onLoad={() => setLoaded(true)}
+              />
+            )}
+          </div>
           <h1 className="text-xl font-bold text-blue-800">
             {systemSettings.system_name ||
               "Office of the Senior Citizen Affairs"}
