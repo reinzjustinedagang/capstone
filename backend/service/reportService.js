@@ -35,21 +35,13 @@ exports.getGenderDistribution = async () => {
         CAST(SUM(CASE 
           WHEN JSON_UNQUOTE(JSON_EXTRACT(form_data, '$.gender')) = 'Female' THEN 1 
           ELSE 0 
-        END) AS UNSIGNED) AS female_count,
-        CAST(SUM(CASE 
-          WHEN JSON_UNQUOTE(JSON_EXTRACT(form_data, '$.gender')) IS NULL 
-            OR JSON_UNQUOTE(JSON_EXTRACT(form_data, '$.gender')) = '' 
-            OR JSON_UNQUOTE(JSON_EXTRACT(form_data, '$.gender')) NOT IN ('Male','Female')
-          THEN 1 
-          ELSE 0 
-        END) AS UNSIGNED) AS unknown_count,
-        COUNT(*) AS total_seniors
+        END) AS UNSIGNED) AS female_count
       FROM senior_citizens
       WHERE deleted = 0 AND registered = 1
     `;
 
     const result = await Connection(sql);
-    return result[0]; // { male_count, female_count, unknown_count, total_seniors }
+    return result[0]; // { male_count, female_count }
   } catch (err) {
     console.error("❌ Error fetching gender distribution:", err);
     throw err;

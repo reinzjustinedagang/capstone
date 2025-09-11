@@ -6,11 +6,11 @@ import "./chartConfig";
 const GenderDistribution = () => {
   const backendUrl = import.meta.env.VITE_API_BASE_URL;
   const [chartData, setChartData] = useState({
-    labels: ["Male", "Female", "Unknown"],
+    labels: ["Male", "Female"],
     datasets: [
       {
-        data: [0, 0, 0],
-        backgroundColor: ["#3B82F6", "#EC4899", "#9CA3AF"], // blue, pink, gray
+        data: [0, 0],
+        backgroundColor: ["#3B82F6", "#EC4899"], // blue, pink
       },
     ],
   });
@@ -20,15 +20,11 @@ const GenderDistribution = () => {
       try {
         const res = await axios.get(`${backendUrl}/api/charts/gender`);
         setChartData({
-          labels: ["Male", "Female", "Unknown"],
+          labels: ["Male", "Female"],
           datasets: [
             {
-              data: [
-                res.data.male_count,
-                res.data.female_count,
-                res.data.unknown_count,
-              ],
-              backgroundColor: ["#3B82F6", "#EC4899", "#9CA3AF"],
+              data: [res.data.male_count, res.data.female_count],
+              backgroundColor: ["#3B82F6", "#EC4899"],
             },
           ],
         });
