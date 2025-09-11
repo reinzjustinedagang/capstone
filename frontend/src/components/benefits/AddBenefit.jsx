@@ -166,7 +166,7 @@ const AddBenefit = () => {
         }}
       >
         {/* Image Upload - only show if type is NOT "republic acts" */}
-        {formData.type !== "republic acts" && (
+        {formData.type !== "republic-acts" && (
           <div>
             <label className="block text-sm font-medium">Benefits Image</label>
             <div className="flex items-center gap-4 mt-2">
