@@ -10,10 +10,12 @@ const RepublicActCard = ({ law, onEdit, onDelete }) => {
       <div className="bg-white rounded-2xl shadow p-4 border border-gray-200 hover:shadow-lg transition flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-purple-700 flex items-center gap-2">
+          <div>
             <BookOpenTextIcon className="w-5 h-5 text-blue-500" />
-            {law.title}
-          </h2>
+            <h2 className="text-lg font-semibold text-purple-700 flex items-center gap-2 line-clamp-2">
+              {law.title}
+            </h2>
+          </div>
           <div className="flex items-center gap-2">
             <button
               onClick={() => onEdit && onEdit(law.id)}

@@ -28,6 +28,7 @@ const FormFieldsPage = () => {
     options: "",
     required: 0,
     group: "",
+    show_outside: 0, // 👈 add this
   });
 
   const [loading, setLoading] = useState(false);
@@ -90,19 +91,10 @@ const FormFieldsPage = () => {
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setNewField((prev) => {
-      let updated = {
-        ...prev,
-        [name]: type === "checkbox" ? checked : value,
-      };
-
-      // Clear options if type changes to one that doesn't need options
-      if (name === "type" && !["select", "radio", "checkbox"].includes(value)) {
-        updated.options = "";
-      }
-
-      return updated;
-    });
+    setNewField((prev) => ({
+      ...prev,
+      [name]: type === "checkbox" ? (checked ? 1 : 0) : value,
+    }));
   };
 
   const handleSubmit = async () => {
@@ -157,6 +149,7 @@ const FormFieldsPage = () => {
         options: "",
         required: 0,
         group: "",
+        show_outside: 0,
       });
 
       fetchFields();
@@ -333,10 +326,10 @@ const FormFieldsPage = () => {
   };
 
   const handleEditChange = (e) => {
-    const { name, value, type, checked } = e.target;
+    const { name, type, checked, value } = e.target;
     setEditFieldData((prev) => ({
       ...prev,
-      [name]: type === "checkbox" ? checked : value,
+      [name]: type === "checkbox" ? (checked ? 1 : 0) : value,
     }));
   };
 
@@ -351,7 +344,11 @@ const FormFieldsPage = () => {
       setLoading(true);
       await axios.put(
         `${backendUrl}/api/form-fields/${editingField.id}`,
-        { ...editFieldData, required: editFieldData.required ? 1 : 0 },
+        {
+          ...editFieldData,
+          required: editFieldData.required ? 1 : 0,
+          show_outside: editFieldData.show_outside ? 1 : 0,
+        },
         { withCredentials: true }
       );
 
@@ -369,6 +366,12 @@ const FormFieldsPage = () => {
     }
   };
 
+  const preparedField = {
+    ...newField,
+    required: newField.required ? 1 : 0,
+    show_outside: newField.show_outside ? 1 : 0,
+  };
+
   return (
     <div className="space-y-6">
       <form
@@ -378,6 +381,20 @@ const FormFieldsPage = () => {
         }}
       >
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Show Outside */}
+          <div className="flex items-center space-x-2">
+            <input
+              type="checkbox"
+              name="show_outside" // 👈 new key
+              checked={newField.show_outside == 1}
+              onChange={handleInputChange}
+              className="h-4 w-4 text-blue-600 border-gray-300 rounded"
+            />
+            <label className="text-sm font-medium text-gray-700">
+              Show Outside
+            </label>
+          </div>
+
           {/* Required */}
           <div className="flex items-center space-x-2">
             <input
@@ -946,6 +963,24 @@ const FormFieldsPage = () => {
                 Required
               </span>
             </div>
+
+            {/* Show Outside */}
+            <div className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                name="show_outside"
+                checked={
+                  editFieldData.show_outside === 1 ||
+                  editFieldData.show_outside === true
+                }
+                onChange={handleEditChange}
+                className="h-4 w-4 text-blue-600 border-gray-300 rounded"
+              />
+              <label className="text-sm font-medium text-gray-700">
+                Show Outside
+              </label>
+            </div>
+
             <div className="flex justify-end gap-2">
               <button
                 onClick={() => {
@@ -1122,6 +1157,56 @@ const FormFieldsPage = () => {
           <p className="text-sm text-gray-600 mb-4">
             Field updated successfully!
           </p>
+          <Button
+            variant="primary"
+            onClick={() => setShowUpdateFieldSuccess(false)}
+          >
+            OK
+          </Button>
+        </div>
+      </Modal>
+      {/* Confirm Update Modal */}
+      <Modal
+        isOpen={showUpdateFieldConfirm}
+        onClose={() => setShowUpdateFieldConfirm(false)}
+        title="Confirm Update"
+      >
+        <div className="mt-4 text-sm text-gray-700">
+          Are you sure you want to update this field?
+        </div>
+        <div className="mt-6 flex justify-end space-x-4">
+          <button
+            onClick={() => setShowUpdateFieldConfirm(false)}
+            className="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 text-sm"
+          >
+            Cancel
+          </button>
+          <button
+            disabled={loading}
+            onClick={handleUpdateField}
+            className={`px-4 py-2 rounded text-sm ${
+              loading
+                ? "bg-blue-400 cursor-not-allowed"
+                : "bg-blue-600 hover:bg-blue-700"
+            } text-white`}
+          >
+            {loading ? "Updating..." : "Yes, Update"}
+          </button>
+        </div>
+      </Modal>
+
+      {/* Success Update Modal */}
+      <Modal
+        isOpen={showUpdateFieldSuccess}
+        onClose={() => setShowUpdateFieldSuccess(false)}
+        title="Field Updated"
+      >
+        <div className="p-6 text-center">
+          <div className="mx-auto mb-4 w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+            <CheckCircle className="w-6 h-6 text-green-500" />
+          </div>
+          <h3 className="text-lg font-medium text-gray-800 mb-2">Updated</h3>
+          <p className="text-sm text-gray-600 mb-4">{successMessage}</p>
           <Button
             variant="primary"
             onClick={() => setShowUpdateFieldSuccess(false)}

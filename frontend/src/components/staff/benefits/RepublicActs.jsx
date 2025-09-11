@@ -68,7 +68,7 @@ const RepublicActs = ({ onEdit }) => {
   return (
     <>
       <h1 className="text-lg font-medium mb-4 text-gray-800 flex items-center gap-2">
-        <BookOpenTextIcon className="w-6 h-6 text-purple-600" />
+        <BookOpenTextIcon className="w-6 h-6 text-blue-600" />
         Republic Acts for Senior Citizens
       </h1>
 
@@ -87,7 +87,7 @@ const RepublicActs = ({ onEdit }) => {
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
           {acts.map((law) => (
             <div key={law.id}>
               <RepublicActCard

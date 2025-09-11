@@ -13,6 +13,7 @@ import {
   CheckCircle,
   MoreVertical,
   XCircle,
+  Loader2,
 } from "lucide-react";
 
 const SeniorCitizenList = ({ onEdit }) => {
@@ -342,7 +343,7 @@ const SeniorCitizenList = ({ onEdit }) => {
                                 }}
                                 className="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50"
                               >
-                                Deceased
+                                Archive
                               </button>
 
                               <button
@@ -352,7 +353,7 @@ const SeniorCitizenList = ({ onEdit }) => {
                                 }}
                                 className="flex items-center w-full px-4 py-2 text-sm text-blue-600 hover:bg-blue-50"
                               >
-                                Reports
+                                Generate ID
                               </button>
                             </div>
                           )}
@@ -367,9 +368,16 @@ const SeniorCitizenList = ({ onEdit }) => {
                     colSpan="8"
                     className="px-6 py-4 text-center text-gray-500"
                   >
-                    {loading
-                      ? "Loading senior citizens..."
-                      : "No senior citizens found."}
+                    {loading ? (
+                      <div className="flex justify-center items-center py-12">
+                        <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
+                        <p className="ml-2 text-gray-600">
+                          Loading Senior Citizen...
+                        </p>
+                      </div>
+                    ) : (
+                      "No senior citizens found."
+                    )}
                   </td>
                 </tr>
               )}

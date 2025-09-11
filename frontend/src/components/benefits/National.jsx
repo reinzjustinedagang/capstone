@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { PercentIcon, CheckCircle, MapIcon } from "lucide-react";
+import { PercentIcon, CheckCircle, MapIcon, Loader2 } from "lucide-react";
 import BenefitsCard from "./BenefitsCard";
 import Modal from "../UI/Modal";
 import Button from "../UI/Button";
@@ -66,7 +66,8 @@ const National = ({ onEdit }) => {
 
       {loading ? (
         <div className="flex justify-center items-center h-32">
-          <p className="text-gray-500">Loading benefits...</p>
+          <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
+          <p className="ml-2 text-gray-500">Loading benefits...</p>
         </div>
       ) : error ? (
         <div className="flex justify-center items-center h-32">
@@ -77,7 +78,7 @@ const National = ({ onEdit }) => {
           <p className="text-gray-500">No benefits available at the moment.</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
           {discounts.map((item) => (
             <BenefitsCard
               key={item.id}

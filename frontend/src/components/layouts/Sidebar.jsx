@@ -20,6 +20,7 @@ import {
   ClipboardListIcon,
   Calendar,
   InfoIcon,
+  Archive,
 } from "lucide-react";
 
 const Sidebar = () => {
@@ -75,6 +76,7 @@ const Sidebar = () => {
     { to: "/admin/benefits", label: "Benefits", icon: GiftIcon },
     { to: "/admin/events", label: "Events", icon: Calendar },
     { to: "/admin/osca-officials", label: "OSCA Officials", icon: UserCheck },
+    { to: "/admin/audit-logs", label: "Archive", icon: Archive },
     { to: "/admin/audit-logs", label: "Audit Logs", icon: ClipboardListIcon },
     {
       to: "/admin/user-management",

@@ -3,7 +3,7 @@ import Button from "../UI/Button";
 import Modal from "../UI/Modal";
 import Pagination from "../UI/Component/Pagination";
 import axios from "axios";
-import { CheckCircle, Trash2 } from "lucide-react";
+import { CheckCircle, Loader2, Trash2 } from "lucide-react";
 
 const UnregisteredSeniorList = ({ onView, onRegister }) => {
   const [loading, setLoading] = useState(false);
@@ -142,9 +142,16 @@ const UnregisteredSeniorList = ({ onView, onRegister }) => {
                     colSpan="5"
                     className="px-6 py-4 text-center text-gray-500"
                   >
-                    {loading
-                      ? "Loading unregistered senior citizens..."
-                      : error || "No unregistered senior citizens found."}
+                    {loading ? (
+                      <div className="flex justify-center items-center py-12">
+                        <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
+                        <p className="ml-2 text-gray-600">
+                          Loading Senior Citizen...
+                        </p>
+                      </div>
+                    ) : (
+                      error || "No unregistered senior citizens found."
+                    )}
                   </td>
                 </tr>
               )}

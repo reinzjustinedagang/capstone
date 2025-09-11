@@ -7,7 +7,8 @@ import { Trash2, Loader2 } from "lucide-react";
 const EventList = () => {
   const [events, setEvents] = useState([]);
   const [selectedEvent, setSelectedEvent] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(false); // for delete
+  const [loadingEvents, setLoadingEvents] = useState(false); // for fetching
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showDeletedModal, setShowDeletedModal] = useState(false);
   const [showDetailModal, setShowDetailModal] = useState(false);
@@ -17,6 +18,7 @@ const EventList = () => {
 
   // Fetch events from backend
   const fetchEvents = async () => {
+    setLoadingEvents(true);
     try {
       const res = await axios.get(`${backendUrl}/api/events/event`, {
         withCredentials: true,
@@ -24,6 +26,8 @@ const EventList = () => {
       setEvents(res.data);
     } catch (err) {
       console.error("Failed to fetch events:", err);
+    } finally {
+      setLoadingEvents(false);
     }
   };
 
@@ -52,10 +56,16 @@ const EventList = () => {
   };
 
   return (
-    <div className="">
+    <div>
       <h1 className="text-2xl font-bold mb-6">Events</h1>
 
-      {events.length === 0 ? (
+      {/* Loading State */}
+      {loadingEvents ? (
+        <div className="flex justify-center items-center py-12">
+          <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
+          <span className="ml-2 text-gray-600">Loading events...</span>
+        </div>
+      ) : events.length === 0 ? (
         <p className="text-gray-500">No events available.</p>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
@@ -86,7 +96,7 @@ const EventList = () => {
                 <button
                   className="absolute top-2 right-2 bg-white/90 hover:bg-white text-red-500 hover:text-red-600 p-2 rounded-full shadow z-10"
                   onClick={(e) => {
-                    e.stopPropagation(); // prevent triggering detail modal
+                    e.stopPropagation();
                     setSelectedEvent(event);
                     setShowDeleteModal(true);
                   }}
