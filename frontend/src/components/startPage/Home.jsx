@@ -6,6 +6,7 @@ import Slideshow from "./home/Slideshow";
 import Footer from "./Footer";
 import slider5 from "../../assets/slider5.jpg";
 import Benefits from "./home/Benefits";
+import RepublicActs from "./home/RepublicActs";
 
 const Home = () => {
   return (
@@ -14,6 +15,7 @@ const Home = () => {
 
       <Slideshow />
       <RegistrationBanner />
+      <RepublicActs />
       <Benefits />
       <Events />
       <Footer />

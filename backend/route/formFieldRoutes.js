@@ -12,7 +12,7 @@ router.get("/", async (req, res) => {
   }
 });
 
-// GET all form fields
+// GET all form fields for register
 router.get("/register-field", async (req, res) => {
   try {
     const fields = await formFieldsService.getOutside();

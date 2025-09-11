@@ -16,6 +16,16 @@ router.get("/count/all", async (req, res) => {
   }
 });
 
+// GET all ra (limit 3)
+router.get("/front-ra", async (req, res) => {
+  try {
+    const data = await benefitService.getThreeRa();
+    res.status(200).json(data);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 // GET all benefits (limit 5)
 router.get("/", async (req, res) => {
   try {
