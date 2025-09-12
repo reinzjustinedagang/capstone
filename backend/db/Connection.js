@@ -260,6 +260,8 @@ async function initTables() {
       document_image VARCHAR(500),
       document_type VARCHAR(255),
       photo VARCHAR(500),
+      document_public_id VARCHAR(500),
+      photo_public_id VARCHAR(500)
       
       -- Metadata
       barangay_id  INT NULL,
@@ -303,7 +305,10 @@ async function initTables() {
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         mission TEXT NULL,
         vision TEXT NULL,
-        preamble TEXT NULL
+        preamble TEXT NULL,
+        introduction TEXT NULL,
+        objective TEXT NULL,
+        team JSON NULL
       )
       `
     );

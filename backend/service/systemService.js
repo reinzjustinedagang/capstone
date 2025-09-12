@@ -172,3 +172,23 @@ exports.saveKey = async (key) => {
 
   return { message: "Developer key created successfully", skipped: false };
 };
+
+exports.updateAboutUs = async (data) => {
+  const { introduction, objective, team } = data;
+  const existing = await Connection("SELECT id FROM system_setting LIMIT 1");
+
+  if (existing.length > 0) {
+    const id = existing[0].id;
+    await Connection(
+      "UPDATE system_setting SET introduction = ?, objective = ?, team = ? WHERE id = ?",
+      [introduction, objective, JSON.stringify(team), id]
+    );
+    return { id };
+  } else {
+    const result = await Connection(
+      "INSERT INTO system_setting (introduction, objective, team) VALUES (?, ?, ?)",
+      [introduction, objective, JSON.stringify(team)]
+    );
+    return { id: result.insertId };
+  }
+};

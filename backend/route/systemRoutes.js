@@ -3,7 +3,12 @@ const router = express.Router();
 const upload = require("../middleware/upload");
 const cloudinary = require("../utils/cloudinary");
 const systemService = require("../service/systemService");
+import { logAudit } from "../service/auditService";
 const { isAuthenticated } = require("../middleware/authMiddleware");
+const {
+  extractCloudinaryPublicId,
+  safeCloudinaryDestroy,
+} = require("../utils/serviceHelpers");
 
 // GET system settings
 router.get("/", async (req, res) => {
@@ -112,6 +117,83 @@ router.post("/about", isAuthenticated, async (req, res) => {
     res.status(500).json({ message: "Failed to update About OSCA" });
   }
 });
+
+// POST update About Us (with Cloudinary for team images)
+router.post(
+  "/about-us",
+  isAuthenticated,
+  upload.array("teamImages"),
+  async (req, res) => {
+    try {
+      const { introduction, objective } = req.body;
+      let team = JSON.parse(req.body.team || "[]");
+      const user = req.session.user;
+      const ip = req.userIp;
+
+      // Upload new images if provided
+      if (req.files && req.files.length > 0) {
+        const teamIndexes = req.body.teamIndexes
+          ? Array.isArray(req.body.teamIndexes)
+            ? req.body.teamIndexes.map(Number)
+            : [Number(req.body.teamIndexes)]
+          : [];
+
+        for (let i = 0; i < req.files.length; i++) {
+          const file = req.files[i];
+          const idx = teamIndexes[i];
+
+          const result = await new Promise((resolve, reject) => {
+            const stream = cloudinary.uploader.upload_stream(
+              { folder: "team/" },
+              (error, result) => (error ? reject(error) : resolve(result))
+            );
+            stream.end(file.buffer);
+          });
+
+          if (team[idx]) {
+            if (team[idx].public_id) {
+              await cloudinary.uploader
+                .destroy(team[idx].public_id)
+                .catch(() => {});
+            }
+            team[idx].image = result.secure_url;
+            team[idx].public_id = result.public_id;
+          }
+        }
+      }
+
+      // Save in DB
+      const result = await systemService.updateAboutUs({
+        introduction,
+        objective,
+        team,
+      });
+
+      // Optional: audit log
+      if (user) {
+        await logAudit(
+          user.id,
+          user.email,
+          user.role,
+          "UPDATE",
+          "Updated About Us section with team members",
+          ip
+        );
+      }
+
+      res.status(200).json({
+        message: "About Us updated successfully",
+        id: result.id,
+        team,
+      });
+    } catch (err) {
+      console.error("Error updating About Us:", err);
+      res
+        .status(500)
+        .json({ message: "Failed to update About Us", error: err.message });
+    }
+  }
+);
 
 // POST save a new key
 router.post("/save-key", async (req, res) => {
