@@ -5,6 +5,18 @@ import { ChevronDown, ChevronUp, Loader2 } from "lucide-react";
 import Button from "../../UI/Button";
 import Modal from "../../UI/Modal";
 
+const documentTypes = [
+  "Certificate of Live Birth",
+  "Social Security System (SSS) ID",
+  "Government Service Insurance System (GSIS) ID",
+  "Driver's License",
+  "Philippine Passport",
+  "COMELEC ID / Voter's Certification",
+  "Baptismal Certificate",
+  "Marriage Certificate",
+  "Unified Multi-Purpose ID (UMID)",
+];
+
 const SeniorCitizenForm = ({ onSubmit, onCancel, onSuccess }) => {
   const [fields, setFields] = useState([]);
   const [groups, setGroups] = useState([]);
@@ -12,6 +24,8 @@ const SeniorCitizenForm = ({ onSubmit, onCancel, onSuccess }) => {
   const [formData, setFormData] = useState({});
   const [collapsedGroups, setCollapsedGroups] = useState({});
   const [barangays, setBarangays] = useState([]);
+  const [documentFile, setDocumentFile] = useState(null);
+  const [photoFile, setPhotoFile] = useState(null);
 
   const [loading, setLoading] = useState(true);
   const [barangayLoading, setBarangayLoading] = useState(false);
@@ -128,6 +142,20 @@ const SeniorCitizenForm = ({ onSubmit, onCancel, onSuccess }) => {
   };
 
   /** ---------------------------
+   * Handle file change
+   * --------------------------- */
+  const handleFileChange = (e) => {
+    const { name, files } = e.target;
+    if (files.length > 0) {
+      if (name === "documentFile") {
+        setDocumentFile(files[0]);
+      } else if (name === "photoFile") {
+        setPhotoFile(files[0]);
+      }
+    }
+  };
+
+  /** ---------------------------
    * Handle submit
    * --------------------------- */
   const handleSubmit = (e) => {
@@ -135,6 +163,9 @@ const SeniorCitizenForm = ({ onSubmit, onCancel, onSuccess }) => {
     setShowConfirmModal(true);
   };
 
+  /** ---------------------------
+   * Final submit with files
+   * --------------------------- */
   const handleFinalSubmit = async () => {
     setIsSubmitting(true);
     setFormError("");
@@ -152,21 +183,33 @@ const SeniorCitizenForm = ({ onSubmit, onCancel, onSuccess }) => {
         return;
       }
 
+      if (!documentFile || !photoFile) {
+        setFormError("Please upload both document and photo.");
+        setIsSubmitting(false);
+        return;
+      }
+
       const barangay_id = Number(formData[barangayField.field_name]);
       const dynamicFields = { ...allFields };
       delete dynamicFields[barangayField.field_name];
 
-      const payload = {
-        firstName,
-        lastName,
-        middleName,
-        suffix,
-        barangay_id,
-        form_data: JSON.stringify(dynamicFields),
-      };
+      // 🔹 Use FormData for JSON + files
+      const payload = new FormData();
+      payload.append("firstName", firstName || "");
+      payload.append("lastName", lastName || "");
+      payload.append("middleName", middleName || "");
+      payload.append("suffix", suffix || "");
+      payload.append("barangay_id", barangay_id);
+      payload.append("form_data", JSON.stringify(dynamicFields));
+      payload.append("documentType", formData.documentType || "");
+
+      // Append files if provided
+      if (documentFile) payload.append("documentFile", documentFile);
+      if (photoFile) payload.append("photoFile", photoFile);
 
       await axios.post(`${backendUrl}/api/senior-citizens/create`, payload, {
         withCredentials: true,
+        headers: { "Content-Type": "multipart/form-data" },
       });
 
       setShowConfirmModal(false);
@@ -386,6 +429,83 @@ const SeniorCitizenForm = ({ onSubmit, onCancel, onSuccess }) => {
           </div>
         ))}
 
+      <div className="bg-gray-50 rounded-md border border-gray-200">
+        <div className="cursor-pointer flex justify-between items-center p-4 bg-gray-100">
+          <div>
+            <h3 className="text-base font-semibold text-gray-800">
+              Document Upload
+            </h3>
+            <p className="mt-1 text-sm text-gray-600">
+              Upload one valid document and your 1x1 photo.
+            </p>
+          </div>
+        </div>
+
+        <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Document Type */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700">
+              Type of Document <span className="text-red-600">*</span>
+            </label>
+            <select
+              name="documentType"
+              value={formData.documentType || ""}
+              onChange={(e) =>
+                setFormData({ ...formData, documentType: e.target.value })
+              }
+              required
+              className="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 
+                     focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+            >
+              <option value="">-- Select a document --</option>
+              {documentTypes.map((doc) => (
+                <option key={doc} value={doc}>
+                  {doc}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Document Upload */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700">
+              Upload Document <span className="text-red-600">*</span>
+            </label>
+            <input
+              type="file"
+              name="documentFile"
+              onChange={handleFileChange}
+              required
+              className="mt-1 block w-full text-sm text-gray-500 
+                     file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 
+                     file:text-sm file:font-semibold file:bg-blue-50 file:text-gray-700 
+                     hover:file:bg-blue-100"
+            />
+          </div>
+
+          {/* Photo Upload */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700">
+              Upload 1x1 Photo <span className="text-red-600">*</span>
+            </label>
+            <input
+              type="file"
+              name="photoFile"
+              accept="image/*"
+              onChange={handleFileChange}
+              required
+              className="mt-1 block w-full text-sm text-gray-500 
+                     file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 
+                     file:text-sm file:font-semibold file:bg-blue-50 file:text-gray-700 
+                     hover:file:bg-blue-100"
+            />
+            <p className="text-xs text-gray-500 mt-1">
+              Must have a white background.
+            </p>
+          </div>
+        </div>
+      </div>
+
       {formError && <p className="text-red-600">{formError}</p>}
 
       <div className="flex justify-end gap-3">
@@ -417,6 +537,7 @@ const SeniorCitizenForm = ({ onSubmit, onCancel, onSuccess }) => {
             Cancel
           </button>
           <button
+            type="button"
             disabled={isSubmitting}
             onClick={handleFinalSubmit}
             className={`px-4 py-2 rounded text-sm ${

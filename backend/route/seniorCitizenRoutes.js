@@ -150,83 +150,123 @@ router.patch("/register/:id", async (req, res) => {
 });
 
 // seniorCitizenRoutes.js
-router.post("/create", async (req, res) => {
-  const user = req.session.user;
-  const ip = req.userIp;
+router.post(
+  "/create",
+  upload.fields([
+    { name: "documentFile", maxCount: 1 },
+    { name: "photoFile", maxCount: 1 },
+  ]),
+  async (req, res) => {
+    const user = req.session.user;
+    const ip = req.userIp;
 
-  if (!user) {
-    return res
-      .status(401)
-      .json({ message: "Unauthorized: No user session found." });
-  }
+    if (!user) {
+      return res
+        .status(401)
+        .json({ message: "Unauthorized: No user session found." });
+    }
 
-  try {
-    const { firstName, lastName, middleName, suffix, form_data, barangay_id } =
-      req.body;
-    const dynamicData = JSON.parse(form_data);
-    dynamicData.barangay_id = barangay_id;
-
-    const insertId = await seniorCitizenService.createSeniorCitizen(
-      {
+    try {
+      const {
         firstName,
         lastName,
         middleName,
         suffix,
-        form_data: dynamicData,
-        birthdate: dynamicData.birthdate,
+        form_data,
+        documentType,
         barangay_id,
-      },
-      user,
-      ip
-    );
+      } = req.body;
+      const dynamicData = JSON.parse(form_data);
+      dynamicData.barangay_id = barangay_id;
 
-    res.status(201).json({ message: "Senior citizen created.", insertId });
-  } catch (error) {
-    res.status(error.code === 409 ? 409 : 500).json({ message: error.message });
+      const insertId = await seniorCitizenService.createSeniorCitizen(
+        {
+          firstName,
+          lastName,
+          middleName,
+          suffix,
+          form_data: dynamicData,
+          birthdate: dynamicData.birthdate,
+          barangay_id,
+          documentType,
+          documentFile: req.files?.documentFile
+            ? req.files.documentFile[0]
+            : null,
+          photoFile: req.files?.photoFile ? req.files.photoFile[0] : null,
+        },
+        user,
+        ip
+      );
+
+      res.status(201).json({ message: "Senior citizen created.", insertId });
+    } catch (error) {
+      res
+        .status(error.code === 409 ? 409 : 500)
+        .json({ message: error.message });
+    }
   }
-});
+);
 
 // PUT: Update senior citizen
-router.put("/update/:id", async (req, res) => {
-  const user = req.session.user;
-  const ip = req.userIp;
-  if (!user) {
-    return res
-      .status(401)
-      .json({ message: "Unauthorized: No user session found." });
-  }
-  try {
-    const { firstName, lastName, middleName, suffix, barangay_id, form_data } =
-      req.body;
+router.put(
+  "/update/:id",
+  upload.fields([
+    { name: "documentFile", maxCount: 1 },
+    { name: "photoFile", maxCount: 1 },
+  ]),
+  async (req, res) => {
+    const user = req.session.user;
+    const ip = req.userIp;
 
-    // 🔑 Ensure form_data is an object
-    const dynamicData =
-      typeof form_data === "string" ? JSON.parse(form_data) : form_data;
+    if (!user) {
+      return res
+        .status(401)
+        .json({ message: "Unauthorized: No user session found." });
+    }
 
-    const success = await seniorCitizenService.updateSeniorCitizen(
-      req.params.id,
-      {
+    try {
+      const {
         firstName,
         lastName,
         middleName,
         suffix,
         barangay_id,
-        form_data: dynamicData,
-      },
-      user,
-      ip
-    );
+        form_data,
+        documentType,
+      } = req.body;
+      const dynamicData =
+        typeof form_data === "string" ? JSON.parse(form_data) : form_data;
 
-    if (!success) {
-      return res
-        .status(404)
-        .json({ message: "Senior citizen not found or not updated." });
+      const success = await seniorCitizenService.updateSeniorCitizen(
+        req.params.id,
+        {
+          firstName,
+          lastName,
+          middleName,
+          suffix,
+          barangay_id,
+          form_data: dynamicData,
+          documentType,
+          documentFile: req.files?.documentFile
+            ? req.files.documentFile[0]
+            : null,
+          photoFile: req.files?.photoFile ? req.files.photoFile[0] : null,
+        },
+        user,
+        ip
+      );
+
+      if (!success) {
+        return res
+          .status(404)
+          .json({ message: "Senior citizen not found or not updated." });
+      }
+      res.status(200).json({ message: "Senior citizen updated." });
+    } catch (error) {
+      res.status(500).json({ message: error.message });
     }
-    res.status(200).json({ message: "Senior citizen updated." });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
   }
-});
+);
 
 // DELETE: Remove senior citizen
 router.delete("/delete/:id", async (req, res) => {

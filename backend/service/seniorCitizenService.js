@@ -159,7 +159,8 @@ exports.registerSeniorCitizen = async (id, user, ip) => {
     const result = await Connection(
       `UPDATE senior_citizens 
        SET registered = 1,
-           updated_at = NOW()
+           updated_at = NOW(),
+           created_at = NOW()
        WHERE id = ?`,
       [id]
     );
@@ -186,20 +187,26 @@ exports.registerSeniorCitizen = async (id, user, ip) => {
 // CREATE
 exports.createSeniorCitizen = async (data, user, ip) => {
   try {
-    const cleanBirthdate = normalize(data.form_data?.birthdate);
+    let documentUrl = null;
+    let photoUrl = null;
 
-    // Duplicate check
-    if (
-      await isDuplicateSeniorCitizen({ ...data, birthdate: cleanBirthdate })
-    ) {
-      const msg = `A senior citizen named '${data.firstName} ${
-        data.lastName
-      }' with birthdate '${cleanBirthdate || "NULL"}' already exists.`;
-      const err = new Error(msg);
-      err.code = 409;
-      throw err;
+    // Upload document if provided
+    if (data.documentFile) {
+      const result = await cloudinary.uploader.upload(data.documentFile.path, {
+        folder: "seniors/documents",
+      });
+      documentUrl = result.secure_url;
     }
 
+    // Upload photo if provided
+    if (data.photoFile) {
+      const result = await cloudinary.uploader.upload(data.photoFile.path, {
+        folder: "seniors/photos",
+      });
+      photoUrl = result.secure_url;
+    }
+
+    // Insert into DB
     const insertData = {
       firstName: data.firstName,
       lastName: data.lastName,
@@ -207,44 +214,85 @@ exports.createSeniorCitizen = async (data, user, ip) => {
       suffix: normalize(data.suffix),
       barangay_id: normalize(data.barangay_id),
       form_data: JSON.stringify(data.form_data || {}),
+      document_image: documentUrl,
+      document_type: data.documentType || null,
+      photo: photoUrl,
     };
 
-    const result = await Connection(
-      `INSERT INTO senior_citizens SET ?`,
-      insertData
-    );
+    const result = await Connection(`INSERT INTO senior_citizens SET ?`, [
+      insertData,
+    ]);
 
-    if (result.affectedRows === 1 && user) {
+    if (result.affectedRows > 0 && user) {
       await logAudit(
         user.id,
         user.email,
         user.role,
         "CREATE",
-        `New Senior Citizen: '${data.firstName} ${data.lastName}'.`,
+        `Created Senior Citizen: '${data.firstName} ${data.lastName}'.`,
         ip
       );
     }
 
     return result.insertId;
   } catch (error) {
-    if (error.code === 409) throw error;
     console.error("Error creating senior citizen:", error);
     throw new Error("Failed to create senior citizen.");
   }
 };
 
-// UPDATE
+//update
 exports.updateSeniorCitizen = async (id, updatedData, user, ip) => {
   try {
+    // Fetch current record to check old images
+    const [existing] = await Connection(
+      `SELECT document_image, photo FROM senior_citizens WHERE id = ? AND deleted = 0`,
+      [id]
+    );
+
+    if (!existing) return false;
+
+    let documentUrl = existing.document_image;
+    let photoUrl = existing.photo;
+
+    // Upload new document if provided
+    if (updatedData.documentFile) {
+      // cleanup old
+      if (existing.document_image) {
+        const publicId = existing.document_image.split("/").pop().split(".")[0];
+        await cloudinary.uploader.destroy(`seniors/documents/${publicId}`);
+      }
+      // upload new
+      const result = await cloudinary.uploader.upload(
+        updatedData.documentFile.path,
+        { folder: "seniors/documents" }
+      );
+      documentUrl = result.secure_url;
+    }
+
+    // Upload new photo if provided
+    if (updatedData.photoFile) {
+      if (existing.photo) {
+        const publicId = existing.photo.split("/").pop().split(".")[0];
+        await cloudinary.uploader.destroy(`seniors/photos/${publicId}`);
+      }
+      const result = await cloudinary.uploader.upload(
+        updatedData.photoFile.path,
+        { folder: "seniors/photos" }
+      );
+      photoUrl = result.secure_url;
+    }
+
     const updateData = {
       firstName: updatedData.firstName,
       lastName: updatedData.lastName,
       middleName: normalize(updatedData.middleName),
       suffix: normalize(updatedData.suffix),
-      barangay_id: normalize(
-        updatedData.barangay_id || updatedData.form_data?.barangay_id
-      ),
+      barangay_id: normalize(updatedData.barangay_id),
       form_data: JSON.stringify(updatedData.form_data || {}),
+      document_image: documentUrl,
+      document_type: updatedData.documentType || null,
+      photo: photoUrl,
     };
 
     const result = await Connection(
@@ -480,21 +528,43 @@ exports.restoreSeniorCitizen = async (id, user, ip) => {
 // Permanent delete (hard remove from DB)
 exports.permanentlyDeleteSeniorCitizen = async (id, user, ip) => {
   try {
+    // Get existing images
+    const [existing] = await Connection(
+      `SELECT document_image, photo FROM senior_citizens WHERE id = ?`,
+      [id]
+    );
+
+    if (!existing) return false;
+
+    // Delete from DB
     const result = await Connection(
       `DELETE FROM senior_citizens WHERE id = ?`,
       [id]
     );
 
-    if (result.affectedRows > 0 && user) {
-      await logAudit(
-        user.id,
-        user.email,
-        user.role,
-        "PERMANENT_DELETE",
-        `Permanently deleted Senior Citizen ID: ${id}`,
-        ip
-      );
+    if (result.affectedRows > 0) {
+      // Cleanup Cloudinary
+      if (existing.document_image) {
+        const publicId = existing.document_image.split("/").pop().split(".")[0];
+        await cloudinary.uploader.destroy(`seniors/documents/${publicId}`);
+      }
+      if (existing.photo) {
+        const publicId = existing.photo.split("/").pop().split(".")[0];
+        await cloudinary.uploader.destroy(`seniors/photos/${publicId}`);
+      }
+
+      if (user) {
+        await logAudit(
+          user.id,
+          user.email,
+          user.role,
+          "PERMANENT_DELETE",
+          `Permanently deleted Senior Citizen ID: ${id}`,
+          ip
+        );
+      }
     }
+
     return result.affectedRows > 0;
   } catch (error) {
     console.error(

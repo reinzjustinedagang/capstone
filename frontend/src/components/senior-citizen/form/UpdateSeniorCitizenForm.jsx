@@ -6,11 +6,29 @@ import { ChevronDown, ChevronUp, Loader2 } from "lucide-react";
 import Button from "../../UI/Button";
 import Modal from "../../UI/Modal";
 
+const documentTypes = [
+  "Certificate of Live Birth",
+  "Social Security System (SSS) ID",
+  "Government Service Insurance System (GSIS) ID",
+  "Driver's License",
+  "Philippine Passport",
+  "COMELEC ID / Voter's Certification",
+  "Baptismal Certificate",
+  "Marriage Certificate",
+  "Unified Multi-Purpose ID (UMID)",
+];
+
 const UpdateSeniorCitizenForm = ({ id, onSuccess, onCancel }) => {
   const [fields, setFields] = useState([]);
   const [groups, setGroups] = useState([]);
   const [system, setSystem] = useState({});
   const [formData, setFormData] = useState({});
+  const [documentPreview, setDocumentPreview] = useState(null);
+  const [photoPreview, setPhotoPreview] = useState(null);
+  const [documentFile, setDocumentFile] = useState(null);
+  const [photoFile, setPhotoFile] = useState(null);
+  const [citizenData, setCitizenData] = useState({});
+
   const [collapsedGroups, setCollapsedGroups] = useState({});
   const [barangays, setBarangays] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -111,9 +129,22 @@ const UpdateSeniorCitizenForm = ({ id, onSuccess, onCancel }) => {
    * Handle changes
    * --------------------------- */
   const handleChange = (e, field) => {
-    const { type, value, checked } = e.target;
+    const { type, value, checked, files, name } = e.target;
 
-    if (field.type === "checkbox") {
+    // Handle file inputs
+    if (name === "documentFile" && files[0]) {
+      setDocumentFile(files[0]);
+      setDocumentPreview(URL.createObjectURL(files[0]));
+      return;
+    }
+    if (name === "photoFile" && files[0]) {
+      setPhotoFile(files[0]);
+      setPhotoPreview(URL.createObjectURL(files[0]));
+      return;
+    }
+
+    // Handle normal inputs
+    if (field?.type === "checkbox") {
       const prev = formData[field.field_name] || [];
       const newVal = checked
         ? [...prev, value]
@@ -122,7 +153,7 @@ const UpdateSeniorCitizenForm = ({ id, onSuccess, onCancel }) => {
       return;
     }
 
-    if (field.type === "date") {
+    if (field?.type === "date") {
       setFormData((prev) => ({ ...prev, [field.field_name]: value }));
       if (field.field_name === "birthdate") {
         const birthDate = new Date(value);
@@ -135,7 +166,9 @@ const UpdateSeniorCitizenForm = ({ id, onSuccess, onCancel }) => {
       return;
     }
 
-    setFormData({ ...formData, [field.field_name]: value });
+    if (field) {
+      setFormData({ ...formData, [field.field_name]: value });
+    }
   };
 
   /** ---------------------------
@@ -163,20 +196,25 @@ const UpdateSeniorCitizenForm = ({ id, onSuccess, onCancel }) => {
       const dynamicFields = { ...allFields };
       delete dynamicFields[barangayField.field_name];
 
-      const payload = {
-        firstName,
-        middleName,
-        lastName,
-        suffix,
-        barangay_id,
-        form_data: JSON.stringify(dynamicFields),
-      };
+      // Use FormData for mixed text + files
+      const formDataToSend = new FormData();
+      formDataToSend.append("firstName", firstName || "");
+      formDataToSend.append("middleName", middleName || "");
+      formDataToSend.append("lastName", lastName || "");
+      formDataToSend.append("suffix", suffix || "");
+      formDataToSend.append("barangay_id", barangay_id);
+      formDataToSend.append("form_data", JSON.stringify(dynamicFields));
+      formDataToSend.append("documentType", formData.documentType || "");
+
+      if (documentFile) formDataToSend.append("documentFile", documentFile);
+      if (photoFile) formDataToSend.append("photoFile", photoFile);
 
       await axios.put(
         `${backendUrl}/api/senior-citizens/update/${id}`,
-        payload,
+        formDataToSend,
         {
           withCredentials: true,
+          headers: { "Content-Type": "multipart/form-data" },
         }
       );
 
@@ -394,6 +432,104 @@ const UpdateSeniorCitizenForm = ({ id, onSuccess, onCancel }) => {
             )}
           </div>
         ))}
+
+      {/* Document & Photo Upload */}
+      <div className="bg-gray-50 rounded-md border border-gray-200">
+        <div className="cursor-pointer flex justify-between items-center p-4 bg-gray-100">
+          <h3 className="text-base font-semibold text-gray-800">
+            Document & Photo Upload
+          </h3>
+        </div>
+
+        <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Document Type */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700">
+              Type of Document <span className="text-red-600">*</span>
+            </label>
+            <select
+              name="documentType"
+              value={formData.documentType || citizenData.document_type || ""}
+              onChange={(e) =>
+                setFormData({ ...formData, documentType: e.target.value })
+              }
+              required
+              className="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 
+                   focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+            >
+              <option value="">-- Select a document --</option>
+              {documentTypes.map((doc) => (
+                <option key={doc} value={doc}>
+                  {doc}
+                </option>
+              ))}
+            </select>
+
+            {/* Document Upload */}
+            <div className="mt-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Upload Document
+              </label>
+              <div className="relative w-48 h-full border rounded-lg overflow-hidden bg-white flex flex-col items-center justify-center p-2">
+                {documentPreview || citizenData?.document_image ? (
+                  <img
+                    src={documentPreview || citizenData?.document_image}
+                    alt="Document"
+                    className="object-contain h-40 w-full transition-transform duration-200 hover:scale-105 mb-2"
+                  />
+                ) : (
+                  <span className="text-gray-400 text-sm mb-2">
+                    No document uploaded
+                  </span>
+                )}
+
+                {/* Always show input */}
+              </div>{" "}
+              <input
+                type="file"
+                name="documentFile"
+                accept="image/*,application/pdf"
+                onChange={handleChange}
+                className="mt-1 block w-full text-sm text-gray-500 
+                     file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 
+                     file:text-sm file:font-semibold file:bg-blue-50 file:text-gray-700 
+                     hover:file:bg-blue-100"
+              />
+            </div>
+          </div>
+
+          {/* Photo Upload */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              1x1 Photo
+            </label>
+            <div className="relative w-32 h-32 border rounded-lg overflow-hidden bg-white flex flex-col items-center justify-center p-2">
+              {photoPreview || citizenData?.photo ? (
+                <img
+                  src={photoPreview || citizenData?.photo}
+                  alt="Photo"
+                  className="object-cover h-full w-full transition-transform duration-200 hover:scale-110 mb-2"
+                />
+              ) : (
+                <span className="text-gray-400 text-sm mb-2">
+                  No photo uploaded
+                </span>
+              )}
+            </div>
+            {/* Always show input */}
+            <input
+              type="file"
+              name="photoFile"
+              accept="image/*"
+              onChange={handleChange}
+              className="mt-1 block w-full text-sm text-gray-500 
+                     file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 
+                     file:text-sm file:font-semibold file:bg-blue-50 file:text-gray-700 
+                     hover:file:bg-blue-100"
+            />
+          </div>
+        </div>
+      </div>
 
       {formError && <p className="text-red-600">{formError}</p>}
 
