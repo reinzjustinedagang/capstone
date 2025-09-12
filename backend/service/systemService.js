@@ -173,22 +173,94 @@ exports.saveKey = async (key) => {
   return { message: "Developer key created successfully", skipped: false };
 };
 
-exports.updateAboutUs = async (data) => {
-  const { introduction, objective, team } = data;
-  const existing = await Connection("SELECT id FROM system_setting LIMIT 1");
+exports.updateAboutUs = async (
+  { introduction, objective, team }, // New data from the request
+  files, // Array of uploaded files (from multer)
+  user,
+  ip
+) => {
+  // 1. Fetch the current settings to compare team members
+  const existingRows = await Connection(
+    `SELECT introduction, objective, team FROM system_setting WHERE id = 1`
+  );
+  const oldSettings = existingRows[0] || { team: "[]" };
+  const oldTeam = oldSettings.team ? JSON.parse(oldSettings.team) : [];
 
-  if (existing.length > 0) {
-    const id = existing[0].id;
-    await Connection(
-      "UPDATE system_setting SET introduction = ?, objective = ?, team = ? WHERE id = ?",
-      [introduction, objective, JSON.stringify(team), id]
-    );
-    return { id };
-  } else {
-    const result = await Connection(
-      "INSERT INTO system_setting (introduction, objective, team) VALUES (?, ?, ?)",
-      [introduction, objective, JSON.stringify(team)]
-    );
-    return { id: result.insertId };
+  const finalTeam = [...team]; // Create a mutable copy of the new team data
+
+  // 2. Upload new images to Cloudinary and update the team array
+  if (files && files.length > 0) {
+    const uploadPromises = files.map((file) => {
+      return new Promise((resolve, reject) => {
+        const stream = cloudinary.uploader.upload_stream(
+          { folder: "team/" },
+          (error, result) => {
+            if (error) return reject(error);
+            resolve(result);
+          }
+        );
+        stream.end(file.buffer);
+      });
+    });
+
+    const uploadResults = await Promise.all(uploadPromises);
+
+    // The frontend sends files and their original indexes separately.
+    // We match them up to update the correct team member.
+    // NOTE: This assumes `req.body.teamIndexes` is available where this service is called.
+    // We will handle this in the route.
+    files.forEach((file, i) => {
+      const memberIndex = parseInt(file.originalname, 10);
+      if (!isNaN(memberIndex) && finalTeam[memberIndex]) {
+        finalTeam[memberIndex].image = uploadResults[i].secure_url;
+        finalTeam[memberIndex].public_id = uploadResults[i].public_id;
+      }
+    });
   }
+
+  // 3. Identify and delete any images for team members that were removed or replaced
+  const oldPublicIds = oldTeam.map((m) => m.public_id).filter(Boolean); // Get all old public_ids
+  const newPublicIds = finalTeam.map((m) => m.public_id).filter(Boolean); // Get all public_ids from the final team
+
+  const idsToDelete = oldPublicIds.filter((id) => !newPublicIds.includes(id));
+
+  if (idsToDelete.length > 0) {
+    const deletionPromises = idsToDelete.map((id) => safeCloudinaryDestroy(id));
+    await Promise.all(deletionPromises);
+    console.log(`Deleted ${idsToDelete.length} obsolete Cloudinary images.`);
+  }
+
+  // 4. Update the database with the new information
+  const teamJson = JSON.stringify(finalTeam);
+  await Connection(
+    `UPDATE system_setting SET introduction = ?, objective = ?, team = ? WHERE id = 1`,
+    [introduction, objective, teamJson]
+  );
+
+  // 5. Log the audit trail
+  const changes = [];
+  if (oldSettings.introduction !== introduction)
+    changes.push("Introduction updated.");
+  if (oldSettings.objective !== objective) changes.push("Objective updated.");
+  // A simple check is enough, as deep comparison is complex
+  if (JSON.stringify(oldTeam) !== teamJson)
+    changes.push("Team members updated.");
+
+  if (changes.length > 0 && user) {
+    await logAudit(
+      user.id,
+      user.email,
+      user.role,
+      "UPDATE",
+      `About Us section: ${changes.join(" ")}`,
+      ip
+    );
+  }
+
+  // 6. Return the updated data to be sent as a response
+  return {
+    introduction,
+    objective,
+    team: finalTeam,
+  };
 };

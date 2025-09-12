@@ -43,7 +43,7 @@ const AboutUs = () => {
   useEffect(() => {
     const fetchSettings = async () => {
       try {
-        const res = await axios.get(`${backendUrl}/api/settings/about-us`, {
+        const res = await axios.get(`${backendUrl}/api/settings/settings`, {
           withCredentials: true,
         });
         setSettings({
