@@ -3,7 +3,14 @@ import axios from "axios";
 import Button from "../UI/Button";
 import Modal from "../UI/Modal";
 import CropperModal from "../UI/CropperModal";
-import { SaveIcon, Loader2, Target, ScrollText, ImagePlus } from "lucide-react";
+import {
+  SaveIcon,
+  Loader2,
+  Target,
+  ScrollText,
+  ImagePlus,
+  CheckCircle,
+} from "lucide-react";
 
 const AboutUs = () => {
   const backendUrl = import.meta.env.VITE_API_BASE_URL;
@@ -19,7 +26,7 @@ const AboutUs = () => {
     role: "",
     imageFile: null,
     imagePreview: null,
-    image: null, // Cloudinary URL if exists
+    image: null,
     public_id: null,
   });
 
@@ -29,10 +36,16 @@ const AboutUs = () => {
   const [showCropper, setShowCropper] = useState(false);
   const fileInputRef = useRef(null);
 
+  // Modals
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+
   useEffect(() => {
     const fetchSettings = async () => {
       try {
-        const res = await axios.get(`${backendUrl}/api/settings/about-us`);
+        const res = await axios.get(`${backendUrl}/api/settings/about-us`, {
+          withCredentials: true,
+        });
         setSettings({
           ...res.data,
           team: res.data.team || [],
@@ -134,19 +147,33 @@ const AboutUs = () => {
       settings.team.forEach((member, index) => {
         if (member.imageFile) {
           formData.append(`teamImages`, member.imageFile);
-          formData.append(`teamIndexes`, index); // map file to member
+          formData.append(`teamIndexes`, index);
         }
       });
 
-      await axios.post(`${backendUrl}/api/settings/about-us`, formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
+      const response = await axios.post(
+        `${backendUrl}/api/settings/about-us`,
+        formData,
+        {
+          headers: { "Content-Type": "multipart/form-data" },
+          withCredentials: true,
+        }
+      );
 
-      alert("About Us saved successfully!");
+      setSettings((prev) => ({
+        ...prev,
+        introduction: response.data.introduction,
+        objective: response.data.objective,
+        team: response.data.team,
+      }));
+
+      setShowSuccessModal(true);
     } catch (err) {
       console.error("Error saving About Us:", err);
+      alert("Failed to update. Please try again.");
     } finally {
       setLoading(false);
+      setShowConfirmModal(false);
     }
   };
 
@@ -289,7 +316,7 @@ const AboutUs = () => {
         <div className="flex justify-end mt-4">
           <Button
             variant="primary"
-            onClick={handleSaveAll}
+            onClick={() => setShowConfirmModal(true)}
             icon={
               loading ? (
                 <Loader2 className="animate-spin h-4 w-4 mr-2" />
@@ -313,6 +340,56 @@ const AboutUs = () => {
           aspect={1}
         />
       )}
+
+      {/* Confirm Modal */}
+      <Modal
+        isOpen={showConfirmModal}
+        onClose={() => setShowConfirmModal(false)}
+        title="Confirm Update"
+      >
+        <div className="mt-4 text-sm text-gray-700">
+          Are you sure you want to save changes to About Us?
+        </div>
+        <div className="mt-6 flex justify-end space-x-4">
+          <button
+            onClick={() => setShowConfirmModal(false)}
+            className="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 text-sm"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={handleSaveAll}
+            disabled={loading}
+            className={`px-4 py-2 rounded text-sm ${
+              loading
+                ? "bg-blue-400 cursor-not-allowed"
+                : "bg-blue-600 hover:bg-blue-700"
+            } text-white`}
+          >
+            {loading ? "Saving..." : "Yes, Save"}
+          </button>
+        </div>
+      </Modal>
+
+      {/* Success Modal */}
+      <Modal
+        isOpen={showSuccessModal}
+        onClose={() => setShowSuccessModal(false)}
+        title=""
+      >
+        <div className="p-6 text-center">
+          <div className="mx-auto mb-4 w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+            <CheckCircle className="w-6 h-6 text-green-500" />
+          </div>
+          <h3 className="text-lg font-medium text-gray-800 mb-2">Success</h3>
+          <p className="text-sm text-gray-600 mb-4">
+            About Us updated successfully!
+          </p>
+          <Button variant="primary" onClick={() => setShowSuccessModal(false)}>
+            OK
+          </Button>
+        </div>
+      </Modal>
     </>
   );
 };

@@ -183,7 +183,8 @@ router.post(
 
       res.status(200).json({
         message: "About Us updated successfully",
-        id: result.id,
+        introduction,
+        objective,
         team,
       });
     } catch (err) {
