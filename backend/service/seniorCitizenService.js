@@ -192,16 +192,32 @@ exports.createSeniorCitizen = async (data, user, ip) => {
 
     // Upload document if provided
     if (data.documentFile) {
-      const result = await cloudinary.uploader.upload(data.documentFile.path, {
-        folder: "seniors/documents",
+      const file = data.documentFile;
+      const result = await new Promise((resolve, reject) => {
+        const stream = cloudinary.uploader.upload_stream(
+          { folder: "seniors/documents" },
+          (error, result) => {
+            if (error) reject(error);
+            else resolve(result);
+          }
+        );
+        stream.end(file.buffer);
       });
       documentUrl = result.secure_url;
     }
 
     // Upload photo if provided
     if (data.photoFile) {
-      const result = await cloudinary.uploader.upload(data.photoFile.path, {
-        folder: "seniors/photos",
+      const file = data.photoFile;
+      const result = await new Promise((resolve, reject) => {
+        const stream = cloudinary.uploader.upload_stream(
+          { folder: "seniors/photos" },
+          (error, result) => {
+            if (error) reject(error);
+            else resolve(result);
+          }
+        );
+        stream.end(file.buffer);
       });
       photoUrl = result.secure_url;
     }
@@ -244,45 +260,67 @@ exports.createSeniorCitizen = async (data, user, ip) => {
 //update
 exports.updateSeniorCitizen = async (id, updatedData, user, ip) => {
   try {
-    // Fetch current record to check old images
+    // Fetch current record (to clean up old images)
     const [existing] = await Connection(
-      `SELECT document_image, photo FROM senior_citizens WHERE id = ? AND deleted = 0`,
+      `SELECT document_image, document_public_id, photo, photo_public_id
+       FROM senior_citizens
+       WHERE id = ? AND deleted = 0`,
       [id]
     );
 
     if (!existing) return false;
 
     let documentUrl = existing.document_image;
+    let documentPublicId = existing.document_public_id;
     let photoUrl = existing.photo;
+    let photoPublicId = existing.photo_public_id;
 
-    // Upload new document if provided
+    // ✅ Helper for Cloudinary upload (using buffer)
+    const uploadToCloudinary = (file, folder) =>
+      new Promise((resolve, reject) => {
+        const stream = cloudinary.uploader.upload_stream(
+          { folder },
+          (error, result) => {
+            if (error) reject(error);
+            else resolve(result);
+          }
+        );
+        stream.end(file.buffer);
+      });
+
+    // 🔹 Upload new document if provided
     if (updatedData.documentFile) {
-      // cleanup old
-      if (existing.document_image) {
-        const publicId = existing.document_image.split("/").pop().split(".")[0];
-        await cloudinary.uploader.destroy(`seniors/documents/${publicId}`);
+      // Delete old document if exists
+      if (documentPublicId) {
+        await cloudinary.uploader.destroy(documentPublicId);
       }
-      // upload new
-      const result = await cloudinary.uploader.upload(
-        updatedData.documentFile.path,
-        { folder: "seniors/documents" }
+
+      // Upload new
+      const result = await uploadToCloudinary(
+        updatedData.documentFile,
+        "seniors/documents"
       );
       documentUrl = result.secure_url;
+      documentPublicId = result.public_id;
     }
 
-    // Upload new photo if provided
+    // 🔹 Upload new photo if provided
     if (updatedData.photoFile) {
-      if (existing.photo) {
-        const publicId = existing.photo.split("/").pop().split(".")[0];
-        await cloudinary.uploader.destroy(`seniors/photos/${publicId}`);
+      // Delete old photo if exists
+      if (photoPublicId) {
+        await cloudinary.uploader.destroy(photoPublicId);
       }
-      const result = await cloudinary.uploader.upload(
-        updatedData.photoFile.path,
-        { folder: "seniors/photos" }
+
+      // Upload new
+      const result = await uploadToCloudinary(
+        updatedData.photoFile,
+        "seniors/photos"
       );
       photoUrl = result.secure_url;
+      photoPublicId = result.public_id;
     }
 
+    // ✅ Update record
     const updateData = {
       firstName: updatedData.firstName,
       lastName: updatedData.lastName,
@@ -291,8 +329,10 @@ exports.updateSeniorCitizen = async (id, updatedData, user, ip) => {
       barangay_id: normalize(updatedData.barangay_id),
       form_data: JSON.stringify(updatedData.form_data || {}),
       document_image: documentUrl,
+      document_public_id: documentPublicId, // new field
       document_type: updatedData.documentType || null,
       photo: photoUrl,
+      photo_public_id: photoPublicId, // new field
     };
 
     const result = await Connection(
@@ -310,6 +350,7 @@ exports.updateSeniorCitizen = async (id, updatedData, user, ip) => {
         ip
       );
     }
+
     return result.affectedRows > 0;
   } catch (error) {
     console.error(`Error updating senior citizen with ID ${id}:`, error);

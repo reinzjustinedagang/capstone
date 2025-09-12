@@ -70,7 +70,7 @@ const UpdateSeniorCitizenForm = ({ id, onSuccess, onCancel }) => {
         const fetchedSystem = systemRes.data || {};
         const fetchedBarangays = barangayRes.data || [];
         const citizenData = citizenRes.data || {};
-
+        setCitizenData(citizenData);
         setFields(fetchedFields);
         setGroups(fetchedGroups);
         setSystem(fetchedSystem);
@@ -112,7 +112,13 @@ const UpdateSeniorCitizenForm = ({ id, onSuccess, onCancel }) => {
           if (!(f.group in initialCollapsed)) initialCollapsed[f.group] = false;
         });
 
-        setFormData(initialData);
+        // ✅ Merge everything once
+        setFormData({
+          ...initialData,
+          documentType: citizenData.document_type || "",
+        });
+        setDocumentPreview(citizenData.document_image || null);
+        setPhotoPreview(citizenData.photo || null);
         setCollapsedGroups(initialCollapsed);
       } catch (err) {
         console.error(err);
@@ -194,7 +200,8 @@ const UpdateSeniorCitizenForm = ({ id, onSuccess, onCancel }) => {
 
       const barangay_id = Number(formData[barangayField.field_name]);
       const dynamicFields = { ...allFields };
-      delete dynamicFields[barangayField.field_name];
+      // ✅ also keep barangay_id inside form_data
+      dynamicFields["barangay_id"] = barangay_id;
 
       // Use FormData for mixed text + files
       const formDataToSend = new FormData();
@@ -449,11 +456,10 @@ const UpdateSeniorCitizenForm = ({ id, onSuccess, onCancel }) => {
             </label>
             <select
               name="documentType"
-              value={formData.documentType || citizenData.document_type || ""}
+              value={formData.documentType}
               onChange={(e) =>
                 setFormData({ ...formData, documentType: e.target.value })
               }
-              required
               className="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 
                    focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
             >
