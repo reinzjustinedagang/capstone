@@ -124,7 +124,7 @@ router.post(
 );
 
 // Register senior citizen (set registered = 1)
-router.patch("/register/:id", async (req, res) => {
+router.put("/register/:id", async (req, res) => {
   const { id } = req.params;
   const user = req.session.user;
   const ip = req.userIp;
