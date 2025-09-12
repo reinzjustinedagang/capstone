@@ -11,6 +11,8 @@ const GetUnregisteredSenior = ({ id, onSuccess, onCancel }) => {
   const [groups, setGroups] = useState([]);
   const [system, setSystem] = useState({});
   const [formData, setFormData] = useState({});
+  const [citizenData, setCitizenData] = useState(null);
+
   const [collapsedGroups, setCollapsedGroups] = useState({});
   const [barangays, setBarangays] = useState([]);
 
@@ -22,6 +24,8 @@ const GetUnregisteredSenior = ({ id, onSuccess, onCancel }) => {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [notRegistered, setNotRegistered] = useState(false);
+  const [photoPreview, setPhotoPreview] = useState(null);
+  const [documentPreview, setDocumentPreview] = useState(null);
 
   const backendUrl = import.meta.env.VITE_API_BASE_URL;
   const navigate = useNavigate();
@@ -65,6 +69,8 @@ const GetUnregisteredSenior = ({ id, onSuccess, onCancel }) => {
           setNotRegistered(true);
           return;
         }
+
+        setCitizenData(citizenData);
 
         // Prepare initial form data
         const dynamicFormData =
@@ -118,31 +124,32 @@ const GetUnregisteredSenior = ({ id, onSuccess, onCancel }) => {
    * Handlers
    * --------------------------- */
   const handleChange = (e, field) => {
-    const { type, value, checked } = e.target;
+    const { type, value, checked, files } = e.target;
 
-    if (field.type === "checkbox") {
-      const prev = formData[field.field_name] || [];
-      const newVal = checked
-        ? [...prev, value]
-        : prev.filter((v) => v !== value);
-      setFormData({ ...formData, [field.field_name]: newVal });
-      return;
-    }
+    if (type === "file") {
+      const file = files[0];
+      setFormData((prev) => ({ ...prev, [field.field_name]: file }));
 
-    if (field.type === "date") {
-      setFormData((prev) => ({ ...prev, [field.field_name]: value }));
-      if (field.field_name === "birthdate") {
-        const birthDate = new Date(value);
-        const today = new Date();
-        let age = today.getFullYear() - birthDate.getFullYear();
-        const m = today.getMonth() - birthDate.getMonth();
-        if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) age--;
-        setFormData((prev) => ({ ...prev, age: age >= 0 ? age : "" }));
+      if (field.field_name === "photoFile") {
+        setPhotoPreview(URL.createObjectURL(file));
+      }
+      if (field.field_name === "documentFile") {
+        setDocumentPreview(URL.createObjectURL(file));
       }
       return;
     }
 
-    setFormData({ ...formData, [field.field_name]: value });
+    if (type === "checkbox") {
+      setFormData((prev) => {
+        const current = prev[field.field_name] || [];
+        return checked
+          ? { ...prev, [field.field_name]: [...current, value] }
+          : { ...prev, [field.field_name]: current.filter((v) => v !== value) };
+      });
+      return;
+    }
+
+    setFormData((prev) => ({ ...prev, [field.field_name]: value }));
   };
 
   const handleSubmit = (e) => {
@@ -167,22 +174,26 @@ const GetUnregisteredSenior = ({ id, onSuccess, onCancel }) => {
       const dynamicFields = { ...allFields };
       delete dynamicFields[barangayField.field_name];
 
-      const payload = {
-        firstName,
-        middleName,
-        lastName,
-        suffix,
-        barangay_id,
-        form_data: JSON.stringify(dynamicFields),
-      };
+      const fd = new FormData();
+      fd.append("firstName", firstName || "");
+      fd.append("middleName", middleName || "");
+      fd.append("lastName", lastName || "");
+      fd.append("suffix", suffix || "");
+      fd.append("barangay_id", barangay_id || "");
+      fd.append("form_data", JSON.stringify(dynamicFields));
 
-      await axios.put(
-        `${backendUrl}/api/senior-citizens/register/${id}`,
-        payload,
-        {
-          withCredentials: true,
-        }
-      );
+      if (formData.photoFile) fd.append("photoFile", formData.photoFile);
+      if (formData.documentFile)
+        fd.append("documentFile", formData.documentFile);
+
+      await axios.put(`${backendUrl}/api/senior-citizens/register/${id}`, fd, {
+        withCredentials: true,
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+
+      setFormData({});
+      setPhotoPreview(null);
+      setDocumentPreview(null);
 
       setShowSuccessModal(true);
       onSuccess?.();
@@ -327,6 +338,7 @@ const GetUnregisteredSenior = ({ id, onSuccess, onCancel }) => {
             </div>
           </div>
         );
+
       default:
         return null;
     }
@@ -414,6 +426,32 @@ const GetUnregisteredSenior = ({ id, onSuccess, onCancel }) => {
             )}
           </div>
         ))}
+
+      {/* Document Upload */}
+      <div>
+        <label className="block text-sm font-medium text-gray-700">
+          Document <span className="text-red-600">*</span>
+        </label>
+        <img
+          src={documentPreview || citizenData?.document_image}
+          alt="Document"
+          className="max-h-40 rounded border"
+        />
+      </div>
+
+      {/* Photo Upload */}
+      <div>
+        <label className="block text-sm font-medium text-gray-700">
+          1x1 Photo <span className="text-red-600">*</span>
+        </label>
+        <div className="h-20 w-20">
+          <img
+            src={photoPreview || citizenData?.photo}
+            alt="Photo"
+            className="h-full w-full object-cover rounded border"
+          />
+        </div>
+      </div>
 
       {formError && <p className="text-red-600">{formError}</p>}
 

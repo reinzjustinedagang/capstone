@@ -6,7 +6,7 @@ exports.getSeniorCitizenById = async (id) => {
   try {
     const result = await Connection(
       `SELECT id, firstName, middleName, lastName, suffix, form_data,
-              age, gender, created_at, updated_at, deleted, deleted_at
+              age, gender, created_at, updated_at, deleted, deleted_at, document_image, photo
        FROM senior_citizens
        WHERE id = ?`,
       [id]

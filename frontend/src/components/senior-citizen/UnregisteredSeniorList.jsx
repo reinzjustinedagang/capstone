@@ -82,14 +82,16 @@ const UnregisteredSeniorList = ({ onView, onRegister }) => {
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
-                {["Name", "Age", "Gender", "Address"].map((col) => (
-                  <th
-                    key={col}
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                  >
-                    {col}
-                  </th>
-                ))}
+                {["Name", "Age", "Gender", "Address", "Applied Date"].map(
+                  (col) => (
+                    <th
+                      key={col}
+                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    >
+                      {col}
+                    </th>
+                  )
+                )}
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Actions
                 </th>
@@ -117,6 +119,17 @@ const UnregisteredSeniorList = ({ onView, onRegister }) => {
                         citizen.form_data?.province || ""
                       }`}
                     </td>
+                    <td className="px-6 py-4 text-sm text-gray-500">
+                      {new Date(citizen.created_at).toLocaleDateString(
+                        "en-US",
+                        {
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
+                        }
+                      )}
+                    </td>
+
                     <td className="px-6 py-4 text-sm font-xs">
                       <div className="flex space-x-2">
                         <Button
