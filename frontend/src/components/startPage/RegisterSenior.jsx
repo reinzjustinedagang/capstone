@@ -26,6 +26,7 @@ const RegisterSenior = () => {
   const [formError, setFormError] = useState("");
   const [collapsedGroups, setCollapsedGroups] = useState({});
   const [barangays, setBarangays] = useState([]);
+  const [system, setSystem] = useState({});
   const [barangayLoading, setBarangayLoading] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -43,20 +44,23 @@ const RegisterSenior = () => {
       setLoading(true);
 
       try {
-        const [fieldsRes, groupsRes] = await Promise.all([
+        const [fieldsRes, groupsRes, systemRes] = await Promise.all([
           axios.get(`${backendUrl}/api/form-fields/register-field`, {
             withCredentials: true,
           }),
           axios.get(`${backendUrl}/api/form-fields/group`, {
             withCredentials: true,
           }),
+          axios.get(`${backendUrl}/api/settings/`, { withCredentials: true }),
         ]);
 
         const fetchedFields = fieldsRes.data;
         const fetchedGroups = groupsRes.data;
+        const fetchedSystem = systemRes.data || {};
 
         setFields(fetchedFields);
         setGroups(fetchedGroups);
+        setSystem(fetchedSystem);
 
         // fetch barangays
         try {
@@ -78,12 +82,20 @@ const RegisterSenior = () => {
         // initialize form data
         let initialData = {};
         const initialCollapsed = {};
+
         fetchedFields.forEach((f) => {
-          initialData[f.field_name] = f.type === "checkbox" ? [] : "";
+          if (f.field_name.toLowerCase().includes("municipal")) {
+            initialData[f.field_name] = fetchedSystem.municipality || "";
+          } else if (f.field_name.toLowerCase().includes("province")) {
+            initialData[f.field_name] = fetchedSystem.province || "";
+          } else {
+            initialData[f.field_name] = f.type === "checkbox" ? [] : "";
+          }
           if (!(f.group in initialCollapsed)) {
             initialCollapsed[f.group] = false;
           }
         });
+
         setFormData(initialData);
         setCollapsedGroups(initialCollapsed);
       } catch (err) {
@@ -135,6 +147,31 @@ const RegisterSenior = () => {
     setShowConfirmModal(true); // open confirm first
   };
 
+  // helper to reset the form back to initial state
+  const resetForm = () => {
+    const resetData = {};
+    fields.forEach((field) => {
+      resetData[field.field_name] = field.type === "checkbox" ? [] : "";
+    });
+
+    fields.forEach((field) => {
+      if (field.field_name.toLowerCase().includes("municipal")) {
+        resetData[field.field_name] = system.municipality || "";
+      }
+      if (field.field_name.toLowerCase().includes("province")) {
+        resetData[field.field_name] = system.province || "";
+      }
+    });
+
+    setFormData(resetData);
+    setFormError("");
+
+    // clear file inputs
+    document.querySelectorAll("input[type='file']").forEach((input) => {
+      input.value = "";
+    });
+  };
+
   const handleFinalSubmit = async () => {
     setIsSubmitting(true);
     setFormError("");
@@ -148,14 +185,13 @@ const RegisterSenior = () => {
         documentType,
         documentFile,
         photoFile,
-        ...allFields
+        ...dynamicFields
       } = formData;
 
       // find barangay field
       const barangayField = fields.find((f) =>
         f.field_name.toLowerCase().includes("barangay")
       );
-
       if (!barangayField) {
         setFormError("Barangay field is missing!");
         setIsSubmitting(false);
@@ -163,10 +199,23 @@ const RegisterSenior = () => {
       }
 
       const barangay_id = Number(formData[barangayField.field_name]);
+      delete dynamicFields[barangayField.field_name]; // avoid duplication
 
-      // remove barangay from dynamicFields
-      const dynamicFields = { ...allFields };
-      delete dynamicFields[barangayField.field_name];
+      // ensure system values are filled
+      fields.forEach((f) => {
+        if (
+          f.field_name.toLowerCase().includes("municipal") &&
+          !dynamicFields[f.field_name]
+        ) {
+          dynamicFields[f.field_name] = system.municipality || "";
+        }
+        if (
+          f.field_name.toLowerCase().includes("province") &&
+          !dynamicFields[f.field_name]
+        ) {
+          dynamicFields[f.field_name] = system.province || "";
+        }
+      });
 
       // build FormData payload
       const fd = new FormData();
@@ -177,20 +226,21 @@ const RegisterSenior = () => {
       fd.append("barangay_id", barangay_id || "");
       fd.append("form_data", JSON.stringify(dynamicFields));
 
-      // attach files
+      // ✅ document upload is hardcoded, not from DB fields
       fd.append("documentType", documentType || "");
       if (documentFile) fd.append("documentFile", documentFile);
       if (photoFile) fd.append("photoFile", photoFile);
 
       await axios.post(`${backendUrl}/api/senior-citizens/apply`, fd, {
         withCredentials: true,
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
+        headers: { "Content-Type": "multipart/form-data" },
       });
 
       setShowConfirmModal(false);
       setShowSuccessModal(true);
+
+      // ✅ clear everything after success
+      resetForm();
     } catch (err) {
       console.error(err);
       setFormError(err.response?.data?.message || "Failed to submit form.");
