@@ -497,13 +497,6 @@ const RegisterSenior = () => {
                 id="agreement"
                 name="agreement"
                 type="checkbox"
-                checked={formData.agreement || false}
-                onChange={(e) =>
-                  setFormData((prev) => ({
-                    ...prev,
-                    agreement: e.target.checked,
-                  }))
-                }
                 required
                 className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-600"
               />

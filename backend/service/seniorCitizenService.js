@@ -119,7 +119,7 @@ exports.applySeniorCitizen = async (data, ip) => {
     // 🗒️ Audit log
     if (result.affectedRows === 1) {
       await logAudit(
-        "",
+        0,
         "N/A",
         "User",
         "REGISTER",
