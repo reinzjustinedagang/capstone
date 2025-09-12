@@ -106,7 +106,7 @@ exports.applySeniorCitizen = async (data, ip) => {
       barangay_id: data.barangay_id || null,
       form_data: JSON.stringify(data.form_data || {}),
       document_image: data.document_image || null,
-      document_type: documentType,
+      document_type: data.documentType || null, // ✅ fixed
       photo: data.photo || null,
       registered: 0,
     };

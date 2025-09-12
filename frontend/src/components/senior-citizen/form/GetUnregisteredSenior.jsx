@@ -438,7 +438,7 @@ const GetUnregisteredSenior = ({ id, onSuccess, onCancel }) => {
           {/* Document Upload */}
           <div className="mb-4">
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Document <span className="text-red-600">*</span>
+              Document Type: {citizenData?.document_type}
             </label>
             <div className="relative w-48 h-full border rounded-lg overflow-hidden bg-white flex items-center justify-center">
               {documentPreview || citizenData?.document_image ? (
