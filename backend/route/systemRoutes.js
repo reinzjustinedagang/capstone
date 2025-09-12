@@ -121,77 +121,85 @@ router.post("/about", isAuthenticated, async (req, res) => {
 // POST update About Us (with Cloudinary for team images)
 router.post(
   "/about-us",
-  isAuthenticated,
-  upload.array("teamImages"),
+  isAuthenticated, // Your authentication middleware
+  upload.array("teamImages"), // Multer middleware for handling multiple files
   async (req, res) => {
     try {
+      // 1. Get text fields and the team structure from the request body
       const { introduction, objective } = req.body;
       let team = JSON.parse(req.body.team || "[]");
       const user = req.session.user;
       const ip = req.userIp;
 
-      // Upload new images if provided
+      // 2. Process new/updated images if they exist
       if (req.files && req.files.length > 0) {
+        // Get the indexes that correspond to each file
         const teamIndexes = req.body.teamIndexes
           ? Array.isArray(req.body.teamIndexes)
             ? req.body.teamIndexes.map(Number)
             : [Number(req.body.teamIndexes)]
           : [];
 
-        for (let i = 0; i < req.files.length; i++) {
-          const file = req.files[i];
-          const idx = teamIndexes[i];
+        // Use Promise.all to handle all uploads concurrently for better performance
+        await Promise.all(
+          req.files.map(async (file, i) => {
+            const idx = teamIndexes[i];
 
-          const result = await new Promise((resolve, reject) => {
-            const stream = cloudinary.uploader.upload_stream(
-              { folder: "team/" },
-              (error, result) => (error ? reject(error) : resolve(result))
-            );
-            stream.end(file.buffer);
-          });
+            // Ensure the index is valid and the team member exists
+            if (team[idx] === undefined) return;
 
-          if (team[idx]) {
+            // Securely upload the new image file to Cloudinary
+            const result = await cloudinary.uploader.upload(file.path, {
+              folder: "team_members", // Using a descriptive folder name
+              resource_type: "image",
+            });
+
+            // If an old image exists, delete it from Cloudinary to save space
             if (team[idx].public_id) {
-              await cloudinary.uploader
-                .destroy(team[idx].public_id)
-                .catch(() => {});
+              await cloudinary.uploader.destroy(team[idx].public_id);
             }
+
+            // Update the team member object with the new Cloudinary URL and public_id
             team[idx].image = result.secure_url;
             team[idx].public_id = result.public_id;
-          }
-        }
+          })
+        );
       }
 
-      // Save in DB
-      const result = await systemService.updateAboutUs({
+      // 3. Persist the final data to the database
+      // This function should handle the `UPDATE settings SET ...` query
+      await updateAboutUs({
         introduction,
         objective,
         team,
       });
 
-      // Optional: audit log
+      // 4. (Optional) Log the successful audit event
       if (user) {
         await logAudit(
           user.id,
           user.email,
           user.role,
           "UPDATE",
-          "Updated About Us section with team members",
+          "Updated About Us section",
           ip
         );
       }
 
+      // 5. Send the complete, updated data back to the frontend
+      // This ensures the UI is perfectly in sync with the database
       res.status(200).json({
-        message: "About Us updated successfully",
+        message: "About Us updated successfully!",
         introduction,
         objective,
-        team,
+        team, // Send the fully updated team array back
       });
     } catch (err) {
-      console.error("Error updating About Us:", err);
-      res
-        .status(500)
-        .json({ message: "Failed to update About Us", error: err.message });
+      console.error("❌ Error updating About Us:", err);
+      res.status(500).json({
+        message: "Server error: Failed to update About Us.",
+        error: err.message,
+      });
     }
   }
 );
