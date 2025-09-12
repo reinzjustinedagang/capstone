@@ -1,18 +1,6 @@
 import React from "react";
 
 const DocumentUpload = ({ formData, setFormData }) => {
-  const documentTypes = [
-    "Certificate of Live Birth",
-    "Social Security System (SSS) ID",
-    "Government Service Insurance System (GSIS) ID",
-    "Driver's License",
-    "Philippine Passport",
-    "COMELEC ID / Voter's Certification",
-    "Baptismal Certificate",
-    "Marriage Certificate",
-    "Unified Multi-Purpose ID (UMID)",
-  ];
-
   const handleChange = (e) => {
     const { name, value, files } = e.target;
     if (files) {

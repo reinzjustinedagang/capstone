@@ -1,6 +1,8 @@
 const express = require("express");
 const router = express.Router();
 const seniorCitizenService = require("../service/seniorCitizenService");
+const upload = require("../middleware/upload");
+const cloudinary = require("../utils/cloudinary");
 
 // GET: Senior citizen by ID
 router.get("/get/:id", async (req, res) => {
@@ -35,43 +37,89 @@ router.get("/unregistered", async (req, res) => {
   }
 });
 
-// POST: Create new senior citizen (with duplicate check)
-router.post("/apply", async (req, res) => {
-  const ip = req.userIp;
+// POST: Apply senior citizen with image/document upload
+router.post(
+  "/apply",
+  upload.fields([
+    { name: "documentFile", maxCount: 1 },
+    { name: "photoFile", maxCount: 1 },
+  ]),
+  async (req, res) => {
+    const ip = req.userIp;
 
-  try {
-    // Destructure all fields including barangay_id from frontend
-    const { firstName, lastName, middleName, suffix, form_data, barangay_id } =
-      req.body;
-
-    // Parse the dynamic form_data object
-    const dynamicData = JSON.parse(form_data);
-
-    // Include barangay_id in dynamicData
-    dynamicData.barangay_id = barangay_id;
-
-    const insertId = await seniorCitizenService.applySeniorCitizen(
-      {
+    try {
+      const {
         firstName,
         lastName,
         middleName,
         suffix,
-        form_data: dynamicData,
-        birthdate: dynamicData.birthdate,
+        form_data,
         barangay_id,
-      },
+      } = req.body;
 
-      ip
-    );
+      const dynamicData = JSON.parse(form_data);
+      dynamicData.barangay_id = barangay_id;
 
-    res.status(201).json({ message: "Senior citizen registered.", insertId });
-  } catch (error) {
-    if (error.code === 409) {
-      return res.status(409).json({ message: error.message });
+      let documentUrl = null;
+      let photoUrl = null;
+
+      // Handle document upload
+      if (req.files?.documentFile) {
+        const file = req.files.documentFile[0];
+        const result = await new Promise((resolve, reject) => {
+          const stream = cloudinary.uploader.upload_stream(
+            { folder: "seniors/documents" },
+            (error, result) => {
+              if (error) reject(error);
+              else resolve(result);
+            }
+          );
+          stream.end(file.buffer);
+        });
+        documentUrl = result.secure_url;
+      }
+
+      // Handle photo upload
+      if (req.files?.photoFile) {
+        const file = req.files.photoFile[0];
+        const result = await new Promise((resolve, reject) => {
+          const stream = cloudinary.uploader.upload_stream(
+            { folder: "seniors/photos" },
+            (error, result) => {
+              if (error) reject(error);
+              else resolve(result);
+            }
+          );
+          stream.end(file.buffer);
+        });
+        photoUrl = result.secure_url;
+      }
+
+      const insertId = await seniorCitizenService.applySeniorCitizen(
+        {
+          firstName,
+          lastName,
+          middleName,
+          suffix,
+          form_data: dynamicData,
+          birthdate: dynamicData.birthdate,
+          barangay_id,
+          document_image: documentUrl,
+          photo: photoUrl,
+        },
+        ip
+      );
+
+      res.status(201).json({ message: "Senior citizen registered.", insertId });
+    } catch (error) {
+      if (error.code === 409) {
+        return res.status(409).json({ message: error.message });
+      }
+      console.error("❌ Error applying senior citizen:", error);
+      res.status(500).json({ message: error.message });
     }
-    res.status(500).json({ message: error.message });
   }
-});
+);
 
 // Register senior citizen (set registered = 1)
 router.patch("/register/:id", async (req, res) => {

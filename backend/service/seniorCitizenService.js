@@ -86,50 +86,51 @@ const isDuplicateSeniorCitizen = async ({ firstName, lastName, birthdate }) => {
   return result.length > 0;
 };
 
-// register
-// In your senior citizen service file
+//apply senior
 exports.applySeniorCitizen = async (data, ip) => {
   try {
-    // 🔎 Check for duplicates
+    // 🔎 Duplicate check
     if (await isDuplicateSeniorCitizen(data)) {
       const msg = `A senior citizen named '${data.firstName} ${data.lastName}' with birthdate '${data.birthdate}' already exists.`;
       const err = new Error(msg);
-      err.code = 409; // Conflict
+      err.code = 409;
       throw err;
     }
 
-    // 📝 Prepare data for insert
+    // 📝 Prepare insert
     const insertData = {
       firstName: data.firstName,
       lastName: data.lastName,
       middleName: data.middleName || null,
       suffix: data.suffix || null,
-      barangay_id: data.barangay_id || null, // Save the ID
+      barangay_id: data.barangay_id || null,
       form_data: JSON.stringify(data.form_data || {}),
+      document_image: data.document_image || null,
+      photo: data.photo || null,
       registered: 0,
     };
 
-    // 💾 Insert into DB
+    // 💾 Save to DB
     const result = await Connection(
       `INSERT INTO senior_citizens SET ?`,
       insertData
     );
 
-    // 🗒️ Audit logging
-    if (result.affectedRows === 1 && user) {
+    // 🗒️ Audit log
+    if (result.affectedRows === 1) {
       await logAudit(
         "",
         "N/A",
         "User",
-        "Register Senior", // 👈 clearer than "Apply"
+        "REGISTER",
         `Registered new senior citizen: '${data.firstName} ${data.lastName}'.`,
         ip
       );
     }
 
-    return result.insertId; // Return the new record's ID
+    return result.insertId;
   } catch (error) {
-    if (error.code === 409) throw error; // Duplicate error
+    if (error.code === 409) throw error;
     console.error("❌ Error creating senior citizen:", error);
     throw new Error("Failed to register senior citizen.");
   }

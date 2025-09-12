@@ -248,16 +248,20 @@ async function initTables() {
       lastName VARCHAR(255) NOT NULL,
       middleName VARCHAR(255),
       suffix VARCHAR(50),
-      birtdate DATE NULL, 
+      birthdate DATE NULL, 
       -- Dynamic form fields stored here
       form_data JSON NOT NULL,
       
       -- Optional: quick access columns (can be included in JSON too)
       age INT GENERATED ALWAYS AS (CAST(JSON_EXTRACT(form_data, '$.age') AS UNSIGNED)) VIRTUAL,
       gender VARCHAR(10) GENERATED ALWAYS AS (JSON_UNQUOTE(JSON_EXTRACT(form_data, '$.gender'))) VIRTUAL,
+
+      -- Image
+      document_image VARCHAR(500),
+      photo VARCHAR(500),
       
       -- Metadata
-      barangay_id  INT(100) NULL,
+      barangay_id  INT NULL,
       socpen_date DATE NULL,
       nonsocpen_date DATE NULL,
       deceased_date DATE NULL,

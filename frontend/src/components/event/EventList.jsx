@@ -57,8 +57,6 @@ const EventList = () => {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-6">Events</h1>
-
       {/* Loading State */}
       {loadingEvents ? (
         <div className="flex justify-center items-center py-12">

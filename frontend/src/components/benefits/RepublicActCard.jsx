@@ -12,7 +12,7 @@ const RepublicActCard = ({ law, onEdit, onDelete }) => {
         <div className="flex items-center justify-between">
           <div>
             <BookOpenTextIcon className="w-5 h-5 text-blue-500" />
-            <h2 className="text-lg font-semibold text-purple-700 flex items-center gap-2 line-clamp-2">
+            <h2 className="text-lg font-semibold text-gray-800 flex items-center gap-2 line-clamp-2">
               {law.title}
             </h2>
           </div>

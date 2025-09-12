@@ -46,7 +46,7 @@ const BarangayDistribution = () => {
 
   return (
     <div className="bg-white p-6 rounded-lg shadow">
-      <h3 className="text-lg font-medium mb-4">Barangay-wise Distribution</h3>
+      <h3 className="text-lg font-medium mb-4">Barangay Demographic Reports</h3>
       <Bar
         data={chartData}
         options={{

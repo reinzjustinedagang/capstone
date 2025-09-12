@@ -14,6 +14,7 @@ import {
   Edit,
   Tag,
   Save,
+  Eye,
 } from "lucide-react";
 import Button from "../UI/Button";
 import Modal from "../UI/Modal";
@@ -633,7 +634,16 @@ const FormFieldsPage = () => {
                                         Required
                                       </span>
                                     )}
+                                    {f.show_outside === 1 && (
+                                      <span
+                                        className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800"
+                                        title="Show outside"
+                                      >
+                                        <Eye className="h-3 w-3" />
+                                      </span>
+                                    )}
                                   </div>
+
                                   <div className="flex items-center space-x-2 text-xs text-gray-500">
                                     <span className="font-mono bg-gray-200 px-2 py-0.5 rounded">
                                       {f.field_name}
