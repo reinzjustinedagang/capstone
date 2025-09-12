@@ -54,6 +54,7 @@ router.post(
         middleName,
         suffix,
         form_data,
+        documentType,
         barangay_id,
       } = req.body;
 
@@ -105,6 +106,7 @@ router.post(
           birthdate: dynamicData.birthdate,
           barangay_id,
           document_image: documentUrl,
+          documentType,
           photo: photoUrl,
         },
         ip

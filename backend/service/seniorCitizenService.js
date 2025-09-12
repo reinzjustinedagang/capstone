@@ -6,7 +6,7 @@ exports.getSeniorCitizenById = async (id) => {
   try {
     const result = await Connection(
       `SELECT id, firstName, middleName, lastName, suffix, form_data,
-              age, gender, created_at, updated_at, deleted, deleted_at, document_image, photo
+              age, gender, created_at, updated_at, deleted, deleted_at, document_image, document_type, photo
        FROM senior_citizens
        WHERE id = ?`,
       [id]
@@ -106,6 +106,7 @@ exports.applySeniorCitizen = async (data, ip) => {
       barangay_id: data.barangay_id || null,
       form_data: JSON.stringify(data.form_data || {}),
       document_image: data.document_image || null,
+      document_type: documentType,
       photo: data.photo || null,
       registered: 0,
     };

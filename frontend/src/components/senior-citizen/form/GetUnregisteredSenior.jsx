@@ -247,7 +247,7 @@ const GetUnregisteredSenior = ({ id, onSuccess, onCancel }) => {
     const commonLabel = (
       <label className="block text-sm font-medium text-gray-700">
         {field.label}
-        {field.required && <span className="text-red-600"> *</span>}
+        {field.required ? <span className="text-red-600"> *</span> : <></>}
       </label>
     );
 
@@ -427,29 +427,51 @@ const GetUnregisteredSenior = ({ id, onSuccess, onCancel }) => {
           </div>
         ))}
 
-      {/* Document Upload */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700">
-          Document <span className="text-red-600">*</span>
-        </label>
-        <img
-          src={documentPreview || citizenData?.document_image}
-          alt="Document"
-          className="max-h-40 rounded border"
-        />
-      </div>
+      <div className="bg-gray-50 rounded-md border border-gray-200">
+        <div className="cursor-pointer flex justify-between items-center p-4 bg-gray-100">
+          <h3 className="text-base font-semibold text-gray-800">
+            Document & Photo Upload
+          </h3>
+        </div>
 
-      {/* Photo Upload */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700">
-          1x1 Photo <span className="text-red-600">*</span>
-        </label>
-        <div className="h-20 w-20">
-          <img
-            src={photoPreview || citizenData?.photo}
-            alt="Photo"
-            className="h-full w-full object-cover rounded border"
-          />
+        <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Document Upload */}
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Document <span className="text-red-600">*</span>
+            </label>
+            <div className="relative w-48 h-full border rounded-lg overflow-hidden bg-white flex items-center justify-center">
+              {documentPreview || citizenData?.document_image ? (
+                <img
+                  src={documentPreview || citizenData?.document_image}
+                  alt="Document"
+                  className="object-contain h-full w-full transition-transform duration-200 hover:scale-105"
+                />
+              ) : (
+                <span className="text-gray-400 text-sm">
+                  No document uploaded
+                </span>
+              )}
+            </div>
+          </div>
+
+          {/* Photo Upload */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              1x1 Photo <span className="text-red-600">*</span>
+            </label>
+            <div className="relative w-32 h-32 border rounded-lg overflow-hidden bg-white flex items-center justify-center">
+              {photoPreview || citizenData?.photo ? (
+                <img
+                  src={photoPreview || citizenData?.photo}
+                  alt="Photo"
+                  className="object-cover h-full w-full transition-transform duration-200 hover:scale-110"
+                />
+              ) : (
+                <span className="text-gray-400 text-sm">No photo uploaded</span>
+              )}
+            </div>
+          </div>
         </div>
       </div>
 

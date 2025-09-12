@@ -258,6 +258,7 @@ async function initTables() {
 
       -- Image
       document_image VARCHAR(500),
+      document_type VARCHAR(255),
       photo VARCHAR(500),
       
       -- Metadata
