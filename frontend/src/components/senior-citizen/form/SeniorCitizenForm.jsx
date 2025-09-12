@@ -31,6 +31,8 @@ const SeniorCitizenForm = ({ onSubmit, onCancel, onSuccess }) => {
   const [barangayLoading, setBarangayLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formError, setFormError] = useState("");
+  const [documentPreview, setDocumentPreview] = useState(null);
+  const [photoPreview, setPhotoPreview] = useState(null);
 
   const [showConfirmModal, setShowConfirmModal] = useState(false);
 
@@ -147,10 +149,13 @@ const SeniorCitizenForm = ({ onSubmit, onCancel, onSuccess }) => {
   const handleFileChange = (e) => {
     const { name, files } = e.target;
     if (files.length > 0) {
+      const file = files[0];
       if (name === "documentFile") {
-        setDocumentFile(files[0]);
+        setDocumentFile(file);
+        setDocumentPreview(URL.createObjectURL(file));
       } else if (name === "photoFile") {
-        setPhotoFile(files[0]);
+        setPhotoFile(file);
+        setPhotoPreview(URL.createObjectURL(file));
       }
     }
   };
@@ -433,7 +438,7 @@ const SeniorCitizenForm = ({ onSubmit, onCancel, onSuccess }) => {
         <div className="cursor-pointer flex justify-between items-center p-4 bg-gray-100">
           <div>
             <h3 className="text-base font-semibold text-gray-800">
-              Document Upload
+              Document & Photo Upload
             </h3>
             <p className="mt-1 text-sm text-gray-600">
               Upload one valid document and your 1x1 photo.
@@ -464,23 +469,29 @@ const SeniorCitizenForm = ({ onSubmit, onCancel, onSuccess }) => {
                 </option>
               ))}
             </select>
-          </div>
-
-          {/* Document Upload */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Upload Document <span className="text-red-600">*</span>
-            </label>
-            <input
-              type="file"
-              name="documentFile"
-              onChange={handleFileChange}
-              required
-              className="mt-1 block w-full text-sm text-gray-500 
+            {/* Document Upload */}
+            <div className="mt-2">
+              <label className="block text-sm font-medium text-gray-700">
+                Upload Document <span className="text-red-600">*</span>
+              </label>
+              <div className="relative w-48 h-full border rounded-lg overflow-hidden bg-white flex flex-col items-center justify-center p-2">
+                <img
+                  src={documentPreview || "/placeholder-doc.png"}
+                  alt="Document Preview"
+                  className="object-contain h-40 w-full transition-transform duration-200 hover:scale-105 mb-2"
+                />
+              </div>
+              <input
+                type="file"
+                name="documentFile"
+                onChange={handleFileChange}
+                required
+                className="mt-1 block w-full text-sm text-gray-500 
                      file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 
                      file:text-sm file:font-semibold file:bg-blue-50 file:text-gray-700 
                      hover:file:bg-blue-100"
-            />
+              />
+            </div>
           </div>
 
           {/* Photo Upload */}
@@ -488,6 +499,13 @@ const SeniorCitizenForm = ({ onSubmit, onCancel, onSuccess }) => {
             <label className="block text-sm font-medium text-gray-700">
               Upload 1x1 Photo <span className="text-red-600">*</span>
             </label>
+            <div className="relative w-32 h-32 border rounded-lg overflow-hidden bg-white flex flex-col items-center justify-center p-2">
+              <img
+                src={photoPreview || "/placeholder-photo.png"}
+                alt="Photo Preview"
+                className="object-cover h-full w-full transition-transform duration-200 hover:scale-110 mb-2"
+              />
+            </div>
             <input
               type="file"
               name="photoFile"

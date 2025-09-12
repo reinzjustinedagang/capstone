@@ -1,5 +1,6 @@
 const Connection = require("../db/Connection");
 const { logAudit } = require("./auditService");
+const cloudinary = require("../utils/cloudinary");
 
 // Fetch by ID
 exports.getSeniorCitizenById = async (id) => {
