@@ -261,7 +261,7 @@ async function initTables() {
       document_type VARCHAR(255),
       photo VARCHAR(500),
       document_public_id VARCHAR(500),
-      photo_public_id VARCHAR(500)
+      photo_public_id VARCHAR(500),
       
       -- Metadata
       barangay_id  INT NULL,

@@ -158,7 +158,7 @@ router.post("/team", isAuthenticated, upload.any(), async (req, res) => {
 
     if (!user) return res.status(401).json({ message: "Unauthorized" });
 
-    const parsedTeam = team ? JSON.parse(team) : [];
+    const parsedTeam = req.body.team ? JSON.parse(req.body.team) : [];
 
     // Attach uploaded files to corresponding team members
     if (req.files && req.files.length) {

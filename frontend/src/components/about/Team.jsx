@@ -91,13 +91,23 @@ const Team = () => {
     setLoading(true);
     try {
       const formData = new FormData();
-      formData.append("team", JSON.stringify(team));
+      formData.append(
+        "team",
+        JSON.stringify(
+          team.map((member) => ({
+            name: member.name,
+            role: member.role,
+            image: member.image || null,
+            public_id: member.public_id || null,
+          }))
+        )
+      );
 
-      // Append each image and its corresponding index
+      // Append actual files separately
       team.forEach((member, index) => {
         if (member.imageFile) {
           formData.append("teamImages", member.imageFile);
-          formData.append("teamIndexes", index.toString()); // always a string
+          formData.append("teamIndexes", index.toString());
         }
       });
 
