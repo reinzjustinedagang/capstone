@@ -149,7 +149,7 @@ router.get("/team", isAuthenticated, async (req, res) => {
 });
 
 // --- POST update/add team members ---
-// POST update/add team members
+// systemRoutes.js
 router.post("/team", isAuthenticated, upload.any(), async (req, res) => {
   try {
     const user = req.session.user;
@@ -157,28 +157,19 @@ router.post("/team", isAuthenticated, upload.any(), async (req, res) => {
 
     if (!user) return res.status(401).json({ message: "Unauthorized" });
 
-    // --- Safely parse team ---
+    // --- Safely parse team from formData ---
     let parsedTeam = [];
     if (req.body.team) {
-      try {
-        if (typeof req.body.team === "string") {
-          parsedTeam = JSON.parse(req.body.team);
-        } else if (Array.isArray(req.body.team)) {
-          parsedTeam = req.body.team;
-        } else if (typeof req.body.team === "object") {
-          parsedTeam = req.body.team;
-        } else {
-          parsedTeam = [];
-        }
-      } catch (e) {
-        console.error("Error parsing team JSON:", e);
-        return res
-          .status(400)
-          .json({ message: "Invalid team format. Must be valid JSON." });
+      if (typeof req.body.team === "string") {
+        parsedTeam = JSON.parse(req.body.team);
+      } else if (Array.isArray(req.body.team)) {
+        parsedTeam = req.body.team;
+      } else {
+        parsedTeam = [];
       }
     }
 
-    // --- Attach uploaded images ---
+    // --- Attach uploaded images to corresponding team members ---
     if (req.files && req.files.length) {
       const teamIndexes = Array.isArray(req.body.teamIndexes)
         ? req.body.teamIndexes
@@ -198,13 +189,10 @@ router.post("/team", isAuthenticated, upload.any(), async (req, res) => {
         });
 
         parsedTeam[index].image = result.secure_url;
-        parsedTeam[index].public_id = extractCloudinaryPublicId(
-          result.secure_url
-        );
+        parsedTeam[index].public_id = result.public_id;
       }
     }
 
-    // --- Update DB ---
     const result = await systemService.updateTeam(parsedTeam, user, ip);
 
     res.status(200).json({
