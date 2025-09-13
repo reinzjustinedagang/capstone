@@ -160,12 +160,21 @@ router.post("/team", isAuthenticated, upload.any(), async (req, res) => {
     // --- Safely parse team ---
     let parsedTeam = [];
     if (req.body.team) {
-      if (typeof req.body.team === "string") {
-        parsedTeam = JSON.parse(req.body.team);
-      } else if (Array.isArray(req.body.team)) {
-        parsedTeam = req.body.team;
-      } else {
-        parsedTeam = [];
+      try {
+        if (typeof req.body.team === "string") {
+          parsedTeam = JSON.parse(req.body.team);
+        } else if (Array.isArray(req.body.team)) {
+          parsedTeam = req.body.team;
+        } else if (typeof req.body.team === "object") {
+          parsedTeam = req.body.team;
+        } else {
+          parsedTeam = [];
+        }
+      } catch (e) {
+        console.error("Error parsing team JSON:", e);
+        return res
+          .status(400)
+          .json({ message: "Invalid team format. Must be valid JSON." });
       }
     }
 
@@ -180,7 +189,6 @@ router.post("/team", isAuthenticated, upload.any(), async (req, res) => {
         const index = parseInt(teamIndexes[i], 10);
         if (!parsedTeam[index]) continue;
 
-        // Upload to Cloudinary
         const result = await new Promise((resolve, reject) => {
           const stream = cloudinary.uploader.upload_stream(
             { folder: "team/" },
@@ -196,7 +204,7 @@ router.post("/team", isAuthenticated, upload.any(), async (req, res) => {
       }
     }
 
-    // --- Call service to update team in DB ---
+    // --- Update DB ---
     const result = await systemService.updateTeam(parsedTeam, user, ip);
 
     res.status(200).json({
