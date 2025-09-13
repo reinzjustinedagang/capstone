@@ -149,6 +149,7 @@ router.get("/team", isAuthenticated, async (req, res) => {
 });
 
 // --- POST update/add team members ---
+// --- POST update/add team members ---
 router.post("/team", isAuthenticated, upload.any(), async (req, res) => {
   try {
     const { team } = req.body;
@@ -159,19 +160,20 @@ router.post("/team", isAuthenticated, upload.any(), async (req, res) => {
 
     const parsedTeam = team ? JSON.parse(team) : [];
 
-    // Normalize teamIndexes to always be an array
-    let teamIndexes = req.body.teamIndexes || [];
-    if (!Array.isArray(teamIndexes)) {
-      teamIndexes = [teamIndexes];
-    }
-
     // Attach uploaded files to corresponding team members
     if (req.files && req.files.length) {
-      req.files.forEach((file) => {
-        const index = parseInt(teamIndexes.shift(), 10); // now safe
-        const url = file.path || file.secure_url;
-        parsedTeam[index].image = url;
-        parsedTeam[index].public_id = extractCloudinaryPublicId(url);
+      const teamIndexes = Array.isArray(req.body.teamIndexes)
+        ? req.body.teamIndexes
+        : [req.body.teamIndexes]; // ensure it's an array
+
+      req.files.forEach((file, i) => {
+        const index = parseInt(teamIndexes[i], 10);
+        if (parsedTeam[index]) {
+          // <-- only update if member exists
+          const url = file.path || file.secure_url;
+          parsedTeam[index].image = url;
+          parsedTeam[index].public_id = extractCloudinaryPublicId(url);
+        }
       });
     }
 

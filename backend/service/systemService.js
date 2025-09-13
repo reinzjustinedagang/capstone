@@ -3,7 +3,9 @@ const { logAudit } = require("./auditService");
 const cloudinary = require("../utils/cloudinary");
 
 const extractCloudinaryPublicId = (url) => {
+  if (!url || typeof url !== "string") return null; // <-- safeguard
   if (!url.includes("res.cloudinary.com")) return null;
+
   const parts = url.split("/");
   const filename = parts.pop().split(".")[0];
   const folder = parts.pop();
