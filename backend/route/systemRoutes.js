@@ -3,7 +3,6 @@ const router = express.Router();
 const upload = require("../middleware/upload");
 const cloudinary = require("../utils/cloudinary");
 const systemService = require("../service/systemService");
-import { logAudit } from "../service/auditService";
 const { isAuthenticated } = require("../middleware/authMiddleware");
 const {
   extractCloudinaryPublicId,
@@ -14,6 +13,7 @@ const {
 router.get("/", async (req, res) => {
   try {
     const settings = await systemService.getSystemSettings();
+    settings.team = JSON.parse(settings.team || "[]");
     if (!settings) {
       return res.status(404).json({ message: "System settings not found" });
     }
@@ -134,66 +134,36 @@ router.post("/save-key", async (req, res) => {
   }
 });
 
-const teamUpload = upload.array("teamImages");
-
-router.post("/about-us", isAuthenticated, (req, res, next) => {
-  // Multer middleware needs special handling for indexes
-  teamUpload(req, res, async (err) => {
-    if (err) {
-      console.error("Multer error:", err);
-      return res.status(500).json({ message: "File upload failed." });
-    }
-
+// POST update About Us
+router.post(
+  "/about-us",
+  isAuthenticated, // ensure only logged-in users can update
+  upload.fields([{ name: "teamImages" }]), // handle multiple team images
+  async (req, res) => {
     try {
       const user = req.session.user;
       const ip = req.userIp;
 
-      const { introduction, objective } = req.body;
-      let { team, teamIndexes } = req.body;
-
-      // 1. Basic Validation
-      if (!introduction || !objective || !team) {
-        return res.status(400).json({ message: "Missing required fields." });
+      if (!user) {
+        return res.status(401).json({ message: "Unauthorized" });
       }
 
-      // 2. Parse the team JSON string from FormData
-      let teamData;
-      try {
-        teamData = JSON.parse(team);
-      } catch (parseError) {
-        return res.status(400).json({ message: "Invalid team data format." });
-      }
+      const updated = await systemService.updateAboutUs(req);
 
-      // 3. VERY IMPORTANT: Attach the original index to each file object
-      // This allows the service to know which team member the file belongs to.
-      // The frontend sends `teamIndexes` for this purpose.
-      if (req.files && teamIndexes) {
-        // Ensure teamIndexes is an array
-        const indexes = Array.isArray(teamIndexes)
-          ? teamIndexes
-          : [teamIndexes];
-        req.files.forEach((file, i) => {
-          // We attach the index to the file's `originalname` field to pass it to the service.
-          // This is a simple way to pass metadata along with the file buffer.
-          file.originalname = indexes[i];
-        });
-      }
+      // Optional: log audit if you want per-user changes
+      // await logAudit(user.id, user.email, user.role, "UPDATE", "About Us updated", ip);
 
-      // 4. Call the service to handle all logic
-      const updatedSettings = await systemService.updateAboutUs(
-        { introduction, objective, team: teamData },
-        req.files, // Pass the processed files
-        user,
-        ip
-      );
-
-      // 5. Send success response
-      res.status(200).json(updatedSettings);
-    } catch (error) {
-      console.error("Error saving About Us:", error);
-      res.status(500).json({ message: "Failed to save About Us settings." });
+      res.status(200).json({
+        message: "About Us updated successfully",
+        data: updated,
+      });
+    } catch (err) {
+      console.error("Failed to update About Us:", err);
+      res.status(err.status || 500).json({
+        message: err.message || "Failed to update About Us",
+      });
     }
-  });
-});
+  }
+);
 
 module.exports = router;
