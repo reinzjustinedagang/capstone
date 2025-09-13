@@ -164,17 +164,27 @@ router.post("/team", isAuthenticated, upload.any(), async (req, res) => {
     if (req.files && req.files.length) {
       const teamIndexes = Array.isArray(req.body.teamIndexes)
         ? req.body.teamIndexes
-        : [req.body.teamIndexes]; // ensure it's an array
+        : [req.body.teamIndexes];
 
-      req.files.forEach((file, i) => {
+      for (let i = 0; i < req.files.length; i++) {
+        const file = req.files[i];
         const index = parseInt(teamIndexes[i], 10);
-        if (parsedTeam[index]) {
-          // <-- only update if member exists
-          const url = file.path || file.secure_url;
-          parsedTeam[index].image = url;
-          parsedTeam[index].public_id = extractCloudinaryPublicId(url);
-        }
-      });
+        if (!parsedTeam[index]) continue;
+
+        // Upload to Cloudinary
+        const result = await new Promise((resolve, reject) => {
+          const stream = cloudinary.uploader.upload_stream(
+            { folder: "team/" },
+            (error, result) => (error ? reject(error) : resolve(result))
+          );
+          stream.end(file.buffer);
+        });
+
+        parsedTeam[index].image = result.secure_url;
+        parsedTeam[index].public_id = extractCloudinaryPublicId(
+          result.secure_url
+        );
+      }
     }
 
     const result = await systemService.updateTeam(parsedTeam, user, ip);
