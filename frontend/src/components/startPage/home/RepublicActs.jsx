@@ -65,7 +65,7 @@ const RepublicActs = () => {
             {/* Acts Scrollable Row */}
             <div
               ref={scrollRef}
-              className={`flex overflow-x-auto scrollbar-hide scroll-smooth px-2 justify-center space-x-4`}
+              className="flex flex-wrap justify-center gap-6"
             >
               {acts.map((act) => (
                 <div

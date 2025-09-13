@@ -7,6 +7,7 @@ import slider5 from "../../assets/slider5.jpg";
 const About = () => {
   const backendUrl = import.meta.env.VITE_API_BASE_URL;
   const [data, setData] = useState({});
+  const [team, setTeam] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -17,6 +18,20 @@ const About = () => {
         console.error("Failed to fetch system settings:", err);
       }
     };
+
+    const fetchTeam = async () => {
+      try {
+        const res = await axios.get(`${backendUrl}/api/settings/team`, {
+          withCredentials: true,
+        });
+        setTeam(Array.isArray(res.data) ? res.data : []);
+      } catch (err) {
+        console.error("Failed to fetch team:", err);
+        setTeam([]);
+      }
+    };
+
+    fetchTeam();
     fetchData();
   }, []);
 
@@ -75,7 +90,7 @@ const About = () => {
               Introduction
             </h2>
             <p className="text-gray-800 leading-relaxed text-justify">
-              {data.preamble}
+              {data.introduction}
             </p>
           </div>
         </div>
@@ -87,7 +102,7 @@ const About = () => {
               Objectives
             </h2>
             <p className="text-gray-800 leading-relaxed text-justify">
-              {data.preamble}
+              {data.objective}
             </p>
           </div>
         </div>
@@ -98,18 +113,29 @@ const About = () => {
             <h2 className="text-2xl font-semibold text-gray-900 mb-3">
               Our Team
             </h2>
-            <div className="flex justify-center space-x-6">
-              {/* Circle Image */}
-              <div className="flex-col justify-center">
-                <img
-                  src={data.teamImage} // make sure this points to your image URL
-                  alt="Our Team"
-                  className="w-30 h-30 rounded-full object-cover border-4 border-gray-200 shadow-lg mb-2"
-                />
-                <p className="font-semibold">Name</p>
-                <p>Developer</p>
+            {team.length === 0 ? (
+              <p className="text-gray-500">No team members added yet.</p>
+            ) : (
+              <div className="flex flex-wrap justify-center gap-6">
+                {team.map((member, index) => (
+                  <div className="flex flex-col items-center" key={index}>
+                    <img
+                      src={
+                        member.image
+                          ? member.image
+                          : "https://via.placeholder.com/128?text=No+Image"
+                      }
+                      alt={member.name}
+                      className="w-32 h-32 rounded-full object-cover border-4 border-gray-200 shadow-lg mb-2"
+                    />
+                    <p className="font-semibold text-lg md:text-xl">
+                      {member.name}
+                    </p>
+                    <p className="text-sm md:text-base">{member.role}</p>
+                  </div>
+                ))}
               </div>
-            </div>
+            )}
           </div>
         </div>
       </div>

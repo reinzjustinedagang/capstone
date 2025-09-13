@@ -65,9 +65,7 @@ const AboutOSCA = () => {
         <div className="space-y-6">
           {/* Preamble */}
           <div className="mt-4">
-            <label className="block text-base font-medium text-gray-700">
-              Preamble
-            </label>
+            <label className="text-lg font-semibold">Preamble</label>
             <div className="mt-1 relative">
               <textarea
                 value={settings.preamble}
@@ -83,9 +81,7 @@ const AboutOSCA = () => {
 
           {/* Mission */}
           <div className="mt-4">
-            <label className="block text-base font-medium text-gray-700">
-              Mission
-            </label>
+            <label className="text-lg font-semibold">Mission</label>
             <div className="mt-1 relative">
               <textarea
                 value={settings.mission}
@@ -101,9 +97,7 @@ const AboutOSCA = () => {
 
           {/* Vision */}
           <div className="mt-4">
-            <label className="block text-base font-medium text-gray-700">
-              Vision
-            </label>
+            <label className="text-lg font-semibold">Vision</label>
             <div className="mt-1 relative">
               <textarea
                 value={settings.vision}
@@ -119,9 +113,7 @@ const AboutOSCA = () => {
 
           {/* Introduction */}
           <div className="mt-4">
-            <label className="block text-base font-medium text-gray-700">
-              Introduction
-            </label>
+            <label className="text-lg font-semibold">Introduction</label>
             <div className="mt-1 relative">
               <textarea
                 value={settings.introduction}
@@ -137,9 +129,7 @@ const AboutOSCA = () => {
 
           {/* Objectives */}
           <div className="mt-4">
-            <label className="block text-base font-medium text-gray-700">
-              Objectives
-            </label>
+            <label className="text-lg font-semibold">Objectives</label>
             <div className="mt-1 relative">
               <textarea
                 value={settings.objective}

@@ -137,7 +137,7 @@ router.post("/save-key", async (req, res) => {
 
 // --- GET team members ---
 // GET team
-router.get("/team", isAuthenticated, async (req, res) => {
+router.get("/team", async (req, res) => {
   try {
     const team = await systemService.getTeam();
     res.status(200).json(team);
