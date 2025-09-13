@@ -10,24 +10,16 @@ const {
 } = require("../utils/serviceHelpers");
 
 // GET system settings
+// GET all system settings (About OSCA + About Us)
 router.get("/", async (req, res) => {
   try {
     const settings = await systemService.getSystemSettings();
-    if (!settings) {
-      return res.status(404).json({ message: "System settings not found" });
-    }
-
-    // Only parse if it's a string
-    if (typeof settings.team === "string") {
-      settings.team = JSON.parse(settings.team || "[]");
-    } else if (!settings.team) {
-      settings.team = [];
-    }
-
+    if (!settings)
+      return res.status(404).json({ message: "Settings not found" });
     res.json(settings);
   } catch (err) {
     console.error("Error fetching system settings:", err);
-    res.status(500).json({ message: "Failed to fetch system settings" });
+    res.status(500).json({ message: "Failed to fetch settings" });
   }
 });
 
@@ -94,33 +86,26 @@ router.post("/", isAuthenticated, upload.single("image"), async (req, res) => {
   }
 });
 
-// POST update About OSCA
-router.post("/about", isAuthenticated, async (req, res) => {
+// POST About OSCA
+router.post("/about-osca", isAuthenticated, async (req, res) => {
   try {
     const { mission, vision, preamble } = req.body;
     const user = req.session.user;
     const ip = req.userIp;
 
-    if (!user) return res.status(401).json({ message: "Unauthorized" });
-
-    // Update system settings via service
-    const result = await systemService.updateAbout(
+    const result = await systemService.updateAboutOSCA(
       mission,
       vision,
       preamble,
       user,
       ip
     );
-
     res.status(200).json({
-      message:
-        result.actionType === "INSERT"
-          ? "About OSCA created successfully."
-          : "About OSCA updated successfully.",
+      message: "About OSCA updated successfully",
       changes: result.changes,
     });
   } catch (err) {
-    console.error("Error updating About OSCA:", err);
+    console.error(err);
     res.status(500).json({ message: "Failed to update About OSCA" });
   }
 });
@@ -142,35 +127,23 @@ router.post("/save-key", async (req, res) => {
 });
 
 // POST update About Us
+// POST About Us
 router.post(
   "/about-us",
-  isAuthenticated, // ensure only logged-in users can update
-  upload.fields([{ name: "teamImages" }]), // handle multiple team images
+  isAuthenticated,
+  upload.fields([{ name: "teamImages" }]),
   async (req, res) => {
     try {
-      const user = req.session.user;
-      const ip = req.userIp;
-
-      if (!user) {
-        return res.status(401).json({ message: "Unauthorized" });
-      }
-
       const updated = await systemService.updateAboutUs(req);
-
-      // Optional: log audit if you want per-user changes
-      // await logAudit(user.id, user.email, user.role, "UPDATE", "About Us updated", ip);
-
-      res.status(200).json({
-        message: "About Us updated successfully",
-        data: updated,
-      });
+      res
+        .status(200)
+        .json({ message: "About Us updated successfully", data: updated });
     } catch (err) {
-      console.error("Failed to update About Us:", err);
-      res.status(err.status || 500).json({
-        message: err.message || "Failed to update About Us",
-      });
+      console.error(err);
+      res
+        .status(err.status || 500)
+        .json({ message: err.message || "Failed to update About Us" });
     }
   }
 );
-
 module.exports = router;

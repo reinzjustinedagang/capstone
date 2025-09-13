@@ -1,31 +1,10 @@
 const Connection = require("../db/Connection");
 const cloudinary = require("../utils/cloudinary");
 const { logAudit } = require("./auditService");
-const stream = require("stream");
-
-/**
- * Extract Cloudinary public_id from a URL
- */
-const extractCloudinaryPublicId = (url) => {
-  if (!url.includes("res.cloudinary.com")) return null;
-  const parts = url.split("/");
-  const filename = parts.pop().split(".")[0];
-  const folder = parts.pop();
-  return `${folder}/${filename}`;
-};
-
-/**
- * Safely delete a Cloudinary image
- */
-const safeCloudinaryDestroy = async (publicId) => {
-  if (!publicId) return;
-  try {
-    await cloudinary.uploader.destroy(publicId);
-    console.log(`Deleted Cloudinary image: ${publicId}`);
-  } catch (err) {
-    console.error(`Failed to delete Cloudinary image (${publicId}):`, err);
-  }
-};
+const {
+  safeCloudinaryDestroy,
+  uploadToCloudinary,
+} = require("../utils/serviceHelpers");
 
 /**
  * Upload buffer to Cloudinary (returns result)
@@ -44,12 +23,25 @@ const uploadToCloudinary = (buffer, folder) => {
   });
 };
 
-// Fetch system settings (only 1 record)
+// Get system settings (all fields)
 exports.getSystemSettings = async () => {
   const result = await Connection(`SELECT * FROM system_setting WHERE id = 1`);
-  return result.length > 0 ? result[0] : null;
-};
+  if (result.length === 0) return null;
 
+  const settings = result[0];
+  return {
+    ...settings,
+    introduction: settings.introduction ? settings.introduction.toString() : "",
+    objective: settings.objective ? settings.objective.toString() : "",
+    mission: settings.mission ? settings.mission.toString() : "",
+    vision: settings.vision ? settings.vision.toString() : "",
+    preamble: settings.preamble ? settings.preamble.toString() : "",
+    team:
+      typeof settings.team === "string"
+        ? JSON.parse(settings.team)
+        : settings.team || [],
+  };
+};
 // Update or insert system settings
 exports.updateSystemSettings = async (
   systemName,
@@ -111,9 +103,10 @@ exports.updateSystemSettings = async (
   return { actionType, changes };
 };
 
-exports.updateAbout = async (mission, vision, preamble, user, ip) => {
+// Update About OSCA
+exports.updateAboutOSCA = async (mission, vision, preamble, user, ip) => {
   const existing = await Connection(
-    `SELECT mission, vision, preamble FROM system_setting WHERE id = 1`
+    `SELECT * FROM system_setting WHERE id = 1`
   );
   const old = existing[0] || {};
   const actionType = existing.length === 0 ? "INSERT" : "UPDATE";
@@ -124,18 +117,16 @@ exports.updateAbout = async (mission, vision, preamble, user, ip) => {
       `INSERT INTO system_setting (id, mission, vision, preamble) VALUES (1, ?, ?, ?)`,
       [mission, vision, preamble]
     );
-    changes.push("Created initial About OSCA settings.");
+    changes.push("Initial About OSCA created");
   } else {
     await Connection(
       `UPDATE system_setting SET mission = ?, vision = ?, preamble = ? WHERE id = 1`,
       [mission, vision, preamble]
     );
+    if (old.mission !== mission) changes.push("Mission updated");
+    if (old.vision !== vision) changes.push("Vision updated");
+    if (old.preamble !== preamble) changes.push("Preamble updated");
   }
-
-  // Track changes
-  if (old.mission !== mission) changes.push(`Mission updated`);
-  if (old.vision !== vision) changes.push(`Vision updated`);
-  if (old.preamble !== preamble) changes.push(`Preamble updated`);
 
   if (changes.length > 0 && user) {
     await logAudit(
@@ -188,7 +179,7 @@ exports.saveKey = async (key) => {
   return { message: "Developer key created successfully", skipped: false };
 };
 
-/** Update About Us settings safely */
+// Update About Us
 exports.updateAboutUs = async (req) => {
   const { introduction, objective, team } = req.body;
   if (!team) throw { status: 400, message: "Team data is required" };
@@ -210,21 +201,18 @@ exports.updateAboutUs = async (req) => {
       ? req.body.teamIndexes
       : [req.body.teamIndexes];
 
-    // Convert string indexes to integers
-    indexes = indexes.map((idx) => parseInt(idx));
+    indexes = indexes.map((i) => parseInt(i));
 
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
       const index = indexes[i];
-
-      if (!parsedTeam[index]) continue; // Safety check
+      if (!parsedTeam[index]) continue;
 
       // Delete old image if exists
       if (parsedTeam[index].public_id) {
         await safeCloudinaryDestroy(parsedTeam[index].public_id);
       }
 
-      // Upload new image
       const result = await uploadToCloudinary(file.buffer, "team");
       parsedTeam[index].image = result.secure_url;
       parsedTeam[index].public_id = result.public_id;
