@@ -180,3 +180,64 @@ exports.saveKey = async (key) => {
 
   return { message: "Developer key created successfully", skipped: false };
 };
+
+// --- Update or insert team members ---
+exports.updateTeam = async (team = [], user, ip) => {
+  const existingRows = await Connection(
+    `SELECT team FROM system_setting WHERE id = 1`
+  );
+  const oldTeam = existingRows[0]?.team ? JSON.parse(existingRows[0].team) : [];
+  const actionType = existingRows.length === 0 ? "INSERT" : "UPDATE";
+  const changes = [];
+
+  // Delete removed images from Cloudinary
+  const oldTeamMap = oldTeam.reduce((acc, member) => {
+    if (member.public_id) acc[member.public_id] = true;
+    return acc;
+  }, {});
+  const newTeamPublicIds = team
+    .filter((m) => m.public_id)
+    .map((m) => m.public_id);
+  const removedPublicIds = Object.keys(oldTeamMap).filter(
+    (pid) => !newTeamPublicIds.includes(pid)
+  );
+  for (const pid of removedPublicIds) {
+    await safeCloudinaryDestroy(pid);
+    changes.push(`Deleted old team image: ${pid}`);
+  }
+
+  // Save team JSON
+  if (existingRows.length === 0) {
+    await Connection(`INSERT INTO system_setting (id, team) VALUES (1, ?)`, [
+      JSON.stringify(team),
+    ]);
+    changes.push("Created initial team data.");
+  } else {
+    await Connection(`UPDATE system_setting SET team = ? WHERE id = 1`, [
+      JSON.stringify(team),
+    ]);
+    changes.push("Team data updated.");
+  }
+
+  if (user) {
+    await logAudit(
+      user.id,
+      user.email,
+      user.role,
+      actionType,
+      changes.join("; "),
+      ip
+    );
+  }
+
+  return { actionType, changes, team };
+};
+
+// --- Fetch team members ---
+exports.getTeam = async () => {
+  const result = await Connection(
+    `SELECT team FROM system_setting WHERE id = 1`
+  );
+  if (!result.length) return [];
+  return result[0].team ? JSON.parse(result[0].team) : [];
+};

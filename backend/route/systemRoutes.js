@@ -135,4 +135,53 @@ router.post("/save-key", async (req, res) => {
   }
 });
 
+// --- GET team members ---
+router.get("/team", isAuthenticated, async (req, res) => {
+  try {
+    const team = await systemService.getTeam();
+    res.status(200).json(team);
+  } catch (err) {
+    console.error("Error fetching team:", err);
+    res
+      .status(500)
+      .json({ message: "Failed to fetch team", error: err.message });
+  }
+});
+
+// --- POST update/add team members ---
+router.post("/team", isAuthenticated, upload.any(), async (req, res) => {
+  try {
+    const { team } = req.body;
+    const user = req.session.user;
+    const ip = req.userIp;
+
+    if (!user) return res.status(401).json({ message: "Unauthorized" });
+
+    const parsedTeam = team ? JSON.parse(team) : [];
+
+    // Attach uploaded files to corresponding team members
+    if (req.files && req.files.length) {
+      req.files.forEach((file) => {
+        const index = parseInt(req.body.teamIndexes.shift(), 10);
+        const url = file.path || file.secure_url;
+        parsedTeam[index].image = url;
+        parsedTeam[index].public_id = extractCloudinaryPublicId(url);
+      });
+    }
+
+    const result = await systemService.updateTeam(parsedTeam, user, ip);
+
+    res.status(200).json({
+      message: "Team updated successfully",
+      changes: result.changes,
+      team: result.team,
+    });
+  } catch (err) {
+    console.error("Error updating team:", err);
+    res
+      .status(500)
+      .json({ message: "Failed to update team", error: err.message });
+  }
+});
+
 module.exports = router;
