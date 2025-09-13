@@ -159,10 +159,16 @@ router.post("/team", isAuthenticated, upload.any(), async (req, res) => {
 
     const parsedTeam = team ? JSON.parse(team) : [];
 
+    // Normalize teamIndexes to always be an array
+    let teamIndexes = req.body.teamIndexes || [];
+    if (!Array.isArray(teamIndexes)) {
+      teamIndexes = [teamIndexes];
+    }
+
     // Attach uploaded files to corresponding team members
     if (req.files && req.files.length) {
       req.files.forEach((file) => {
-        const index = parseInt(req.body.teamIndexes.shift(), 10);
+        const index = parseInt(teamIndexes.shift(), 10); // now safe
         const url = file.path || file.secure_url;
         parsedTeam[index].image = url;
         parsedTeam[index].public_id = extractCloudinaryPublicId(url);

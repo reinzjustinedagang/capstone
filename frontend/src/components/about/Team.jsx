@@ -92,16 +92,20 @@ const Team = () => {
     try {
       const formData = new FormData();
       formData.append("team", JSON.stringify(team));
+
+      // Append each image and its corresponding index
       team.forEach((member, index) => {
         if (member.imageFile) {
           formData.append("teamImages", member.imageFile);
-          formData.append("teamIndexes", index);
+          formData.append("teamIndexes", index.toString()); // always a string
         }
       });
+
       await axios.post(`${backendUrl}/api/settings/team`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
         withCredentials: true,
       });
+
       setShowSuccessModal(true);
     } catch (err) {
       console.error("Failed to save team:", err);
