@@ -1,47 +1,38 @@
 const Connection = require("../db/Connection");
-const cloudinary = require("../utils/cloudinary");
 const { logAudit } = require("./auditService");
-const {
-  safeCloudinaryDestroy,
-  uploadToCloudinary,
-} = require("../utils/serviceHelpers");
+const cloudinary = require("../utils/cloudinary");
 
-/**
- * Upload buffer to Cloudinary (returns result)
- */
-const uploadToCloudinary = (buffer, folder) => {
-  return new Promise((resolve, reject) => {
-    const passthrough = new stream.PassThrough();
-    passthrough.end(buffer);
-
-    cloudinary.uploader
-      .upload_stream({ folder }, (err, result) => {
-        if (err) return reject(err);
-        resolve(result);
-      })
-      .end(buffer);
-  });
+const extractCloudinaryPublicId = (url) => {
+  if (!url.includes("res.cloudinary.com")) return null;
+  const parts = url.split("/");
+  const filename = parts.pop().split(".")[0];
+  const folder = parts.pop();
+  return `${folder}/${filename}`;
 };
 
-// Get system settings (all fields)
+const safeCloudinaryDestroy = async (publicId, retries = 3, delayMs = 1000) => {
+  for (let attempt = 1; attempt <= retries; attempt++) {
+    try {
+      await cloudinary.uploader.destroy(publicId);
+      console.log(`Deleted Cloudinary image: ${publicId}`);
+      return;
+    } catch (error) {
+      console.error(
+        `Attempt ${attempt} to delete Cloudinary image failed:`,
+        error
+      );
+      if (attempt === retries) throw error;
+      await new Promise((resolve) => setTimeout(resolve, delayMs));
+    }
+  }
+};
+
+// Fetch system settings (only 1 record)
 exports.getSystemSettings = async () => {
   const result = await Connection(`SELECT * FROM system_setting WHERE id = 1`);
-  if (result.length === 0) return null;
-
-  const settings = result[0];
-  return {
-    ...settings,
-    introduction: settings.introduction ? settings.introduction.toString() : "",
-    objective: settings.objective ? settings.objective.toString() : "",
-    mission: settings.mission ? settings.mission.toString() : "",
-    vision: settings.vision ? settings.vision.toString() : "",
-    preamble: settings.preamble ? settings.preamble.toString() : "",
-    team:
-      typeof settings.team === "string"
-        ? JSON.parse(settings.team)
-        : settings.team || [],
-  };
+  return result.length > 0 ? result[0] : null;
 };
+
 // Update or insert system settings
 exports.updateSystemSettings = async (
   systemName,
@@ -103,10 +94,17 @@ exports.updateSystemSettings = async (
   return { actionType, changes };
 };
 
-// Update About OSCA
-exports.updateAboutOSCA = async (mission, vision, preamble, user, ip) => {
+exports.updateAbout = async (
+  mission,
+  vision,
+  preamble,
+  introduction,
+  objective,
+  user,
+  ip
+) => {
   const existing = await Connection(
-    `SELECT * FROM system_setting WHERE id = 1`
+    `SELECT mission, vision, preamble, introduction, objective FROM system_setting WHERE id = 1`
   );
   const old = existing[0] || {};
   const actionType = existing.length === 0 ? "INSERT" : "UPDATE";
@@ -114,19 +112,23 @@ exports.updateAboutOSCA = async (mission, vision, preamble, user, ip) => {
 
   if (existing.length === 0) {
     await Connection(
-      `INSERT INTO system_setting (id, mission, vision, preamble) VALUES (1, ?, ?, ?)`,
-      [mission, vision, preamble]
+      `INSERT INTO system_setting (id, mission, vision, preamble, introduction, objective) VALUES (1, ?, ?, ?, ?, ?)`,
+      [mission, vision, preamble, introduction, objective]
     );
-    changes.push("Initial About OSCA created");
+    changes.push("Created initial About OSCA settings.");
   } else {
     await Connection(
-      `UPDATE system_setting SET mission = ?, vision = ?, preamble = ? WHERE id = 1`,
-      [mission, vision, preamble]
+      `UPDATE system_setting SET mission = ?, vision = ?, preamble = ?, introduction = ?, objective = ? WHERE id = 1`,
+      [mission, vision, preamble, introduction, objective]
     );
-    if (old.mission !== mission) changes.push("Mission updated");
-    if (old.vision !== vision) changes.push("Vision updated");
-    if (old.preamble !== preamble) changes.push("Preamble updated");
   }
+
+  // Track changes
+  if (old.mission !== mission) changes.push(`Mission updated`);
+  if (old.vision !== vision) changes.push(`Vision updated`);
+  if (old.preamble !== preamble) changes.push(`Preamble updated`);
+  if (old.introduction !== introduction) changes.push(`Introduction updated`);
+  if (old.objective !== objective) changes.push(`Objective updated`);
 
   if (changes.length > 0 && user) {
     await logAudit(
@@ -177,53 +179,4 @@ exports.saveKey = async (key) => {
   );
 
   return { message: "Developer key created successfully", skipped: false };
-};
-
-// Update About Us
-exports.updateAboutUs = async (req) => {
-  const { introduction, objective, team } = req.body;
-  if (!team) throw { status: 400, message: "Team data is required" };
-
-  let parsedTeam;
-  try {
-    parsedTeam = JSON.parse(team);
-  } catch (err) {
-    throw { status: 400, message: "Invalid team JSON" };
-  }
-
-  // Handle uploaded team images
-  if (req.files && req.files.teamImages) {
-    const files = Array.isArray(req.files.teamImages)
-      ? req.files.teamImages
-      : [req.files.teamImages];
-
-    let indexes = Array.isArray(req.body.teamIndexes)
-      ? req.body.teamIndexes
-      : [req.body.teamIndexes];
-
-    indexes = indexes.map((i) => parseInt(i));
-
-    for (let i = 0; i < files.length; i++) {
-      const file = files[i];
-      const index = indexes[i];
-      if (!parsedTeam[index]) continue;
-
-      // Delete old image if exists
-      if (parsedTeam[index].public_id) {
-        await safeCloudinaryDestroy(parsedTeam[index].public_id);
-      }
-
-      const result = await uploadToCloudinary(file.buffer, "team");
-      parsedTeam[index].image = result.secure_url;
-      parsedTeam[index].public_id = result.public_id;
-    }
-  }
-
-  // Update DB
-  await Connection(
-    `UPDATE system_setting SET introduction = ?, objective = ?, team = ? WHERE id = 1`,
-    [introduction, objective, JSON.stringify(parsedTeam)]
-  );
-
-  return { introduction, objective, team: parsedTeam };
 };

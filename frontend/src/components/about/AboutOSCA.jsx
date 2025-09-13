@@ -9,132 +9,217 @@ import {
   Eye,
   ScrollText,
   CheckCircle,
+  XCircle,
 } from "lucide-react";
+import AboutUs from "./AboutUs";
 
 const AboutOSCA = () => {
   const backendUrl = import.meta.env.VITE_API_BASE_URL;
+  const [loading, setLoading] = useState(false);
   const [settings, setSettings] = useState({
     mission: "",
     vision: "",
     preamble: "",
+    introduction: "",
+    objective: "",
   });
-  const [loading, setLoading] = useState(false);
-  const [showConfirm, setShowConfirm] = useState(false);
-  const [showSuccess, setShowSuccess] = useState(false);
 
+  // Modals
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+
+  // Fetch settings on load
   useEffect(() => {
     const fetchSettings = async () => {
       try {
         const res = await axios.get(`${backendUrl}/api/settings/`);
-        setSettings({
-          mission: res.data.mission || "",
-          vision: res.data.vision || "",
-          preamble: res.data.preamble || "",
-        });
+        setSettings(res.data);
       } catch (err) {
-        console.error(err);
+        console.error("Failed to fetch system settings:", err);
       }
     };
     fetchSettings();
-  }, []);
+  }, [backendUrl]);
 
   const handleSave = async () => {
     setLoading(true);
     try {
-      await axios.post(`${backendUrl}/api/settings/about-osca`, settings, {
+      await axios.post(`${backendUrl}/api/settings/about`, settings, {
         withCredentials: true,
       });
-      setShowSuccess(true);
+      setShowSuccessModal(true); // Show success modal
     } catch (err) {
-      console.error(err);
-      alert("Failed to update About OSCA.");
+      console.error("Failed to save settings:", err);
+      alert("Failed to update. Please try again.");
     } finally {
       setLoading(false);
-      setShowConfirm(false);
+      setShowConfirmModal(false);
     }
   };
 
   return (
     <>
-      <div className="bg-white rounded shadow p-6 mb-6 space-y-4">
-        <div>
-          <label>Preamble</label>
-          <textarea
-            value={settings.preamble}
-            onChange={(e) =>
-              setSettings({ ...settings, preamble: e.target.value })
-            }
-            rows={4}
-            className="w-full border rounded p-2"
-          />
-        </div>
-        <div>
-          <label>Mission</label>
-          <textarea
-            value={settings.mission}
-            onChange={(e) =>
-              setSettings({ ...settings, mission: e.target.value })
-            }
-            rows={3}
-            className="w-full border rounded p-2"
-          />
-        </div>
-        <div>
-          <label>Vision</label>
-          <textarea
-            value={settings.vision}
-            onChange={(e) =>
-              setSettings({ ...settings, vision: e.target.value })
-            }
-            rows={3}
-            className="w-full border rounded p-2"
-          />
-        </div>
-        <div className="flex justify-end">
-          <Button onClick={() => setShowConfirm(true)} disabled={loading}>
-            {loading ? (
-              "Saving..."
-            ) : (
-              <>
-                <SaveIcon className="mr-2" /> Save
-              </>
-            )}
-          </Button>
+      <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
+        <div className="space-y-6">
+          {/* Preamble */}
+          <div className="mt-4">
+            <label className="block text-base font-medium text-gray-700">
+              Preamble
+            </label>
+            <div className="mt-1 relative">
+              <textarea
+                value={settings.preamble}
+                onChange={(e) =>
+                  setSettings({ ...settings, preamble: e.target.value })
+                }
+                className="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 pl-10 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                rows={4}
+              />
+              <ScrollText className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
+            </div>
+          </div>
+
+          {/* Mission */}
+          <div className="mt-4">
+            <label className="block text-base font-medium text-gray-700">
+              Mission
+            </label>
+            <div className="mt-1 relative">
+              <textarea
+                value={settings.mission}
+                onChange={(e) =>
+                  setSettings({ ...settings, mission: e.target.value })
+                }
+                className="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 pl-10 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                rows={3}
+              />
+              <Target className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
+            </div>
+          </div>
+
+          {/* Vision */}
+          <div className="mt-4">
+            <label className="block text-base font-medium text-gray-700">
+              Vision
+            </label>
+            <div className="mt-1 relative">
+              <textarea
+                value={settings.vision}
+                onChange={(e) =>
+                  setSettings({ ...settings, vision: e.target.value })
+                }
+                className="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 pl-10 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                rows={3}
+              />
+              <Eye className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
+            </div>
+          </div>
+
+          {/* Introduction */}
+          <div className="mt-4">
+            <label className="block text-base font-medium text-gray-700">
+              Introduction
+            </label>
+            <div className="mt-1 relative">
+              <textarea
+                value={settings.introduction}
+                onChange={(e) =>
+                  setSettings({ ...settings, introduction: e.target.value })
+                }
+                className="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 pl-10 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                rows={5}
+              />
+              <Eye className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
+            </div>
+          </div>
+
+          {/* Objectives */}
+          <div className="mt-4">
+            <label className="block text-base font-medium text-gray-700">
+              Objectives
+            </label>
+            <div className="mt-1 relative">
+              <textarea
+                value={settings.objective}
+                onChange={(e) =>
+                  setSettings({ ...settings, objective: e.target.value })
+                }
+                className="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 pl-10 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                rows={5}
+              />
+              <Eye className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
+            </div>
+          </div>
+
+          {/* Save Button */}
+          <div className="flex justify-end">
+            <Button
+              onClick={() => setShowConfirmModal(true)} // Open confirm modal
+              variant="primary"
+              icon={
+                loading ? (
+                  <Loader2 className="animate-spin h-4 w-4 mr-2" />
+                ) : (
+                  <SaveIcon className="h-4 w-4 mr-2" />
+                )
+              }
+              disabled={loading}
+            >
+              {loading ? "Saving..." : "Save"}
+            </Button>
+          </div>
         </div>
       </div>
 
+      <AboutUs />
+
       {/* Confirm Modal */}
       <Modal
-        isOpen={showConfirm}
-        onClose={() => setShowConfirm(false)}
+        isOpen={showConfirmModal}
+        onClose={() => setShowConfirmModal(false)}
         title="Confirm Update"
       >
-        <p>Are you sure you want to save About OSCA?</p>
-        <div className="flex justify-end gap-2 mt-4">
+        <div className="mt-4 text-sm text-gray-700">
+          Are you sure you want to save changes to About OSCA?
+        </div>
+        <div className="mt-6 flex justify-end space-x-4">
           <button
-            onClick={() => setShowConfirm(false)}
-            className="px-3 py-1 bg-gray-200 rounded"
+            onClick={() => setShowConfirmModal(false)}
+            className="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 text-sm"
           >
             Cancel
           </button>
           <button
             onClick={handleSave}
-            className="px-3 py-1 bg-blue-600 text-white rounded"
+            disabled={loading}
+            className={`px-4 py-2 rounded text-sm ${
+              loading
+                ? "bg-blue-400 cursor-not-allowed"
+                : "bg-blue-600 hover:bg-blue-700"
+            } text-white`}
           >
-            Yes, Save
+            {loading ? "Saving..." : "Yes, Save"}
           </button>
         </div>
       </Modal>
 
       {/* Success Modal */}
-      <Modal isOpen={showSuccess} onClose={() => setShowSuccess(false)}>
-        <div className="text-center p-6">
-          <div className="mx-auto w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mb-4">
-            <CheckCircle className="text-green-500 w-6 h-6" />
+      <Modal
+        isOpen={showSuccessModal}
+        onClose={() => setShowSuccessModal(false)}
+        title=""
+      >
+        <div className="p-6 text-center">
+          <div className="mx-auto mb-4 w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+            <CheckCircle className="w-6 h-6 text-green-500" />
           </div>
-          <h3>Success!</h3>
-          <p>About OSCA updated successfully.</p>
-          <Button onClick={() => setShowSuccess(false)}>OK</Button>
+          <h3 className="text-lg font-medium text-gray-800 mb-2">Success</h3>
+          <p className="text-sm text-gray-600 mb-4">
+            About OSCA updated successfully!
+          </p>
+          <Button variant="primary" onClick={() => setShowSuccessModal(false)}>
+            OK
+          </Button>
         </div>
       </Modal>
     </>

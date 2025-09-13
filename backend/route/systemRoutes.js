@@ -10,16 +10,16 @@ const {
 } = require("../utils/serviceHelpers");
 
 // GET system settings
-// GET all system settings (About OSCA + About Us)
 router.get("/", async (req, res) => {
   try {
     const settings = await systemService.getSystemSettings();
-    if (!settings)
-      return res.status(404).json({ message: "Settings not found" });
+    if (!settings) {
+      return res.status(404).json({ message: "System settings not found" });
+    }
     res.json(settings);
   } catch (err) {
     console.error("Error fetching system settings:", err);
-    res.status(500).json({ message: "Failed to fetch settings" });
+    res.status(500).json({ message: "Failed to fetch system settings" });
   }
 });
 
@@ -86,26 +86,35 @@ router.post("/", isAuthenticated, upload.single("image"), async (req, res) => {
   }
 });
 
-// POST About OSCA
-router.post("/about-osca", isAuthenticated, async (req, res) => {
+// POST update About OSCA
+router.post("/about", isAuthenticated, async (req, res) => {
   try {
-    const { mission, vision, preamble } = req.body;
+    const { mission, vision, preamble, introduction, objective } = req.body;
     const user = req.session.user;
     const ip = req.userIp;
 
-    const result = await systemService.updateAboutOSCA(
+    if (!user) return res.status(401).json({ message: "Unauthorized" });
+
+    // Update system settings via service
+    const result = await systemService.updateAbout(
       mission,
       vision,
       preamble,
+      introduction,
+      objective,
       user,
       ip
     );
+
     res.status(200).json({
-      message: "About OSCA updated successfully",
+      message:
+        result.actionType === "INSERT"
+          ? "About OSCA created successfully."
+          : "About OSCA updated successfully.",
       changes: result.changes,
     });
   } catch (err) {
-    console.error(err);
+    console.error("Error updating About OSCA:", err);
     res.status(500).json({ message: "Failed to update About OSCA" });
   }
 });
@@ -126,24 +135,4 @@ router.post("/save-key", async (req, res) => {
   }
 });
 
-// POST update About Us
-// POST About Us
-router.post(
-  "/about-us",
-  isAuthenticated,
-  upload.fields([{ name: "teamImages" }]),
-  async (req, res) => {
-    try {
-      const updated = await systemService.updateAboutUs(req);
-      res
-        .status(200)
-        .json({ message: "About Us updated successfully", data: updated });
-    } catch (err) {
-      console.error(err);
-      res
-        .status(err.status || 500)
-        .json({ message: err.message || "Failed to update About Us" });
-    }
-  }
-);
 module.exports = router;
