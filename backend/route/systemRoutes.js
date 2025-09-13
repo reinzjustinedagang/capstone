@@ -13,10 +13,17 @@ const {
 router.get("/", async (req, res) => {
   try {
     const settings = await systemService.getSystemSettings();
-    settings.team = JSON.parse(settings.team || "[]");
     if (!settings) {
       return res.status(404).json({ message: "System settings not found" });
     }
+
+    // Only parse if it's a string
+    if (typeof settings.team === "string") {
+      settings.team = JSON.parse(settings.team || "[]");
+    } else if (!settings.team) {
+      settings.team = [];
+    }
+
     res.json(settings);
   } catch (err) {
     console.error("Error fetching system settings:", err);
