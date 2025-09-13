@@ -149,18 +149,27 @@ router.get("/team", isAuthenticated, async (req, res) => {
 });
 
 // --- POST update/add team members ---
-// --- POST update/add team members ---
+// POST update/add team members
 router.post("/team", isAuthenticated, upload.any(), async (req, res) => {
   try {
-    const { team } = req.body;
     const user = req.session.user;
     const ip = req.userIp;
 
     if (!user) return res.status(401).json({ message: "Unauthorized" });
 
-    const parsedTeam = req.body.team ? JSON.parse(req.body.team) : [];
+    // --- Safely parse team ---
+    let parsedTeam = [];
+    if (req.body.team) {
+      if (typeof req.body.team === "string") {
+        parsedTeam = JSON.parse(req.body.team);
+      } else if (Array.isArray(req.body.team)) {
+        parsedTeam = req.body.team;
+      } else {
+        parsedTeam = [];
+      }
+    }
 
-    // Attach uploaded files to corresponding team members
+    // --- Attach uploaded images ---
     if (req.files && req.files.length) {
       const teamIndexes = Array.isArray(req.body.teamIndexes)
         ? req.body.teamIndexes
@@ -187,6 +196,7 @@ router.post("/team", isAuthenticated, upload.any(), async (req, res) => {
       }
     }
 
+    // --- Call service to update team in DB ---
     const result = await systemService.updateTeam(parsedTeam, user, ip);
 
     res.status(200).json({

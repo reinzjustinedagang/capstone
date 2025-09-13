@@ -192,7 +192,7 @@ exports.updateTeam = async (team = [], user, ip) => {
   const actionType = existingRows.length === 0 ? "INSERT" : "UPDATE";
   const changes = [];
 
-  // Delete removed images from Cloudinary
+  // --- Delete removed Cloudinary images ---
   const oldTeamMap = oldTeam.reduce((acc, member) => {
     if (member.public_id) acc[member.public_id] = true;
     return acc;
@@ -203,24 +203,27 @@ exports.updateTeam = async (team = [], user, ip) => {
   const removedPublicIds = Object.keys(oldTeamMap).filter(
     (pid) => !newTeamPublicIds.includes(pid)
   );
+
   for (const pid of removedPublicIds) {
     await safeCloudinaryDestroy(pid);
     changes.push(`Deleted old team image: ${pid}`);
   }
 
-  // Save team JSON
+  // --- Save team JSON ---
+  const teamJSON = JSON.stringify(team);
   if (existingRows.length === 0) {
     await Connection(`INSERT INTO system_setting (id, team) VALUES (1, ?)`, [
-      JSON.stringify(team),
+      teamJSON,
     ]);
     changes.push("Created initial team data.");
   } else {
     await Connection(`UPDATE system_setting SET team = ? WHERE id = 1`, [
-      JSON.stringify(team),
+      teamJSON,
     ]);
     changes.push("Team data updated.");
   }
 
+  // --- Log audit ---
   if (user) {
     await logAudit(
       user.id,

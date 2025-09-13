@@ -91,19 +91,19 @@ const Team = () => {
     setLoading(true);
     try {
       const formData = new FormData();
-      formData.append(
-        "team",
-        JSON.stringify(
-          team.map((member) => ({
-            name: member.name,
-            role: member.role,
-            image: member.image || null,
-            public_id: member.public_id || null,
-          }))
-        )
-      );
 
-      // Append actual files separately
+      // Prepare team data with only JSON-safe fields
+      const teamData = team.map((member) => ({
+        name: member.name,
+        role: member.role,
+        image: member.image || null,
+        public_id: member.public_id || null,
+      }));
+
+      // Append team as JSON string
+      formData.append("team", JSON.stringify(teamData));
+
+      // Append image files and their indexes
       team.forEach((member, index) => {
         if (member.imageFile) {
           formData.append("teamImages", member.imageFile);
@@ -111,6 +111,7 @@ const Team = () => {
         }
       });
 
+      // Send to backend
       await axios.post(`${backendUrl}/api/settings/team`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
         withCredentials: true,
