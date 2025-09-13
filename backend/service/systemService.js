@@ -244,11 +244,38 @@ exports.updateTeam = async (team = [], user, ip) => {
   return { actionType, changes, team };
 };
 
-// --- Fetch team members ---
 exports.getTeam = async () => {
-  const result = await Connection(
-    `SELECT team FROM system_setting WHERE id = 1`
-  );
-  if (!result.length) return [];
-  return result[0].team ? JSON.parse(result[0].team) : [];
+  try {
+    const result = await Connection(
+      `SELECT team FROM system_setting WHERE id = 1`
+    );
+
+    if (!result.length || !result[0].team) {
+      return [];
+    }
+
+    const teamData = result[0].team;
+
+    // If it's already an array, return it
+    if (Array.isArray(teamData)) {
+      return teamData;
+    }
+
+    // If it's a non-empty string, attempt to parse
+    if (typeof teamData === "string" && teamData.trim() !== "") {
+      try {
+        const parsed = JSON.parse(teamData);
+        return Array.isArray(parsed) ? parsed : [];
+      } catch (err) {
+        console.warn("Invalid JSON in team field:", err);
+        return [];
+      }
+    }
+
+    // Fallback
+    return [];
+  } catch (error) {
+    console.error("Error in getTeam:", error);
+    return [];
+  }
 };
