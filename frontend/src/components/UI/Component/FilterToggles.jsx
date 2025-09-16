@@ -9,7 +9,7 @@ const FilterToggles = ({
 }) => {
   const hasFilters =
     filters.filterBarangay !== "All Barangays" ||
-    filters.filterHealthStatus !== "All Health Status" ||
+    filters.filterHealthStatus !== "All Remarks" ||
     filters.filterAge !== "All" ||
     filters.filterGender !== "All";
 

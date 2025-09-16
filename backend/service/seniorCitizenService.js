@@ -383,11 +383,12 @@ exports.getPaginatedFilteredCitizens = async (options) => {
   // Search by name or barangay
   if (search) {
     where += ` AND (
-      sc.firstName LIKE ? OR sc.lastName LIKE ? OR sc.middleName LIKE ? OR sc.suffix LIKE ?
-      OR b.barangay_name LIKE ?
-    )`;
+    sc.firstName LIKE ? OR sc.lastName LIKE ? OR sc.middleName LIKE ? OR sc.suffix LIKE ?
+    OR b.barangay_name LIKE ?
+    OR JSON_UNQUOTE(JSON_EXTRACT(sc.form_data, '$.idNumber')) LIKE ?
+  )`;
     const s = `%${search}%`;
-    params.push(s, s, s, s, s);
+    params.push(s, s, s, s, s, s);
   }
 
   // Barangay filter
