@@ -151,6 +151,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#f8f9ff",
     padding: 12,
     fontSize: 8,
+    lineHeight: 0.5,
   },
   benefitsTitle: {
     textAlign: "center",
@@ -164,12 +165,13 @@ const styles = StyleSheet.create({
   benefitItem: {
     marginBottom: 2,
     fontSize: 8,
-    lineHeight: 1.3,
+    lineHeight: 1,
   },
   footerText: {
     marginTop: 10,
     fontSize: 8,
     textAlign: "center",
+    lineHeight: 1,
   },
   signatureArea: {
     flexDirection: "row",
@@ -218,13 +220,13 @@ const styles = StyleSheet.create({
 });
 
 const SeniorCitizenID = ({
-  name = "JESSIELOU R. MADRIAGA",
-  address = "Labangan, Poblacion",
-  municipality = "San Jose, Occ. Mindoro",
-  dob = "10-12-61",
-  sex = "F",
-  dateIssued = "10-22-2021",
-  controlNo = "5100026-946",
+  name = "",
+  address = "",
+  municipality = "",
+  dob = "",
+  sex = "",
+  dateIssued = "",
+  controlNo = "",
   photoUrl = user,
   oscaLogoUrl = oscaLogo,
   municipalSealUrl = municipalSeal,
@@ -358,7 +360,7 @@ const SeniorCitizenID = ({
           <View style={styles.signatureArea}>
             {/* Left side */}
             <View style={styles.signatureBlock}>
-              <Text style={styles.nameText}>ALICIA M. CAJAYON</Text>
+              <Text style={styles.nameText}>MARCELINO G. CORPUZ JR.</Text>
               <Text style={styles.designationText}>
                 MSWO Officer / OIC-OSCA Head
               </Text>

@@ -21,10 +21,12 @@ import UpdateSeniorCitizenForm from "./form/UpdateSeniorCitizenForm";
 import UnregisteredSeniorList from "./UnregisteredSeniorList";
 import GetUnregisteredSenior from "./form/GetUnregisteredSenior";
 import Archive from "../archive/Archive";
+import SeniorCitizenIDPDF from "./SeniorCitizenIDPDF";
 
 const SeniorCitizen = () => {
   const [activeTab, setActiveTab] = useState("list");
   const [selectedCitizenId, setSelectedCitizenId] = useState(null);
+  const [selectedIDCitizen, setSelectedIDCitizen] = useState(null);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [showUpdateModal, setShowUpdateModal] = useState(false);
 
@@ -55,23 +57,30 @@ const SeniorCitizen = () => {
     setActiveTab("view"); // or "register" if you want a different flow
   };
 
+  const handleId = (citizen) => {
+    setSelectedIDCitizen(citizen);
+    setActiveTab("id");
+  };
+
   return (
     <>
       <div className="mt-4 mb-4 md:mt-0 flex flex-col sm:flex-row justify-between items-center space-y-3 sm:space-y-0">
         <div className="relative w-full sm:w-64">
-          {activeTab !== "list" && activeTab !== "unregistered" && (
-            <div
-              className="flex items-center cursor-pointer text-gray-600 hover:text-gray-900 transition-colors"
-              onClick={() =>
-                activeTab === "view" && selectedCitizenId
-                  ? setActiveTab("unregistered")
-                  : setActiveTab("list")
-              }
-            >
-              <ArrowUp className="h-5 w-5 mr-2 -rotate-90" />
-              Back to Senior Citizens
-            </div>
-          )}
+          {activeTab !== "list" &&
+            activeTab !== "unregistered" &&
+            activeTab !== "archived" && (
+              <div
+                className="flex items-center cursor-pointer text-gray-600 hover:text-gray-900 transition-colors"
+                onClick={() =>
+                  activeTab === "view" && selectedCitizenId
+                    ? setActiveTab("unregistered")
+                    : setActiveTab("list")
+                }
+              >
+                <ArrowUp className="h-5 w-5 mr-2 -rotate-90" />
+                Back to Senior Citizens
+              </div>
+            )}
         </div>
 
         <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
@@ -148,7 +157,9 @@ const SeniorCitizen = () => {
       </div>
 
       <div className="bg-white shadow overflow-hidden">
-        {activeTab === "list" && <SeniorCitizenList onEdit={handleEdit} />}
+        {activeTab === "list" && (
+          <SeniorCitizenList onEdit={handleEdit} onId={handleId} />
+        )}
         {activeTab === "unregistered" && (
           <UnregisteredSeniorList onView={onView} onRegister={onRegister} />
         )}
@@ -173,6 +184,15 @@ const SeniorCitizen = () => {
         {activeTab === "view" && (
           <GetUnregisteredSenior
             id={selectedCitizenId}
+            onSuccess={handleUpdateSuccess}
+            onCancel={() => {
+              setActiveTab("unregistered");
+            }}
+          />
+        )}
+        {activeTab === "id" && (
+          <SeniorCitizenIDPDF
+            citizen={selectedIDCitizen}
             onSuccess={handleUpdateSuccess}
             onCancel={() => {
               setActiveTab("unregistered");

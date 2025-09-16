@@ -61,7 +61,7 @@ const Archive = ({ onView }) => {
     setRestoring(true);
     try {
       await axios.put(
-        `${backendUrl}/api/senior-citizens/restore-archive/${restoreTarget.id}`,
+        `${backendUrl}/api/senior-citizens/archive/restore/${restoreTarget.id}`,
         {},
         { withCredentials: true }
       );

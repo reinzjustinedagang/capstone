@@ -19,7 +19,7 @@ import {
   IdCard,
 } from "lucide-react";
 
-const SeniorCitizenList = ({ onEdit }) => {
+const SeniorCitizenList = ({ onEdit, onId }) => {
   const backendUrl =
     import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
 
@@ -348,7 +348,7 @@ const SeniorCitizenList = ({ onEdit }) => {
                               <button
                                 onClick={() => {
                                   setOpenDropdownId(null);
-                                  handleForReports(citizen);
+                                  onId(citizen);
                                 }}
                                 className="flex items-center w-full px-4 py-2 text-sm text-blue-600 hover:bg-blue-600 hover:text-white"
                               >
@@ -530,6 +530,7 @@ const SeniorCitizenList = ({ onEdit }) => {
         </div>
       </Modal>
       {/* Archive Modal */}
+      {/* Archive Modal */}
       <Modal
         isOpen={showArchiveModal}
         onClose={() => setShowArchiveModal(false)}
@@ -549,16 +550,45 @@ const SeniorCitizenList = ({ onEdit }) => {
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Reason
             </label>
-            <input
-              type="text"
+
+            {/* Dropdown */}
+            <select
               value={archiveDetails.reason}
               onChange={(e) =>
                 setArchiveDetails({ ...archiveDetails, reason: e.target.value })
               }
               className="w-full border rounded-md px-3 py-2 text-sm"
-              placeholder="Enter reason for archiving"
               required
-            />
+            >
+              <option value="">Select a reason</option>
+              <option value="Deceased">Deceased</option>
+              <option value="Other">Other</option>
+            </select>
+
+            {/* Show input if Other is selected */}
+            {archiveDetails.reason === "Other" && (
+              <input
+                type="text"
+                value={archiveDetails.otherReason || ""}
+                onChange={(e) =>
+                  setArchiveDetails({
+                    ...archiveDetails,
+                    otherReason: e.target.value,
+                  })
+                }
+                className="w-full border rounded-md px-3 py-2 text-sm mt-3"
+                placeholder="Enter custom reason"
+                required
+              />
+            )}
+
+            {(!archiveDetails.reason ||
+              (archiveDetails.reason === "Other" &&
+                !archiveDetails.otherReason?.trim())) && (
+              <p className="text-xs text-red-500 mt-1">
+                Reason is required before archiving.
+              </p>
+            )}
           </div>
 
           <div className="flex justify-end space-x-3">
@@ -571,23 +601,40 @@ const SeniorCitizenList = ({ onEdit }) => {
             <Button
               variant="primary"
               onClick={async () => {
+                // Final reason: use otherReason if "Other" is chosen
+                const finalReason =
+                  archiveDetails.reason === "Other"
+                    ? archiveDetails.otherReason
+                    : archiveDetails.reason;
+
+                if (!finalReason?.trim()) return;
+
                 setArchiving(true);
                 try {
                   await axios.put(
                     `${backendUrl}/api/senior-citizens/archive/${selectedArchiveCitizen.id}`,
-                    archiveDetails,
+                    { reason: finalReason }, // ✅ send correct reason
                     { withCredentials: true }
                   );
                   await fetchCitizens();
                   setShowArchiveModal(false);
-                  setArchiveDetails({ reason: "" });
+                  setArchiveDetails({ reason: "", otherReason: "" });
+                  setShowSuccessModal(true);
                 } catch (err) {
                   console.error("Archive failed", err);
+                  setError(
+                    "Failed to archive senior citizen. Please try again."
+                  );
                 } finally {
                   setArchiving(false);
                 }
               }}
-              disabled={archiving}
+              disabled={
+                archiving ||
+                !archiveDetails.reason ||
+                (archiveDetails.reason === "Other" &&
+                  !archiveDetails.otherReason?.trim())
+              }
             >
               {archiving ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
@@ -596,6 +643,42 @@ const SeniorCitizenList = ({ onEdit }) => {
               )}
             </Button>
           </div>
+        </div>
+      </Modal>
+
+      {/* Archive Success Modal */}
+      <Modal
+        isOpen={showSuccessModal}
+        onClose={() => setShowSuccessModal(false)}
+        title="Success"
+      >
+        <div className="p-6 text-center">
+          <div className="mx-auto mb-4 w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+            <CheckCircle className="w-6 h-6 text-green-500" />
+          </div>
+          <h3 className="text-lg font-medium text-gray-800 mb-2">Success</h3>
+          <p className="text-sm text-gray-600 mb-4">
+            Senior Citizen archived successfully!
+          </p>
+          <Button variant="primary" onClick={() => setShowSuccessModal(false)}>
+            OK
+          </Button>
+        </div>
+      </Modal>
+
+      {/* Error Modal (optional) */}
+      <Modal isOpen={!!error} onClose={() => setError("")} title="Error">
+        <div className="p-6 text-center">
+          <div className="mx-auto mb-4 w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
+            <XCircle className="w-6 h-6 text-red-500" />
+          </div>
+          <h3 className="text-lg font-medium text-gray-800 mb-2">
+            Archive Failed
+          </h3>
+          <p className="text-sm text-gray-600 mb-4">{error}</p>
+          <Button variant="primary" onClick={() => setError("")}>
+            Close
+          </Button>
         </div>
       </Modal>
     </div>
