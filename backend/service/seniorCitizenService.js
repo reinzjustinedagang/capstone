@@ -777,7 +777,7 @@ exports.getArchivedSeniorCitizens = async (page = 1, limit = 10) => {
     const [rows] = await Connection(
       `SELECT SQL_CALC_FOUND_ROWS 
           id, firstName, lastName, middleName, suffix, gender,
-          barangay_id, archive_date, archive_reason,
+          barangay_id, archive_date, archive_reason
        FROM senior_citizens
        WHERE archived = 1 AND deleted = 0
        ORDER BY archived_at DESC
