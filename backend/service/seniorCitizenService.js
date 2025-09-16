@@ -774,19 +774,19 @@ exports.getArchivedSeniorCitizens = async (page = 1, limit = 10) => {
   try {
     const offset = (page - 1) * limit;
 
-    const [rows] = await Connection(
+    const rows = await Connection(
       `SELECT SQL_CALC_FOUND_ROWS 
           id, firstName, lastName, middleName, suffix, gender,
           barangay_id, archive_date, archive_reason
        FROM senior_citizens
        WHERE archived = 1 AND deleted = 0
-       ORDER BY archived_at DESC
+       ORDER BY archive_date DESC
        LIMIT ? OFFSET ?`,
       [parseInt(limit), parseInt(offset)]
     );
 
-    const [countRows] = await Connection(`SELECT FOUND_ROWS() as total`);
-    const total = countRows.total || 0;
+    const countRows = await Connection(`SELECT FOUND_ROWS() as total`);
+    const total = countRows[0]?.total || 0;
     const totalPages = Math.ceil(total / limit);
 
     return {

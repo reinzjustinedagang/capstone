@@ -100,7 +100,7 @@ const Archive = ({ onView }) => {
                       {citizen.barangay_id || "-"}
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-500">
-                      {citizen.gender || "-"}
+                      {citizen.archive_reason || "-"}
                     </td>
                     <td className="px-6 py-4 text-sm font-xs">
                       {citizen.details}
