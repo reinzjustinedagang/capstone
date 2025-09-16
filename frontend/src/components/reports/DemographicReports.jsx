@@ -35,14 +35,18 @@ const DemographicReports = () => {
         <div className="flex justify-end items-center mb-2 relative">
           <div className="flex space-x-2">
             <button
-              onClick={() => handleExport(ageRef, "age-report.pdf", "p")}
+              onClick={() =>
+                handleExport(barangayRef, "barangay-report.pdf", "p")
+              }
               className="flex items-center px-3 py-2 text-sm rounded-lg bg-blue-600 text-white transition hover:bg-blue-700"
             >
               <GalleryHorizontal className="h-4 w-4 mr-2" />
               Portrait
             </button>
             <button
-              onClick={() => handleExport(ageRef, "age-report.pdf", "l")}
+              onClick={() =>
+                handleExport(barangayRef, "barangay-report.pdf", "l")
+              }
               className="flex items-center px-3 py-2 text-sm rounded-lg bg-green-600 text-white transition hover:bg-green-700"
             >
               <GalleryVertical className="h-4 w-4 mr-2" />
@@ -86,14 +90,18 @@ const DemographicReports = () => {
           <div className="flex justify-end items-center mb-2 relative">
             <div className="flex space-x-2">
               <button
-                onClick={() => handleExport(ageRef, "age-report.pdf", "p")}
+                onClick={() =>
+                  handleExport(genderRef, "gender-report.pdf", "p")
+                }
                 className="flex items-center px-3 py-2 text-sm rounded-lg bg-blue-600 text-white transition hover:bg-blue-700"
               >
                 <GalleryHorizontal className="h-4 w-4 mr-2" />
                 Portrait
               </button>
               <button
-                onClick={() => handleExport(ageRef, "age-report.pdf", "l")}
+                onClick={() =>
+                  handleExport(genderRef, "gender-report.pdf", "l")
+                }
                 className="flex items-center px-3 py-2 text-sm rounded-lg bg-green-600 text-white transition hover:bg-green-700"
               >
                 <GalleryVertical className="h-4 w-4 mr-2" />
