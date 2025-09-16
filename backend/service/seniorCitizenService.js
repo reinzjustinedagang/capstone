@@ -713,13 +713,12 @@ exports.getSmsRecipients = async (
 
 // Archive a senior citizen
 exports.archiveSeniorCitizen = async (id, reason, user, ip) => {
-  const archiveDate = archiveDetails.date || new Date();
   try {
     const result = await Connection(
       `UPDATE senior_citizens 
-       SET archived = 1, archive_reason = ?, archive_date = ?, updated_at = NOW() 
+       SET archived = 1, archive_reason = ?, archive_date = NOW(), updated_at = NOW() 
        WHERE id = ?`,
-      [reason, archiveDate, id]
+      [reason, id]
     );
 
     if (result.affectedRows > 0) {

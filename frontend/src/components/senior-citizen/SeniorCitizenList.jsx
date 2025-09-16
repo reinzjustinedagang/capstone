@@ -62,7 +62,6 @@ const SeniorCitizenList = ({ onEdit }) => {
   const [showArchiveModal, setShowArchiveModal] = useState(false);
   const [archiveDetails, setArchiveDetails] = useState({
     reason: "",
-    date: "",
   });
   const [archiving, setArchiving] = useState(false);
   const [selectedArchiveCitizen, setSelectedArchiveCitizen] = useState(null);
@@ -573,14 +572,14 @@ const SeniorCitizenList = ({ onEdit }) => {
               onClick={async () => {
                 setArchiving(true);
                 try {
-                  await axios.patch(
+                  await axios.put(
                     `${backendUrl}/api/senior-citizens/archive/${selectedArchiveCitizen.id}`,
                     archiveDetails,
                     { withCredentials: true }
                   );
                   await fetchCitizens();
                   setShowArchiveModal(false);
-                  setArchiveDetails({ reason: "", date: "" });
+                  setArchiveDetails({ reason: "" });
                 } catch (err) {
                   console.error("Archive failed", err);
                 } finally {
