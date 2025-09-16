@@ -378,7 +378,8 @@ exports.getPaginatedFilteredCitizens = async (options) => {
   const offset = (safePage - 1) * safeLimit;
 
   const params = [];
-  let where = "WHERE sc.deleted = 0 AND sc.age >= 60 AND registered = 1"; // Only active seniors
+  let where =
+    "WHERE sc.deleted = 0 AND sc.age >= 60 AND registered = 1 AND archived = 0"; // Only active seniors
 
   // Search by name or barangay
   if (search) {
@@ -639,7 +640,7 @@ exports.getCitizenCount = async () => {
     const result = await Connection(
       `SELECT COUNT(*) AS count 
        FROM senior_citizens 
-       WHERE deleted = 0 AND age >= 60 AND registered = 1`
+       WHERE deleted = 0 AND age >= 60 AND registered = 1 AND archived = 0`
     );
     return result[0].count;
   } catch (error) {
@@ -675,6 +676,7 @@ exports.getSmsRecipients = async (
           OR JSON_EXTRACT(sc.form_data, '$.emergencyContactNumber') IS NOT NULL)
         AND sc.deleted = 0 
         AND registered = 1
+        AND archived = 0
         AND TIMESTAMPDIFF(
               YEAR,
               STR_TO_DATE(JSON_UNQUOTE(JSON_EXTRACT(sc.form_data, '$.birthdate')), '%Y-%m-%d'),
