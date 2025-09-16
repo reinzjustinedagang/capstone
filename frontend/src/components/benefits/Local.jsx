@@ -67,11 +67,6 @@ const Local = ({ onEdit }) => {
 
   return (
     <>
-      <h1 className="text-lg font-medium mb-4 text-gray-800 flex items-center gap-2">
-        <Landmark className="w-6 h-6 text-blue-600" />
-        Local Benefits of Senior Citizens
-      </h1>
-
       {loading ? (
         <div className="flex justify-center items-center h-32">
           <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />

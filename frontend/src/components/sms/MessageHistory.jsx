@@ -91,8 +91,8 @@ const MessageHistory = () => {
       <div className="bg-white rounded-lg shadow overflow-hidden">
         {loading ? (
           <div className="flex justify-center items-center h-48">
-            <Loader2 className="animate-spin h-6 w-6 mr-2 text-gray-500" />
-            <span className="text-gray-600">Loading messages...</span>
+            <Loader2 className="animate-spin h-8 w-8 text-blue-600" />
+            <span className="ml-2 text-gray-600">Loading history...</span>
           </div>
         ) : logs.length === 0 ? (
           <div className="text-center py-12">

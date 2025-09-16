@@ -12,7 +12,7 @@ import {
 import Modal from "../../UI/Modal";
 
 import Button from "../../UI/Button";
-import SeniorCitizenList from "../../senior-citizen/SeniorCitizenList";
+import SeniorCitizenList from "./SeniorCitizenList";
 import SeniorCitizenForm from "../../senior-citizen/form/SeniorCitizenForm";
 import UpdateSeniorCitizenForm from "../../senior-citizen/form/UpdateSeniorCitizenForm";
 

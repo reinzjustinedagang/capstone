@@ -8,6 +8,7 @@ const EventList = () => {
   const [events, setEvents] = useState([]);
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [loadingEvents, setLoadingEvents] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showDeletedModal, setShowDeletedModal] = useState(false);
   const [showDetailModal, setShowDetailModal] = useState(false);
@@ -17,6 +18,7 @@ const EventList = () => {
 
   // Fetch events from backend
   const fetchEvents = async () => {
+    setLoadingEvents(true);
     try {
       const res = await axios.get(`${backendUrl}/api/events/event`, {
         withCredentials: true,
@@ -24,6 +26,8 @@ const EventList = () => {
       setEvents(res.data);
     } catch (err) {
       console.error("Failed to fetch events:", err);
+    } finally {
+      setLoadingEvents(false);
     }
   };
 
@@ -53,7 +57,12 @@ const EventList = () => {
 
   return (
     <div className="bg-white rounded-lg shadow overflow-hidden p-6">
-      {events.length === 0 ? (
+      {loadingEvents ? (
+        <div className="flex justify-center items-center py-12">
+          <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
+          <span className="ml-2 text-gray-600">Loading events...</span>
+        </div>
+      ) : events.length === 0 ? (
         <p className="text-gray-500">No events available.</p>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">

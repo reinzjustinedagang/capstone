@@ -126,7 +126,7 @@ const About = () => {
                           : "https://via.placeholder.com/128?text=No+Image"
                       }
                       alt={member.name}
-                      className="w-32 h-32 rounded-full object-cover border-4 border-gray-200 shadow-lg mb-2"
+                      className="w-32 h-32 rounded-full object-cover border-4 border-blue-200 shadow-lg mb-2"
                     />
                     <p className="font-semibold text-lg md:text-xl">
                       {member.name}

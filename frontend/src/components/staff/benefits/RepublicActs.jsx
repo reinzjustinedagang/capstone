@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import RepublicActCard from "./RepublicActCard";
-import { BookOpenTextIcon, CheckCircle } from "lucide-react";
+import { BookOpenTextIcon, CheckCircle, Loader2 } from "lucide-react";
 import Modal from "../../UI/Modal";
 import Button from "../../UI/Button";
 import axios from "axios";
@@ -67,14 +67,10 @@ const RepublicActs = ({ onEdit }) => {
 
   return (
     <>
-      <h1 className="text-lg font-medium mb-4 text-gray-800 flex items-center gap-2">
-        <BookOpenTextIcon className="w-6 h-6 text-blue-600" />
-        Republic Acts for Senior Citizens
-      </h1>
-
       {loading && !acts.length ? (
         <div className="flex justify-center items-center h-32">
-          <p className="text-gray-500">Loading Republic Acts...</p>
+          <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
+          <span className="ml-2 text-gray-600">Loading republic acts...</span>
         </div>
       ) : error ? (
         <div className="flex justify-center items-center h-32">

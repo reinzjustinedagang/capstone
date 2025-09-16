@@ -59,11 +59,6 @@ const National = ({ onEdit }) => {
 
   return (
     <>
-      <h1 className="text-lg font-medium mb-4 text-gray-800 flex items-center gap-2">
-        <MapIcon className="w-6 h-6 text-blue-600" />
-        National Benefits of Senior Citizen
-      </h1>
-
       {loading ? (
         <div className="flex justify-center items-center h-32">
           <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />

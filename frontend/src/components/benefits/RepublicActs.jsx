@@ -67,11 +67,6 @@ const RepublicActs = ({ onEdit }) => {
 
   return (
     <>
-      <h1 className="text-lg font-medium mb-4 text-gray-800 flex items-center gap-2">
-        <BookOpenTextIcon className="w-6 h-6 text-blue-600" />
-        Republic Acts for Senior Citizens
-      </h1>
-
       {loading && !acts.length ? (
         <div className="flex justify-center items-center h-32">
           <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />

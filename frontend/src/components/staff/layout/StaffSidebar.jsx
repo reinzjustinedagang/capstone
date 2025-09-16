@@ -22,6 +22,7 @@ const StaffSidebar = () => {
   const [systemSettings, setSystemSettings] = useState({
     system_name: "",
     municipality: "",
+    province: "",
     seal: null,
   });
   const backendUrl = import.meta.env.VITE_API_BASE_URL;
@@ -128,11 +129,11 @@ const StaffSidebar = () => {
             )}
           </div>
           <h1 className="text-xl font-bold text-blue-800">
-            {systemSettings.system_name ||
-              "Office of the Senior Citizen Affairs"}
+            {systemSettings.system_name || "——————— ————————"}
           </h1>
           <p className="text-sm font-medium text-gray-800">
-            {systemSettings.municipality || "San Jose, Occidental Mindoro"}
+            {systemSettings.municipality || "——————————"},{" "}
+            {systemSettings.province || "———————"}
           </p>
         </div>
 

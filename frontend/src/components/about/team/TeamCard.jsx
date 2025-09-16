@@ -5,14 +5,6 @@ import user from "../../../assets/user.png";
 const TeamCard = ({ member, onEdit, onDelete }) => {
   return (
     <div className="relative flex flex-col items-center bg-white p-4 rounded-2xl shadow-md w-48 transition-transform transform hover:scale-105">
-      {/* Member Name */}
-      <h3
-        className="text-sm font-semibold text-center mb-2 max-w-full truncate"
-        title={member.name}
-      >
-        {member.name}
-      </h3>
-
       {/* Profile Picture */}
       <div className="relative mb-3">
         <img
@@ -26,7 +18,13 @@ const TeamCard = ({ member, onEdit, onDelete }) => {
           className="w-24 h-24 object-cover border-2 rounded-full border-blue-500"
         />
       </div>
-
+      {/* Member Name */}
+      <h3
+        className="text-sm font-semibold text-center mb-2 max-w-full truncate"
+        title={member.name}
+      >
+        {member.name}
+      </h3>
       {/* Role */}
       <p className="text-sm bg-blue-100 text-blue-700 mt-1 px-3 py-0.5 rounded-md font-medium truncate">
         {member.role}

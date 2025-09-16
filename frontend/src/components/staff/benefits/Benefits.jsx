@@ -8,7 +8,7 @@ import {
   BookOpenTextIcon,
   CheckCircle,
   PhilippinePeso,
-  Map,
+  Earth,
   Landmark,
 } from "lucide-react";
 import National from "./National";
@@ -36,16 +36,6 @@ const Benefits = () => {
 
   return (
     <>
-      <div className="mt-4 md:mt-0 flex flex-col sm:flex-row justify-end sm:items-center mb-4">
-        <Button
-          variant="primary"
-          icon={<Plus className="h-4 w-4 mr-2" />}
-          onClick={() => setActiveTab("addbenefits")}
-        >
-          Add New Benefits
-        </Button>
-      </div>
-
       <div className="bg-white rounded-lg shadow overflow-hidden">
         <div className="border-b border-gray-200">
           <nav className="flex flex-wrap -mb-px">
@@ -70,7 +60,7 @@ const Benefits = () => {
                     : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
                 }`}
             >
-              <Map className="inline-block h-4 w-4 mr-2" /> National Benefits
+              <Earth className="inline-block h-4 w-4 mr-2" /> National Benefits
             </button>
             <button
               onClick={() => setActiveTab("ra")}

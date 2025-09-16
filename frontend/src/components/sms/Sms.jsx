@@ -14,7 +14,8 @@ const Sms = () => {
   const [seniorCitizens, setSeniorCitizens] = useState([]);
   const [templates, setTemplates] = useState([]);
   const [selectedTemplateId, setSelectedTemplateId] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [loadingPage, setLoadingPage] = useState(false); // ✅ global actions (send SMS, etc.)
+  const [loadingRecipients, setLoadingRecipients] = useState(false); // ✅ only for recipients list
   const [searchText, setSearchText] = useState("");
 
   const backendUrl = import.meta.env.VITE_API_BASE_URL;
@@ -23,7 +24,7 @@ const Sms = () => {
   const fetchBarangays = async () => {
     try {
       const res = await axios.get(`${backendUrl}/api/barangays/all`);
-      setBarangays(res.data || []); // API returns array directly
+      setBarangays(res.data || []);
     } catch (err) {
       console.error("Failed to fetch barangays:", err);
       setBarangays([]);
@@ -33,7 +34,7 @@ const Sms = () => {
   // Fetch senior citizens by barangay ID
   const fetchCitizens = async (barangayId = "", search = "") => {
     try {
-      setLoading(true);
+      setLoadingRecipients(true); // ✅ only affects recipients panel
       const params = {};
       if (barangayId) params.barangay_id = barangayId;
       if (search) params.search = search;
@@ -43,15 +44,14 @@ const Sms = () => {
         { params }
       );
 
-      const citizens = res.data || [];
-      setSeniorCitizens(citizens);
+      setSeniorCitizens(res.data || []);
       setSelectedRecipients([]);
     } catch (err) {
       console.error("Failed to fetch citizens:", err);
       setSeniorCitizens([]);
       setSelectedRecipients([]);
     } finally {
-      setLoading(false);
+      setLoadingRecipients(false);
     }
   };
 
@@ -104,7 +104,7 @@ const Sms = () => {
 
     if (!numbers.length || !messageText) return;
 
-    setLoading(true);
+    setLoadingPage(true); // ✅ global loader for sending
     try {
       const res = await axios.post(`${backendUrl}/api/sms/send-sms`, {
         numbers,
@@ -129,17 +129,18 @@ const Sms = () => {
         "❌ Failed to send messages.";
       alert(msg);
     } finally {
-      setLoading(false);
+      setLoadingPage(false);
     }
   };
 
   return (
     <div className="relative">
-      {loading && (
+      {/* ✅ Only block full page when sending SMS */}
+      {loadingPage && (
         <div className="absolute inset-0 z-50 flex items-center justify-center bg-white/70 backdrop-blur-sm">
           <div className="flex flex-col items-center">
             <Loader2 className="animate-spin h-10 w-10 text-blue-600 mb-2" />
-            <span className="text-blue-700 font-medium">Loading...</span>
+            <span className="text-blue-700 font-medium">Sending...</span>
           </div>
         </div>
       )}
@@ -208,7 +209,7 @@ const Sms = () => {
                           value={searchText}
                           onChange={(e) => {
                             setSearchText(e.target.value);
-                            fetchCitizens(barangayFilter, e.target.value); // Pass search
+                            fetchCitizens(barangayFilter, e.target.value);
                           }}
                           placeholder="Search by Name or Contact..."
                           className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
@@ -225,7 +226,7 @@ const Sms = () => {
                           onChange={(e) => {
                             const selected = e.target.value;
                             setBarangayFilter(selected);
-                            fetchCitizens(selected, searchText); // fetch with search too
+                            fetchCitizens(selected, searchText);
                           }}
                         >
                           <option value="">All Barangays</option>
@@ -240,7 +241,14 @@ const Sms = () => {
                   </div>
 
                   <div className="max-h-80 overflow-y-auto">
-                    {seniorCitizens.length > 0 ? (
+                    {loadingRecipients ? (
+                      <div className="p-4 flex items-center justify-center text-blue-600">
+                        <Loader2 className="animate-spin h-8 w-8" />
+                        <span className="ml-2 text-gray-600">
+                          Loading recipients...
+                        </span>
+                      </div>
+                    ) : seniorCitizens.length > 0 ? (
                       seniorCitizens.map((citizen) => (
                         <div
                           key={citizen.id}
@@ -327,11 +335,11 @@ const Sms = () => {
                       disabled={
                         selectedRecipients.length === 0 ||
                         !messageText ||
-                        loading
+                        loadingPage
                       }
                       icon={<SendIcon className="h-4 w-4 mr-2" />}
                     >
-                      {loading ? "Sending..." : "Send Message"}
+                      {loadingPage ? "Sending..." : "Send Message"}
                     </Button>
                   </div>
                 </div>

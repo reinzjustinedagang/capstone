@@ -1,5 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { PlusIcon, EditIcon, TrashIcon, ImageIcon } from "lucide-react";
+import {
+  PlusIcon,
+  EditIcon,
+  TrashIcon,
+  ImageIcon,
+  Loader2,
+} from "lucide-react";
 import Button from "../UI/Button";
 import Modal from "../UI/Modal";
 import axios from "axios";
@@ -111,7 +117,10 @@ const MessageTemplates = () => {
         </Button>
       </div>
       {loading ? (
-        <p className="text-gray-500">Loading templates...</p>
+        <div className="flex justify-center items-center h-48">
+          <Loader2 className="animate-spin h-8 w-8 text-blue-600" />
+          <span className="ml-2 text-gray-600">Loading history...</span>
+        </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {templates.length === 0 ? (

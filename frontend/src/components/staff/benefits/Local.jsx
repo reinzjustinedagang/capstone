@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Landmark, Info, MapPin, CheckCircle } from "lucide-react";
+import { Landmark, Info, MapPin, CheckCircle, Loader2 } from "lucide-react";
 import BenefitsCard from "./BenefitsCard";
 import Modal from "../../UI/Modal";
 import Button from "../../UI/Button";
@@ -67,14 +67,10 @@ const Local = ({ onEdit }) => {
 
   return (
     <>
-      <h1 className="text-lg font-medium mb-4 text-gray-800 flex items-center gap-2">
-        <Landmark className="w-6 h-6 text-blue-600" />
-        Local Benefits of Senior Citizens
-      </h1>
-
       {loading ? (
         <div className="flex justify-center items-center h-32">
-          <p className="text-gray-500">Loading benefits...</p>
+          <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
+          <span className="ml-2 text-gray-600">Loading benefits...</span>
         </div>
       ) : error ? (
         <div className="flex justify-center items-center h-32">
