@@ -70,16 +70,21 @@ const Archive = ({ onView }) => {
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
-                {["Name", "Barangay", "Details", "Archived Date", "Action"].map(
-                  (col) => (
-                    <th
-                      key={col}
-                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                    >
-                      {col}
-                    </th>
-                  )
-                )}
+                {[
+                  "Name",
+                  "Gender",
+                  "Barangay",
+                  "Details",
+                  "Archived Date",
+                  "Action",
+                ].map((col) => (
+                  <th
+                    key={col}
+                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    {col}
+                  </th>
+                ))}
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
@@ -92,7 +97,10 @@ const Archive = ({ onView }) => {
                       } ${citizen.suffix || ""}`}
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-500">
-                      {citizen.barangay_name || "-"}
+                      {citizen.barangay_id || "-"}
+                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-500">
+                      {citizen.gender || "-"}
                     </td>
                     <td className="px-6 py-4 text-sm font-xs">
                       {citizen.details}
