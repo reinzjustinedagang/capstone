@@ -37,8 +37,7 @@ const SeniorCitizenList = ({ onEdit }) => {
   // Filters
   const [searchTerm, setSearchTerm] = useState("");
   const [filterBarangay, setFilterBarangay] = useState("All Barangays");
-  const [filterHealthStatus, setFilterHealthStatus] =
-    useState("All Health Status");
+  const [filterHealthStatus, setFilterHealthStatus] = useState("All Remarks");
   const [filterAge, setFilterAge] = useState("All");
   const [filterGender, setFilterGender] = useState("All");
   const [sortBy, setSortBy] = useState("lastName");
