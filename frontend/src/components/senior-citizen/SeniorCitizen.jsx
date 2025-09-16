@@ -11,6 +11,7 @@ import {
   UserCheck,
   UserRoundCheck,
   UserRoundX,
+  ArchiveIcon,
 } from "lucide-react";
 import Modal from "../UI/Modal";
 import Button from "../UI/Button";
@@ -19,6 +20,7 @@ import SeniorCitizenForm from "./form/SeniorCitizenForm";
 import UpdateSeniorCitizenForm from "./form/UpdateSeniorCitizenForm";
 import UnregisteredSeniorList from "./UnregisteredSeniorList";
 import GetUnregisteredSenior from "./form/GetUnregisteredSenior";
+import Archive from "../archive/Archive";
 
 const SeniorCitizen = () => {
   const [activeTab, setActiveTab] = useState("list");
@@ -129,6 +131,18 @@ const SeniorCitizen = () => {
               <UserRoundX className="inline-block h-4 w-4 mr-2" />
               Not Registered Senior Citizen
             </button>
+            <button
+              onClick={() => setActiveTab("archived")}
+              className={`py-4 px-6 text-center border-b-2 font-medium text-sm transition-colors duration-200
+                            ${
+                              activeTab === "archived"
+                                ? "border-blue-500 text-blue-600"
+                                : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                            }`}
+            >
+              <ArchiveIcon className="inline-block h-4 w-4 mr-2" />
+              Archived Senior Citizen
+            </button>
           </nav>
         </div>
       </div>
@@ -138,6 +152,7 @@ const SeniorCitizen = () => {
         {activeTab === "unregistered" && (
           <UnregisteredSeniorList onView={onView} onRegister={onRegister} />
         )}
+        {activeTab === "archived" && <Archive />}
         {activeTab === "add" && (
           <SeniorCitizenForm
             onSuccess={handleAddSuccess}

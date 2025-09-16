@@ -710,3 +710,91 @@ exports.getSmsRecipients = async (
     throw new Error("Internal server error");
   }
 };
+
+// Archive a senior citizen
+exports.archiveSeniorCitizen = async (id, reason, user, ip) => {
+  const archiveDate = archiveDetails.date || new Date();
+  try {
+    const result = await Connection(
+      `UPDATE senior_citizens 
+       SET archived = 1, archive_reason = ?, archive_date = ?, updated_at = NOW() 
+       WHERE id = ?`,
+      [reason, archiveDate, id]
+    );
+
+    if (result.affectedRows > 0) {
+      await logAudit(
+        user,
+        "Archive",
+        "Senior Citizen",
+        id,
+        `Archived senior citizen with ID: ${id}`,
+        ip
+      );
+      return true;
+    }
+    return false;
+  } catch (error) {
+    console.error("Error archiving senior citizen:", error);
+    throw error;
+  }
+};
+
+// Restore archived senior citizen
+exports.restoreArchivedSeniorCitizen = async (id, user, ip) => {
+  try {
+    const result = await Connection(
+      `UPDATE senior_citizens 
+       SET archived = 0, updated_at = NOW() 
+       WHERE id = ? AND deleted = 0`,
+      [id]
+    );
+
+    if (result.affectedRows > 0) {
+      await logAudit(
+        user,
+        "Restore",
+        "Senior Citizen",
+        id,
+        `Restored archived senior citizen with ID: ${id}`,
+        ip
+      );
+      return true;
+    }
+    return false;
+  } catch (error) {
+    console.error("Error restoring archived senior citizen:", error);
+    throw error;
+  }
+};
+
+// Get archived senior citizens with pagination
+exports.getArchivedSeniorCitizens = async (page = 1, limit = 10) => {
+  try {
+    const offset = (page - 1) * limit;
+
+    const [rows] = await Connection(
+      `SELECT SQL_CALC_FOUND_ROWS 
+          id, firstName, lastName, middleName, suffix, gender,
+          barangay_name, deleted_at, archived_at
+       FROM senior_citizens
+       WHERE archived = 1 AND deleted = 0
+       ORDER BY archived_at DESC
+       LIMIT ? OFFSET ?`,
+      [parseInt(limit), parseInt(offset)]
+    );
+
+    const [countRows] = await Connection(`SELECT FOUND_ROWS() as total`);
+    const total = countRows.total || 0;
+    const totalPages = Math.ceil(total / limit);
+
+    return {
+      citizens: rows,
+      total,
+      totalPages,
+    };
+  } catch (error) {
+    console.error("Error fetching archived senior citizens:", error);
+    throw error;
+  }
+};

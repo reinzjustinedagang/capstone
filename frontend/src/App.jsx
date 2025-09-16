@@ -46,6 +46,7 @@ import { StaffAboutPage } from "./pages/staff/StaffAboutPage.jsx";
 import { StaffProfilePage } from "./pages/staff/StaffProfilePage.jsx";
 import { StaffOfficialPage } from "./pages/staff/StaffOfficialPage.jsx";
 import { StaffEventsPage } from "./pages/staff/StaffEventsPage.jsx";
+import { ArchivePage } from "./pages/admin/ArchivePage.jsx";
 
 function App() {
   return (
@@ -267,6 +268,14 @@ function App() {
         element={
           <ProtectedRoute role="Admin">
             <AboutOscaPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/archive"
+        element={
+          <ProtectedRoute role="Admin">
+            <ArchivePage />
           </ProtectedRoute>
         }
       />

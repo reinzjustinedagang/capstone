@@ -467,4 +467,70 @@ router.delete("/permanent-delete/:id", async (req, res) => {
   }
 });
 
+// Archive senior citizen
+router.put("/archive/:id", async (req, res) => {
+  const { id } = req.params;
+  const { reason } = req.body;
+  const user = req.session.user;
+  const ip = req.userIp;
+
+  try {
+    const success = await seniorCitizenService.archiveSeniorCitizen(
+      id,
+      reason,
+      user,
+      ip
+    );
+    if (!success)
+      return res.status(404).json({ message: "Senior citizen not found" });
+    res.json({
+      success: true,
+      message: "Senior citizen archived successfully",
+    });
+  } catch (error) {
+    console.error("Error archiving senior citizen:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+// Restore archived senior citizen
+router.put("/restore-archive/:id", async (req, res) => {
+  const { id } = req.params;
+  const { user, ip } = req.session;
+
+  try {
+    const success = await seniorCitizenService.restoreArchivedSeniorCitizen(
+      id,
+      user,
+      ip
+    );
+    if (!success)
+      return res.status(404).json({ message: "Senior citizen not found" });
+    res.json({
+      success: true,
+      message: "Senior citizen restored from archive",
+    });
+  } catch (error) {
+    console.error("Error restoring archived senior citizen:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+// Get all archived senior citizens (paginated)
+router.get("/archived", async (req, res) => {
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 10;
+
+  try {
+    const seniors = await seniorCitizenService.getArchivedSeniorCitizens(
+      page,
+      limit
+    );
+    res.json(seniors);
+  } catch (error) {
+    console.error("Error fetching archived senior citizens:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
 module.exports = router;

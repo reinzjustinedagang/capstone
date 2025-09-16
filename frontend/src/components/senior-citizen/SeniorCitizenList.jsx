@@ -58,6 +58,15 @@ const SeniorCitizenList = ({ onEdit }) => {
   const [showActions, setShowActions] = useState(false);
   const [openDropdownId, setOpenDropdownId] = useState(null);
 
+  // Archive states
+  const [showArchiveModal, setShowArchiveModal] = useState(false);
+  const [archiveDetails, setArchiveDetails] = useState({
+    reason: "",
+    date: "",
+  });
+  const [archiving, setArchiving] = useState(false);
+  const [selectedArchiveCitizen, setSelectedArchiveCitizen] = useState(null);
+
   // Fetch Citizens
   const fetchCitizens = async () => {
     setLoading(true);
@@ -351,7 +360,8 @@ const SeniorCitizenList = ({ onEdit }) => {
                               <button
                                 onClick={() => {
                                   setOpenDropdownId(null);
-                                  handleMarkDeceased(citizen);
+                                  setSelectedArchiveCitizen(citizen);
+                                  setShowArchiveModal(true);
                                 }}
                                 className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-600 hover:text-white"
                               >
@@ -518,6 +528,74 @@ const SeniorCitizenList = ({ onEdit }) => {
           <Button variant="primary" onClick={() => setShowSuccessModal(false)}>
             OK
           </Button>
+        </div>
+      </Modal>
+      {/* Archive Modal */}
+      <Modal
+        isOpen={showArchiveModal}
+        onClose={() => setShowArchiveModal(false)}
+        title="Archive Senior Citizen"
+      >
+        <div className="p-6">
+          <p className="text-sm text-gray-600 mb-4">
+            Please provide archive details for{" "}
+            <strong>
+              {selectedArchiveCitizen?.firstName}{" "}
+              {selectedArchiveCitizen?.lastName}
+            </strong>
+            .
+          </p>
+
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Reason
+            </label>
+            <input
+              type="text"
+              value={archiveDetails.reason}
+              onChange={(e) =>
+                setArchiveDetails({ ...archiveDetails, reason: e.target.value })
+              }
+              className="w-full border rounded-md px-3 py-2 text-sm"
+              placeholder="Enter reason for archiving"
+            />
+          </div>
+
+          <div className="flex justify-end space-x-3">
+            <Button
+              variant="secondary"
+              onClick={() => setShowArchiveModal(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="primary"
+              onClick={async () => {
+                setArchiving(true);
+                try {
+                  await axios.patch(
+                    `${backendUrl}/api/senior-citizens/archive/${selectedArchiveCitizen.id}`,
+                    archiveDetails,
+                    { withCredentials: true }
+                  );
+                  await fetchCitizens();
+                  setShowArchiveModal(false);
+                  setArchiveDetails({ reason: "", date: "" });
+                } catch (err) {
+                  console.error("Archive failed", err);
+                } finally {
+                  setArchiving(false);
+                }
+              }}
+              disabled={archiving}
+            >
+              {archiving ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                "Archive"
+              )}
+            </Button>
+          </div>
         </div>
       </Modal>
     </div>
