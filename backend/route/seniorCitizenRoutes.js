@@ -467,12 +467,18 @@ router.delete("/permanent-delete/:id", async (req, res) => {
   }
 });
 
-// Archive senior citizen
+// Archive a senior citizen
 router.put("/archive/:id", async (req, res) => {
   const { id } = req.params;
   const { reason } = req.body;
   const user = req.session.user;
   const ip = req.userIp;
+
+  if (!user) {
+    return res
+      .status(401)
+      .json({ message: "Unauthorized: No user session found." });
+  }
 
   try {
     const success = await seniorCitizenService.archiveSeniorCitizen(
@@ -481,23 +487,33 @@ router.put("/archive/:id", async (req, res) => {
       user,
       ip
     );
-    if (!success)
-      return res.status(404).json({ message: "Senior citizen not found" });
-    res.json({
-      success: true,
-      message: "Senior citizen archived successfully",
-    });
+
+    if (success) {
+      return res
+        .status(200)
+        .json({ message: "Senior citizen archived successfully." });
+    } else {
+      return res
+        .status(404)
+        .json({ message: "Senior citizen not found or already archived." });
+    }
   } catch (error) {
-    console.error("Error archiving senior citizen:", error);
+    console.error("❌ Error archiving senior citizen:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 });
 
-// Restore archived senior citizen
-router.put("/restore-archive/:id", async (req, res) => {
+// Restore an archived senior citizen
+router.put("/archive/restore/:id", async (req, res) => {
   const { id } = req.params;
   const user = req.session.user;
   const ip = req.userIp;
+
+  if (!user) {
+    return res
+      .status(401)
+      .json({ message: "Unauthorized: No user session found." });
+  }
 
   try {
     const success = await seniorCitizenService.restoreArchivedSeniorCitizen(
@@ -505,31 +521,36 @@ router.put("/restore-archive/:id", async (req, res) => {
       user,
       ip
     );
-    if (!success)
-      return res.status(404).json({ message: "Senior citizen not found" });
-    res.json({
-      success: true,
-      message: "Senior citizen restored from archive",
-    });
+
+    if (success) {
+      return res
+        .status(200)
+        .json({ message: "Archived senior citizen restored successfully." });
+    } else {
+      return res
+        .status(404)
+        .json({ message: "Senior citizen not found or not archived." });
+    }
   } catch (error) {
-    console.error("Error restoring archived senior citizen:", error);
+    console.error("❌ Error restoring archived senior citizen:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 });
 
-// Get all archived senior citizens (paginated)
+// Get archived senior citizens (with pagination)
 router.get("/archived", async (req, res) => {
-  const page = parseInt(req.query.page) || 1;
-  const limit = parseInt(req.query.limit) || 10;
-
   try {
-    const seniors = await seniorCitizenService.getArchivedSeniorCitizens(
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+
+    const result = await seniorCitizenService.getArchivedSeniorCitizens(
       page,
       limit
     );
-    res.json(seniors);
+
+    res.status(200).json(result);
   } catch (error) {
-    console.error("Error fetching archived senior citizens:", error);
+    console.error("❌ Error fetching archived senior citizens:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 });

@@ -725,11 +725,13 @@ exports.archiveSeniorCitizen = async (id, reason, user, ip) => {
 
     if (result.affectedRows > 0) {
       await logAudit(
-        user,
+        user.id,
+        user.email,
+        user.role,
         "Archive",
         "Senior Citizen",
         id,
-        `Archived senior citizen with ID: ${id}`,
+        `Archived senior citizen with ID: ${id}. Reason: ${reason}`,
         ip
       );
       return true;
@@ -753,7 +755,9 @@ exports.restoreArchivedSeniorCitizen = async (id, user, ip) => {
 
     if (result.affectedRows > 0) {
       await logAudit(
-        user,
+        user.id,
+        user.email,
+        user.role,
         "Restore",
         "Senior Citizen",
         id,
