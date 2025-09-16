@@ -1,5 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { FileTextIcon, ImageIcon, PlusIcon } from "lucide-react";
+import {
+  ChartColumn,
+  ChartColumnBig,
+  FileTextIcon,
+  ImageIcon,
+  PlusIcon,
+} from "lucide-react";
 import Button from "../UI/Button";
 import Card from "../UI/Card";
 import DemographicReports from "./DemographicReports";
@@ -46,6 +52,7 @@ const Reports = () => {
                   : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
               }`}
             >
+              <ChartColumnBig className="inline-block h-4 w-4 mr-2" />
               Reports
             </button>
             <button
@@ -56,6 +63,7 @@ const Reports = () => {
                   : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
               }`}
             >
+              <ChartColumn className="inline-block h-4 w-4 mr-2" />
               Demographics
             </button>
           </nav>

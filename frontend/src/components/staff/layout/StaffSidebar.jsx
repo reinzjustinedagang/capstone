@@ -133,7 +133,7 @@ const StaffSidebar = () => {
           </h1>
           <p className="text-sm font-medium text-gray-800">
             {systemSettings.municipality || "——————————"},{" "}
-            {systemSettings.province || "———————"}
+            {systemSettings.province}
           </p>
         </div>
 

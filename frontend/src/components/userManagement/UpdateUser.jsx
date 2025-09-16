@@ -203,7 +203,7 @@ export default function UpdateUser({ id, onSuccess }) {
         <div className="flex gap-2">
           <div className="w-1/2">
             <label className="block text-sm font-medium text-gray-800 mb-1">
-              New Password (optional)
+              New Password
             </label>
             <input
               type="password"

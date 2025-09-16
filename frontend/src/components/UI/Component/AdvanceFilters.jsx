@@ -53,7 +53,7 @@ const AdvancedFilters = ({
       options={barangayOptions}
     />
     <SelectFilter
-      label="Health Status"
+      label="Remarks"
       value={filterHealthStatus}
       onChange={setFilterHealthStatus}
       options={healthStatusOptions}

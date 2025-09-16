@@ -5,6 +5,8 @@ import {
   TrashIcon,
   ImageIcon,
   Loader2,
+  MessageSquareCode,
+  MessageSquareQuote,
 } from "lucide-react";
 import Button from "../UI/Button";
 import Modal from "../UI/Modal";
@@ -106,8 +108,7 @@ const MessageTemplates = () => {
 
   return (
     <div className="p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-lg font-medium">Message Templates</h2>
+      <div className="flex justify-end items-center mb-6">
         <Button
           onClick={() => setShowAddModal(true)}
           variant="primary"
@@ -119,13 +120,15 @@ const MessageTemplates = () => {
       {loading ? (
         <div className="flex justify-center items-center h-48">
           <Loader2 className="animate-spin h-8 w-8 text-blue-600" />
-          <span className="ml-2 text-gray-600">Loading history...</span>
+          <span className="ml-2 text-gray-600">
+            Loading message template...
+          </span>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {templates.length === 0 ? (
             <div className="text-center py-16 text-gray-400 col-span-full">
-              <ImageIcon className="w-12 h-12 mx-auto mb-4" />
+              <MessageSquareQuote className="w-12 h-12 mx-auto mb-4" />
               <p className="text-sm">No message templates found.</p>
             </div>
           ) : (

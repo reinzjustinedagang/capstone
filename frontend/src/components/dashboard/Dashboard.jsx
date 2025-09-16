@@ -8,6 +8,13 @@ import {
   BellIcon,
   UserPlusIcon,
   HouseIcon,
+  GiftIcon,
+  Calendar,
+  User,
+  UserRoundPlus,
+  UserRoundCheck,
+  UserRound,
+  UserRoundX,
 } from "lucide-react";
 import BarangayDistribution from "../reports/chart/BarangayDistribution";
 
@@ -113,7 +120,7 @@ const Dashboard = () => {
           <Card
             title="Total Registered Senior Citizens"
             value={loading ? "—" : citizenCount}
-            icon={<UsersIcon />}
+            icon={<UserRoundCheck />}
             color="blue"
           />
         </NavLink>
@@ -121,7 +128,7 @@ const Dashboard = () => {
           <Card
             title="Not Registered Senior Citizens"
             value={loading ? "—" : registerCount}
-            icon={<UsersIcon />}
+            icon={<UserRoundX />}
             color="blue"
           />
         </NavLink>
@@ -131,7 +138,7 @@ const Dashboard = () => {
             title="No. of Barangay"
             value={loading ? "—" : barangayCount}
             icon={<HouseIcon />}
-            color="green"
+            color="blue"
           />
         </NavLink>
         <NavLink to="/admin/sms-management">
@@ -139,31 +146,31 @@ const Dashboard = () => {
             title="SMS Sent (This Month)"
             value={loading ? "—" : smsCount}
             icon={<MessageSquareIcon />}
-            color="indigo"
+            color="blue"
           />
         </NavLink>
         <NavLink to="/admin/benefits">
           <Card
             title="Total Benefits"
             value={loading ? "—" : benefitsCount}
-            icon={<BellIcon />}
-            color="amber"
+            icon={<GiftIcon />}
+            color="blue"
           />
         </NavLink>
         <NavLink to="/admin/events">
           <Card
             title="Total Events"
             value={loading ? "—" : eventsCount}
-            icon={<BellIcon />}
-            color="amber"
+            icon={<Calendar />}
+            color="blue"
           />
         </NavLink>
         <NavLink to="/admin/user-management">
           <Card
             title="Total User"
             value={loading ? "—" : userCount}
-            icon={<BellIcon />}
-            color="amber"
+            icon={<UserRound />}
+            color="blue"
           />
         </NavLink>
       </div>

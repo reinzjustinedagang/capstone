@@ -1,5 +1,13 @@
 import React, { useState, useEffect } from "react";
-import { SendIcon, Loader2, Search } from "lucide-react";
+import {
+  SendIcon,
+  Loader2,
+  Search,
+  MessageSquare,
+  History,
+  FileText,
+  MessageSquareQuote,
+} from "lucide-react";
 import Button from "../UI/Button";
 import MessageTemplates from "./MessageTemplates";
 import MessageHistory from "./MessageHistory";
@@ -133,6 +141,12 @@ const Sms = () => {
     }
   };
 
+  const tabs = [
+    { key: "send", label: "Send SMS", icon: MessageSquare },
+    { key: "templates", label: "Message Templates", icon: MessageSquareQuote },
+    { key: "history", label: "Message History", icon: History },
+  ];
+
   return (
     <div className="relative">
       {/* ✅ Only block full page when sending SMS */}
@@ -149,21 +163,18 @@ const Sms = () => {
         {/* Tabs */}
         <div className="border-b border-gray-200">
           <nav className="flex -mb-px">
-            {["send", "templates", "history"].map((tab) => (
+            {tabs.map(({ key, label, icon: Icon }) => (
               <button
-                key={tab}
-                onClick={() => setActiveTab(tab)}
-                className={`py-4 px-6 text-center border-b-2 font-medium text-sm ${
-                  activeTab === tab
+                key={key}
+                onClick={() => setActiveTab(key)}
+                className={`flex items-center py-4 px-6 border-b-2 font-medium text-sm ${
+                  activeTab === key
                     ? "border-blue-500 text-blue-600"
                     : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
                 }`}
               >
-                {tab === "send"
-                  ? "Send SMS"
-                  : tab === "templates"
-                  ? "Message Templates"
-                  : "Message History"}
+                <Icon className="h-4 w-4 mr-2" />
+                {label}
               </button>
             ))}
           </nav>

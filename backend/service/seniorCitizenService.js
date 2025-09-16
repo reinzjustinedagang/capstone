@@ -397,8 +397,8 @@ exports.getPaginatedFilteredCitizens = async (options) => {
   }
 
   // Health status filter
-  if (healthStatus && healthStatus !== "All Health Status") {
-    where += ` AND JSON_UNQUOTE(JSON_EXTRACT(sc.form_data, '$.healthStatus')) = ?`;
+  if (healthStatus && healthStatus !== "All Remarks") {
+    where += ` AND JSON_UNQUOTE(JSON_EXTRACT(sc.form_data, '$.remarks')) = ?`;
     params.push(healthStatus);
   }
 

@@ -112,21 +112,6 @@ const StaffHeader = () => {
 
         {/* Right Section */}
         <div className="flex items-center space-x-4 ml-auto">
-          {/* Notifications */}
-          <NavLink
-            to="/staff/notifications"
-            className={({ isActive }) =>
-              `relative p-2 rounded-full transition duration-150 ${
-                isActive
-                  ? "bg-blue-100 text-blue-700 ring-2 ring-blue-500"
-                  : "text-gray-600 hover:bg-gray-100"
-              }`
-            }
-          >
-            <BellIcon className="h-5 w-5" />
-            <span className="absolute top-1 right-1 bg-red-500 border-2 border-white rounded-full w-2.5 h-2.5"></span>
-          </NavLink>
-
           {/* Profile Dropdown */}
           <div className="flex items-center">
             <div className="mr-3 text-right hidden sm:block">
@@ -158,7 +143,7 @@ const StaffHeader = () => {
 
               {/* Dropdown Icon */}
               <div
-                className="absolute bottom-0 right-0 bg-blue-500 text-white rounded-full p-0.5 cursor-pointer shadow-lg hover:bg-blue-700 block lg:opacity-0 lg:group-hover:opacity-100 transition-all duration-300"
+                className="absolute bottom-0.5 right-0 bg-blue-500 text-white rounded-full p-0.1 cursor-pointer shadow-lg hover:bg-blue-700 block lg:opacity-0 lg:group-hover:opacity-100 transition-all duration-300"
                 onClick={() => setShowDropdown(!showDropdown)}
               >
                 <ChevronDown className="h-4 w-4" />
