@@ -95,10 +95,12 @@ const styles = StyleSheet.create({
     width: 75,
   },
   columnLabel: {
-    fontSize: 7,
-    color: "#333",
-    marginTop: 3,
+    fontSize: 10,
+    borderTop: "1pt solid #000", // adds line above
+    marginTop: 2,
+    paddingTop: 2,
     textAlign: "center",
+    color: "#333",
   },
   photo: {
     width: 72,
@@ -208,14 +210,6 @@ const styles = StyleSheet.create({
   bottomValue: {
     fontSize: 10,
     fontWeight: "medium",
-  },
-  columnLabel: {
-    fontSize: 10,
-    borderTop: "1pt solid #000", // adds line above
-    marginTop: 2,
-    paddingTop: 2,
-    textAlign: "center",
-    color: "#333",
   },
 });
 
