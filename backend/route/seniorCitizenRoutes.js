@@ -496,7 +496,8 @@ router.put("/archive/:id", async (req, res) => {
 // Restore archived senior citizen
 router.put("/restore-archive/:id", async (req, res) => {
   const { id } = req.params;
-  const { user, ip } = req.session;
+  const user = req.session.user;
+  const ip = req.userIp;
 
   try {
     const success = await seniorCitizenService.restoreArchivedSeniorCitizen(
