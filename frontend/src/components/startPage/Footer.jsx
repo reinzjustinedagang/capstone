@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import axios from "axios";
 
 const Footer = () => {
@@ -24,18 +25,26 @@ const Footer = () => {
       <div className="container mx-auto flex flex-col items-center gap-4">
         {/* Links */}
         <div className="flex flex-wrap justify-center gap-6 text-sm font-medium">
-          <a href="#" className="hover:text-blue-700 transition-colors">
-            Home
-          </a>
-          <a href="#" className="hover:text-blue-700 transition-colors">
-            Organization
-          </a>
-          <a href="#" className="hover:text-blue-700 transition-colors">
-            About
-          </a>
-          <a href="#" className="hover:text-blue-700 transition-colors">
-            Register
-          </a>
+          <Link to="/">
+            <a href="#" className="hover:text-blue-700 transition-colors">
+              Home
+            </a>
+          </Link>
+          <Link to="/organization">
+            <a href="#" className="hover:text-blue-700 transition-colors">
+              Organization
+            </a>
+          </Link>
+          <Link to="/about">
+            <a href="#" className="hover:text-blue-700 transition-colors">
+              About Us
+            </a>
+          </Link>
+          <Link to="/register-guide">
+            <a href="#" className="hover:text-blue-700 transition-colors">
+              Register
+            </a>
+          </Link>
         </div>
 
         {/* Copyright */}

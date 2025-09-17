@@ -2,6 +2,7 @@ import React from "react";
 import { PDFDownloadLink, PDFViewer } from "@react-pdf/renderer";
 import { Printer } from "lucide-react";
 import SeniorCitizenID from "./SeniorCitizenID";
+import user from "../../assets/user.png";
 
 const SeniorCitizenIDPDF = ({ citizen }) => {
   if (!citizen) return null;
@@ -20,6 +21,7 @@ const SeniorCitizenIDPDF = ({ citizen }) => {
     sex: citizen.gender || "",
     dateIssued: new Date().toLocaleDateString("en-US"),
     controlNo: citizen.form_data?.idNumber || "",
+    photoUrl: citizen.photo || user,
   };
 
   return (

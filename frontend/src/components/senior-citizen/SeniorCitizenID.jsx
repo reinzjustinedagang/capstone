@@ -7,7 +7,6 @@ import {
   StyleSheet,
   Image,
 } from "@react-pdf/renderer";
-import user from "../../assets/user.png";
 import oscaLogo from "../../assets/osca-sj.png"; // Import your OSCA logo here
 import municipalSeal from "../../assets/osca-logo.png"; // Import your municipal seal here
 
@@ -214,14 +213,14 @@ const styles = StyleSheet.create({
 });
 
 const SeniorCitizenID = ({
-  name = "",
-  address = "",
-  municipality = "",
-  dob = "",
-  sex = "",
-  dateIssued = "",
-  controlNo = "",
-  photoUrl = user,
+  name,
+  address,
+  municipality,
+  dob,
+  sex,
+  dateIssued,
+  controlNo,
+  photoUrl,
   oscaLogoUrl = oscaLogo,
   municipalSealUrl = municipalSeal,
 }) => (

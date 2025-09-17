@@ -4,7 +4,6 @@ import { useNavigate } from "react-router-dom";
 import { ChevronDown, ChevronUp, CheckCircle, Loader2 } from "lucide-react";
 import Button from "../UI/Button";
 import Modal from "../UI/Modal";
-import DocumentUpload from "./register/DocumentUpload";
 
 const documentTypes = [
   "Certificate of Live Birth",
@@ -411,7 +410,7 @@ const RegisterSenior = () => {
   }, {});
 
   return (
-    <>
+    <div className="max-w-7xl mx-auto my-6">
       {/* Section Header */}
       <div className="text-center px-5 py-6 md:px-25 bg-white">
         <h2 className="text-3xl font-bold text-gray-900">
@@ -623,7 +622,7 @@ const RegisterSenior = () => {
           </Modal>
         </form>
       )}
-    </>
+    </div>
   );
 };
 

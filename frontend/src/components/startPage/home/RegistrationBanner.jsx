@@ -64,14 +64,13 @@ const RegistrationBanner = () => {
       </div>
       <div className="flex flex-col sm:flex-row justify-center gap-8 mt-4 text-gray-700">
         <div>
-          <p className="font-semibold">How to register?</p>
-          <ul className="text-sm">
-            <li>
-              <a href="#" className="underline hover:text-blue-700">
-                Online Registration User Guide
-              </a>
-            </li>
-          </ul>
+          <p className="font-semibold">How to Register?</p>
+          <NavLink
+            to="/register-guide"
+            className="underline hover:text-blue-700 text-sm"
+          >
+            Online Registration User Guide
+          </NavLink>
         </div>
         <div>
           <p className="font-semibold">View Registration Count</p>
