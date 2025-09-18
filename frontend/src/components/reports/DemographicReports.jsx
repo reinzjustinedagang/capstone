@@ -1,18 +1,18 @@
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
 import AgeDistribution from "./chart/AgeDistribution";
 import GenderDistribution from "./chart/GenderDistribution";
 import BarangayDistribution from "./chart/BarangayDistribution";
 import StatisticalSummary from "./chart/StatisticalSummary";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
-import { GalleryVertical, GalleryHorizontal } from "lucide-react";
+import { GalleryHorizontal, GalleryVertical, MoreVertical } from "lucide-react";
 
 const DemographicReports = () => {
   const barangayRef = useRef();
   const ageRef = useRef();
   const genderRef = useRef();
 
-  // Export function with orientation option
+  // Export function
   const handleExport = async (elementRef, filename, orientation = "p") => {
     if (!elementRef.current) return;
     const element = elementRef.current;
@@ -28,94 +28,61 @@ const DemographicReports = () => {
     pdf.save(filename);
   };
 
+  // Chart wrapper with 3-dot export menu
+  const ChartWrapper = ({ children, title, refProp }) => {
+    const [showMenu, setShowMenu] = useState(false);
+
+    return (
+      <div>
+        <div className="flex justify-end mb-2">
+          <div className="relative">
+            <button
+              onClick={() => setShowMenu(!showMenu)}
+              className="p-1 rounded hover:bg-gray-200"
+            >
+              <MoreVertical className="h-5 w-5" />
+            </button>
+            {showMenu && (
+              <div className="absolute right-0 mt-1 w-32 bg-white border rounded shadow-lg z-10">
+                <button
+                  className="block w-full text-left px-3 py-2 hover:bg-blue-600 hover:text-white"
+                  onClick={() => handleExport(refProp, `${title}.pdf`, "p")}
+                >
+                  <GalleryHorizontal className="h-4 w-4 inline mr-2" />
+                  Portrait
+                </button>
+                <button
+                  className="block w-full text-left px-3 py-2 hover:bg-blue-600 hover:text-white"
+                  onClick={() => handleExport(refProp, `${title}.pdf`, "l")}
+                >
+                  <GalleryVertical className="h-4 w-4 inline mr-2" />
+                  Landscape
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+        <div ref={refProp}>{children}</div>
+      </div>
+    );
+  };
+
   return (
     <div className="space-y-6">
-      {/* Barangay Chart */}
-      <div>
-        <div className="flex justify-end items-center mb-2 relative">
-          <div className="flex space-x-2">
-            <button
-              onClick={() =>
-                handleExport(barangayRef, "barangay-report.pdf", "p")
-              }
-              className="flex items-center px-3 py-2 text-sm rounded-lg bg-blue-600 text-white transition hover:bg-blue-700"
-            >
-              <GalleryHorizontal className="h-4 w-4 mr-2" />
-              Portrait
-            </button>
-            <button
-              onClick={() =>
-                handleExport(barangayRef, "barangay-report.pdf", "l")
-              }
-              className="flex items-center px-3 py-2 text-sm rounded-lg bg-green-600 text-white transition hover:bg-green-700"
-            >
-              <GalleryVertical className="h-4 w-4 mr-2" />
-              Landscape
-            </button>
-          </div>
-        </div>
-        <div ref={barangayRef}>
-          <BarangayDistribution />
-        </div>
-      </div>
+      <ChartWrapper title="Barangay Distribution" refProp={barangayRef}>
+        <BarangayDistribution />
+      </ChartWrapper>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Gender Distribution */}
-        <div>
-          <div className="flex justify-end items-center mb-2 relative">
-            <div className="flex space-x-2">
-              <button
-                onClick={() =>
-                  handleExport(genderRef, "gender-report.pdf", "p")
-                }
-                className="flex items-center px-3 py-2 text-sm rounded-lg bg-blue-600 text-white transition hover:bg-blue-700"
-              >
-                <GalleryHorizontal className="h-4 w-4 mr-2" />
-                Portrait
-              </button>
-              <button
-                onClick={() =>
-                  handleExport(genderRef, "gender-report.pdf", "l")
-                }
-                className="flex items-center px-3 py-2 text-sm rounded-lg bg-green-600 text-white transition hover:bg-green-700"
-              >
-                <GalleryVertical className="h-4 w-4 mr-2" />
-                Landscape
-              </button>
-            </div>
-          </div>
-          <div ref={genderRef}>
-            <GenderDistribution />
-          </div>
-        </div>
+        <ChartWrapper title="Gender Distribution" refProp={genderRef}>
+          <GenderDistribution />
+        </ChartWrapper>
+        <ChartWrapper title="Age Distribution" refProp={ageRef}>
+          <AgeDistribution />
+        </ChartWrapper>
 
-        {/* Age Distribution */}
-        <div>
-          <div className="flex justify-end items-center mb-2 relative">
-            <div className="flex space-x-2">
-              <button
-                onClick={() => handleExport(ageRef, "age-report.pdf", "p")}
-                className="flex items-center px-3 py-2 text-sm rounded-lg bg-blue-600 text-white transition hover:bg-blue-700"
-              >
-                <GalleryHorizontal className="h-4 w-4 mr-2" />
-                Portrait
-              </button>
-              <button
-                onClick={() => handleExport(ageRef, "age-report.pdf", "l")}
-                className="flex items-center px-3 py-2 text-sm rounded-lg bg-green-600 text-white transition hover:bg-green-700"
-              >
-                <GalleryVertical className="h-4 w-4 mr-2" />
-                Landscape
-              </button>
-            </div>
-          </div>
-          <div ref={ageRef}>
-            <AgeDistribution />
-          </div>
-        </div>
-
-        {/* Statistical Summary (no export buttons) */}
-        <div>
+        {/* Statistical summary without export */}
+        <div className="bg-white p-4 rounded shadow">
           <StatisticalSummary />
         </div>
       </div>
