@@ -51,12 +51,12 @@ exports.getRa = async () => {
 };
 
 exports.getBenefits = async () => {
-  return await Connection(
-    ` SELECT type, description, provider, image_url
+  return await Connection(`
+    SELECT id, type, title, provider, description, enacted_date, image_url
     FROM benefits
     WHERE type != 'republic-acts'
-    ORDER BY created_at ASC`
-  );
+    ORDER BY created_at ASC
+  `);
 };
 
 exports.getBenefitsById = async (id) => {
@@ -71,11 +71,10 @@ exports.create = async (data, user, ip) => {
     throw new Error("Type and description are required");
   }
 
-  if (type === "republic acts" && !title) {
+  if (type === "republic-acts" && !title) {
     throw new Error("Title is required for Republic Acts");
   }
-
-  if (type === "republic acts" && !enacted_date) {
+  if (type === "republic-acts" && !enacted_date) {
     throw new Error("Enacted date is required for Republic Acts");
   }
 

@@ -13,6 +13,7 @@ export const HomeBenefitsPage = () => {
     const fetchBenefits = async () => {
       try {
         const res = await axios.get(`${backendUrl}/api/benefits/allbenefits`);
+        console.log("Benefits fetched:", res.data); // check here
         setBenefits(res.data);
       } catch (err) {
         console.error("Error fetching benefits:", err);
