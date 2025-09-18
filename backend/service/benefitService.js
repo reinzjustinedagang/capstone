@@ -52,7 +52,9 @@ exports.getRa = async () => {
 
 exports.getBenefits = async () => {
   return await Connection(
-    `SELECT * FROM benefits WHERE type = 'national' AND type = 'local' ORDER BY created_at DESC`
+    `SELECT * FROM benefits 
+     WHERE type IN ('national', 'local') 
+     ORDER BY created_at DESC`
   );
 };
 
