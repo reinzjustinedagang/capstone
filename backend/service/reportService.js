@@ -188,3 +188,42 @@ exports.getSocPenReport = async (year) => {
     throw err;
   }
 };
+
+// Get Non-Social Pension reports by gender per month
+exports.getNonSocPenReport = async (year) => {
+  try {
+    const results = await Connection(
+      `
+      SELECT 
+        MONTH(nonsocpen_date) AS month,
+        ANY_VALUE(JSON_UNQUOTE(JSON_EXTRACT(form_data, '$.gender'))) AS gender,
+        COUNT(*) AS count
+      FROM senior_citizens
+      WHERE socpen_date IS NULL
+        AND YEAR(nonsocpen_date) = ?
+        AND deleted = 0
+      GROUP BY MONTH(nonsocpen_date), gender
+      ORDER BY MONTH(nonsocpen_date)
+      `,
+      [year]
+    );
+
+    const months = Array.from({ length: 12 }, (_, i) => i + 1);
+
+    return months.map((m) => {
+      const male =
+        results.find((r) => r.month === m && r.gender === "Male")?.count || 0;
+      const female =
+        results.find((r) => r.month === m && r.gender === "Female")?.count || 0;
+
+      return {
+        month: new Date(0, m - 1).toLocaleString("en", { month: "short" }),
+        male,
+        female,
+      };
+    });
+  } catch (err) {
+    console.error("❌ Error fetching Non-SocPen report:", err);
+    throw err;
+  }
+};

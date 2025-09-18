@@ -6,11 +6,13 @@ import "./chart/chartConfig"; // make sure Chart.js is configured
 import DeceasedReportsChart from "./chart/DeceasedReportsChart";
 import TransfereeReportsChart from "./chart/TransfereeReportsChart";
 import SocPenReportsChart from "./chart/SocPenReportsChart";
+import NonSocPenReportsChart from "./chart/NonSocPenReportsChart";
 
 const OscaReportsChart = () => {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
       <SocPenReportsChart />
+      <NonSocPenReportsChart />
       <TransfereeReportsChart />
       <DeceasedReportsChart />
     </div>
