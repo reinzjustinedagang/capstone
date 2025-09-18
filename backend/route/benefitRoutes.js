@@ -65,7 +65,7 @@ router.get("/ra", async (req, res) => {
   }
 });
 
-router.get("/benefits", async (req, res) => {
+router.get("/allbenefits", async (req, res) => {
   try {
     const data = await benefitService.getBenefits();
     res.status(200).json(data);

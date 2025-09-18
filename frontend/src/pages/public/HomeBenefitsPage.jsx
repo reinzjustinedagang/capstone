@@ -12,7 +12,7 @@ export const HomeBenefitsPage = () => {
   useEffect(() => {
     const fetchBenefits = async () => {
       try {
-        const res = await axios.get(`${backendUrl}/api/benefits/benefits`);
+        const res = await axios.get(`${backendUrl}/api/benefits/allbenefits`);
         setBenefits(res.data);
       } catch (err) {
         console.error("Error fetching benefits:", err);
