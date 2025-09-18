@@ -76,7 +76,7 @@ exports.getDeceasedReport = async (year) => {
       `
       SELECT 
         MONTH(deceased_date) AS month,
-        JSON_UNQUOTE(JSON_EXTRACT(form_data, '$.gender')) AS gender,
+        ANY_VALUE(JSON_UNQUOTE(JSON_EXTRACT(form_data, '$.gender'))) AS gender,
         COUNT(*) AS count
       FROM senior_citizens
       WHERE deleted = 0
