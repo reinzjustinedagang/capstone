@@ -8,16 +8,20 @@ import TransfereeReportsChart from "./chart/TransfereeReportsChart";
 import SocPenReportsChart from "./chart/SocPenReportsChart";
 import NonSocPenReportsChart from "./chart/NonSocPenReportsChart";
 import PDLReportsChart from "./chart/PDLReportsChart";
+import NewSeniorReportsChart from "./chart/NewSeniorReportsChart";
 
 const OscaReportsChart = () => {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-      <SocPenReportsChart />
-      <NonSocPenReportsChart />
-      <PDLReportsChart />
-      <TransfereeReportsChart />
-      <DeceasedReportsChart />
-    </div>
+    <>
+      <NewSeniorReportsChart />
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <SocPenReportsChart />
+        <NonSocPenReportsChart />
+        <PDLReportsChart />
+        <TransfereeReportsChart />
+        <DeceasedReportsChart />
+      </div>
+    </>
   );
 };
 
