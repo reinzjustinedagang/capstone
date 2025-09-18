@@ -52,4 +52,16 @@ router.get("/summary", async (req, res) => {
   }
 });
 
+// GET /api/charts/deceased?year=2025
+router.get("/deceased", async (req, res) => {
+  try {
+    const year = req.query.year || new Date().getFullYear();
+    const result = await reportService.getDeceasedReport(year);
+    res.json(result);
+  } catch (err) {
+    console.error("❌ Failed to fetch deceased reports:", err);
+    res.status(500).json({ error: "Failed to fetch deceased reports" });
+  }
+});
+
 module.exports = router;

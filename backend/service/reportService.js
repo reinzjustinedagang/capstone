@@ -69,3 +69,50 @@ exports.getAgeDistribution = async () => {
     throw err;
   }
 };
+
+exports.getDeceasedReport = async (year) => {
+  try {
+    const sql = `
+      SELECT 
+        m.month_name AS month,
+        COALESCE(d.count, 0) AS count
+      FROM (
+        SELECT 1 AS month_num, 'January' AS month_name UNION ALL
+        SELECT 2, 'February' UNION ALL
+        SELECT 3, 'March' UNION ALL
+        SELECT 4, 'April' UNION ALL
+        SELECT 5, 'May' UNION ALL
+        SELECT 6, 'June' UNION ALL
+        SELECT 7, 'July' UNION ALL
+        SELECT 8, 'August' UNION ALL
+        SELECT 9, 'September' UNION ALL
+        SELECT 10, 'October' UNION ALL
+        SELECT 11, 'November' UNION ALL
+        SELECT 12, 'December'
+      ) m
+      LEFT JOIN (
+        SELECT 
+          MONTH(archive_date) AS month_num,
+          COUNT(*) AS count
+        FROM senior_citizens
+        WHERE deleted = 0
+          AND registered = 1
+          AND archived = 1
+          AND archive_reason = 'Deceased'
+          AND archive_date IS NOT NULL
+          AND YEAR(archive_date) = ?
+        GROUP BY MONTH(archive_date)
+      ) d ON m.month_num = d.month_num
+      ORDER BY m.month_num;
+    `;
+
+    const result = await Connection(sql, [year]);
+    return result.map((row) => ({
+      month: row.month,
+      count: row.count,
+    }));
+  } catch (err) {
+    console.error("❌ Error fetching deceased report:", err);
+    throw err;
+  }
+};

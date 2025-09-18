@@ -3,6 +3,7 @@ import axios from "axios";
 import { Bar } from "react-chartjs-2";
 import { Loader2 } from "lucide-react";
 import "./chart/chartConfig"; // make sure Chart.js is configured
+import DeceasedReportsChart from "./chart/DeceasedReportsChart";
 
 const OscaReportsChart = () => {
   const backendUrl = import.meta.env.VITE_API_BASE_URL;
@@ -135,7 +136,10 @@ const OscaReportsChart = () => {
           <Loader2 className="animate-spin" size={20} /> Loading...
         </div>
       ) : (
-        <Bar data={chartData} options={chartOptions} />
+        <>
+          <Bar data={chartData} options={chartOptions} />
+          <DeceasedReportsChart />
+        </>
       )}
     </div>
   );
