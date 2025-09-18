@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import Modal from "../../UI/Modal";
 import { ChevronLeft, ChevronRight, BookOpenTextIcon } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const RepublicActs = () => {
   const backendUrl = import.meta.env.VITE_API_BASE_URL;
@@ -95,6 +96,14 @@ const RepublicActs = () => {
             </div>
           </div>
         )}
+        {/* Footer Links */}
+        <div className="flex flex-col sm:flex-row justify-center items-center mt-8 gap-4 text-sm text-gray-700">
+          <Link to="/republic-acts">
+            <a href="#" className="underline hover:text-blue-700">
+              See more...
+            </a>
+          </Link>
+        </div>
       </div>
 
       {/* Modal */}

@@ -50,6 +50,12 @@ exports.getRa = async () => {
   );
 };
 
+exports.getBenefits = async () => {
+  return await Connection(
+    `SELECT * FROM benefits WHERE type = 'national' AND type = 'local' ORDER BY created_at DESC`
+  );
+};
+
 exports.getBenefitsById = async (id) => {
   return await Connection(`SELECT * FROM benefits WHERE id = ? LIMIT 1`, [id]);
 };

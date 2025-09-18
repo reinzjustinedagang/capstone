@@ -17,6 +17,8 @@ import { GuidePage } from "./pages/public/GuidePage.jsx";
 import { OrganizationPage } from "./pages/public/OrganizationPage.jsx";
 import { AboutPage } from "./pages/public/AboutPage.jsx";
 import { DeveloperPage } from "./pages/public/DeveloperPage.jsx";
+import { RepublicActsPage } from "./pages/public/RepublicActsPage.jsx";
+import { HomeEventPage } from "./pages/public/HomeEventsPage.jsx";
 
 // Admin Pages
 import { DashboardPage } from "./pages/admin/DashboardPage";
@@ -36,6 +38,7 @@ import { RecycleBinPage } from "./pages/admin/RecycleBinPage.jsx";
 import { EventsPage } from "./pages/admin/EventsPage.jsx";
 import { AboutOscaPage } from "./pages/admin/AboutOscaPage.jsx";
 import { NotificationPage } from "./pages/admin/NotificationPage.jsx";
+import { ArchivePage } from "./pages/admin/ArchivePage.jsx";
 
 // Staff Pages
 import { StaffDashboardPage } from "./pages/staff/StaffDashboardPage";
@@ -47,7 +50,7 @@ import { StaffAboutPage } from "./pages/staff/StaffAboutPage.jsx";
 import { StaffProfilePage } from "./pages/staff/StaffProfilePage.jsx";
 import { StaffOfficialPage } from "./pages/staff/StaffOfficialPage.jsx";
 import { StaffEventsPage } from "./pages/staff/StaffEventsPage.jsx";
-import { ArchivePage } from "./pages/admin/ArchivePage.jsx";
+import { HomeBenefitsPage } from "./pages/public/HomeBenefitsPage.jsx";
 
 function App() {
   return (
@@ -59,6 +62,30 @@ function App() {
         element={
           <PublicOnlyRoute>
             <HomePage />
+          </PublicOnlyRoute>
+        }
+      />
+      <Route
+        path="/republic-acts"
+        element={
+          <PublicOnlyRoute>
+            <RepublicActsPage />
+          </PublicOnlyRoute>
+        }
+      />
+      <Route
+        path="/events"
+        element={
+          <PublicOnlyRoute>
+            <HomeEventPage />
+          </PublicOnlyRoute>
+        }
+      />
+      <Route
+        path="/benefits"
+        element={
+          <PublicOnlyRoute>
+            <HomeBenefitsPage />
           </PublicOnlyRoute>
         }
       />

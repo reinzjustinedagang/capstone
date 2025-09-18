@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import Modal from "../../UI/Modal";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const Events = () => {
   const backendUrl = import.meta.env.VITE_API_BASE_URL;
@@ -123,9 +124,11 @@ const Events = () => {
 
         {/* Footer Links */}
         <div className="flex flex-col sm:flex-row justify-center items-center mt-8 gap-4 text-sm text-gray-700">
-          <a href="#" className="underline hover:text-blue-700">
-            Click here to read more news items...
-          </a>
+          <Link to="/events">
+            <a href="#" className="underline hover:text-blue-700">
+              See more...
+            </a>
+          </Link>
         </div>
       </div>
 
