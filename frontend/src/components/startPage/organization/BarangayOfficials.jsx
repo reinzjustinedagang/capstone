@@ -7,8 +7,9 @@ import { PlusIcon, Loader2 } from "lucide-react";
 const BarangayOfficials = ({ title }) => {
   const [barangays, setBarangays] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(""); // ✅ added
-  const [successMessage, setSuccessMessage] = useState(""); // ✅ added
+  const [error, setError] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
+  const [showAll, setShowAll] = useState(false); // ✅ control for See More
 
   const backendUrl =
     import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
@@ -36,6 +37,9 @@ const BarangayOfficials = ({ title }) => {
     fetchBarangays();
   }, []);
 
+  // ✅ Limit display to first 12 officials unless showAll is true
+  const officialsToShow = showAll ? barangays : barangays.slice(0, 5);
+
   return (
     <>
       {isLoading ? (
@@ -53,7 +57,7 @@ const BarangayOfficials = ({ title }) => {
                 No barangay officials found.
               </p>
             ) : (
-              barangays.map((b) => (
+              officialsToShow.map((b) => (
                 <BarangayCard
                   key={b.id}
                   official={b}
@@ -73,6 +77,18 @@ const BarangayOfficials = ({ title }) => {
               ))
             )}
           </div>
+
+          {/* ✅ See More button */}
+          {barangays.length > 5 && !showAll && (
+            <div className="flex justify-center mt-6">
+              <button
+                onClick={() => setShowAll(true)}
+                className="px-6 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition"
+              >
+                See More
+              </button>
+            </div>
+          )}
         </>
       )}
     </>

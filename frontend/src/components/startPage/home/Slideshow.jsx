@@ -29,7 +29,7 @@ const Slideshow = () => {
     if (eventsData.length === 0) return;
     const timer = setInterval(() => {
       setCurrentIndex((prev) => (prev + 1) % eventsData.length);
-    }, 5000);
+    }, 10000);
     return () => clearInterval(timer);
   }, [eventsData]);
 
@@ -70,7 +70,7 @@ const Slideshow = () => {
     >
       {/* Slide */}
       <div
-        className="absolute inset-0 bg-cover bg-center transition-all duration-700"
+        className="absolute inset-0 bg-cover bg-center transition-all duration-1000"
         style={{
           backgroundImage: `url(${eventsData[currentIndex].image_url})`, // 👈 matches DB field
         }}

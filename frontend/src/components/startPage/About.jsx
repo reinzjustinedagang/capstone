@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import Header from "./Header";
 import Footer from "./Footer";
-import slider5 from "../../assets/slider5.jpg";
+import user from "../../assets/user.png";
 
 const About = () => {
   const backendUrl = import.meta.env.VITE_API_BASE_URL;
@@ -120,18 +120,12 @@ const About = () => {
                 {team.map((member, index) => (
                   <div className="flex flex-col items-center" key={index}>
                     <img
-                      src={
-                        member.image
-                          ? member.image
-                          : "https://via.placeholder.com/128?text=No+Image"
-                      }
+                      src={member.image ? member.image : user}
                       alt={member.name}
                       className="w-32 h-32 rounded-full object-cover border-4 border-blue-200 shadow-lg mb-2"
                     />
-                    <p className="font-semibold text-lg md:text-xl">
-                      {member.name}
-                    </p>
-                    <p className="text-sm md:text-base">{member.role}</p>
+                    <p className="font-semibold text-base">{member.name}</p>
+                    <p className="md:text-base">{member.role}</p>
                   </div>
                 ))}
               </div>

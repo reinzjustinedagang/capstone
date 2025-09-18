@@ -33,7 +33,7 @@ export const RepublicActsPage = () => {
       <div className="bg-white py-10">
         <div className="max-w-6xl mx-auto px-5 lg:px-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-8 text-center">
-            All Republic Acts
+            Republic Acts
           </h1>
 
           {loading ? (

@@ -33,7 +33,7 @@ export const HomeEventPage = () => {
       <div className="bg-white py-10">
         <div className="max-w-6xl mx-auto px-5 lg:px-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-8 text-center">
-            All Events
+            Events
           </h1>
 
           {loading ? (
