@@ -261,7 +261,6 @@ exports.createSeniorCitizen = async (data, user, ip) => {
 //update
 exports.updateSeniorCitizen = async (id, updatedData, user, ip) => {
   try {
-    // Fetch current record (to clean up old images)
     const [existing] = await Connection(
       `SELECT document_image, document_public_id, photo, photo_public_id
        FROM senior_citizens
@@ -276,7 +275,6 @@ exports.updateSeniorCitizen = async (id, updatedData, user, ip) => {
     let photoUrl = existing.photo;
     let photoPublicId = existing.photo_public_id;
 
-    // ✅ Helper for Cloudinary upload (using buffer)
     const uploadToCloudinary = (file, folder) =>
       new Promise((resolve, reject) => {
         const stream = cloudinary.uploader.upload_stream(
@@ -289,14 +287,8 @@ exports.updateSeniorCitizen = async (id, updatedData, user, ip) => {
         stream.end(file.buffer);
       });
 
-    // 🔹 Upload new document if provided
     if (updatedData.documentFile) {
-      // Delete old document if exists
-      if (documentPublicId) {
-        await cloudinary.uploader.destroy(documentPublicId);
-      }
-
-      // Upload new
+      if (documentPublicId) await cloudinary.uploader.destroy(documentPublicId);
       const result = await uploadToCloudinary(
         updatedData.documentFile,
         "seniors/documents"
@@ -305,14 +297,8 @@ exports.updateSeniorCitizen = async (id, updatedData, user, ip) => {
       documentPublicId = result.public_id;
     }
 
-    // 🔹 Upload new photo if provided
     if (updatedData.photoFile) {
-      // Delete old photo if exists
-      if (photoPublicId) {
-        await cloudinary.uploader.destroy(photoPublicId);
-      }
-
-      // Upload new
+      if (photoPublicId) await cloudinary.uploader.destroy(photoPublicId);
       const result = await uploadToCloudinary(
         updatedData.photoFile,
         "seniors/photos"
@@ -321,19 +307,33 @@ exports.updateSeniorCitizen = async (id, updatedData, user, ip) => {
       photoPublicId = result.public_id;
     }
 
-    // ✅ Update record
+    // ✅ Logic for special date fields based on form_data
+    const formData = updatedData.form_data || {};
     const updateData = {
       firstName: updatedData.firstName,
       lastName: updatedData.lastName,
       middleName: normalize(updatedData.middleName),
       suffix: normalize(updatedData.suffix),
       barangay_id: normalize(updatedData.barangay_id),
-      form_data: JSON.stringify(updatedData.form_data || {}),
+      form_data: JSON.stringify(formData),
       document_image: documentUrl,
-      document_public_id: documentPublicId, // new field
+      document_public_id: documentPublicId,
       document_type: updatedData.documentType || null,
       photo: photoUrl,
-      photo_public_id: photoPublicId, // new field
+      photo_public_id: photoPublicId,
+      // 👇 handle conditional date fields
+      pdl_date:
+        formData.pdl && formData.pdl.toLowerCase() === "yes"
+          ? new Date() // sets to NOW()
+          : null,
+      socpen_date: formData.remarks === "SOCIAL PENSION" ? new Date() : null,
+      nonsocpen_date:
+        formData.remarks === "NON-SOCIAL PENSION" ? new Date() : null,
+      transferee_date:
+        formData.tranfer && formData.tranfer.toLowerCase() === "yes"
+          ? new Date()
+          : null,
+      booklet_date: formData.booklet ? new Date() : null,
     };
 
     const result = await Connection(
