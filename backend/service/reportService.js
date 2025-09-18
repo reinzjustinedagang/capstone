@@ -149,3 +149,42 @@ exports.getTransfereeReport = async (year) => {
     throw err;
   }
 };
+
+// Get Social Pension reports by gender per month
+exports.getSocPenReport = async (year) => {
+  try {
+    const results = await Connection(
+      `
+      SELECT 
+        MONTH(socpen_date) AS month,
+        ANY_VALUE(JSON_UNQUOTE(JSON_EXTRACT(form_data, '$.gender'))) AS gender,
+        COUNT(*) AS count
+      FROM senior_citizens
+      WHERE socpen_date IS NOT NULL
+        AND YEAR(socpen_date) = ?
+        AND deleted = 0
+      GROUP BY MONTH(socpen_date), gender
+      ORDER BY MONTH(socpen_date)
+      `,
+      [year]
+    );
+
+    const months = Array.from({ length: 12 }, (_, i) => i + 1);
+
+    return months.map((m) => {
+      const male =
+        results.find((r) => r.month === m && r.gender === "Male")?.count || 0;
+      const female =
+        results.find((r) => r.month === m && r.gender === "Female")?.count || 0;
+
+      return {
+        month: new Date(0, m - 1).toLocaleString("en", { month: "short" }),
+        male,
+        female,
+      };
+    });
+  } catch (err) {
+    console.error("❌ Error fetching SocPen report:", err);
+    throw err;
+  }
+};

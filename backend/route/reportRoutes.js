@@ -75,4 +75,16 @@ router.get("/transferees", async (req, res) => {
   }
 });
 
+// GET /api/charts/socpen?year=2025
+router.get("/socpen", async (req, res) => {
+  const year = req.query.year || new Date().getFullYear();
+  try {
+    const data = await reportService.getSocPenReport(year);
+    res.json(data);
+  } catch (err) {
+    console.error("❌ Failed to fetch SocPen reports:", err);
+    res.status(500).json({ message: "Failed to fetch SocPen reports." });
+  }
+});
+
 module.exports = router;

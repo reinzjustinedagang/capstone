@@ -5,10 +5,12 @@ import { Loader2 } from "lucide-react";
 import "./chart/chartConfig"; // make sure Chart.js is configured
 import DeceasedReportsChart from "./chart/DeceasedReportsChart";
 import TransfereeReportsChart from "./chart/TransfereeReportsChart";
+import SocPenReportsChart from "./chart/SocPenReportsChart";
 
 const OscaReportsChart = () => {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <SocPenReportsChart />
       <TransfereeReportsChart />
       <DeceasedReportsChart />
     </div>
