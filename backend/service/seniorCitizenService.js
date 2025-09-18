@@ -810,17 +810,24 @@ exports.getArchivedSeniorCitizens = async (page = 1, limit = 10) => {
   }
 };
 
+// services/seniorCitizenService.js
 exports.getRemarksFilters = async () => {
   try {
-    const remarksResult = await Connection(
-      `SELECT DISTINCT JSON_UNQUOTE(JSON_EXTRACT(form_data, '$.remarks')) AS remarks
-       FROM senior_citizens
-       WHERE JSON_UNQUOTE(JSON_EXTRACT(form_data, '$.remarks')) IS NOT NULL
-         AND JSON_UNQUOTE(JSON_EXTRACT(form_data, '$.remarks')) <> ''
-       ORDER BY remarks ASC`
+    const [field] = await Connection(
+      `SELECT options 
+       FROM form_fields 
+       WHERE field_name = 'remarks' 
+       LIMIT 1`
     );
 
-    return remarksResult.map((row) => row.remarks);
+    if (!field) return [];
+
+    // options is stored as a blob (comma-separated string)
+    return field.options
+      .toString()
+      .split(",")
+      .map((opt) => opt.trim())
+      .filter((opt) => opt !== "");
   } catch (err) {
     console.error("❌ Failed to fetch remarks options:", err);
     throw err;
