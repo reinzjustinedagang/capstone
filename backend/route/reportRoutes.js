@@ -99,4 +99,16 @@ router.get("/non-socpen", async (req, res) => {
   }
 });
 
+// GET /api/charts/non-socpen?year=2025
+router.get("/pdl", async (req, res) => {
+  const year = req.query.year || new Date().getFullYear();
+  try {
+    const data = await reportService.getPDLReport(year);
+    res.json(data);
+  } catch (err) {
+    console.error("❌ Failed to fetch PDL reports:", err);
+    res.status(500).json({ message: "Failed to fetch PDL reports." });
+  }
+});
+
 module.exports = router;

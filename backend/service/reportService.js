@@ -227,3 +227,42 @@ exports.getNonSocPenReport = async (year) => {
     throw err;
   }
 };
+
+// Get Non-Social Pension reports by gender per month
+exports.getPDLReport = async (year) => {
+  try {
+    const results = await Connection(
+      `
+      SELECT 
+        MONTH(pdl_date) AS month,
+        ANY_VALUE(JSON_UNQUOTE(JSON_EXTRACT(form_data, '$.gender'))) AS gender,
+        COUNT(*) AS count
+      FROM senior_citizens
+      WHERE pdl_date IS NOT NULL
+        AND YEAR(pdl_date) = ?
+        AND deleted = 0
+      GROUP BY MONTH(pdl_date), gender
+      ORDER BY MONTH(pdl_date)
+      `,
+      [year]
+    );
+
+    const months = Array.from({ length: 12 }, (_, i) => i + 1);
+
+    return months.map((m) => {
+      const male =
+        results.find((r) => r.month === m && r.gender === "Male")?.count || 0;
+      const female =
+        results.find((r) => r.month === m && r.gender === "Female")?.count || 0;
+
+      return {
+        month: new Date(0, m - 1).toLocaleString("en", { month: "short" }),
+        male,
+        female,
+      };
+    });
+  } catch (err) {
+    console.error("❌ Error fetching pdl report:", err);
+    throw err;
+  }
+};
