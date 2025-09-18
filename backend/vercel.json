@@ -2,7 +2,7 @@
   "version": 2,
   "functions": {
     "src/server.js": {
-      "runtime": "nodejs18.x"
+      "runtime": "vercel-node@18.x"
     }
   },
   "routes": [{ "src": "/(.*)", "dest": "src/server.js" }]
