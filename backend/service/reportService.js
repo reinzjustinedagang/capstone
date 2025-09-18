@@ -72,45 +72,39 @@ exports.getAgeDistribution = async () => {
 
 exports.getDeceasedReport = async (year) => {
   try {
-    const sql = `
+    const results = await Connection(
+      `
       SELECT 
-        m.month_name AS month,
-        COALESCE(d.count, 0) AS count
-      FROM (
-        SELECT 1 AS month_num, 'January' AS month_name UNION ALL
-        SELECT 2, 'February' UNION ALL
-        SELECT 3, 'March' UNION ALL
-        SELECT 4, 'April' UNION ALL
-        SELECT 5, 'May' UNION ALL
-        SELECT 6, 'June' UNION ALL
-        SELECT 7, 'July' UNION ALL
-        SELECT 8, 'August' UNION ALL
-        SELECT 9, 'September' UNION ALL
-        SELECT 10, 'October' UNION ALL
-        SELECT 11, 'November' UNION ALL
-        SELECT 12, 'December'
-      ) m
-      LEFT JOIN (
-        SELECT 
-          MONTH(deceased_date) AS month_num,
-          COUNT(*) AS count
-        FROM senior_citizens
-        WHERE deleted = 0
-          AND registered = 1
-          AND archived = 1
-          AND archive_reason = 'Deceased'
-          AND deceased_date IS NOT NULL
-          AND YEAR(deceased_date) = ?
-        GROUP BY MONTH(deceased_date)
-      ) d ON m.month_num = d.month_num
-      ORDER BY m.month_num;
-    `;
+        MONTH(deceased_date) AS month,
+        JSON_UNQUOTE(JSON_EXTRACT(form_data, '$.gender')) AS gender,
+        COUNT(*) AS count
+      FROM senior_citizens
+      WHERE deleted = 0
+        AND registered = 1
+        AND archived = 1
+        AND archive_reason = 'Deceased'
+        AND deceased_date IS NOT NULL
+        AND YEAR(deceased_date) = ?
+      GROUP BY MONTH(deceased_date), gender
+      ORDER BY MONTH(deceased_date)
+      `,
+      [year]
+    );
 
-    const result = await Connection(sql, [year]);
-    return result.map((row) => ({
-      month: row.month,
-      count: row.count,
-    }));
+    // Format into { month, male, female }
+    const months = Array.from({ length: 12 }, (_, i) => i + 1);
+    return months.map((m) => {
+      const male =
+        results.find((r) => r.month === m && r.gender === "Male")?.count || 0;
+      const female =
+        results.find((r) => r.month === m && r.gender === "Female")?.count || 0;
+
+      return {
+        month: new Date(0, m - 1).toLocaleString("en", { month: "short" }),
+        male,
+        female,
+      };
+    });
   } catch (err) {
     console.error("❌ Error fetching deceased report:", err);
     throw err;

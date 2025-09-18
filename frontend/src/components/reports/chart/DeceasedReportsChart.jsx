@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Bar } from "react-chartjs-2";
-import { Loader2 } from "lucide-react";
 import "./chartConfig";
 
 const DeceasedReportsChart = () => {
@@ -28,12 +27,17 @@ const DeceasedReportsChart = () => {
   }, [year, backendUrl]);
 
   const chartData = {
-    labels: reports.map((r) => r.month), // e.g. ["Jan", "Feb", "Mar"]
+    labels: reports.map((r) => r.month),
     datasets: [
       {
-        label: "Deceased Seniors",
-        data: reports.map((r) => r.count),
-        backgroundColor: "#F87171", // red
+        label: "Male",
+        data: reports.map((r) => r.male),
+        backgroundColor: "#60A5FA", // blue
+      },
+      {
+        label: "Female",
+        data: reports.map((r) => r.female),
+        backgroundColor: "#F472B6", // pink
       },
     ],
   };
@@ -42,8 +46,6 @@ const DeceasedReportsChart = () => {
     <div className="bg-white p-6 rounded-lg shadow">
       <div className="flex justify-between items-center mb-4">
         <h3 className="text-lg font-medium">Monthly Deceased Seniors Report</h3>
-
-        {/* Year Selector */}
         <div className="flex items-center gap-2">
           <label className="font-semibold text-sm">Year:</label>
           <select
@@ -66,8 +68,8 @@ const DeceasedReportsChart = () => {
           responsive: true,
           plugins: { legend: { position: "bottom" } },
           scales: {
-            x: { beginAtZero: true },
-            y: { beginAtZero: true },
+            x: { stacked: false }, // side-by-side bars
+            y: { beginAtZero: true, stacked: false },
           },
         }}
       />

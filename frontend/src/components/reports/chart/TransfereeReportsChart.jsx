@@ -73,8 +73,8 @@ const TransfereeReportsChart = () => {
           responsive: true,
           plugins: { legend: { position: "bottom" } },
           scales: {
-            x: { stacked: true },
-            y: { beginAtZero: true, stacked: true },
+            x: { stacked: false },
+            y: { beginAtZero: true, stacked: false },
           },
         }}
       />
