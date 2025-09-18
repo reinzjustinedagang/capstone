@@ -809,3 +809,20 @@ exports.getArchivedSeniorCitizens = async (page = 1, limit = 10) => {
     throw error;
   }
 };
+
+exports.getRemarksFilters = async () => {
+  try {
+    const remarksResult = await Connection(
+      `SELECT DISTINCT JSON_UNQUOTE(JSON_EXTRACT(form_data, '$.remarks')) AS remarks
+       FROM senior_citizens
+       WHERE JSON_UNQUOTE(JSON_EXTRACT(form_data, '$.remarks')) IS NOT NULL
+         AND JSON_UNQUOTE(JSON_EXTRACT(form_data, '$.remarks')) <> ''
+       ORDER BY remarks ASC`
+    );
+
+    return remarksResult.map((row) => row.remarks);
+  } catch (err) {
+    console.error("❌ Failed to fetch remarks options:", err);
+    throw err;
+  }
+};

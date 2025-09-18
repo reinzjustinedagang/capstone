@@ -38,6 +38,10 @@ const SeniorCitizenList = ({ onEdit, onId }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterBarangay, setFilterBarangay] = useState("All Barangays");
   const [filterHealthStatus, setFilterHealthStatus] = useState("All Remarks");
+  const [healthStatusOptions, setHealthStatusOptions] = useState([
+    "All Remarks",
+  ]);
+
   const [filterAge, setFilterAge] = useState("All");
   const [filterGender, setFilterGender] = useState("All");
   const [sortBy, setSortBy] = useState("lastName");
@@ -65,6 +69,22 @@ const SeniorCitizenList = ({ onEdit, onId }) => {
   });
   const [archiving, setArchiving] = useState(false);
   const [selectedArchiveCitizen, setSelectedArchiveCitizen] = useState(null);
+
+  const fetchRemarks = async () => {
+    try {
+      const response = await axios.get(
+        `${backendUrl}/api/senior-citizens/filters/remarks`
+      );
+      setHealthStatusOptions(["All Remarks", ...response.data]);
+    } catch (err) {
+      console.error("❌ Failed to fetch remarks:", err);
+    }
+  };
+
+  useEffect(() => {
+    fetchBarangays();
+    fetchRemarks();
+  }, []);
 
   // Fetch Citizens
   const fetchCitizens = async () => {
@@ -173,12 +193,7 @@ const SeniorCitizenList = ({ onEdit, onId }) => {
   };
 
   // Options
-  const healthStatusOptions = [
-    "All Remarks",
-    "SOCIAL PENSION",
-    "INDIGENT SENIOR CITIZEN",
-    "BEDRIDDEN",
-  ];
+
   const genderOptions = ["All", "Male", "Female"];
   const AgeOptions = [
     "All",

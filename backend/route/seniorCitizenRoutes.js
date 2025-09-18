@@ -556,4 +556,13 @@ router.get("/archived", async (req, res) => {
   }
 });
 
+router.get("/filters/remarks", async (req, res) => {
+  try {
+    const remarks = await seniorCitizenService.getRemarksFilters();
+    res.json(remarks);
+  } catch (err) {
+    res.status(500).json({ message: "Failed to fetch remarks options" });
+  }
+});
+
 module.exports = router;

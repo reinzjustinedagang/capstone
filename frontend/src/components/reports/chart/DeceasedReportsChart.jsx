@@ -25,62 +25,52 @@ const DeceasedReportsChart = () => {
       }
     };
     fetchReports();
-  }, [year]);
+  }, [year, backendUrl]);
 
   const chartData = {
     labels: reports.map((r) => r.month), // e.g. ["Jan", "Feb", "Mar"]
     datasets: [
       {
         label: "Deceased Seniors",
-        data: reports.map((r) => r.count), // make sure backend sends { month, count }
-        backgroundColor: "#F87171",
+        data: reports.map((r) => r.count),
+        backgroundColor: "#F87171", // red
       },
     ],
   };
 
-  const chartOptions = {
-    responsive: true,
-    plugins: {
-      legend: { position: "bottom" },
-      title: {
-        display: true,
-        text: `Monthly Deceased Seniors Report - ${year}`,
-        font: { size: 18 },
-      },
-    },
-    scales: {
-      x: { beginAtZero: true },
-      y: { beginAtZero: true },
-    },
-  };
-
   return (
-    <div className="p-6">
-      <h2 className="text-2xl font-bold mb-4">Monthly Deceased Seniors</h2>
+    <div className="bg-white p-6 rounded-lg shadow">
+      <div className="flex justify-between items-center mb-4">
+        <h3 className="text-lg font-medium">Monthly Deceased Seniors Report</h3>
 
-      {/* Year Selector */}
-      <div className="flex items-center gap-2 mb-4">
-        <label className="font-semibold">Year:</label>
-        <select
-          value={year}
-          onChange={(e) => setYear(Number(e.target.value))}
-          className="border px-2 py-1 rounded"
-        >
-          {[2023, 2024, 2025, 2026].map((y) => (
-            <option key={y} value={y}>
-              {y}
-            </option>
-          ))}
-        </select>
+        {/* Year Selector */}
+        <div className="flex items-center gap-2">
+          <label className="font-semibold text-sm">Year:</label>
+          <select
+            value={year}
+            onChange={(e) => setYear(Number(e.target.value))}
+            className="border px-2 py-1 rounded text-sm"
+          >
+            {[2023, 2024, 2025, 2026].map((y) => (
+              <option key={y} value={y}>
+                {y}
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
 
-      {loading ? (
-        <div className="flex items-center gap-2 text-gray-500">
-          <Loader2 className="animate-spin" size={20} /> Loading...
-        </div>
-      ) : (
-        <Bar data={chartData} options={chartOptions} />
-      )}
+      <Bar
+        data={chartData}
+        options={{
+          responsive: true,
+          plugins: { legend: { position: "bottom" } },
+          scales: {
+            x: { beginAtZero: true },
+            y: { beginAtZero: true },
+          },
+        }}
+      />
     </div>
   );
 };
