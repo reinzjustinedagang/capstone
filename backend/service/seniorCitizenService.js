@@ -714,13 +714,17 @@ exports.getSmsRecipients = async (
 };
 
 // Archive a senior citizen
-exports.archiveSeniorCitizen = async (id, reason, user, ip) => {
+exports.archiveSeniorCitizen = async (id, reason, deceasedDate, user, ip) => {
   try {
     const result = await Connection(
       `UPDATE senior_citizens 
-       SET archived = 1, archive_reason = ?, archive_date = NOW(), updated_at = NOW() 
+       SET archived = 1, 
+           archive_reason = ?, 
+           deceased_date = ?, 
+           archive_date = NOW(), 
+           updated_at = NOW() 
        WHERE id = ?`,
-      [reason, id]
+      [reason, deceasedDate || null, id]
     );
 
     if (result.affectedRows > 0) {
@@ -731,7 +735,9 @@ exports.archiveSeniorCitizen = async (id, reason, user, ip) => {
         "Archive",
         "Senior Citizen",
         id,
-        `Archived senior citizen with ID: ${id}. Reason: ${reason}`,
+        `Archived senior citizen with ID: ${id}. Reason: ${reason}${
+          deceasedDate ? `, Date of Death: ${deceasedDate}` : ""
+        }`,
         ip
       );
       return true;
@@ -748,7 +754,7 @@ exports.restoreArchivedSeniorCitizen = async (id, user, ip) => {
   try {
     const result = await Connection(
       `UPDATE senior_citizens 
-       SET archived = 0, updated_at = NOW() 
+       SET archived = 0, deceased_date = NULL, updated_at = NOW() 
        WHERE id = ? AND deleted = 0`,
       [id]
     );
@@ -781,7 +787,7 @@ exports.getArchivedSeniorCitizens = async (page = 1, limit = 10) => {
     const rows = await Connection(
       `SELECT SQL_CALC_FOUND_ROWS 
           id, firstName, lastName, middleName, suffix, gender,
-          barangay_id, archive_date, archive_reason
+          barangay_id, deceased_date, archive_date, archive_reason
        FROM senior_citizens
        WHERE archived = 1 AND deleted = 0
        ORDER BY archive_date DESC

@@ -470,7 +470,7 @@ router.delete("/permanent-delete/:id", async (req, res) => {
 // Archive a senior citizen
 router.put("/archive/:id", async (req, res) => {
   const { id } = req.params;
-  const { reason } = req.body;
+  const { reason, deceasedDate } = req.body;
   const user = req.session.user;
   const ip = req.userIp;
 
@@ -484,6 +484,7 @@ router.put("/archive/:id", async (req, res) => {
     const success = await seniorCitizenService.archiveSeniorCitizen(
       id,
       reason,
+      deceasedDate,
       user,
       ip
     );

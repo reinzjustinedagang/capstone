@@ -113,6 +113,7 @@ const Archive = ({ onView }) => {
                   "Barangay",
                   "Archive Reason",
                   "Archived Date",
+                  "Deceased Date",
                   "Action",
                 ].map((col) => (
                   <th
@@ -145,6 +146,18 @@ const Archive = ({ onView }) => {
                     <td className="px-6 py-4 text-sm text-gray-500">
                       {citizen.archive_date
                         ? new Date(citizen.archive_date).toLocaleDateString(
+                            "en-US",
+                            {
+                              year: "numeric",
+                              month: "long",
+                              day: "numeric",
+                            }
+                          )
+                        : "—"}
+                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-500">
+                      {citizen.archive_date
+                        ? new Date(citizen.deceased_date).toLocaleDateString(
                             "en-US",
                             {
                               year: "numeric",

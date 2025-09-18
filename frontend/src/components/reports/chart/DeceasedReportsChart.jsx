@@ -15,7 +15,7 @@ const DeceasedReportsChart = () => {
       try {
         setLoading(true);
         const res = await axios.get(
-          `${backendUrl}/reports/deceased?year=${year}`
+          `${backendUrl}/api/charts/deceased?year=${year}`
         );
         setReports(res.data || []);
       } catch (err) {

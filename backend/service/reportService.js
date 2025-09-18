@@ -92,16 +92,16 @@ exports.getDeceasedReport = async (year) => {
       ) m
       LEFT JOIN (
         SELECT 
-          MONTH(archive_date) AS month_num,
+          MONTH(deceased_date) AS month_num,
           COUNT(*) AS count
         FROM senior_citizens
         WHERE deleted = 0
           AND registered = 1
           AND archived = 1
           AND archive_reason = 'Deceased'
-          AND archive_date IS NOT NULL
-          AND YEAR(archive_date) = ?
-        GROUP BY MONTH(archive_date)
+          AND deceased_date IS NOT NULL
+          AND YEAR(deceased_date) = ?
+        GROUP BY MONTH(deceased_date)
       ) d ON m.month_num = d.month_num
       ORDER BY m.month_num;
     `;

@@ -529,6 +529,7 @@ const SeniorCitizenList = ({ onEdit, onId }) => {
           </Button>
         </div>
       </Modal>
+
       {/* Archive Modal */}
       {/* Archive Modal */}
       <Modal
@@ -555,7 +556,10 @@ const SeniorCitizenList = ({ onEdit, onId }) => {
             <select
               value={archiveDetails.reason}
               onChange={(e) =>
-                setArchiveDetails({ ...archiveDetails, reason: e.target.value })
+                setArchiveDetails({
+                  ...archiveDetails,
+                  reason: e.target.value,
+                })
               }
               className="w-full border rounded-md px-3 py-2 text-sm"
               required
@@ -565,7 +569,33 @@ const SeniorCitizenList = ({ onEdit, onId }) => {
               <option value="Other">Other</option>
             </select>
 
-            {/* Show input if Other is selected */}
+            {/* If Deceased → Date Picker */}
+            {archiveDetails.reason === "Deceased" && (
+              <div className="mt-3">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Date of Death
+                </label>
+                <input
+                  type="date"
+                  value={archiveDetails.deceasedDate || ""}
+                  onChange={(e) =>
+                    setArchiveDetails({
+                      ...archiveDetails,
+                      deceasedDate: e.target.value,
+                    })
+                  }
+                  className="w-full border rounded-md px-3 py-2 text-sm"
+                  required
+                />
+                {!archiveDetails.deceasedDate && (
+                  <p className="text-xs text-red-500 mt-1">
+                    Date of death is required for Deceased.
+                  </p>
+                )}
+              </div>
+            )}
+
+            {/* If Other → Custom Reason Input */}
             {archiveDetails.reason === "Other" && (
               <input
                 type="text"
@@ -581,14 +611,6 @@ const SeniorCitizenList = ({ onEdit, onId }) => {
                 required
               />
             )}
-
-            {(!archiveDetails.reason ||
-              (archiveDetails.reason === "Other" &&
-                !archiveDetails.otherReason?.trim())) && (
-              <p className="text-xs text-red-500 mt-1">
-                Reason is required before archiving.
-              </p>
-            )}
           </div>
 
           <div className="flex justify-end space-x-3">
@@ -601,11 +623,19 @@ const SeniorCitizenList = ({ onEdit, onId }) => {
             <Button
               variant="primary"
               onClick={async () => {
-                // Final reason: use otherReason if "Other" is chosen
+                // ✅ Final reason
                 const finalReason =
                   archiveDetails.reason === "Other"
                     ? archiveDetails.otherReason
                     : archiveDetails.reason;
+
+                // ✅ Require date if Deceased
+                if (
+                  archiveDetails.reason === "Deceased" &&
+                  !archiveDetails.deceasedDate
+                ) {
+                  return;
+                }
 
                 if (!finalReason?.trim()) return;
 
@@ -613,12 +643,22 @@ const SeniorCitizenList = ({ onEdit, onId }) => {
                 try {
                   await axios.put(
                     `${backendUrl}/api/senior-citizens/archive/${selectedArchiveCitizen.id}`,
-                    { reason: finalReason }, // ✅ send correct reason
+                    {
+                      reason: finalReason,
+                      deceasedDate:
+                        archiveDetails.reason === "Deceased"
+                          ? archiveDetails.deceasedDate
+                          : null,
+                    },
                     { withCredentials: true }
                   );
                   await fetchCitizens();
                   setShowArchiveModal(false);
-                  setArchiveDetails({ reason: "", otherReason: "" });
+                  setArchiveDetails({
+                    reason: "",
+                    otherReason: "",
+                    deceasedDate: "",
+                  });
                   setShowSuccessModal(true);
                 } catch (err) {
                   console.error("Archive failed", err);
@@ -633,7 +673,9 @@ const SeniorCitizenList = ({ onEdit, onId }) => {
                 archiving ||
                 !archiveDetails.reason ||
                 (archiveDetails.reason === "Other" &&
-                  !archiveDetails.otherReason?.trim())
+                  !archiveDetails.otherReason?.trim()) ||
+                (archiveDetails.reason === "Deceased" &&
+                  !archiveDetails.deceasedDate)
               }
             >
               {archiving ? (
