@@ -314,3 +314,43 @@ exports.getNewSeniorReport = async (year) => {
     throw err;
   }
 };
+
+// Get New booklet by gender per month
+exports.getBookletReport = async (year) => {
+  try {
+    const results = await Connection(
+      `
+      SELECT 
+        MONTH(booklet_date) AS month,
+        ANY_VALUE(JSON_UNQUOTE(JSON_EXTRACT(form_data, '$.gender'))) AS gender,
+        COUNT(*) AS count
+      FROM senior_citizens
+      WHERE registered = 1
+        AND YEAR(booklet_date) = ?
+        AND deleted = 0
+        AND archived = 0
+      GROUP BY MONTH(booklet_date), gender
+      ORDER BY MONTH(booklet_date)
+      `,
+      [year]
+    );
+
+    const months = Array.from({ length: 12 }, (_, i) => i + 1);
+
+    return months.map((m) => {
+      const male =
+        results.find((r) => r.month === m && r.gender === "Male")?.count || 0;
+      const female =
+        results.find((r) => r.month === m && r.gender === "Female")?.count || 0;
+
+      return {
+        month: new Date(0, m - 1).toLocaleString("en", { month: "short" }),
+        male,
+        female,
+      };
+    });
+  } catch (err) {
+    console.error("❌ Error fetching booklet report:", err);
+    throw err;
+  }
+};

@@ -123,4 +123,16 @@ router.get("/new", async (req, res) => {
   }
 });
 
+// GET /api/charts/booklet?year=2025
+router.get("/booklet", async (req, res) => {
+  const year = req.query.year || new Date().getFullYear();
+  try {
+    const data = await reportService.getBookletReport(year);
+    res.json(data);
+  } catch (err) {
+    console.error("❌ Failed to fetch booklet reports:", err);
+    res.status(500).json({ message: "Failed to fetch booklet reports." });
+  }
+});
+
 module.exports = router;

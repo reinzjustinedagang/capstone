@@ -223,19 +223,29 @@ exports.createSeniorCitizen = async (data, user, ip) => {
       photoUrl = result.secure_url;
     }
 
-    // Insert into DB
+    // Handle conditional date fields based on form_data
+    const formData = data.form_data || {};
+    const now = new Date();
+
     const insertData = {
       firstName: data.firstName,
       lastName: data.lastName,
       middleName: normalize(data.middleName),
       suffix: normalize(data.suffix),
       barangay_id: normalize(data.barangay_id),
-      form_data: JSON.stringify(data.form_data || {}),
+      form_data: JSON.stringify(formData || {}),
       document_image: documentUrl,
       document_type: data.documentType || null,
       photo: photoUrl,
+      // ✅ set dates based on form_data
+      pdl_date: formData.pdl?.toLowerCase() === "yes" ? now : null,
+      socpen_date: formData.remarks === "SOCIAL PENSION" ? now : null,
+      nonsocpen_date: formData.remarks === "NON-SOCIAL PENSION" ? now : null,
+      transferee_date: formData.tranfer?.toLowerCase() === "yes" ? now : null,
+      booklet_date: formData.booklet?.toLowerCase() === "yes" ? now : null,
     };
 
+    // Insert into DB
     const result = await Connection(`INSERT INTO senior_citizens SET ?`, [
       insertData,
     ]);
