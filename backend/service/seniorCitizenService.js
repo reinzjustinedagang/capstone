@@ -333,7 +333,8 @@ exports.updateSeniorCitizen = async (id, updatedData, user, ip) => {
         formData.tranfer && formData.tranfer.toLowerCase() === "yes"
           ? new Date()
           : null,
-      booklet_date: formData.booklet ? new Date() : null,
+      booklet_date:
+        formData.booklet.toLowerCase() === "yes" ? new Date() : null,
     };
 
     const result = await Connection(

@@ -64,4 +64,16 @@ router.get("/deceased", async (req, res) => {
   }
 });
 
+// GET /api/charts/transferees?year=2025
+router.get("/transferees", async (req, res) => {
+  const year = req.query.year || new Date().getFullYear();
+
+  try {
+    const data = await reportService.getTransfereeReport(year);
+    res.json(data);
+  } catch (err) {
+    res.status(500).json({ message: "Failed to fetch transferee reports." });
+  }
+});
+
 module.exports = router;

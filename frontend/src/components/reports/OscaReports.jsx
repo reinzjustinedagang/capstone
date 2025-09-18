@@ -4,6 +4,7 @@ import { Bar } from "react-chartjs-2";
 import { Loader2 } from "lucide-react";
 import "./chart/chartConfig"; // make sure Chart.js is configured
 import DeceasedReportsChart from "./chart/DeceasedReportsChart";
+import TransfereeReportsChart from "./chart/TransfereeReportsChart";
 
 const OscaReportsChart = () => {
   const backendUrl = import.meta.env.VITE_API_BASE_URL;
@@ -138,6 +139,7 @@ const OscaReportsChart = () => {
       ) : (
         <>
           <Bar data={chartData} options={chartOptions} />
+          <TransfereeReportsChart />
           <DeceasedReportsChart />
         </>
       )}
