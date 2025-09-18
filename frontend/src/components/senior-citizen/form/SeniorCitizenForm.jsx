@@ -188,11 +188,11 @@ const SeniorCitizenForm = ({ onSubmit, onCancel, onSuccess }) => {
         return;
       }
 
-      if (!documentFile || !photoFile) {
-        setFormError("Please upload both document and photo.");
-        setIsSubmitting(false);
-        return;
-      }
+      // if (!documentFile || !photoFile) {
+      //   setFormError("Please upload both document and photo.");
+      //   setIsSubmitting(false);
+      //   return;
+      // }
 
       const barangay_id = Number(formData[barangayField.field_name]);
       const dynamicFields = { ...allFields };
