@@ -123,30 +123,26 @@ exports.getTransfereeReport = async (year) => {
       `
       SELECT 
         MONTH(transferee_date) AS month,
-        COALESCE(JSON_UNQUOTE(JSON_EXTRACT(CAST(form_data AS JSON), '$.gender')), 'Unknown') AS gender,
+        JSON_UNQUOTE(JSON_EXTRACT(form_data, '$.gender')) AS gender,
         COUNT(*) AS count
       FROM senior_citizens
       WHERE transferee_date IS NOT NULL
         AND YEAR(transferee_date) = ?
         AND deleted = 0
-      GROUP BY MONTH(transferee_date), gender
+      GROUP BY 
+        MONTH(transferee_date),
+        JSON_UNQUOTE(JSON_EXTRACT(form_data, '$.gender'))
       ORDER BY MONTH(transferee_date)
       `,
       [year]
     );
 
-    console.log("📊 Raw DB Results:", results);
-
     const months = Array.from({ length: 12 }, (_, i) => i + 1);
-
     return months.map((m) => {
       const male =
-        results.find((r) => r.month === m && r.gender.toLowerCase() === "male")
-          ?.count || 0;
+        results.find((r) => r.month === m && r.gender === "Male")?.count || 0;
       const female =
-        results.find(
-          (r) => r.month === m && r.gender.toLowerCase() === "female"
-        )?.count || 0;
+        results.find((r) => r.month === m && r.gender === "Female")?.count || 0;
 
       return {
         month: new Date(0, m - 1).toLocaleString("en", { month: "short" }),
@@ -154,12 +150,8 @@ exports.getTransfereeReport = async (year) => {
         female,
       };
     });
-  } catch (error) {
-    console.error(
-      "❌ Error in getTransfereeReport:",
-      error.message,
-      error.stack
-    );
-    throw error;
+  } catch (err) {
+    console.error("❌ Error in getTransfereeReport:", err);
+    throw err;
   }
 };
