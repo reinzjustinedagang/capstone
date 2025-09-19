@@ -14,6 +14,9 @@ const UnregisteredSeniorList = ({ onView, onRegister }) => {
   const [totalPages, setTotalPages] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
 
+  // Barangay mapping
+  const [barangayMap, setBarangayMap] = useState({});
+
   // Delete state
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -21,6 +24,20 @@ const UnregisteredSeniorList = ({ onView, onRegister }) => {
 
   const backendUrl =
     import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
+
+  // Fetch barangays for mapping
+  const fetchBarangays = async () => {
+    try {
+      const response = await axios.get(`${backendUrl}/api/barangays/all`);
+      const map = {};
+      response.data.forEach((b) => {
+        map[b.id] = b.barangay_name;
+      });
+      setBarangayMap(map);
+    } catch (err) {
+      console.error("Failed to fetch barangays:", err);
+    }
+  };
 
   const fetchUnregisteredCitizens = async () => {
     setLoading(true);
@@ -33,7 +50,15 @@ const UnregisteredSeniorList = ({ onView, onRegister }) => {
 
       const { citizens, total, totalPages } = response.data;
 
-      setSeniorCitizens(citizens || []);
+      setSeniorCitizens(
+        (citizens || []).map((citizen) => ({
+          ...citizen,
+          form_data:
+            typeof citizen.form_data === "string"
+              ? JSON.parse(citizen.form_data || "{}")
+              : citizen.form_data || {},
+        }))
+      );
       setTotalCount(total || 0);
       setTotalPages(totalPages || 1);
     } catch (err) {
@@ -48,6 +73,7 @@ const UnregisteredSeniorList = ({ onView, onRegister }) => {
   };
 
   useEffect(() => {
+    fetchBarangays();
     fetchUnregisteredCitizens();
   }, [page]);
 
@@ -113,11 +139,20 @@ const UnregisteredSeniorList = ({ onView, onRegister }) => {
                       {citizen.gender}
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-500">
-                      {`${citizen.form_data?.street || ""}, Brgy. ${
-                        citizen.form_data?.barangay || ""
-                      }, ${citizen.form_data?.municipality || ""}, ${
-                        citizen.form_data?.province || ""
-                      }`}
+                      {[
+                        citizen.form_data?.street,
+                        citizen.barangay_id
+                          ? `Brgy. ${
+                              barangayMap[citizen.barangay_id] || "Unknown"
+                            }`
+                          : citizen.form_data?.barangay
+                          ? `Brgy. ${citizen.form_data?.barangay}`
+                          : "",
+                        citizen.form_data?.municipality,
+                        citizen.form_data?.province,
+                      ]
+                        .filter(Boolean)
+                        .join(", ")}
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-500">
                       {new Date(citizen.created_at).toLocaleDateString(

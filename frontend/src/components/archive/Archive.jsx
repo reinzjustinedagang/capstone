@@ -24,8 +24,29 @@ const Archive = ({ onView }) => {
   const [deleting, setDeleting] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
 
+  const [barangayMap, setBarangayMap] = useState({});
+
   const backendUrl =
     import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
+
+  // Fetch barangays
+  const fetchBarangays = async () => {
+    try {
+      const response = await axios.get(`${backendUrl}/api/barangays/all`);
+      const map = {};
+      response.data.forEach((b) => {
+        map[b.id] = b.barangay_name;
+      });
+      setBarangayMap(map);
+    } catch (err) {
+      console.error("Failed to fetch barangays:", err);
+    }
+  };
+
+  useEffect(() => {
+    fetchBarangays(); // fetch barangay list
+    fetchArchivedCitizens();
+  }, [page]);
 
   const fetchArchivedCitizens = async () => {
     setLoading(true);
@@ -138,8 +159,15 @@ const Archive = ({ onView }) => {
                       {citizen.gender || "-"}
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-500">
-                      {citizen.barangay_id || "-"}
+                      {citizen.barangay_id
+                        ? `Brgy. ${
+                            barangayMap[citizen.barangay_id] || "Unknown"
+                          }`
+                        : citizen.form_data?.barangay
+                        ? `Brgy. ${citizen.form_data?.barangay}`
+                        : "-"}
                     </td>
+
                     <td className="px-6 py-4 text-sm text-gray-500">
                       {citizen.archive_reason || "-"}
                     </td>

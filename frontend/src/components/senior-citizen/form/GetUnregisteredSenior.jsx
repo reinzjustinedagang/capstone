@@ -446,6 +446,12 @@ const GetUnregisteredSenior = ({ id, onSuccess, onCancel }) => {
                   src={documentPreview || citizenData?.document_image}
                   alt="Document"
                   className="object-contain h-full w-full transition-transform duration-200 hover:scale-105"
+                  onClick={() =>
+                    window.open(
+                      documentPreview || citizenData?.document_image,
+                      "_blank"
+                    )
+                  }
                 />
               ) : (
                 <span className="text-gray-400 text-sm">
@@ -466,6 +472,9 @@ const GetUnregisteredSenior = ({ id, onSuccess, onCancel }) => {
                   src={photoPreview || citizenData?.photo}
                   alt="Photo"
                   className="object-cover h-full w-full transition-transform duration-200 hover:scale-110"
+                  onClick={() =>
+                    window.open(photoPreview || citizenData?.photo, "_blank")
+                  }
                 />
               ) : (
                 <span className="text-gray-400 text-sm">No photo uploaded</span>

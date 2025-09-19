@@ -310,14 +310,22 @@ const SeniorCitizenList = ({ onEdit, onId }) => {
                       {citizen.gender}
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-500">
-                      {`${citizen.form_data?.street || ""}, Brgy. ${
+                      {[
+                        citizen.form_data?.street,
                         citizen.barangay_id
-                          ? barangayMap[citizen.barangay_id] || "Unknown"
-                          : citizen.form_data?.barangay || ""
-                      }, ${citizen.form_data?.municipality || ""}, ${
-                        citizen.form_data?.province || ""
-                      }`}
+                          ? `Brgy. ${
+                              barangayMap[citizen.barangay_id] || "Unknown"
+                            }`
+                          : citizen.form_data?.barangay
+                          ? `Brgy. ${citizen.form_data?.barangay}`
+                          : "",
+                        citizen.form_data?.municipality,
+                        citizen.form_data?.province,
+                      ]
+                        .filter(Boolean) // remove empty/undefined/null values
+                        .join(", ")}
                     </td>
+
                     <td className="px-6 py-4 text-sm text-gray-500">
                       {citizen.form_data?.mobileNumber}
                     </td>

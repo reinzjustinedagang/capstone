@@ -34,6 +34,8 @@ const RegisterSenior = () => {
   );
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [documentPreview, setDocumentPreview] = useState(null);
+  const [photoPreview, setPhotoPreview] = useState(null);
 
   const backendUrl = import.meta.env.VITE_API_BASE_URL;
   const navigate = useNavigate();
@@ -141,6 +143,18 @@ const RegisterSenior = () => {
     }
   };
 
+  const handleFileChange = (e) => {
+    const { name, files } = e.target;
+    if (files && files[0]) {
+      setFormData((prev) => ({ ...prev, [name]: files[0] }));
+
+      // for preview
+      const previewUrl = URL.createObjectURL(files[0]);
+      if (name === "documentFile") setDocumentPreview(previewUrl);
+      if (name === "photoFile") setPhotoPreview(previewUrl);
+    }
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
     setShowConfirmModal(true); // open confirm first
@@ -164,8 +178,9 @@ const RegisterSenior = () => {
 
     setFormData(resetData);
     setFormError("");
+    setDocumentPreview(null);
+    setPhotoPreview(null);
 
-    // clear file inputs
     document.querySelectorAll("input[type='file']").forEach((input) => {
       input.value = "";
     });
@@ -465,76 +480,92 @@ const RegisterSenior = () => {
             ))}
 
           <div className="bg-gray-50 rounded-md border border-gray-200">
-            <div className="cursor-pointer flex justify-between items-center p-4 bg-gray-100">
-              <div>
-                <h3 className="text-base font-semibold text-gray-800">
-                  Document Upload
-                </h3>
-                <p className="mt-1 text-sm text-gray-600">
-                  Upload one valid document and your 1x1 photo.
-                </p>
-              </div>
-            </div>
-
-            <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Document Type */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Type of Document <span className="text-red-600">*</span>
-                </label>
-                <select
-                  name="documentType"
-                  value={formData.documentType || ""}
-                  onChange={handleChange}
-                  required
-                  className="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 
-                     focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                >
-                  <option value="">-- Select a document --</option>
-                  {documentTypes.map((doc) => (
-                    <option key={doc} value={doc}>
-                      {doc}
-                    </option>
-                  ))}
-                </select>
+            <div className="bg-gray-50 rounded-md border border-gray-200">
+              <div className="cursor-pointer flex justify-between items-center p-4 bg-gray-100">
+                <div>
+                  <h3 className="text-base font-semibold text-gray-800">
+                    Document & Photo Upload
+                  </h3>
+                  <p className="mt-1 text-sm text-gray-600">
+                    Upload one valid document and your 1x1 photo.
+                  </p>
+                </div>
               </div>
 
-              {/* Document Upload */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Upload Document <span className="text-red-600">*</span>
-                </label>
-                <input
-                  type="file"
-                  name="documentFile"
-                  onChange={handleChange}
-                  required
-                  className="mt-1 block w-full text-sm text-gray-500 
-                     file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 
-                     file:text-sm file:font-semibold file:bg-blue-50 file:text-gray-700 
-                     hover:file:bg-blue-100"
-                />
-              </div>
+              <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Document Section */}
+                <div>
+                  {/* Document Type */}
+                  <label className="block text-sm font-medium text-gray-700">
+                    Type of Document <span className="text-red-600">*</span>
+                  </label>
+                  <select
+                    name="documentType"
+                    value={formData.documentType || ""}
+                    onChange={(e) =>
+                      setFormData({ ...formData, documentType: e.target.value })
+                    }
+                    className="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 
+          focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  >
+                    <option value="">-- Select a document --</option>
+                    {documentTypes.map((doc) => (
+                      <option key={doc} value={doc}>
+                        {doc}
+                      </option>
+                    ))}
+                  </select>
 
-              {/* Photo Upload */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Upload 1x1 Photo <span className="text-red-600">*</span>
-                </label>
-                <input
-                  type="file"
-                  name="photoFile"
-                  accept="image/*"
-                  onChange={handleChange}
-                  required
-                  className="mt-1 block w-full text-sm text-gray-500 
-                     file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 
-                     file:text-sm file:font-semibold file:bg-blue-50 file:text-gray-700 
-                     hover:file:bg-blue-100"
-                />
-                <p className="text-xs text-gray-500 mt-1">
-                  Must have a white background.
-                </p>
+                  {/* Document Upload */}
+                  <div className="mt-2">
+                    <label className="block text-sm font-medium text-gray-700">
+                      Upload Document <span className="text-red-600">*</span>
+                    </label>
+                    <div className="relative w-48 h-full border rounded-lg overflow-hidden bg-white flex flex-col items-center justify-center p-2">
+                      <img
+                        src={documentPreview || "/placeholder-doc.png"}
+                        alt="Document Preview"
+                        className="object-contain h-40 w-full transition-transform duration-200 hover:scale-105 mb-2"
+                      />
+                    </div>
+                    <input
+                      type="file"
+                      name="documentFile"
+                      onChange={handleFileChange}
+                      className="mt-1 block w-full text-sm text-gray-500 
+            file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 
+            file:text-sm file:font-semibold file:bg-blue-50 file:text-gray-700 
+            hover:file:bg-blue-100"
+                    />
+                  </div>
+                </div>
+
+                {/* Photo Upload */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Upload 1x1 Photo <span className="text-red-600">*</span>
+                  </label>
+                  <div className="relative w-32 h-32 border rounded-lg overflow-hidden bg-white flex flex-col items-center justify-center p-2">
+                    <img
+                      src={photoPreview || "/placeholder-photo.png"}
+                      alt="Photo Preview"
+                      className="object-cover h-full w-full transition-transform duration-200 hover:scale-110 mb-2"
+                    />
+                  </div>
+                  <input
+                    type="file"
+                    name="photoFile"
+                    accept="image/*"
+                    onChange={handleFileChange}
+                    className="mt-1 block w-full text-sm text-gray-500 
+          file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 
+          file:text-sm file:font-semibold file:bg-blue-50 file:text-gray-700 
+          hover:file:bg-blue-100"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    Must have a white background.
+                  </p>
+                </div>
               </div>
             </div>
 
