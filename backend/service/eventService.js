@@ -87,67 +87,70 @@ exports.create = async (data, user, ip) => {
   return result;
 };
 
-exports.update = async (id, data, user, ip) => {
-  const { title, type, description, date, image_url } = data;
+exports.update = async (
+  id,
+  title,
+  type,
+  description,
+  date,
+  image_url,
+  user,
+  ip
+) => {
+  try {
+    const currentEvent = await exports.getById(id);
+    if (!currentEvent) return false;
 
-  // Fetch current event
-  const events = await Connection(`SELECT * FROM events WHERE id = ?`, [id]);
-  const currentEvent = events[0];
-  if (!currentEvent) throw new Error("Event not found");
+    // Keep existing values if not provided
+    const newTitle = title || currentEvent.title;
+    const newType = type || currentEvent.type;
+    const newDescription = description || currentEvent.description;
+    const newDate = date || currentEvent.date;
+    let newImageUrl = currentEvent.image_url;
 
-  // Validation
-  if (!type) throw new Error("Event type is required");
-
-  if (type === "slideshow") {
-    if (!image_url) throw new Error("Image is required for slideshow");
-  } else {
-    if (!title || !description || !date || !image_url) {
-      throw new Error("All fields including image are required for an event");
+    // Handle new image
+    if (image_url && image_url !== currentEvent.image_url) {
+      if (currentEvent.image_url) {
+        const publicId = extractCloudinaryPublicId(currentEvent.image_url);
+        if (publicId) {
+          await safeCloudinaryDestroy(publicId);
+        } else {
+          await deleteLocalImage(currentEvent.image_url);
+        }
+      }
+      newImageUrl = image_url;
     }
-  }
 
-  // Handle image replacement
-  if (
-    image_url &&
-    currentEvent.image_url &&
-    currentEvent.image_url !== image_url
-  ) {
-    const publicId = extractCloudinaryPublicId(currentEvent.image_url);
-    if (publicId) {
-      await safeCloudinaryDestroy(publicId);
-    } else {
-      await deleteLocalImage(currentEvent.image_url);
+    const query = `
+      UPDATE events
+      SET title = ?, type = ?, description = ?, date = ?, image_url = ?
+      WHERE id = ?
+    `;
+    const result = await Connection(query, [
+      newTitle,
+      newType,
+      newDescription,
+      newDate,
+      newImageUrl,
+      id,
+    ]);
+
+    if (result.affectedRows > 0) {
+      await logAudit(
+        user.id,
+        user.email,
+        user.role,
+        "UPDATE",
+        `Updated event ID ${id}: '${newTitle}'`,
+        ip
+      );
+      return true;
     }
+    return false;
+  } catch (err) {
+    console.error("Error updating event:", err);
+    throw err;
   }
-
-  // Update query
-  const query = `
-    UPDATE events
-    SET title = ?, type = ?, description = ?, date = ?, image_url = ?
-    WHERE id = ?
-  `;
-
-  const result = await Connection(query, [
-    title || null,
-    type,
-    description || null,
-    date || null,
-    image_url,
-    id,
-  ]);
-
-  if (result.affectedRows > 0) {
-    await logAudit(
-      user.id,
-      user.email,
-      user.role,
-      "UPDATE",
-      `Updated event ID ${id}: '${title || "Slideshow"}'`,
-      ip
-    );
-  }
-
-  return result.affectedRows > 0;
 };
 
 // DELETE event

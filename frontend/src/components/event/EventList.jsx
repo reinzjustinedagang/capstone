@@ -2,9 +2,9 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import Button from "../UI/Button";
 import Modal from "../UI/Modal";
-import { Trash2, Loader2 } from "lucide-react";
+import { Trash2, Loader2, Edit } from "lucide-react";
 
-const EventList = () => {
+const EventList = ({ onEdit }) => {
   const [events, setEvents] = useState([]);
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [loading, setLoading] = useState(false); // for delete
@@ -90,6 +90,17 @@ const EventList = () => {
                   </div>
                 )}
 
+                {/* Edit Button */}
+                <button
+                  className="absolute top-2 right-12 bg-white/90 hover:bg-white text-blue-500 hover:text-blue-600 p-2 rounded-full shadow z-10"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onEdit(event); // ✅ pass the whole event object
+                  }}
+                >
+                  <Edit className="w-4 h-4" />
+                </button>
+
                 {/* Delete Button */}
                 <button
                   className="absolute top-2 right-2 bg-white/90 hover:bg-white text-red-500 hover:text-red-600 p-2 rounded-full shadow z-10"
@@ -99,7 +110,7 @@ const EventList = () => {
                     setShowDeleteModal(true);
                   }}
                 >
-                  <Trash2 className="w-5 h-5" />
+                  <Trash2 className="w-4 h-4" />
                 </button>
               </div>
 

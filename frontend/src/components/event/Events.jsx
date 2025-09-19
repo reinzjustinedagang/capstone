@@ -5,19 +5,28 @@ import { Calendar, Plus, CheckCircle, LucideImagePlay } from "lucide-react";
 import AddEvent from "./AddEvent";
 import EventList from "./EventList";
 import EventSlideshow from "./EventSlideshow";
+import UpdateEvent from "./UpdateEvent";
 
 const Events = () => {
   const [activeTab, setActiveTab] = useState("eventlist");
   const [selectedEventId, setSelectedEventId] = useState(null);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
 
-  // This function handles the edit action from any BenefitsCard
+  // Handle edit button from EventList
   const handleEdit = (id) => {
-    setSelectedBenefitId(id); // Set the ID of the benefit to be updated
-    setActiveTab("updatebenefits"); // Switch to the update tab
+    setSelectedEventId(id); // store ID of event to update
+    setActiveTab("updateevent"); // switch to update tab
   };
 
+  // Success after adding
   const handleAddedSuccess = () => {
+    setActiveTab("eventlist");
+    setSelectedEventId(null);
+    setShowSuccessModal(true);
+  };
+
+  // Success after updating
+  const handleUpdateSuccess = () => {
     setActiveTab("eventlist");
     setSelectedEventId(null);
     setShowSuccessModal(true);
@@ -25,6 +34,7 @@ const Events = () => {
 
   return (
     <>
+      {/* Add Event Button */}
       <div className="mt-4 mb-4 md:mt-0 flex flex-col sm:flex-row justify-end sm:items-center ">
         <Button
           variant="primary"
@@ -35,6 +45,7 @@ const Events = () => {
         </Button>
       </div>
 
+      {/* Main Card */}
       <div className="bg-white rounded-lg shadow overflow-hidden">
         <div className="border-b border-gray-200">
           <nav className="flex flex-wrap -mb-px">
@@ -63,15 +74,23 @@ const Events = () => {
             </button>
           </nav>
         </div>
+
         <div className="p-6">
-          {/* Pass the handleEdit function as a prop to the components that render BenefitsCards */}
-          {activeTab === "eventlist" && <EventList />}
+          {/* Tabs */}
+          {activeTab === "eventlist" && <EventList onEdit={handleEdit} />}
           {activeTab === "slideshow" && <EventSlideshow />}
           {activeTab === "addevent" && (
             <AddEvent onEventAdded={handleAddedSuccess} />
           )}
+          {activeTab === "updateevent" && selectedEventId && (
+            <UpdateEvent
+              eventId={selectedEventId}
+              onSuccess={handleUpdateSuccess}
+            />
+          )}
         </div>
       </div>
+
       {/* Success Modal */}
       <Modal
         isOpen={showSuccessModal}
@@ -84,7 +103,9 @@ const Events = () => {
           </div>
           <h3 className="text-lg font-medium text-gray-800 mb-2">Success</h3>
           <p className="text-sm text-gray-600 mb-4">
-            New Event Added Successfully!
+            {activeTab === "addevent"
+              ? "New Event Added Successfully!"
+              : "Event Updated Successfully!"}
           </p>
           <Button variant="primary" onClick={() => setShowSuccessModal(false)}>
             OK

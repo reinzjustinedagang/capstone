@@ -84,7 +84,6 @@ router.post("/", isAuthenticated, upload.single("image"), async (req, res) => {
 });
 
 // PUT update event
-// PUT update event
 router.put(
   "/:id",
   isAuthenticated,
@@ -100,7 +99,6 @@ router.put(
     try {
       let image_url = req.body.image_url || null;
 
-      // Handle new image upload
       if (req.file) {
         const result = await new Promise((resolve, reject) => {
           const stream = cloudinary.uploader.upload_stream(
@@ -117,13 +115,16 @@ router.put(
 
       const updated = await eventService.update(
         id,
-        { title, type, description, date, image_url },
+        title,
+        type,
+        description,
+        date,
+        image_url,
         user,
         ip
       );
 
       if (!updated) return res.status(404).json({ message: "Event not found" });
-
       res.status(200).json({ message: "Event updated" });
     } catch (err) {
       console.error("Failed to update event:", err);
