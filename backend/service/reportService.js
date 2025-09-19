@@ -77,7 +77,7 @@ exports.getDeceasedReport = async (year) => {
       `
       SELECT 
         MONTH(deceased_date) AS month,
-        JSON_UNQUOTE(JSON_EXTRACT(form_data, '$.gender')) AS gender,
+        ANY_VALUE(JSON_UNQUOTE(JSON_EXTRACT(form_data, '$.gender'))) AS gender,
         COUNT(*) AS count
       FROM senior_citizens
       WHERE deleted = 0
@@ -160,7 +160,7 @@ exports.getSocPenReport = async (year) => {
       `
       SELECT 
         MONTH(socpen_date) AS month,
-       JSON_UNQUOTE(JSON_EXTRACT(form_data, '$.gender')) AS gender,
+        ANY_VALUE(JSON_UNQUOTE(JSON_EXTRACT(form_data, '$.gender'))) AS gender,
         COUNT(*) AS count
       FROM senior_citizens
       WHERE socpen_date IS NOT NULL
@@ -201,7 +201,7 @@ exports.getNonSocPenReport = async (year) => {
       `
       SELECT 
         MONTH(nonsocpen_date) AS month,
-      JSON_UNQUOTE(JSON_EXTRACT(form_data, '$.gender')) AS gender,
+        ANY_VALUE(JSON_UNQUOTE(JSON_EXTRACT(form_data, '$.gender'))) AS gender,
         COUNT(*) AS count
       FROM senior_citizens
       WHERE socpen_date IS NULL
@@ -242,7 +242,7 @@ exports.getPDLReport = async (year) => {
       `
       SELECT 
         MONTH(pdl_date) AS month,
-        JSON_UNQUOTE(JSON_EXTRACT(form_data, '$.gender')) AS gender,
+        ANY_VALUE(JSON_UNQUOTE(JSON_EXTRACT(form_data, '$.gender'))) AS gender,
         COUNT(*) AS count
       FROM senior_citizens
       WHERE pdl_date IS NOT NULL
@@ -283,7 +283,7 @@ exports.getNewSeniorReport = async (year) => {
       `
       SELECT 
         MONTH(created_at) AS month,
-       JSON_UNQUOTE(JSON_EXTRACT(form_data, '$.gender')) AS gender,
+        ANY_VALUE(JSON_UNQUOTE(JSON_EXTRACT(form_data, '$.gender'))) AS gender,
         COUNT(*) AS count
       FROM senior_citizens
       WHERE registered = 1
@@ -311,7 +311,7 @@ exports.getNewSeniorReport = async (year) => {
       };
     });
   } catch (err) {
-    console.error("❌ Error fetching new report:", err);
+    console.error("❌ Error fetching pdl report:", err);
     throw err;
   }
 };
@@ -323,7 +323,7 @@ exports.getBookletReport = async (year) => {
       `
       SELECT 
         MONTH(booklet_date) AS month,
-       JSON_UNQUOTE(JSON_EXTRACT(form_data, '$.gender')) AS gender,
+        ANY_VALUE(JSON_UNQUOTE(JSON_EXTRACT(form_data, '$.gender'))) AS gender,
         COUNT(*) AS count
       FROM senior_citizens
       WHERE registered = 1
