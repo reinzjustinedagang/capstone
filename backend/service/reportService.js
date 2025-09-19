@@ -13,6 +13,7 @@ exports.getBarangayDistribution = async () => {
     ON sc.barangay_id = b.id 
    AND sc.deleted = 0 
    AND sc.registered = 1
+   AND archived = 0
   GROUP BY b.id, b.barangay_name
   ORDER BY b.barangay_name ASC
 `;
@@ -37,7 +38,7 @@ exports.getGenderDistribution = async () => {
           ELSE 0 
         END) AS UNSIGNED) AS female_count
       FROM senior_citizens
-      WHERE deleted = 0 AND registered = 1
+      WHERE deleted = 0 AND registered = 1 AND archived = 0
     `;
 
     const result = await Connection(sql);
@@ -59,7 +60,7 @@ exports.getAgeDistribution = async () => {
     CAST(SUM(CASE WHEN CAST(JSON_UNQUOTE(JSON_EXTRACT(form_data, '$.age')) AS UNSIGNED) BETWEEN 81 AND 85 THEN 1 ELSE 0 END) AS UNSIGNED) AS "81_85",
     CAST(SUM(CASE WHEN CAST(JSON_UNQUOTE(JSON_EXTRACT(form_data, '$.age')) AS UNSIGNED) >= 86 THEN 1 ELSE 0 END) AS UNSIGNED) AS "86_plus"
   FROM senior_citizens
-  WHERE deleted = 0 AND registered = 1
+  WHERE deleted = 0 AND registered = 1 AND archived = 0
 `;
 
     const result = await Connection(sql);
