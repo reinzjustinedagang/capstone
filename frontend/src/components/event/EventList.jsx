@@ -95,7 +95,7 @@ const EventList = ({ onEdit }) => {
                   className="absolute top-2 right-12 bg-white/90 hover:bg-white text-blue-500 hover:text-blue-600 p-2 rounded-full shadow z-10"
                   onClick={(e) => {
                     e.stopPropagation();
-                    onEdit(event); // ✅ pass the whole event object
+                    onEdit(event.id); // ✅ pass the whole event object
                   }}
                 >
                   <Edit className="w-4 h-4" />

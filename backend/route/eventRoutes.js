@@ -45,6 +45,15 @@ router.get("/", async (req, res) => {
   }
 });
 
+router.get("/:id", async (req, res) => {
+  try {
+    const data = await eventService.getById((id = req.params.id));
+    res.status(200).json(data);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 // POST create event
 router.post("/", isAuthenticated, upload.single("image"), async (req, res) => {
   const { title, type, description, date } = req.body; // Remove image_url destructure
@@ -90,15 +99,22 @@ router.put(
   upload.single("image"),
   async (req, res) => {
     const { id } = req.params;
-    const { title, type, description, date } = req.body;
+    const {
+      title,
+      type,
+      description,
+      date,
+      image_url: bodyImageUrl,
+    } = req.body;
     const user = req.session.user;
     const ip = req.userIp;
 
     if (!user) return res.status(401).json({ message: "Unauthorized" });
 
     try {
-      let image_url = req.body.image_url || null;
+      let image_url = bodyImageUrl || null;
 
+      // If a new image file is uploaded → upload to Cloudinary
       if (req.file) {
         const result = await new Promise((resolve, reject) => {
           const stream = cloudinary.uploader.upload_stream(
@@ -113,18 +129,23 @@ router.put(
         image_url = result.secure_url;
       }
 
+      // If no new file and no body image_url, fallback to current DB image
+      if (!req.file && !bodyImageUrl) {
+        const current = await eventService.getById(id);
+        if (current && current.image_url) {
+          image_url = current.image_url;
+        }
+      }
+
       const updated = await eventService.update(
         id,
-        title,
-        type,
-        description,
-        date,
-        image_url,
+        { title, type, description, date, image_url },
         user,
         ip
       );
 
       if (!updated) return res.status(404).json({ message: "Event not found" });
+
       res.status(200).json({ message: "Event updated" });
     } catch (err) {
       console.error("Failed to update event:", err);
