@@ -40,6 +40,7 @@ async function initTables() {
         status ENUM('active', 'inactive') DEFAULT 'inactive',
         image TEXT DEFAULT NULL,
         blocked INT DEFAULT 0,
+        registered INT DEFAULT 0,
         last_login TIMESTAMP NULL DEFAULT NULL,
         last_seen TIMESTAMP NULL,
         last_logout TIMESTAMP NULL DEFAULT NULL,

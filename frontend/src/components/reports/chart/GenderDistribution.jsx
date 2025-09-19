@@ -39,13 +39,17 @@ const GenderDistribution = () => {
   return (
     <div className="bg-white p-6 rounded-lg shadow">
       <h3 className="text-lg font-medium mb-4">Gender Distribution</h3>
-      <Pie
-        data={chartData}
-        options={{
-          responsive: true,
-          plugins: { legend: { position: "bottom" } },
-        }}
-      />
+      {/* Chart container with fixed height */}
+      <div className="h-72">
+        <Pie
+          data={chartData}
+          options={{
+            responsive: true,
+            maintainAspectRatio: false, // lets it shrink inside h-72
+            plugins: { legend: { position: "bottom" } },
+          }}
+        />
+      </div>
     </div>
   );
 };

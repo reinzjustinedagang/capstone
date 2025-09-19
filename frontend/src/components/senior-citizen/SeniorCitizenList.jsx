@@ -339,13 +339,13 @@ const SeniorCitizenList = ({ onEdit, onId }) => {
                         >
                           <Edit className="h-5 w-5" />
                         </button>
-                        <button
+                        {/* <button
                           onClick={() => handleDelete(citizen)}
                           className="text-red-600 hover:text-red-900"
                           aria-label={`Delete ${citizen.firstName} ${citizen.lastName}`}
                         >
                           <Trash2 className="h-5 w-5" />
-                        </button>
+                        </button> */}
 
                         {/* More options dropdown */}
                         <div className="relative">
@@ -588,6 +588,7 @@ const SeniorCitizenList = ({ onEdit, onId }) => {
               required
             >
               <option value="">Select a reason</option>
+              <option value="Delete">Delete</option>
               <option value="Deceased">Deceased</option>
               <option value="Other">Other</option>
             </select>

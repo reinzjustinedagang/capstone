@@ -47,17 +47,30 @@ const BarangayDistribution = () => {
   return (
     <div id="demographics" className="bg-white p-6 rounded-lg shadow">
       <h3 className="text-lg font-medium mb-4">Barangay Demographic Reports</h3>
-      <Bar
-        data={chartData}
-        options={{
-          responsive: true,
-          plugins: { legend: { position: "bottom" } },
-          scales: {
-            x: { stacked: false },
-            y: { beginAtZero: true, stacked: false },
-          },
-        }}
-      />
+
+      {/* Scrollable wrapper */}
+      <div className="h-96 overflow-x-auto">
+        <div className="min-w-[600px] h-full">
+          <Bar
+            data={chartData}
+            options={{
+              responsive: true,
+              maintainAspectRatio: false, // make it fill h-96
+              plugins: { legend: { position: "bottom" } },
+              scales: {
+                x: {
+                  stacked: false,
+                  ticks: {
+                    maxRotation: 45, // tilt labels
+                    minRotation: 30,
+                  },
+                },
+                y: { beginAtZero: true, stacked: false },
+              },
+            }}
+          />
+        </div>
+      </div>
     </div>
   );
 };

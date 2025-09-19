@@ -58,7 +58,7 @@ const Header = () => {
     { to: "/organization", label: "Organization", icon: Building },
 
     { to: "/about", label: "About Us", icon: InfoIcon },
-    { to: "/register-guide", label: "Register", icon: UserPlus },
+    // { to: "/register-guide", label: "Register", icon: UserPlus },
     { to: "/login", label: "Login", icon: LogIn },
   ];
 

@@ -3,20 +3,26 @@ const Connection = require("../db/Connection");
 exports.getBarangayDistribution = async () => {
   try {
     const sql = `
-  SELECT 
-    b.id,
-    b.barangay_name AS barangay,
-    CAST(SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(sc.form_data, '$.gender')) = 'Male' THEN 1 ELSE 0 END) AS UNSIGNED) AS male_count,
-    CAST(SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(sc.form_data, '$.gender')) = 'Female' THEN 1 ELSE 0 END) AS UNSIGNED) AS female_count
-  FROM barangays b
-  LEFT JOIN senior_citizens sc 
-    ON sc.barangay_id = b.id 
-   AND sc.deleted = 0 
-   AND sc.registered = 1
-   AND sc.archived = 0
-  GROUP BY b.id, b.barangay_name
-  ORDER BY b.barangay_name ASC
-`;
+      SELECT 
+        b.id,
+        b.barangay_name AS barangay,
+        CAST(SUM(CASE 
+          WHEN LOWER(TRIM(JSON_UNQUOTE(JSON_EXTRACT(sc.form_data, '$.gender')))) = 'male' THEN 1 
+          ELSE 0 
+        END) AS UNSIGNED) AS male_count,
+        CAST(SUM(CASE 
+          WHEN LOWER(TRIM(JSON_UNQUOTE(JSON_EXTRACT(sc.form_data, '$.gender')))) = 'female' THEN 1 
+          ELSE 0 
+        END) AS UNSIGNED) AS female_count
+      FROM barangays b
+      LEFT JOIN senior_citizens sc 
+        ON sc.barangay_id = b.id 
+       AND sc.deleted = 0 
+       AND sc.registered = 1
+       AND sc.archived = 0
+      GROUP BY b.id, b.barangay_name
+      ORDER BY b.barangay_name ASC
+    `;
 
     return await Connection(sql);
   } catch (err) {
@@ -30,11 +36,11 @@ exports.getGenderDistribution = async () => {
     const sql = `
       SELECT 
         CAST(SUM(CASE 
-          WHEN JSON_UNQUOTE(JSON_EXTRACT(form_data, '$.gender')) = 'Male' THEN 1 
+          WHEN LOWER(TRIM(JSON_UNQUOTE(JSON_EXTRACT(form_data, '$.gender')))) = 'male' THEN 1 
           ELSE 0 
         END) AS UNSIGNED) AS male_count,
         CAST(SUM(CASE 
-          WHEN JSON_UNQUOTE(JSON_EXTRACT(form_data, '$.gender')) = 'Female' THEN 1 
+          WHEN LOWER(TRIM(JSON_UNQUOTE(JSON_EXTRACT(form_data, '$.gender')))) = 'female' THEN 1 
           ELSE 0 
         END) AS UNSIGNED) AS female_count
       FROM senior_citizens
@@ -42,7 +48,7 @@ exports.getGenderDistribution = async () => {
     `;
 
     const result = await Connection(sql);
-    return result[0]; // { male_count, female_count }
+    return result[0];
   } catch (err) {
     console.error("❌ Error fetching gender distribution:", err);
     throw err;

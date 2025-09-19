@@ -84,24 +84,6 @@ const SeniorCitizen = () => {
         </div>
 
         <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
-          {/* Recycle Bin */}
-          <NavLink
-            to="/admin/recycle-bin"
-            className="w-full sm:w-auto flex" // full width on mobile
-          >
-            <Button
-              variant="secondary"
-              icon={<ArchiveRestore className="h-4 w-4 mr-2" />}
-              className="w-full sm:w-auto flex justify-center" // full width on mobile, centered content
-            >
-              Recycle Bin
-              {/* Optional badge */}
-              {/* <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-        1
-      </span> */}
-            </Button>
-          </NavLink>
-
           {/* Add New Senior Citizen */}
           <Button
             variant="primary"

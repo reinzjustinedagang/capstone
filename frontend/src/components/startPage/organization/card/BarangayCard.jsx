@@ -10,7 +10,7 @@ const BarangayCard = ({ official, onEdit, onDelete }) => {
         className="text-sm font-semibold text-center mb-2 max-w-full truncate"
         title={official.barangay_name}
       >
-        {official.barangay_name}
+        Brgy. {official.barangay_name.replace(/^Barangay\s+/i, "")}
       </h3>
 
       {/* Profile Picture */}
