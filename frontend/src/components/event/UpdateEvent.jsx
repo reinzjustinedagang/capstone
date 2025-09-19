@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { SaveIcon, Loader2, ImagePlus } from "lucide-react";
+import { SaveIcon, Loader2, ImagePlus, Edit2 } from "lucide-react";
 import Modal from "../UI/Modal";
 import Button from "../UI/Button";
 import CropperModal from "../UI/CropperModal";
@@ -117,8 +117,10 @@ const UpdateEvent = ({ eventId, onSuccess }) => {
   };
 
   return (
-    <div className="bg-white p-6 rounded-lg shadow">
-      <h2 className="text-lg font-semibold mb-4">Update Event</h2>
+    <div className="space-y-6">
+      <h1 className="text-xl font-bold mb-4 text-gray-800 flex items-center gap-2">
+        <Edit2 className="w-6 h-6 text-indigo-600" /> Update Event
+      </h1>
 
       {/* Image Preview */}
       <div>
@@ -158,63 +160,65 @@ const UpdateEvent = ({ eventId, onSuccess }) => {
         </div>
       </div>
 
-      {/* Fields */}
-      <div className="mt-4">
-        <label className="block text-sm font-medium text-gray-700">
-          Event Type
-        </label>
-        <select
-          name="type"
-          value={formData.type}
-          onChange={handleChange}
-          className="mt-1 w-full border rounded-md px-3 py-2"
-        >
-          <option value="event">Event</option>
-        </select>
+      {/* Form Fields */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-700">
+            Event Type
+          </label>
+          <select
+            name="type"
+            value={formData.type}
+            onChange={handleChange}
+            className="mt-1 w-full border rounded-md px-3 py-2 focus:ring-blue-500 focus:outline-none"
+          >
+            <option value="event">Event</option>
+          </select>
+        </div>
+
+        {formData.type === "event" && (
+          <>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">
+                Title
+              </label>
+              <input
+                type="text"
+                name="title"
+                value={formData.title}
+                onChange={handleChange}
+                className="mt-1 w-full border rounded-md px-3 py-2 focus:ring-blue-500 focus:outline-none"
+              />
+            </div>
+
+            <div className="md:col-span-2">
+              <label className="block text-sm font-medium text-gray-700">
+                Description
+              </label>
+              <textarea
+                name="description"
+                value={formData.description}
+                onChange={handleChange}
+                rows={3}
+                className="mt-1 w-full border rounded-md px-3 py-2 focus:ring-blue-500 focus:outline-none"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700">
+                Date
+              </label>
+              <input
+                type="date"
+                name="date"
+                value={formData.date}
+                onChange={handleChange}
+                className="mt-1 w-full border rounded-md px-3 py-2 focus:ring-blue-500 focus:outline-none"
+              />
+            </div>
+          </>
+        )}
       </div>
-
-      {formData.type === "event" && (
-        <>
-          <div className="mt-4">
-            <label className="block text-sm font-medium text-gray-700">
-              Title
-            </label>
-            <input
-              type="text"
-              name="title"
-              value={formData.title}
-              onChange={handleChange}
-              className="mt-1 w-full border rounded-md px-3 py-2"
-            />
-          </div>
-
-          <div className="mt-4">
-            <label className="block text-sm font-medium text-gray-700">
-              Description
-            </label>
-            <textarea
-              name="description"
-              value={formData.description}
-              onChange={handleChange}
-              rows={3}
-              className="mt-1 w-full border rounded-md px-3 py-2"
-            />
-          </div>
-
-          <div className="mt-4">
-            <label className="block text-sm font-medium text-gray-700">
-              Date
-            </label>
-            <input
-              type="date"
-              name="date"
-              value={formData.date}
-              onChange={handleChange}
-              className="mt-1 w-full border rounded-md px-3 py-2"
-            />
-          </div>
-        </>
-      )}
 
       {/* Actions */}
       <div className="flex justify-end gap-3 mt-6">

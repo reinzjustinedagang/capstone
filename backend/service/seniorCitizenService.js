@@ -636,7 +636,7 @@ exports.getRegisteredCount = async () => {
     const result = await Connection(
       `SELECT COUNT(*) AS count 
        FROM senior_citizens 
-       WHERE deleted = 0 AND age >= 60 AND registered = 0`
+       WHERE deleted = 0 AND age >= 60 AND registered = 0 AND archived = 0`
     );
     return result[0].count;
   } catch (error) {
