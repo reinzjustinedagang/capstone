@@ -124,14 +124,14 @@ const Dashboard = () => {
             color="blue"
           />
         </NavLink>
-        <NavLink to="/admin/senior-citizen-list">
+        {/* <NavLink to="/admin/senior-citizen-list">
           <Card
             title="Not Registered Senior Citizens"
             value={loading ? "—" : registerCount}
             icon={<UserRoundX />}
             color="blue"
           />
-        </NavLink>
+        </NavLink> */}
 
         <NavLink to="/admin/barangays">
           <Card

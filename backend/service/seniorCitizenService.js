@@ -253,6 +253,7 @@ exports.createSeniorCitizen = async (data, user, ip) => {
       nonsocpen_date: formData.remarks === "NON-SOCIAL PENSION" ? now : null,
       transferee_date: formData.tranfer?.toLowerCase() === "yes" ? now : null,
       booklet_date: formData.booklet?.toLowerCase() === "yes" ? now : null,
+      utp_date: formData.utp?.toLowerCase() === "yes" ? now : null,
     };
 
     // Insert into DB
@@ -355,6 +356,7 @@ exports.updateSeniorCitizen = async (id, updatedData, user, ip) => {
           : null,
       booklet_date:
         formData.booklet.toLowerCase() === "yes" ? new Date() : null,
+      utp_date: formData.utp.toLowerCase() === "yes" ? new Date() : null,
     };
 
     const result = await Connection(

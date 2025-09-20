@@ -135,4 +135,16 @@ router.get("/booklet", async (req, res) => {
   }
 });
 
+// GET /api/charts/booklet?year=2025
+router.get("/utp", async (req, res) => {
+  const year = req.query.year || new Date().getFullYear();
+  try {
+    const data = await reportService.getUTPReport(year);
+    res.json(data);
+  } catch (err) {
+    console.error("❌ Failed to fetch utp reports:", err);
+    res.status(500).json({ message: "Failed to fetch utp reports." });
+  }
+});
+
 module.exports = router;

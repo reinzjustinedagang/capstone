@@ -7,6 +7,7 @@ import NonSocPenReportsChart from "./chart/NonSocPenReportsChart";
 import PDLReportsChart from "./chart/PDLReportsChart";
 import BookletReportsChart from "./chart/BookletReportsChart";
 import BarangayReportPrint from "./print/BarangayReportPrint";
+import UtpReportsChart from "./chart/UtpReportsChart";
 
 const OscaReportsChart = () => {
   const chartOptions = [
@@ -17,6 +18,7 @@ const OscaReportsChart = () => {
     { label: "Booklet", component: <BookletReportsChart /> },
     { label: "Transferee", component: <TransfereeReportsChart /> },
     { label: "Deceased", component: <DeceasedReportsChart /> },
+    { label: "UTP", component: <UtpReportsChart /> },
   ];
 
   const [selectedChart, setSelectedChart] = useState(chartOptions[0].label);
