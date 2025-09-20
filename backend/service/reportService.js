@@ -1,5 +1,6 @@
 const Connection = require("../db/Connection");
 
+// 📊 Barangay Distribution
 exports.getBarangayDistribution = async () => {
   try {
     const sql = `
@@ -20,6 +21,7 @@ exports.getBarangayDistribution = async () => {
        AND sc.deleted = 0 
        AND sc.registered = 1 
        AND sc.archived = 0
+       AND CAST(JSON_UNQUOTE(JSON_EXTRACT(sc.form_data, '$.age')) AS UNSIGNED) >= 60
       GROUP BY b.id, b.barangay_name
       ORDER BY b.barangay_name ASC
     `;
@@ -30,6 +32,7 @@ exports.getBarangayDistribution = async () => {
   }
 };
 
+// 📊 Gender Distribution
 exports.getGenderDistribution = async () => {
   try {
     const sql = `
@@ -43,7 +46,10 @@ exports.getGenderDistribution = async () => {
           ELSE 0 
         END) AS UNSIGNED) AS female_count
       FROM senior_citizens
-      WHERE deleted = 0 AND registered = 1 AND archived = 0
+      WHERE deleted = 0 
+        AND registered = 1 
+        AND archived = 0
+        AND CAST(JSON_UNQUOTE(JSON_EXTRACT(form_data, '$.age')) AS UNSIGNED) >= 60
     `;
     const result = await Connection(sql);
     return result[0];
