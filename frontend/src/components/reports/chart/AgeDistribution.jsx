@@ -44,7 +44,7 @@ const AgeDistribution = () => {
                 res.data["71_75"],
                 res.data["76_80"],
                 res.data["81_85"],
-                res.data["86_plus"],
+                res.data["86_90"],
                 res.data["90_95"],
                 res.data["96_100"],
                 res.data["100_plus"],
