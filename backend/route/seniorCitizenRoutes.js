@@ -4,6 +4,16 @@ const seniorCitizenService = require("../service/seniorCitizenService");
 const upload = require("../middleware/upload");
 const cloudinary = require("../utils/cloudinary");
 
+router.get("/all", async (req, res) => {
+  try {
+    const citizens = await seniorCitizenService.getAllSeniorCitizens();
+    res.status(200).json(citizens);
+  } catch (error) {
+    console.error("Error fetching all senior citizens:", error);
+    res.status(500).json({ message: "Failed to fetch senior citizens." });
+  }
+});
+
 // GET: Senior citizen by ID
 router.get("/get/:id", async (req, res) => {
   try {

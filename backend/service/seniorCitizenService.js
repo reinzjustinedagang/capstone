@@ -2,6 +2,16 @@ const Connection = require("../db/Connection");
 const { logAudit } = require("./auditService");
 const cloudinary = require("../utils/cloudinary");
 
+exports.getAllSeniorCitizens = async () => {
+  try {
+    const result = await Connection(`SELECT * FROM senior_citizens`);
+    return result;
+  } catch (error) {
+    console.error("Error fetching all senior citizens:", error);
+    throw new Error("Failed to retrieve senior citizens.");
+  }
+};
+
 // Fetch by ID
 exports.getSeniorCitizenById = async (id) => {
   try {
