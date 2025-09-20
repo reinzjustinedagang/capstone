@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Bar } from "react-chartjs-2";
+import { Line } from "react-chartjs-2";
 import axios from "axios";
 import "./chartConfig"; // register chart.js modules
 
@@ -11,7 +11,10 @@ const AgeDistribution = () => {
       {
         label: "Number of Senior Citizens",
         data: [0, 0, 0, 0, 0, 0],
-        backgroundColor: "rgba(59, 130, 246, 0.5)",
+        borderColor: "rgba(59, 130, 246, 1)",
+        backgroundColor: "rgba(59, 130, 246, 0.2)",
+        fill: true,
+        tension: 0.3, // smooth line curve
       },
     ],
   });
@@ -21,7 +24,17 @@ const AgeDistribution = () => {
       try {
         const res = await axios.get(`${backendUrl}/api/charts/age`);
         setChartData({
-          labels: ["60-65", "66-70", "71-75", "76-80", "81-85", "86+"],
+          labels: [
+            "60-65",
+            "66-70",
+            "71-75",
+            "76-80",
+            "81-85",
+            "86-90",
+            "90-95",
+            "96-100",
+            "100+",
+          ],
           datasets: [
             {
               label: "Number of Senior Citizens",
@@ -32,8 +45,14 @@ const AgeDistribution = () => {
                 res.data["76_80"],
                 res.data["81_85"],
                 res.data["86_plus"],
+                res.data["90_95"],
+                res.data["96_100"],
+                res.data["100_plus"],
               ],
-              backgroundColor: "rgba(59, 130, 246, 0.5)",
+              borderColor: "rgba(59, 130, 246, 1)",
+              backgroundColor: "rgba(59, 130, 246, 0.2)",
+              fill: true,
+              tension: 0.3,
             },
           ],
         });
@@ -43,16 +62,24 @@ const AgeDistribution = () => {
     };
 
     fetchData();
-  }, []);
+  }, [backendUrl]);
 
   return (
     <div className="bg-white p-6 rounded-lg shadow">
       <h3 className="text-lg font-medium mb-4">Age Distribution</h3>
-      <Bar
+      <Line
         data={chartData}
         options={{
           responsive: true,
           plugins: { legend: { position: "bottom" } },
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: {
+                precision: 0, // avoids decimals
+              },
+            },
+          },
         }}
       />
     </div>
