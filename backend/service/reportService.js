@@ -7,23 +7,22 @@ exports.getBarangayDistribution = async () => {
         b.id,
         b.barangay_name AS barangay,
         CAST(SUM(CASE 
-          WHEN LOWER(TRIM(JSON_UNQUOTE(JSON_EXTRACT(sc.form_data, '$.gender')))) = 'male' THEN 1 
+          WHEN LOWER(TRIM(sc.gender)) = 'male' THEN 1 
           ELSE 0 
         END) AS UNSIGNED) AS male_count,
         CAST(SUM(CASE 
-          WHEN LOWER(TRIM(JSON_UNQUOTE(JSON_EXTRACT(sc.form_data, '$.gender')))) = 'female' THEN 1 
+          WHEN LOWER(TRIM(sc.gender)) = 'female' THEN 1 
           ELSE 0 
         END) AS UNSIGNED) AS female_count
       FROM barangays b
       LEFT JOIN senior_citizens sc 
         ON sc.barangay_id = b.id 
        AND sc.deleted = 0 
-       AND sc.registered = 1
+       AND sc.registered = 1 
        AND sc.archived = 0
       GROUP BY b.id, b.barangay_name
       ORDER BY b.barangay_name ASC
     `;
-
     return await Connection(sql);
   } catch (err) {
     console.error("❌ Error fetching barangay distribution:", err);
@@ -36,17 +35,16 @@ exports.getGenderDistribution = async () => {
     const sql = `
       SELECT 
         CAST(SUM(CASE 
-          WHEN LOWER(TRIM(JSON_UNQUOTE(JSON_EXTRACT(form_data, '$.gender')))) = 'male' THEN 1 
+          WHEN LOWER(TRIM(gender)) = 'male' THEN 1 
           ELSE 0 
         END) AS UNSIGNED) AS male_count,
         CAST(SUM(CASE 
-          WHEN LOWER(TRIM(JSON_UNQUOTE(JSON_EXTRACT(form_data, '$.gender')))) = 'female' THEN 1 
+          WHEN LOWER(TRIM(gender)) = 'female' THEN 1 
           ELSE 0 
         END) AS UNSIGNED) AS female_count
       FROM senior_citizens
       WHERE deleted = 0 AND registered = 1 AND archived = 0
     `;
-
     const result = await Connection(sql);
     return result[0];
   } catch (err) {
