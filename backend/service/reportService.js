@@ -81,6 +81,7 @@ exports.getAgeDistribution = async () => {
   }
 };
 
+// 📊 Deceased
 exports.getDeceasedReport = async (year) => {
   try {
     const results = await Connection(
@@ -96,32 +97,28 @@ exports.getDeceasedReport = async (year) => {
         AND archive_reason = 'Deceased'
         AND deceased_date IS NOT NULL
         AND YEAR(deceased_date) = ?
+        AND CAST(JSON_UNQUOTE(JSON_EXTRACT(form_data, '$.age')) AS UNSIGNED) >= 60
       GROUP BY MONTH(deceased_date), gender
       ORDER BY MONTH(deceased_date)
       `,
       [year]
     );
-
-    // Format into { month, male, female }
+    // format results
     const months = Array.from({ length: 12 }, (_, i) => i + 1);
-    return months.map((m) => {
-      const male =
-        results.find((r) => r.month === m && r.gender === "Male")?.count || 0;
-      const female =
-        results.find((r) => r.month === m && r.gender === "Female")?.count || 0;
-
-      return {
-        month: new Date(0, m - 1).toLocaleString("en", { month: "short" }),
-        male,
-        female,
-      };
-    });
+    return months.map((m) => ({
+      month: new Date(0, m - 1).toLocaleString("en", { month: "short" }),
+      male:
+        results.find((r) => r.month === m && r.gender === "Male")?.count || 0,
+      female:
+        results.find((r) => r.month === m && r.gender === "Female")?.count || 0,
+    }));
   } catch (err) {
     console.error("❌ Error fetching deceased report:", err);
     throw err;
   }
 };
 
+// 📊 Transferee
 exports.getTransfereeReport = async (year) => {
   try {
     const results = await Connection(
@@ -136,34 +133,27 @@ exports.getTransfereeReport = async (year) => {
         AND registered = 1
         AND deleted = 0
         AND archived = 0
-      GROUP BY 
-        MONTH(transferee_date),
-        JSON_UNQUOTE(JSON_EXTRACT(form_data, '$.gender'))
+        AND CAST(JSON_UNQUOTE(JSON_EXTRACT(form_data, '$.age')) AS UNSIGNED) >= 60
+      GROUP BY MONTH(transferee_date), gender
       ORDER BY MONTH(transferee_date)
       `,
       [year]
     );
-
     const months = Array.from({ length: 12 }, (_, i) => i + 1);
-    return months.map((m) => {
-      const male =
-        results.find((r) => r.month === m && r.gender === "Male")?.count || 0;
-      const female =
-        results.find((r) => r.month === m && r.gender === "Female")?.count || 0;
-
-      return {
-        month: new Date(0, m - 1).toLocaleString("en", { month: "short" }),
-        male,
-        female,
-      };
-    });
+    return months.map((m) => ({
+      month: new Date(0, m - 1).toLocaleString("en", { month: "short" }),
+      male:
+        results.find((r) => r.month === m && r.gender === "Male")?.count || 0,
+      female:
+        results.find((r) => r.month === m && r.gender === "Female")?.count || 0,
+    }));
   } catch (err) {
     console.error("❌ Error in getTransfereeReport:", err);
     throw err;
   }
 };
 
-// Get Social Pension reports by gender per month
+// 📊 SocPen
 exports.getSocPenReport = async (year) => {
   try {
     const results = await Connection(
@@ -178,33 +168,27 @@ exports.getSocPenReport = async (year) => {
         AND registered = 1
         AND deleted = 0
         AND archived = 0
+        AND CAST(JSON_UNQUOTE(JSON_EXTRACT(form_data, '$.age')) AS UNSIGNED) >= 60
       GROUP BY MONTH(socpen_date), gender
       ORDER BY MONTH(socpen_date)
       `,
       [year]
     );
-
     const months = Array.from({ length: 12 }, (_, i) => i + 1);
-
-    return months.map((m) => {
-      const male =
-        results.find((r) => r.month === m && r.gender === "Male")?.count || 0;
-      const female =
-        results.find((r) => r.month === m && r.gender === "Female")?.count || 0;
-
-      return {
-        month: new Date(0, m - 1).toLocaleString("en", { month: "short" }),
-        male,
-        female,
-      };
-    });
+    return months.map((m) => ({
+      month: new Date(0, m - 1).toLocaleString("en", { month: "short" }),
+      male:
+        results.find((r) => r.month === m && r.gender === "Male")?.count || 0,
+      female:
+        results.find((r) => r.month === m && r.gender === "Female")?.count || 0,
+    }));
   } catch (err) {
     console.error("❌ Error fetching SocPen report:", err);
     throw err;
   }
 };
 
-// Get Non-Social Pension reports by gender per month
+// 📊 Non-SocPen
 exports.getNonSocPenReport = async (year) => {
   try {
     const results = await Connection(
@@ -219,33 +203,27 @@ exports.getNonSocPenReport = async (year) => {
         AND registered = 1
         AND deleted = 0
         AND archived = 0
+        AND CAST(JSON_UNQUOTE(JSON_EXTRACT(form_data, '$.age')) AS UNSIGNED) >= 60
       GROUP BY MONTH(nonsocpen_date), gender
       ORDER BY MONTH(nonsocpen_date)
       `,
       [year]
     );
-
     const months = Array.from({ length: 12 }, (_, i) => i + 1);
-
-    return months.map((m) => {
-      const male =
-        results.find((r) => r.month === m && r.gender === "Male")?.count || 0;
-      const female =
-        results.find((r) => r.month === m && r.gender === "Female")?.count || 0;
-
-      return {
-        month: new Date(0, m - 1).toLocaleString("en", { month: "short" }),
-        male,
-        female,
-      };
-    });
+    return months.map((m) => ({
+      month: new Date(0, m - 1).toLocaleString("en", { month: "short" }),
+      male:
+        results.find((r) => r.month === m && r.gender === "Male")?.count || 0,
+      female:
+        results.find((r) => r.month === m && r.gender === "Female")?.count || 0,
+    }));
   } catch (err) {
     console.error("❌ Error fetching Non-SocPen report:", err);
     throw err;
   }
 };
 
-// Get PDL reports by gender per month
+// 📊 PDL
 exports.getPDLReport = async (year) => {
   try {
     const results = await Connection(
@@ -260,33 +238,27 @@ exports.getPDLReport = async (year) => {
         AND registered = 1
         AND deleted = 0
         AND archived = 0
+        AND CAST(JSON_UNQUOTE(JSON_EXTRACT(form_data, '$.age')) AS UNSIGNED) >= 60
       GROUP BY MONTH(pdl_date), gender
       ORDER BY MONTH(pdl_date)
       `,
       [year]
     );
-
     const months = Array.from({ length: 12 }, (_, i) => i + 1);
-
-    return months.map((m) => {
-      const male =
-        results.find((r) => r.month === m && r.gender === "Male")?.count || 0;
-      const female =
-        results.find((r) => r.month === m && r.gender === "Female")?.count || 0;
-
-      return {
-        month: new Date(0, m - 1).toLocaleString("en", { month: "short" }),
-        male,
-        female,
-      };
-    });
+    return months.map((m) => ({
+      month: new Date(0, m - 1).toLocaleString("en", { month: "short" }),
+      male:
+        results.find((r) => r.month === m && r.gender === "Male")?.count || 0,
+      female:
+        results.find((r) => r.month === m && r.gender === "Female")?.count || 0,
+    }));
   } catch (err) {
     console.error("❌ Error fetching pdl report:", err);
     throw err;
   }
 };
 
-// Get New reports by gender per month
+// 📊 New Seniors
 exports.getNewSeniorReport = async (year) => {
   try {
     const results = await Connection(
@@ -300,33 +272,27 @@ exports.getNewSeniorReport = async (year) => {
         AND YEAR(created_at) = ?
         AND deleted = 0
         AND archived = 0
+        AND CAST(JSON_UNQUOTE(JSON_EXTRACT(form_data, '$.age')) AS UNSIGNED) >= 60
       GROUP BY MONTH(created_at), gender
       ORDER BY MONTH(created_at)
       `,
       [year]
     );
-
     const months = Array.from({ length: 12 }, (_, i) => i + 1);
-
-    return months.map((m) => {
-      const male =
-        results.find((r) => r.month === m && r.gender === "Male")?.count || 0;
-      const female =
-        results.find((r) => r.month === m && r.gender === "Female")?.count || 0;
-
-      return {
-        month: new Date(0, m - 1).toLocaleString("en", { month: "short" }),
-        male,
-        female,
-      };
-    });
+    return months.map((m) => ({
+      month: new Date(0, m - 1).toLocaleString("en", { month: "short" }),
+      male:
+        results.find((r) => r.month === m && r.gender === "Male")?.count || 0,
+      female:
+        results.find((r) => r.month === m && r.gender === "Female")?.count || 0,
+    }));
   } catch (err) {
-    console.error("❌ Error fetching pdl report:", err);
+    console.error("❌ Error fetching new senior report:", err);
     throw err;
   }
 };
 
-// Get New booklet by gender per month
+// 📊 Booklet
 exports.getBookletReport = async (year) => {
   try {
     const results = await Connection(
@@ -340,26 +306,20 @@ exports.getBookletReport = async (year) => {
         AND YEAR(booklet_date) = ?
         AND deleted = 0
         AND archived = 0
+        AND CAST(JSON_UNQUOTE(JSON_EXTRACT(form_data, '$.age')) AS UNSIGNED) >= 60
       GROUP BY MONTH(booklet_date), gender
       ORDER BY MONTH(booklet_date)
       `,
       [year]
     );
-
     const months = Array.from({ length: 12 }, (_, i) => i + 1);
-
-    return months.map((m) => {
-      const male =
-        results.find((r) => r.month === m && r.gender === "Male")?.count || 0;
-      const female =
-        results.find((r) => r.month === m && r.gender === "Female")?.count || 0;
-
-      return {
-        month: new Date(0, m - 1).toLocaleString("en", { month: "short" }),
-        male,
-        female,
-      };
-    });
+    return months.map((m) => ({
+      month: new Date(0, m - 1).toLocaleString("en", { month: "short" }),
+      male:
+        results.find((r) => r.month === m && r.gender === "Male")?.count || 0,
+      female:
+        results.find((r) => r.month === m && r.gender === "Female")?.count || 0,
+    }));
   } catch (err) {
     console.error("❌ Error fetching booklet report:", err);
     throw err;
