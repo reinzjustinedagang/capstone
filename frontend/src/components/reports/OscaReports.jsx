@@ -8,6 +8,7 @@ import PDLReportsChart from "./chart/PDLReportsChart";
 import BookletReportsChart from "./chart/BookletReportsChart";
 import BarangayReportPrint from "./print/BarangayReportPrint";
 import UtpReportsChart from "./chart/UtpReportsChart";
+import MonthlySummaryReportPrint from "./print/MonthlySummaryReportPrint";
 
 const OscaReportsChart = () => {
   const chartOptions = [
@@ -57,6 +58,17 @@ const OscaReportsChart = () => {
                     </div>
                   </td>
                 </tr>
+                <tr className="hover:bg-gray-50">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                    Monthly Summary Report
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                    <div className="flex justify-end">
+                      <MonthlySummaryReportPrint />
+                    </div>
+                  </td>
+                </tr>
+
                 {/* Add more reports here */}
               </tbody>
             </table>
