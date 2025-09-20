@@ -11,7 +11,6 @@ const StatisticalSummary = () => {
     const fetchSummary = async () => {
       try {
         const res = await axios.get(`${backendUrl}/api/charts/summary`);
-        console.log("📊 Summary Data:", res.data); // ✅ debug here
         setData(res.data);
       } catch (err) {
         console.error("❌ Failed to fetch summary:", err);
@@ -47,9 +46,6 @@ const StatisticalSummary = () => {
   // Total senior citizens = only Male + Female
   const totalSeniors = male_count + female_count;
 
-  // Active Members estimation (placeholder: ~80% of total)
-  const activeMembers = Math.round(totalSeniors * 0.8);
-
   // Calculate average age
   const ageDist = data.age || {};
   const totalInBuckets = Object.values(ageDist).reduce(
@@ -65,16 +61,41 @@ const StatisticalSummary = () => {
             ageDist["71_75"] * 73 +
             ageDist["76_80"] * 78 +
             ageDist["81_85"] * 83 +
-            ageDist["86_plus"] * 88) /
+            ageDist["86_90"] * 88 +
+            ageDist["90_95"] * 93 +
+            ageDist["96_100"] * 98 +
+            ageDist["100_plus"] * 102) / // pick midpoint / reasonable rep value
           totalInBuckets
         ).toFixed(1)
       : 0;
 
+  // Find the age group with the highest count
+  const maxAgeGroup = Object.entries(ageDist).reduce(
+    (max, [range, count]) =>
+      count > (max.count || 0) ? { range, count } : max,
+    {}
+  );
+
+  // Map backend keys to readable labels
+  const ageLabels = {
+    "60_65": "60-65 years old",
+    "66_70": "66-70 years old",
+    "71_75": "71-75 years old",
+    "76_80": "76-80 years old",
+    "81_85": "81-85 years old",
+    "86_90": "86-90 years old",
+    "90_95": "90-95 years old",
+    "96_100": "96-100 years old",
+    "100_plus": "100+ years old",
+  };
+
+  const majorityObservation = maxAgeGroup.range
+    ? `Majority are between ${ageLabels[maxAgeGroup.range]}`
+    : "No age data available";
+
   // Example observation logic
   const keyObservations = [
-    ageDist["66_70"] > ageDist["60_65"]
-      ? "Majority are between 66-70 years old"
-      : "Majority are between 60-65 years old",
+    majorityObservation,
     female_count > male_count
       ? "Female seniors slightly outnumber male seniors"
       : "Male seniors slightly outnumber female seniors",

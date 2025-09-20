@@ -8,8 +8,9 @@ import {
   Tooltip,
   Legend,
   ArcElement,
-  LineElement, // ✅ use LineElement instead of Line
-  PointElement, // ✅ usually needed for line charts
+  LineElement,
+  PointElement,
+  Filler,
 } from "chart.js";
 
 ChartJS.register(
@@ -20,6 +21,7 @@ ChartJS.register(
   Tooltip,
   Legend,
   ArcElement,
-  LineElement, // ✅ correct element
-  PointElement // ✅ important for line charts
+  LineElement,
+  PointElement,
+  Filler
 );
