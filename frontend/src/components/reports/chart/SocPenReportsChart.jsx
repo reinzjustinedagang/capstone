@@ -7,20 +7,16 @@ const SocPenReportsChart = () => {
   const backendUrl = import.meta.env.VITE_API_BASE_URL;
   const [reports, setReports] = useState([]);
   const [year, setYear] = useState(new Date().getFullYear());
-  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const fetchReports = async () => {
       try {
-        setLoading(true);
         const res = await axios.get(
           `${backendUrl}/api/charts/socpen?year=${year}`
         );
         setReports(res.data || []);
       } catch (err) {
         console.error("Error fetching SocPen reports:", err);
-      } finally {
-        setLoading(false);
       }
     };
     fetchReports();
@@ -62,17 +58,26 @@ const SocPenReportsChart = () => {
         </div>
       </div>
 
-      <Bar
-        data={chartData}
-        options={{
-          responsive: true,
-          plugins: { legend: { position: "bottom" } },
-          scales: {
-            x: { stacked: false }, // side-by-side bars
-            y: { beginAtZero: true, stacked: false },
-          },
-        }}
-      />
+      {/* Scrollable wrapper like BarangayDistribution */}
+      <div className="h-96 overflow-x-auto">
+        <div className="min-w-[600px] h-full">
+          <Bar
+            data={chartData}
+            options={{
+              responsive: true,
+              maintainAspectRatio: false, // fill the h-96 container
+              plugins: { legend: { position: "bottom" } },
+              scales: {
+                x: {
+                  stacked: false,
+                  ticks: { maxRotation: 45, minRotation: 30 },
+                },
+                y: { beginAtZero: true, stacked: false },
+              },
+            }}
+          />
+        </div>
+      </div>
     </div>
   );
 };

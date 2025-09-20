@@ -64,17 +64,25 @@ const SocPenReportsChart = () => {
         </div>
       </div>
 
-      <Bar
-        data={chartData}
-        options={{
-          responsive: true,
-          plugins: { legend: { position: "bottom" } },
-          scales: {
-            x: { stacked: false }, // side-by-side bars
-            y: { beginAtZero: true, stacked: false },
-          },
-        }}
-      />
+      <div className="h-96 overflow-x-auto">
+        <div className="min-w-[600px] h-full">
+          <Bar
+            data={chartData}
+            options={{
+              responsive: true,
+              maintainAspectRatio: false, // fill the h-96 container
+              plugins: { legend: { position: "bottom" } },
+              scales: {
+                x: {
+                  stacked: false,
+                  ticks: { maxRotation: 45, minRotation: 30 },
+                },
+                y: { beginAtZero: true, stacked: false },
+              },
+            }}
+          />
+        </div>
+      </div>
     </div>
   );
 };

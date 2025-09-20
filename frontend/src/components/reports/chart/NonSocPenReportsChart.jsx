@@ -64,17 +64,26 @@ const NonSocPenReportsChart = () => {
         </div>
       </div>
 
-      <Bar
-        data={chartData}
-        options={{
-          responsive: true,
-          plugins: { legend: { position: "bottom" } },
-          scales: {
-            x: { stacked: false },
-            y: { beginAtZero: true, stacked: false },
-          },
-        }}
-      />
+      {/* Scrollable wrapper like BarangayDistribution */}
+      <div className="h-96 overflow-x-auto">
+        <div className="min-w-[600px] h-full">
+          <Bar
+            data={chartData}
+            options={{
+              responsive: true,
+              maintainAspectRatio: false, // fill the h-96 container
+              plugins: { legend: { position: "bottom" } },
+              scales: {
+                x: {
+                  stacked: false,
+                  ticks: { maxRotation: 45, minRotation: 30 },
+                },
+                y: { beginAtZero: true, stacked: false },
+              },
+            }}
+          />
+        </div>
+      </div>
     </div>
   );
 };

@@ -1,28 +1,25 @@
-import React, { useState, useEffect } from "react";
-import axios from "axios";
+import React, { useEffect, useState } from "react";
 import { Bar } from "react-chartjs-2";
 import "./chartConfig";
+import axios from "axios";
 
 const NewSeniorReportsChart = () => {
   const backendUrl = import.meta.env.VITE_API_BASE_URL;
   const [reports, setReports] = useState([]);
   const [year, setYear] = useState(new Date().getFullYear());
-  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const fetchReports = async () => {
       try {
-        setLoading(true);
         const res = await axios.get(
           `${backendUrl}/api/charts/new?year=${year}`
         );
         setReports(res.data || []);
       } catch (err) {
         console.error("Error fetching new reports:", err);
-      } finally {
-        setLoading(false);
       }
     };
+
     fetchReports();
   }, [year, backendUrl]);
 
@@ -62,17 +59,26 @@ const NewSeniorReportsChart = () => {
         </div>
       </div>
 
-      <Bar
-        data={chartData}
-        options={{
-          responsive: true,
-          plugins: { legend: { position: "bottom" } },
-          scales: {
-            x: { stacked: false },
-            y: { beginAtZero: true, stacked: false },
-          },
-        }}
-      />
+      {/* Scrollable wrapper like BarangayDistribution */}
+      <div className="h-96 overflow-x-auto">
+        <div className="min-w-[600px] h-full">
+          <Bar
+            data={chartData}
+            options={{
+              responsive: true,
+              maintainAspectRatio: false, // fill the h-96 container
+              plugins: { legend: { position: "bottom" } },
+              scales: {
+                x: {
+                  stacked: false,
+                  ticks: { maxRotation: 45, minRotation: 30 },
+                },
+                y: { beginAtZero: true, stacked: false },
+              },
+            }}
+          />
+        </div>
+      </div>
     </div>
   );
 };

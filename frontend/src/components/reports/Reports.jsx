@@ -68,7 +68,7 @@ const Reports = () => {
             </button>
           </nav>
         </div>
-        <div className="p-4">
+        <div className="p-6">
           {/* Conditionally render the correct component based on the active tab */}
           {activeTab === "reports" && <OscaReports />}
           {activeTab === "demographics" && <DemographicReports />}

@@ -49,7 +49,7 @@ const BarangayDistribution = () => {
       <h3 className="text-lg font-medium mb-4">Barangay Demographic Reports</h3>
 
       {/* Scrollable wrapper */}
-      <div className="h-96 overflow-x-auto">
+      <div className="h-96 overflow-x-auto appearance-none scrollbar-hide">
         <div className="min-w-[600px] h-full">
           <Bar
             data={chartData}

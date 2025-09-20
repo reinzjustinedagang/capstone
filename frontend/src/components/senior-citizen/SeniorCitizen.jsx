@@ -110,7 +110,7 @@ const SeniorCitizen = () => {
               <UserRoundCheck className="inline-block h-4 w-4 mr-2" />{" "}
               Registered Senior Citizen
             </button>
-            <button
+            {/* <button
               onClick={() => setActiveTab("unregistered")}
               className={`py-4 px-6 text-center border-b-2 font-medium text-sm transition-colors duration-200
                             ${
@@ -121,7 +121,7 @@ const SeniorCitizen = () => {
             >
               <UserRoundX className="inline-block h-4 w-4 mr-2" />
               Not Registered Senior Citizen
-            </button>
+            </button> */}
             <button
               onClick={() => setActiveTab("archived")}
               className={`py-4 px-6 text-center border-b-2 font-medium text-sm transition-colors duration-200

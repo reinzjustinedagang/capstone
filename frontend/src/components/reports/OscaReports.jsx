@@ -1,105 +1,91 @@
-import React, { useRef } from "react";
-import jsPDF from "jspdf";
-import html2canvas from "html2canvas";
-import { GalleryHorizontal, GalleryVertical, MoreVertical } from "lucide-react"; // 3-dot icon
+import React, { useState } from "react";
 import NewSeniorReportsChart from "./chart/NewSeniorReportsChart";
+import DeceasedReportsChart from "./chart/DeceasedReportsChart";
+import TransfereeReportsChart from "./chart/TransfereeReportsChart";
 import SocPenReportsChart from "./chart/SocPenReportsChart";
 import NonSocPenReportsChart from "./chart/NonSocPenReportsChart";
 import PDLReportsChart from "./chart/PDLReportsChart";
 import BookletReportsChart from "./chart/BookletReportsChart";
-import TransfereeReportsChart from "./chart/TransfereeReportsChart";
-import DeceasedReportsChart from "./chart/DeceasedReportsChart";
+import BarangayReportPrint from "./print/BarangayReportPrint";
 
 const OscaReportsChart = () => {
-  // refs for each chart
-  const newSeniorRef = useRef();
-  const socpenRef = useRef();
-  const nonsocpenRef = useRef();
-  const pdlRef = useRef();
-  const bookletRef = useRef();
-  const transfereeRef = useRef();
-  const deceasedRef = useRef();
+  const chartOptions = [
+    { label: "New Senior Citizen", component: <NewSeniorReportsChart /> },
+    { label: "SocPen", component: <SocPenReportsChart /> },
+    { label: "Non-SocPen", component: <NonSocPenReportsChart /> },
+    { label: "PDL", component: <PDLReportsChart /> },
+    { label: "Booklet", component: <BookletReportsChart /> },
+    { label: "Transferee", component: <TransfereeReportsChart /> },
+    { label: "Deceased", component: <DeceasedReportsChart /> },
+  ];
 
-  // Export function
-  const handleExport = async (elementRef, filename, orientation = "p") => {
-    if (!elementRef.current) return;
-    const element = elementRef.current;
+  const [selectedChart, setSelectedChart] = useState(chartOptions[0].label);
 
-    const canvas = await html2canvas(element, { scale: 2 });
-    const imgData = canvas.toDataURL("image/png");
-
-    const pdf = new jsPDF(orientation, "mm", "a4");
-    const pdfWidth = pdf.internal.pageSize.getWidth();
-    const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-
-    pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
-    pdf.save(filename);
-  };
-
-  // Chart wrapper component with print menu
-  const ChartWrapper = ({ children, title, refProp }) => {
-    const [showMenu, setShowMenu] = React.useState(false);
-
-    return (
-      <div>
-        <div className="flex justify-end items-center mb-2">
-          <div className="relative">
-            <button
-              onClick={() => setShowMenu(!showMenu)}
-              className="p-1 rounded hover:bg-gray-200"
-            >
-              <MoreVertical className="h-5 w-5" />
-            </button>
-            {showMenu && (
-              <div className="absolute right-0 mt-1 w-32 bg-white border rounded shadow-lg z-10">
-                <button
-                  className="block w-full text-left px-3 py-2 hover:bg-blue-600 hover:text-white"
-                  onClick={() => handleExport(refProp, `${title}.pdf`, "p")}
-                >
-                  <GalleryHorizontal className="h-4 w-4 inline mr-2" />
-                  Portrait
-                </button>
-                <button
-                  className="block w-full text-left px-3 py-2 hover:bg-blue-600 hover:text-white"
-                  onClick={() => handleExport(refProp, `${title}.pdf`, "l")}
-                >
-                  <GalleryVertical className="h-4 w-4 inline mr-2" />
-                  Landscape
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
-        <div ref={refProp}>{children}</div>
-      </div>
-    );
+  const renderSelectedChart = () => {
+    const chart = chartOptions.find((c) => c.label === selectedChart);
+    return chart?.component || null;
   };
 
   return (
     <div className="space-y-6">
-      <ChartWrapper title="New Senior Citizens" refProp={newSeniorRef}>
-        <NewSeniorReportsChart />
-      </ChartWrapper>
+      <div>
+        <h2 className="text-lg font-medium mb-4">Printable Reports</h2>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <ChartWrapper title="Social Pension" refProp={socpenRef}>
-          <SocPenReportsChart />
-        </ChartWrapper>
-        <ChartWrapper title="Non-Social Pension" refProp={nonsocpenRef}>
-          <NonSocPenReportsChart />
-        </ChartWrapper>
-        <ChartWrapper title="PDL" refProp={pdlRef}>
-          <PDLReportsChart />
-        </ChartWrapper>
-        <ChartWrapper title="Booklet" refProp={bookletRef}>
-          <BookletReportsChart />
-        </ChartWrapper>
-        <ChartWrapper title="Transferee" refProp={transfereeRef}>
-          <TransfereeReportsChart />
-        </ChartWrapper>
-        <ChartWrapper title="Deceased" refProp={deceasedRef}>
-          <DeceasedReportsChart />
-        </ChartWrapper>
+        <div className="bg-white rounded-lg shadow overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200 table-fixed">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="w-3/4 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Report Name
+                  </th>
+                  <th className="w-1/4 px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                <tr className="hover:bg-gray-50">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                    Barangay Report
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                    <div className="flex justify-end">
+                      <BarangayReportPrint />
+                    </div>
+                  </td>
+                </tr>
+                {/* Add more reports here */}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      {/* Other Reports Section */}
+      <div className=" rounded-lg">
+        <h2 className="text-lg font-medium mb-4">Statistical Reports</h2>
+
+        {/* Dropdown to select charts */}
+        <div className="flex items-center gap-3 mb-4">
+          <label className="font-medium text-gray-600">Select Report:</label>
+          <select
+            value={selectedChart}
+            onChange={(e) => setSelectedChart(e.target.value)}
+            className="border border-gray-300 px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          >
+            {chartOptions.map((option) => (
+              <option key={option.label} value={option.label}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* Render the selected chart */}
+        <div className="bg-white rounded-lg shadow">
+          {renderSelectedChart()}
+        </div>
       </div>
     </div>
   );

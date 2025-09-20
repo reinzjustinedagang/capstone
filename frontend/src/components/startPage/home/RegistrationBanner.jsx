@@ -55,14 +55,14 @@ const RegistrationBanner = () => {
         Occidental Mindoro. Join the community, register, and be counted today!
       </p>
 
-      <div className="flex flex-col sm:flex-row justify-center gap-4 mb-4">
+      {/* <div className="flex flex-col sm:flex-row justify-center gap-4 mb-4">
         <NavLink to="/register-senior">
           <button className="m-5 px-6 py-3 bg-blue-700 text-white font-semibold rounded-md hover:bg-blue-800 transition">
             Register Now!
           </button>
         </NavLink>
-      </div>
-      <div className="flex flex-col sm:flex-row justify-center gap-8 mt-4 text-gray-700">
+      </div> */}
+      {/* <div className="flex flex-col sm:flex-row justify-center gap-8 mt-4 text-gray-700">
         <div>
           <p className="font-semibold">How to Register?</p>
           <NavLink
@@ -81,7 +81,7 @@ const RegistrationBanner = () => {
             Registration Distribution by Barangay
           </NavLink>
         </div>
-      </div>
+      </div> */}
     </section>
   );
 };
