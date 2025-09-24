@@ -41,9 +41,9 @@ exports.sendSMS = async (message, recipients) => {
         [
           log.recipient,
           log.message,
-          log.status || "Pending",
+          log.status || "Sent", // ⬅️ Default to Success
           log.message_id || null,
-          log.credits_used || 1,
+          1,
         ]
       );
     }
@@ -57,105 +57,6 @@ exports.sendSMS = async (message, recipients) => {
       `INSERT INTO sms_logs (recipients, message, status, reference_id, credit_used)
        VALUES (?, ?, ?, ?, ?)`,
       [JSON.stringify(recipients), message, "Failed", null, 0]
-    );
-
-    return { success: false, response: error.message };
-  }
-};
-
-exports.checkMessageStatus = async (messageId) => {
-  try {
-    const [credentials] = await Connection(
-      "SELECT * FROM sms_credentials LIMIT 1"
-    );
-    if (!credentials) throw new Error("SMS credentials not found.");
-
-    const response = await axios.get(
-      `https://api.semaphore.co/api/v4/messages/${messageId}`,
-      {
-        headers: { Authorization: `Bearer ${credentials.api_key}` },
-      }
-    );
-
-    const data = response.data;
-
-    if (data && data.status) {
-      await Connection(
-        `UPDATE sms_logs 
-         SET status = ? 
-         WHERE reference_id = ?`,
-        [data.status, messageId]
-      );
-    }
-
-    return data;
-  } catch (error) {
-    console.error(
-      "Error checking message status:",
-      error.response?.data || error.message
-    );
-
-    throw new Error("Failed to check message status.");
-  }
-};
-
-exports.sendOtp = async (recipient, message, customCode = null) => {
-  try {
-    const [credentials] = await Connection(
-      "SELECT * FROM sms_credentials LIMIT 1"
-    );
-
-    if (!credentials) throw new Error("SMS credentials not found.");
-
-    const params = new URLSearchParams();
-    params.append("apikey", credentials.api_key);
-    params.append("number", recipient);
-    params.append("message", message);
-
-    if (credentials.sender_id) {
-      params.append("sendername", credentials.sender_id);
-    }
-
-    // Optional: provide your own OTP code
-    if (customCode) {
-      params.append("code", customCode);
-    }
-
-    const response = await axios.post(
-      "https://api.semaphore.co/api/v4/otp",
-      params.toString(),
-      {
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      }
-    );
-
-    const data = response.data;
-    const logs = Array.isArray(data) ? data : [data];
-
-    // Save OTP logs
-    for (const log of logs) {
-      await Connection(
-        `INSERT INTO sms_logs (recipients, message, status, reference_id, credit_used)
-         VALUES (?, ?, ?, ?, ?)`,
-        [
-          log.recipient,
-          log.message,
-          log.status || "Pending",
-          log.message_id || null,
-          log.credits_used || 2, // OTPs cost 2 credits
-        ]
-      );
-    }
-
-    return { success: true, response: data };
-  } catch (error) {
-    console.error("Error sending OTP:", error.response?.data || error.message);
-
-    // Log failure
-    await Connection(
-      `INSERT INTO sms_logs (recipients, message, status, reference_id, credit_used)
-       VALUES (?, ?, ?, ?, ?)`,
-      [recipient, message, "Failed", null, 0]
     );
 
     return { success: false, response: error.message };
