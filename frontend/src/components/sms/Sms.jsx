@@ -11,6 +11,8 @@ import {
 import Button from "../UI/Button";
 import MessageTemplates from "./MessageTemplates";
 import MessageHistory from "./MessageHistory";
+import { CheckCircle, XCircle } from "lucide-react";
+import Modal from "../UI/Modal";
 import axios from "axios";
 
 const Sms = () => {
@@ -25,6 +27,9 @@ const Sms = () => {
   const [loadingPage, setLoadingPage] = useState(false); // ✅ global actions (send SMS, etc.)
   const [loadingRecipients, setLoadingRecipients] = useState(false); // ✅ only for recipients list
   const [searchText, setSearchText] = useState("");
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [showErrorModal, setShowErrorModal] = useState(false);
+  const [modalMessage, setModalMessage] = useState("");
 
   const backendUrl = import.meta.env.VITE_API_BASE_URL;
 
@@ -112,7 +117,7 @@ const Sms = () => {
 
     if (!numbers.length || !messageText) return;
 
-    setLoadingPage(true); // ✅ global loader for sending
+    setLoadingPage(true);
     try {
       const res = await axios.post(`${backendUrl}/api/sms/send-sms`, {
         numbers,
@@ -123,7 +128,9 @@ const Sms = () => {
         res.data?.message ||
         res.data?.response?.data?.message ||
         "✅ Broadcast sent successfully";
-      alert(msg);
+
+      setModalMessage(msg);
+      setShowSuccessModal(true); // ✅ open success modal
 
       // Reset form
       setMessageText("");
@@ -135,7 +142,9 @@ const Sms = () => {
         err.response?.data?.message ||
         err.response?.data?.error ||
         "❌ Failed to send messages.";
-      alert(msg);
+
+      setModalMessage(msg);
+      setShowErrorModal(true); // ✅ open error modal
     } finally {
       setLoadingPage(false);
     }
@@ -362,6 +371,41 @@ const Sms = () => {
         {activeTab === "templates" && <MessageTemplates />}
         {activeTab === "history" && <MessageHistory />}
       </div>
+      {/* Success Modal */}
+      <Modal
+        isOpen={showSuccessModal}
+        onClose={() => setShowSuccessModal(false)}
+        title="Success"
+      >
+        <div className="p-6 text-center">
+          <div className="mx-auto mb-4 w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+            <CheckCircle className="w-6 h-6 text-green-500" />
+          </div>
+          <h3 className="text-lg font-medium text-gray-800 mb-2">Success</h3>
+          <p className="text-sm text-gray-600 mb-4">{modalMessage}</p>
+          <Button variant="primary" onClick={() => setShowSuccessModal(false)}>
+            OK
+          </Button>
+        </div>
+      </Modal>
+
+      {/* Error Modal */}
+      <Modal
+        isOpen={showErrorModal}
+        onClose={() => setShowErrorModal(false)}
+        title="Error"
+      >
+        <div className="p-6 text-center">
+          <div className="mx-auto mb-4 w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
+            <XCircle className="w-6 h-6 text-red-500" />
+          </div>
+          <h3 className="text-lg font-medium text-gray-800 mb-2">Error</h3>
+          <p className="text-sm text-gray-600 mb-4">{modalMessage}</p>
+          <Button variant="primary" onClick={() => setShowErrorModal(false)}>
+            Close
+          </Button>
+        </div>
+      </Modal>
     </div>
   );
 };

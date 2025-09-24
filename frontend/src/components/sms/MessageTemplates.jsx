@@ -21,6 +21,9 @@ const MessageTemplates = () => {
   const [templates, setTemplates] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [addLoading, setAddLoading] = useState(false);
+  const [updateLoading, setUpdateLoading] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   const backendUrl = import.meta.env.VITE_API_BASE_URL;
 
@@ -46,6 +49,7 @@ const MessageTemplates = () => {
       return;
     }
     try {
+      setAddLoading(true);
       await axios.post(`${backendUrl}/api/templates/`, newTemplate, {
         withCredentials: true,
       });
@@ -53,21 +57,22 @@ const MessageTemplates = () => {
       setShowAddModal(false);
       fetchTemplates();
       setNewTemplate({ name: "", category: "", message: "" });
-      setError(""); // clear error
+      setError("");
     } catch (err) {
       console.error("Add failed", err);
       setError("Failed to add template.");
+    } finally {
+      setAddLoading(false);
     }
   };
 
   const handleUpdateTemplate = async () => {
     try {
+      setUpdateLoading(true);
       await axios.put(
         `${backendUrl}/api/templates/${selectedTemplate.id}`,
         selectedTemplate,
-        {
-          withCredentials: true,
-        }
+        { withCredentials: true }
       );
 
       setShowEditModal(false);
@@ -76,11 +81,14 @@ const MessageTemplates = () => {
     } catch (err) {
       console.error("Update failed", err);
       setError("Failed to update template.");
+    } finally {
+      setUpdateLoading(false);
     }
   };
 
   const handleConfirmDelete = async () => {
     try {
+      setDeleteLoading(true);
       await axios.delete(`${backendUrl}/api/templates/${selectedTemplate.id}`, {
         withCredentials: true,
       });
@@ -89,6 +97,8 @@ const MessageTemplates = () => {
       fetchTemplates();
     } catch (err) {
       console.error("Delete failed", err);
+    } finally {
+      setDeleteLoading(false);
     }
   };
 
@@ -241,8 +251,18 @@ const MessageTemplates = () => {
               >
                 Cancel
               </Button>
-              <Button variant="primary" onClick={handleAddTemplate}>
-                Save Template
+              <Button
+                variant="primary"
+                onClick={handleAddTemplate}
+                disabled={addLoading}
+              >
+                {addLoading ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin mr-2" /> Saving...
+                  </>
+                ) : (
+                  "Save Template"
+                )}
               </Button>
             </div>
           </form>
@@ -328,8 +348,19 @@ const MessageTemplates = () => {
               >
                 Cancel
               </Button>
-              <Button variant="primary" onClick={handleUpdateTemplate}>
-                Update Template
+              <Button
+                variant="primary"
+                onClick={handleUpdateTemplate}
+                disabled={updateLoading}
+              >
+                {updateLoading ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin mr-2" />{" "}
+                    Updating...
+                  </>
+                ) : (
+                  "Update Template"
+                )}
               </Button>
             </div>
           </form>
@@ -353,8 +384,18 @@ const MessageTemplates = () => {
             >
               Cancel
             </Button>
-            <Button variant="danger" onClick={handleConfirmDelete}>
-              Delete
+            <Button
+              variant="danger"
+              onClick={handleConfirmDelete}
+              disabled={deleteLoading}
+            >
+              {deleteLoading ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" /> Deleting...
+                </>
+              ) : (
+                "Delete"
+              )}
             </Button>
           </div>
         </div>

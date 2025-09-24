@@ -41,7 +41,7 @@ exports.sendSMS = async (message, recipients) => {
         [
           log.recipient,
           log.message,
-          log.status || "Sent", // ⬅️ Default to Success
+          log.status === "Pending" ? "Sent" : log.status, // ⬅️ Default to Success
           log.message_id || null,
           1,
         ]
