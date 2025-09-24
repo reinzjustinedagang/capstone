@@ -2,14 +2,19 @@ const Connection = require("../db/Connection");
 const { logAudit } = require("./auditService");
 const cloudinary = require("../utils/cloudinary");
 
-// Generate next unique idNumber (6-digit like 011419)
+// Generate next unique idNumber (6-digit like 000013)
 const generateUniqueIdNumber = async () => {
-  // Get the latest idNumber in DB
   const result = await Connection(
-    `SELECT JSON_UNQUOTE(JSON_EXTRACT(form_data, '$.idNumber')) AS idNumber
+    `SELECT REGEXP_REPLACE(
+        JSON_UNQUOTE(JSON_EXTRACT(form_data, '$.idNumber')),
+        '[^0-9]', ''
+      ) AS idNumber
      FROM senior_citizens
      WHERE JSON_EXTRACT(form_data, '$.idNumber') IS NOT NULL
-     ORDER BY CAST(JSON_UNQUOTE(JSON_EXTRACT(form_data, '$.idNumber')) AS UNSIGNED) DESC
+     ORDER BY CAST(REGEXP_REPLACE(
+        JSON_UNQUOTE(JSON_EXTRACT(form_data, '$.idNumber')),
+        '[^0-9]', ''
+      ) AS UNSIGNED) DESC
      LIMIT 1`
   );
 
@@ -271,6 +276,11 @@ exports.createSeniorCitizen = async (data, user, ip) => {
     // Handle conditional date fields based on form_data
     const formData = data.form_data || {};
 
+    if (formData.idNumber) {
+      formData.idNumber = formData.idNumber.replace(/\D/g, ""); // remove non-digits
+      formData.idNumber = formData.idNumber.padStart(6, "0");
+    }
+
     // ✅ Handle idNumber
     if (!formData.idNumber || formData.idNumber.trim() === "") {
       formData.idNumber = await generateUniqueIdNumber();
@@ -384,6 +394,11 @@ exports.updateSeniorCitizen = async (id, updatedData, user, ip) => {
       typeof existing.form_data === "string"
         ? JSON.parse(existing.form_data)
         : existing.form_data || {};
+
+    if (formData.idNumber) {
+      formData.idNumber = formData.idNumber.replace(/\D/g, ""); // remove non-digits
+      formData.idNumber = formData.idNumber.padStart(6, "0");
+    }
 
     // ✅ Check for duplicate idNumber if changed
     if (formData.idNumber && formData.idNumber !== oldFormData.idNumber) {
@@ -822,8 +837,6 @@ exports.archiveSeniorCitizen = async (id, reason, deceasedDate, user, ip) => {
         user.email,
         user.role,
         "Archive",
-        "Senior Citizen",
-        id,
         `Archived senior citizen with ID: ${id}. Reason: ${reason}${
           deceasedDate ? `, Date of Death: ${deceasedDate}` : ""
         }`,
@@ -854,8 +867,6 @@ exports.restoreArchivedSeniorCitizen = async (id, user, ip) => {
         user.email,
         user.role,
         "Restore",
-        "Senior Citizen",
-        id,
         `Restored archived senior citizen with ID: ${id}`,
         ip
       );

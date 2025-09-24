@@ -43,7 +43,7 @@ exports.sendSMS = async (message, recipients) => {
           log.message,
           log.status === "Pending" ? "Sent" : log.status, // ⬅️ Default to Success
           log.message_id || null,
-          1,
+          log.credits_used || 0,
         ]
       );
     }
