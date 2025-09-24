@@ -2,6 +2,41 @@ const Connection = require("../db/Connection");
 const { logAudit } = require("./auditService");
 const cloudinary = require("../utils/cloudinary");
 
+// Generate next unique idNumber (6-digit like 011419)
+const generateUniqueIdNumber = async () => {
+  // Get the latest idNumber in DB
+  const result = await Connection(
+    `SELECT JSON_UNQUOTE(JSON_EXTRACT(form_data, '$.idNumber')) AS idNumber
+     FROM senior_citizens
+     WHERE JSON_EXTRACT(form_data, '$.idNumber') IS NOT NULL
+     ORDER BY CAST(JSON_UNQUOTE(JSON_EXTRACT(form_data, '$.idNumber')) AS UNSIGNED) DESC
+     LIMIT 1`
+  );
+
+  let lastId = result[0]?.idNumber || "000000";
+  let nextId = (parseInt(lastId, 10) + 1).toString().padStart(6, "0");
+
+  return nextId;
+};
+
+// Check duplicate idNumber
+const isDuplicateIdNumber = async (idNumber, excludeId = null) => {
+  let sql = `
+    SELECT id FROM senior_citizens
+    WHERE JSON_UNQUOTE(JSON_EXTRACT(form_data, '$.idNumber')) = ?
+      AND deleted = 0
+  `;
+  const params = [idNumber];
+
+  if (excludeId) {
+    sql += " AND id != ?";
+    params.push(excludeId);
+  }
+
+  const result = await Connection(sql, params);
+  return result.length > 0;
+};
+
 exports.getAllSeniorCitizens = async () => {
   try {
     const result = await Connection(`SELECT * FROM senior_citizens`);
@@ -235,6 +270,20 @@ exports.createSeniorCitizen = async (data, user, ip) => {
 
     // Handle conditional date fields based on form_data
     const formData = data.form_data || {};
+
+    // ✅ Handle idNumber
+    if (!formData.idNumber || formData.idNumber.trim() === "") {
+      formData.idNumber = await generateUniqueIdNumber();
+    } else {
+      if (await isDuplicateIdNumber(formData.idNumber)) {
+        const err = new Error(
+          `ID Number '${formData.idNumber}' already exists.`
+        );
+        err.code = 409;
+        throw err;
+      }
+    }
+
     const now = new Date();
 
     const insertData = {
@@ -330,6 +379,23 @@ exports.updateSeniorCitizen = async (id, updatedData, user, ip) => {
 
     // ✅ Logic for special date fields based on form_data
     const formData = updatedData.form_data || {};
+
+    const oldFormData =
+      typeof existing.form_data === "string"
+        ? JSON.parse(existing.form_data)
+        : existing.form_data || {};
+
+    // ✅ Check for duplicate idNumber if changed
+    if (formData.idNumber && formData.idNumber !== oldFormData.idNumber) {
+      if (await isDuplicateIdNumber(formData.idNumber, id)) {
+        const err = new Error(
+          `ID Number '${formData.idNumber}' already exists.`
+        );
+        err.code = 409;
+        throw err;
+      }
+    }
+
     const updateData = {
       firstName: updatedData.firstName,
       lastName: updatedData.lastName,

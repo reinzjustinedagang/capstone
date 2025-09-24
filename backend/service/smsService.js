@@ -37,13 +37,13 @@ exports.sendSMS = async (message, recipients) => {
     for (const log of logs) {
       await Connection(
         `INSERT INTO sms_logs (recipients, message, status, reference_id, credit_used)
-         VALUES (?, ?, ?, ?, ?)`,
+     VALUES (?, ?, ?, ?, ?)`,
         [
           log.recipient,
           log.message,
-          log.status || "Pending",
+          log.status || "Success", // ⬅️ Default to Success
           log.message_id || null,
-          1, // Assume 1 credit per message
+          1,
         ]
       );
     }
