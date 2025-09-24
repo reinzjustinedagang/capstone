@@ -7,7 +7,6 @@ exports.sendSMS = async (message, recipients) => {
     const [credentials] = await Connection(
       "SELECT * FROM sms_credentials LIMIT 1"
     );
-
     if (!credentials) throw new Error("SMS credentials not found.");
 
     // Convert recipients array to comma-separated string
@@ -25,41 +24,62 @@ exports.sendSMS = async (message, recipients) => {
     const response = await axios.post(
       "https://api.semaphore.co/api/v4/messages",
       params.toString(),
-      {
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      }
+      { headers: { "Content-Type": "application/x-www-form-urlencoded" } }
     );
 
-    const data = response.data;
-
-    // Save each message individually in SMS logs
+    const data = response.data; // should be an array (one per recipient)
     const logs = Array.isArray(data) ? data : [data];
+
+    // Save each message log with updated status
     for (const log of logs) {
+      let finalStatus = log.status || "pending"; // default
+
+      try {
+        // 🔍 Check Semaphore for latest status
+        const statusRes = await axios.get(
+          `https://api.semaphore.co/api/v4/messages/${log.message_id}`,
+          {
+            headers: { Authorization: `Bearer ${credentials.api_key}` },
+          }
+        );
+
+        if (statusRes.data?.status) {
+          finalStatus = statusRes.data.status; // e.g. "sent", "failed", "queued"
+        }
+      } catch (err) {
+        console.warn(
+          `Could not fetch status for ${log.message_id}:`,
+          err.response?.data || err.message
+        );
+      }
+
       await Connection(
-        `INSERT INTO sms_logs (recipients, message, status, reference_id, credit_used)
-     VALUES (?, ?, ?, ?, ?)`,
+        `INSERT INTO sms_logs 
+          (recipients, message, status, reference_id, credit_used, created_at)
+         VALUES (?, ?, ?, ?, ?, NOW())`,
         [
           log.recipient,
           log.message,
-          log.status || "Success", // ⬅️ Default to Success
+          finalStatus,
           log.message_id || null,
-          1,
+          log.credits_used || 1,
         ]
       );
     }
 
-    return { success: true, response: data };
+    return { success: true, response: logs };
   } catch (error) {
-    console.error("Error sending SMS:", error);
+    console.error("Error sending SMS:", error.response?.data || error.message);
 
-    // Log failure for all recipients
+    // Log failure for tracking
     await Connection(
-      `INSERT INTO sms_logs (recipients, message, status, reference_id, credit_used)
-       VALUES (?, ?, ?, ?, ?)`,
-      [JSON.stringify(recipients), message, "Failed", null, 0]
+      `INSERT INTO sms_logs 
+        (recipients, message, status, reference_id, credit_used, created_at)
+       VALUES (?, ?, ?, ?, ?, NOW())`,
+      [JSON.stringify(recipients), message, "failed", null, 0]
     );
 
-    return { success: false, response: error.message };
+    return { success: false, response: error.response?.data || error.message };
   }
 };
 
