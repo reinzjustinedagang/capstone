@@ -173,7 +173,7 @@ export default function ForgotPassword() {
             to="/login"
             className="font-medium text-indigo-600 hover:text-indigo-500 transition-colors duration-200"
           >
-            Back to Sign in
+            Back to Login
           </Link>
         </p>
       </div>

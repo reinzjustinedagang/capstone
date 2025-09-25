@@ -130,6 +130,7 @@ router.put("/sms-credentials", async (req, res) => {
 // ✅ Request OTP
 router.post("/request-otp", async (req, res) => {
   try {
+    console.log("Incoming OTP request body:", req.body); // ✅ Debug log
     const { cpNumber } = req.body;
     await smsService.requestOtp(cpNumber);
     res.json({ success: true, message: "OTP sent successfully" });

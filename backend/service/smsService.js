@@ -188,8 +188,8 @@ exports.requestOtp = async (cpNumber) => {
     [cpNumber, otp]
   );
 
-  // Send SMS
-  const smsResult = await smsService.sendSMS(`Your OTP code is ${otp}`, [
+  // Send SMS (use exports.sendSMS, not smsService.sendSMS)
+  const smsResult = await exports.sendSMS(`Your OTP code is ${otp}`, [
     cpNumber,
   ]);
 
