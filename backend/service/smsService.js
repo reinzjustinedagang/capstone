@@ -182,7 +182,7 @@ exports.requestOtp = async (cpNumber) => {
 
   // Save OTP in DB with expiration (5 mins)
   await Connection(
-    `INSERT INTO otp_codes (cp_number, otp, expires_at) 
+    `INSERT INTO otp_codes (mobile, otp, expires_at) 
      VALUES (?, ?, DATE_ADD(NOW(), INTERVAL 5 MINUTE))
      ON DUPLICATE KEY UPDATE otp = VALUES(otp), expires_at = VALUES(expires_at)`,
     [cpNumber, otp]
@@ -205,7 +205,7 @@ exports.requestOtp = async (cpNumber) => {
  */
 exports.verifyOtp = async (cpNumber, otp) => {
   const [record] = await Connection(
-    `SELECT * FROM otp_codes WHERE cp_number = ? AND expires_at > NOW()`,
+    `SELECT * FROM otp_codes WHERE mobile = ? AND expires_at > NOW()`,
     [cpNumber]
   );
 
@@ -214,7 +214,7 @@ exports.verifyOtp = async (cpNumber, otp) => {
   }
 
   // Optional: delete OTP after successful verification
-  await Connection(`DELETE FROM otp_codes WHERE cp_number = ?`, [cpNumber]);
+  await Connection(`DELETE FROM otp_codes WHERE mobile = ?`, [cpNumber]);
 
   return true;
 };
@@ -226,7 +226,7 @@ exports.resetPassword = async (cpNumber, newPassword) => {
   const hashed = await bcrypt.hash(newPassword, 10);
 
   const result = await Connection(
-    `UPDATE users SET password = ? WHERE cp_number = ?`,
+    `UPDATE users SET password = ? WHERE mobile = ?`,
     [hashed, cpNumber]
   );
 
