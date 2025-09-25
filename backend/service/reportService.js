@@ -365,3 +365,42 @@ exports.getUTPReport = async (year) => {
     throw err;
   }
 };
+
+// 📊 Pensioner Report (Totals Only)
+exports.getPensionerReport = async () => {
+  try {
+    const [results] = await Connection(
+      `
+      SELECT 
+        JSON_UNQUOTE(JSON_EXTRACT(form_data, '$.pensioner')) AS pensioner,
+        COUNT(*) AS count
+      FROM senior_citizens
+      WHERE registered = 1
+        AND deleted = 0
+        AND archived = 0
+        AND CAST(JSON_UNQUOTE(JSON_EXTRACT(form_data, '$.age')) AS UNSIGNED) >= 60
+        AND JSON_UNQUOTE(JSON_EXTRACT(form_data, '$.pensioner')) IN ('GSIS','SSS','PVAO','PWD')
+      GROUP BY pensioner
+      `
+    );
+
+    // Map results into fixed structure
+    const report = {
+      GSIS: 0,
+      SSS: 0,
+      PVAO: 0,
+      PWD: 0,
+    };
+
+    results.forEach((r) => {
+      if (report.hasOwnProperty(r.pensioner)) {
+        report[r.pensioner] = r.count;
+      }
+    });
+
+    return report;
+  } catch (err) {
+    console.error("❌ Error fetching pensioner report:", err);
+    throw err;
+  }
+};

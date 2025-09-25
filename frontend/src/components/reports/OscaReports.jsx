@@ -9,6 +9,7 @@ import BookletReportsChart from "./chart/BookletReportsChart";
 import BarangayReportPrint from "./print/BarangayReportPrint";
 import UtpReportsChart from "./chart/UtpReportsChart";
 import MonthlySummaryReportPrint from "./print/MonthlySummaryReportPrint";
+import PensionerDistribution from "./chart/PensionerDistribution";
 
 const OscaReportsChart = () => {
   const chartOptions = [
@@ -99,6 +100,9 @@ const OscaReportsChart = () => {
         {/* Render the selected chart */}
         <div className="bg-white rounded-lg shadow">
           {renderSelectedChart()}
+        </div>
+        <div className="mt-6 bg-white rounded-lg shadow">
+          <PensionerDistribution />
         </div>
       </div>
     </div>

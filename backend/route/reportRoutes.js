@@ -147,4 +147,15 @@ router.get("/utp", async (req, res) => {
   }
 });
 
+// GET /api/charts/pensioner
+router.get("/pensioner", async (req, res) => {
+  try {
+    const data = await reportService.getPensionerReport();
+    res.json(data);
+  } catch (err) {
+    console.error("❌ Failed to fetch pensioner reports:", err);
+    res.status(500).json({ message: "Failed to fetch pensioner reports." });
+  }
+});
+
 module.exports = router;
