@@ -138,7 +138,7 @@ async function initTables() {
       `
   CREATE TABLE IF NOT EXISTS otp_codes (
     id INT AUTO_INCREMENT PRIMARY KEY,  
-    mobile VARCHAR(15) NOT NULL,        
+    cp_number VARCHAR(15) NOT NULL,        
     otp VARCHAR(6) NOT NULL,            
     purpose VARCHAR(50),                
     expires_at DATETIME,                

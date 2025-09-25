@@ -1,7 +1,7 @@
 const axios = require("axios");
 const Connection = require("../db/Connection");
 const { logAudit } = require("./auditService");
-const bcrypt = require("bcryptjs");
+const bcrypt = require("bcrypt");
 
 exports.sendSMS = async (message, recipients) => {
   try {
