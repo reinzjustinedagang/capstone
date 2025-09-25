@@ -20,6 +20,18 @@ exports.getUserCount = async () => {
   return result.count;
 };
 
+exports.checkAdminExists = async () => {
+  try {
+    const [result] = await Connection(
+      "SELECT COUNT(*) AS total FROM users WHERE role = 'Admin'"
+    );
+    return result.total > 0;
+  } catch (error) {
+    console.error("Error checking admin existence:", error);
+    throw error;
+  }
+};
+
 exports.getUser = async (id) => {
   try {
     const user = await Connection(
@@ -266,10 +278,10 @@ exports.register = async (
   try {
     const keyCheck = await Connection(
       `SELECT * FROM dev_keys 
-   WHERE \`key\` = ? 
-   AND used = 0
-   AND created_at >= NOW() - INTERVAL 5 MINUTE
-   LIMIT 1`,
+       WHERE \`key\` = ? 
+       AND used = 0
+       AND created_at >= NOW() - INTERVAL 5 MINUTE
+       LIMIT 1`,
       [devKey]
     );
 
@@ -281,11 +293,11 @@ exports.register = async (
       keyCheck[0].id,
     ]);
 
+    // Check if email already exists
     const existingUsers = await Connection(
       "SELECT * FROM users WHERE email = ?",
       [email]
     );
-
     if (existingUsers.length > 0) {
       const error = new Error("User with this email already exists.");
       error.statusCode = 409;
@@ -294,9 +306,18 @@ exports.register = async (
 
     const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
 
+    // 🔑 Check if there's already an Admin in the system
+    const [adminExists] = await Connection(
+      "SELECT COUNT(*) AS total FROM users WHERE role = 'Admin'"
+    );
+
+    // If there is already an Admin → registered = 0
+    // If no Admin yet → registered = 1
+    const registered = adminExists.total > 0 ? 0 : 1;
+
     const query = `
-      INSERT INTO users (id, username, email, password, cp_number, role)
-      VALUES (NULL, ?, ?, ?, ?, ?)
+      INSERT INTO users (id, username, email, password, cp_number, role, registered)
+      VALUES (NULL, ?, ?, ?, ?, ?, ?)
     `;
     const result = await Connection(query, [
       username,
@@ -304,6 +325,7 @@ exports.register = async (
       hashedPassword,
       cp_number,
       role,
+      registered,
     ]);
 
     // ✅ Log registration
@@ -313,12 +335,12 @@ exports.register = async (
         email,
         role,
         "REGISTER",
-        `New user '${username}' registered.`,
+        `New user '${username}' registered (registered=${registered}).`,
         ip
       );
     }
 
-    return result.affectedRows === 1;
+    return { success: result.affectedRows === 1, registered };
   } catch (error) {
     console.error("Error in register service:", error);
     throw error;

@@ -15,6 +15,17 @@ router.get("/count/all", async (req, res) => {
   }
 });
 
+// ✅ Check if an Admin already exists
+router.get("/check-admin", async (req, res) => {
+  try {
+    const adminExists = await userService.checkAdminExists();
+    res.json({ adminExists });
+  } catch (err) {
+    console.error("Error checking admin existence:", err);
+    res.status(500).json({ message: "Failed to check admin existence" });
+  }
+});
+
 // Get user by ID
 router.get("/user/:id", async (req, res) => {
   const { id } = req.params;

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { UserPlus, Loader2, CheckCircle, XCircle } from "lucide-react";
 import axios from "axios";
@@ -16,6 +16,7 @@ export default function Register() {
   const [confirmPassword, setConfirmPassword] = useState(""); // ✅ new state
   const [cp_number, setPhoneNumber] = useState("");
   const [role, setRole] = useState("staff");
+  const [adminExists, setAdminExists] = useState(false);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -32,6 +33,22 @@ export default function Register() {
   const [showNotification, setShowNotification] = useState(false);
   const [status, setStatus] = useState(""); // "success" or "error"
   const [notificationMessage, setNotificationMessage] = useState("");
+
+  // ✅ Check if an Admin exists on mount
+  useEffect(() => {
+    const checkAdmin = async () => {
+      try {
+        const res = await axios.get(`${backendUrl}/api/user/check-admin`);
+        setAdminExists(res.data.adminExists);
+
+        // If no admin → default role = admin
+        setRole(res.data.adminExists ? "staff" : "admin");
+      } catch (err) {
+        console.error("Failed to check admin existence:", err);
+      }
+    };
+    checkAdmin();
+  }, []);
 
   const checkPasswordStrength = (pwd) => {
     if (!pwd) return "";
@@ -356,10 +373,14 @@ export default function Register() {
                   id="role"
                   value={role}
                   onChange={(e) => setRole(e.target.value)}
+                  disabled // ✅ prevent changing
                   className="block w-full rounded-lg border border-gray-300 px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-600"
                 >
-                  <option value="staff">Staff</option>
-                  <option value="admin">Admin</option>
+                  {adminExists ? (
+                    <option value="staff">Staff</option>
+                  ) : (
+                    <option value="admin">Admin</option>
+                  )}
                 </select>
               </div>
 

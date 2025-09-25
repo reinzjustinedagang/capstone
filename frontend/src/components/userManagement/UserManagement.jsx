@@ -16,6 +16,7 @@ import AddUser from "./AddUser";
 import UpdateUser from "./UpdateUser";
 import UserList from "./UserList";
 import BlockedUsers from "./BlockedUsers";
+import UnregisteredUserList from "./UnregisteredUserList";
 
 const UserManagement = () => {
   const [activeTab, setActiveTab] = useState("list");
@@ -89,6 +90,9 @@ const UserManagement = () => {
 
         <div className="">
           {activeTab === "list" && <UserList onEdit={handleEdit} />}
+          {activeTab === "unregistered" && (
+            <UnregisteredUserList onEdit={handleEdit} />
+          )}
           {activeTab === "blocked" && <BlockedUsers />}
           {activeTab === "update" && (
             <UpdateUser id={selectedUserId} onSuccess={handleUpdateSuccess} />
