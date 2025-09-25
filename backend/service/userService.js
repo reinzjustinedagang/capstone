@@ -38,7 +38,7 @@ exports.getAllUsers = async () => {
   try {
     const users = await Connection(`
       SELECT id, username, email, cp_number, role, status, last_login, image
-      FROM users WHERE blocked = 0 registered = 1
+      FROM users WHERE blocked = 0 AND registered = 1
       ORDER BY username ASC
     `);
     return users;
