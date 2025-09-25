@@ -170,17 +170,38 @@ exports.blockUser = async (id, user, ip) => {
 exports.login = async (email, password, ip) => {
   try {
     const results = await Connection(
-      "SELECT id, username, email, password, cp_number, role, status, last_logout, image, last_login FROM users WHERE email = ? AND blocked = 0 AND status = 'inactive' AND registered = 1",
+      "SELECT id, username, email, password, cp_number, role, status, last_logout, image, last_login, blocked, registered FROM users WHERE email = ?",
       [email]
     );
 
-    if (results.length === 0) return null;
+    if (results.length === 0) return { error: "Invalid credentials" };
 
     const user = results[0];
-    const passwordMatch = await bcrypt.compare(password, user.password);
-    if (!passwordMatch) return null;
 
-    // Set status to 'active' on login
+    // ❌ Check for blocked
+    if (user.blocked === 1) {
+      return {
+        error: "Your account is blocked. Please contact the administrator.",
+      };
+    }
+
+    // ❌ Check for not registered
+    if (user.registered === 0) {
+      return {
+        error: "Your account is not yet registered. Please wait for approval.",
+      };
+    }
+
+    // ❌ Already logged in (status active)
+    if (user.status === "active") {
+      return { error: "You are already logged in on another device." };
+    }
+
+    // ✅ Verify password
+    const passwordMatch = await bcrypt.compare(password, user.password);
+    if (!passwordMatch) return { error: "Invalid credentials" };
+
+    // ✅ Update status
     await Connection(
       "UPDATE users SET status = 'active', last_login = NOW() WHERE id = ?",
       [user.id]
@@ -196,15 +217,15 @@ exports.login = async (email, password, ip) => {
     );
 
     return {
-      username: user.username,
       id: user.id,
+      username: user.username,
       email: user.email,
       cp_number: user.cp_number,
       role: user.role,
-      status: user.status,
+      status: "active",
       last_logout: user.last_logout,
       image: user.image,
-      last_login: user.last_login,
+      last_login: new Date(),
     };
   } catch (error) {
     console.error("Error in login service:", error);

@@ -165,6 +165,10 @@ router.post("/login", async (req, res) => {
 
     const user = await userService.login(email, password, ip);
 
+    if (user?.error) {
+      return res.status(401).json({ message: user.error });
+    }
+
     if (!user) {
       return res.status(401).json({ message: "Invalid credentials" });
     }
@@ -183,7 +187,6 @@ router.post("/login", async (req, res) => {
     req.session.isAuthenticated = true;
 
     res.json({ message: "Login successful", user: req.session.user });
-    console.log("Session after login:", req.session);
   } catch (err) {
     console.error("Login error:", err);
     res.status(500).json({
