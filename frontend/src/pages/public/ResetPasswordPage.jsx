@@ -8,7 +8,6 @@ export const ResetPasswordPage = () => {
     <div>
       <Header />
       <ResetPassword />
-      <Footer />
     </div>
   );
 };

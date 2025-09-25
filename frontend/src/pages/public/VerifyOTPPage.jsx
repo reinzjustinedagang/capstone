@@ -8,7 +8,6 @@ export const VerifyOTPPage = () => {
     <div>
       <Header />
       <VerifyOTP />
-      <Footer />
     </div>
   );
 };

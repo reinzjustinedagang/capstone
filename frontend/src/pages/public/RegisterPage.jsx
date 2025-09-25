@@ -8,7 +8,6 @@ export const RegisterPage = () => {
     <div>
       <Header />
       <Register />
-      <Footer />
     </div>
   );
 };
