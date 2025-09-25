@@ -253,6 +253,33 @@ router.post("/register/internal", async (req, res) => {
   }
 });
 
+// Approve unregistered user
+router.put("/approve/:id", async (req, res) => {
+  const { id } = req.params;
+  const user = req.session.user;
+  const ip = req.userIp;
+
+  if (!user) {
+    return res.status(401).json({ message: "Unauthorized" });
+  }
+
+  try {
+    const success = await userService.approveUser(id, user, ip);
+    if (success) {
+      return res.status(200).json({ message: "User approved successfully." });
+    } else {
+      return res
+        .status(400)
+        .json({ message: "User already registered or not found." });
+    }
+  } catch (err) {
+    console.error("Error approving user:", err);
+    return res
+      .status(500)
+      .json({ message: "Server error while approving user." });
+  }
+});
+
 // Update profile (username, email, cp_number only)
 router.put("/updateProfile/:id", async (req, res) => {
   const { username, email, cp_number } = req.body;

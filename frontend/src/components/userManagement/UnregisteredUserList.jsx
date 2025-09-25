@@ -1,7 +1,16 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { Search, Edit, Trash, Loader2, ArrowDown, ArrowUp } from "lucide-react";
+import {
+  Search,
+  Edit,
+  Trash,
+  Loader2,
+  ArrowDown,
+  ArrowUp,
+  SquareCheckBig,
+  CircleCheckBig,
+} from "lucide-react";
 import Modal from "../UI/Modal";
 import Button from "../UI/Button";
 import userIcon from "../../assets/user.png";
@@ -14,6 +23,9 @@ const UnregisteredUserList = ({ onEdit }) => {
   const [selectedUser, setSelectedUser] = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [formSubmitting, setFormSubmitting] = useState(false);
+  const [showApproveModal, setShowApproveModal] = useState(false);
+  const [approveSuccessModal, setApproveSuccessModal] = useState(false);
+  const [userToApprove, setUserToApprove] = useState(null);
 
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState("username");
@@ -41,6 +53,29 @@ const UnregisteredUserList = ({ onEdit }) => {
   useEffect(() => {
     fetchUsers();
   }, []);
+
+  const confirmApproveUser = async () => {
+    if (!userToApprove) return;
+    setFormSubmitting(true);
+    try {
+      const response = await axios.put(
+        `${backendUrl}/api/user/approve/${userToApprove.id}`,
+        {},
+        { withCredentials: true }
+      );
+
+      if (response.status === 200) {
+        setUsers(users.filter((u) => u.id !== userToApprove.id));
+        setShowApproveModal(false);
+        setApproveSuccessModal(true);
+      }
+    } catch (err) {
+      console.error("Failed to approve user:", err);
+      setError("Failed to approve user.");
+    } finally {
+      setFormSubmitting(false);
+    }
+  };
 
   const handleDeleteUser = (user) => {
     setSelectedUser(user);
@@ -146,6 +181,9 @@ const UnregisteredUserList = ({ onEdit }) => {
                     Email
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                    Role
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                     Actions
                   </th>
                 </tr>
@@ -176,7 +214,30 @@ const UnregisteredUserList = ({ onEdit }) => {
                       <td className="px-6 py-4 text-sm text-gray-500">
                         {user.email}
                       </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        <span
+                          className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                            user.role === "admin"
+                              ? "bg-purple-100 text-purple-800"
+                              : "bg-yellow-100 text-yellow-800"
+                          }`}
+                        >
+                          {user.role.charAt(0).toUpperCase() +
+                            user.role.slice(1)}
+                        </span>
+                      </td>
                       <td className="px-6 py-4 text-sm font-medium flex space-x-3">
+                        <button
+                          onClick={() => {
+                            setUserToApprove(user);
+                            setShowApproveModal(true);
+                          }}
+                          className="text-green-600 hover:text-green-900"
+                          title="Approve"
+                        >
+                          <SquareCheckBig className="h-5 w-5" />
+                        </button>
+
                         <button
                           onClick={() => onEdit(user.id)}
                           className="text-blue-600 hover:text-blue-900"
@@ -270,6 +331,59 @@ const UnregisteredUserList = ({ onEdit }) => {
               disabled={formSubmitting}
             >
               {formSubmitting ? "Deleting..." : "Delete"}
+            </Button>
+          </div>
+        </div>
+      </Modal>
+
+      <Modal
+        isOpen={showApproveModal}
+        onClose={() => setShowApproveModal(false)}
+        title="Confirm Approval"
+      >
+        <div className="p-6">
+          <p className="mb-4 text-gray-700">
+            Are you sure you want to Register{" "}
+            <span className="font-semibold text-gray-600">
+              {userToApprove?.username}
+            </span>
+            ?
+          </p>
+          <div className="flex justify-end space-x-3">
+            <Button
+              variant="secondary"
+              onClick={() => setShowApproveModal(false)}
+              disabled={formSubmitting}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="primary"
+              onClick={confirmApproveUser}
+              disabled={formSubmitting}
+            >
+              {formSubmitting ? "Approving..." : "Approve"}
+            </Button>
+          </div>
+        </div>
+      </Modal>
+
+      <Modal
+        isOpen={approveSuccessModal}
+        onClose={() => setApproveSuccessModal(false)}
+        title="User Approved"
+      >
+        <div className="p-6">
+          <p className="text-gray-700">
+            <span className="font-semibold">{userToApprove?.username}</span> has
+            been successfully approved.
+          </p>
+          <div className="flex justify-end mt-4">
+            <Button
+              variant="primary"
+              onClick={() => setApproveSuccessModal(false)}
+            >
+              OK
             </Button>
           </div>
         </div>

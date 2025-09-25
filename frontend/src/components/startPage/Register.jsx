@@ -34,6 +34,9 @@ export default function Register() {
   const [status, setStatus] = useState(""); // "success" or "error"
   const [notificationMessage, setNotificationMessage] = useState("");
 
+  const backendUrl =
+    import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
+
   // ✅ Check if an Admin exists on mount
   useEffect(() => {
     const checkAdmin = async () => {

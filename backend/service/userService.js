@@ -347,6 +347,33 @@ exports.register = async (
   }
 };
 
+// Approve (register) a user
+exports.approveUser = async (id, user, ip) => {
+  try {
+    // Update the 'registered' field to 1
+    const result = await Connection(
+      "UPDATE users SET registered = 1 WHERE id = ? AND registered = 0",
+      [id]
+    );
+
+    if (result.affectedRows === 1) {
+      await logAudit(
+        user.id,
+        user.email,
+        user.role,
+        "REGISTER",
+        `User has been approved (registered).`,
+        ip
+      );
+    }
+
+    return result.affectedRows === 1;
+  } catch (error) {
+    console.error("Error approving user:", error);
+    throw error;
+  }
+};
+
 exports.updateUserProfile = async (id, username, email, cp_number, ip) => {
   try {
     const emailExists = await Connection(
