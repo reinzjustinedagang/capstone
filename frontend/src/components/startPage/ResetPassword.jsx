@@ -15,6 +15,8 @@ export default function ResetPassword() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
+  const backendUrl =
+    import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
 
   const handleReset = async (e) => {
     e.preventDefault(); // Prevent default form submission behavior
@@ -49,31 +51,19 @@ export default function ResetPassword() {
     try {
       // --- Placeholder for actual API call ---
       // In a real application, you would make an API call here, e.g., using axios:
-      /*
+
       const response = await axios.post(
-        "http://localhost:3000/api/reset-password", // Ensure this URL is correct for your backend
-        {
-          cpNumber,
-          newPassword,
-        },
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-          withCredentials: true, // Important for sending cookies/sessions
-        }
+        `${backendUrl}/api/sms/reset-password`,
+        { cpNumber, newPassword },
+        { withCredentials: true }
       );
 
       if (response.data.success) {
-        setSuccessMessage("Password has been reset successfully! Redirecting to login...");
-        localStorage.removeItem("recoveryCpNumber"); // Clear recovery data after successful reset
-        setTimeout(() => {
-          navigate("/login");
-        }, 2000); // Navigate after a short delay
+        setSuccessMessage("Password reset successfully! Redirecting...");
+        setTimeout(() => navigate("/login"), 2000);
       } else {
-        setError(response.data.message || "Failed to reset password. Please try again.");
+        setError(response.data.message || "Failed to reset password");
       }
-      */
 
       // --- Mock Password Reset Success (for demonstration) ---
       await new Promise((resolve) => setTimeout(resolve, 1500)); // Simulate API call delay

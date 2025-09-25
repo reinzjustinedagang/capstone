@@ -398,9 +398,9 @@ export default function AuditLogs() {
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                     Details
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                  {/* <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                     IP Address
-                  </th>
+                  </th> */}
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
@@ -441,7 +441,7 @@ export default function AuditLogs() {
                       </td>
                       <td className="px-6 py-4 text-sm">{log.userRole}</td>
                       <td className="px-6 py-4 text-sm">{log.details}</td>
-                      <td className="px-6 py-4 text-sm">{log.ipAddress}</td>
+                      {/* <td className="px-6 py-4 text-sm">{log.ipAddress}</td> */}
                     </tr>
                   ))
                 )}

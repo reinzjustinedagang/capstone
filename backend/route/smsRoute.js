@@ -127,4 +127,91 @@ router.put("/sms-credentials", async (req, res) => {
   }
 });
 
+router.post("/request-otp", async (req, res) => {
+  try {
+    const { cpNumber } = req.body;
+    if (!cpNumber)
+      return res
+        .status(400)
+        .json({ success: false, message: "Mobile number required" });
+
+    // Generate random 6-digit OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+    // Save OTP in DB with expiration (5 mins)
+    await Connection(
+      `INSERT INTO otp_codes (cp_number, otp, expires_at) VALUES (?, ?, DATE_ADD(NOW(), INTERVAL 5 MINUTE))
+       ON DUPLICATE KEY UPDATE otp = VALUES(otp), expires_at = VALUES(expires_at)`,
+      [cpNumber, otp]
+    );
+
+    // Send SMS via Semaphore
+    const smsResult = await smsService.sendSMS(`Your OTP code is ${otp}`, [
+      cpNumber,
+    ]);
+    if (!smsResult.success) {
+      return res
+        .status(500)
+        .json({ success: false, message: "Failed to send OTP" });
+    }
+
+    res.json({ success: true, message: "OTP sent successfully" });
+  } catch (err) {
+    console.error("Error in request-otp:", err);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+});
+
+router.post("/verify-otp", async (req, res) => {
+  try {
+    const { cpNumber, otp } = req.body;
+
+    const [record] = await Connection(
+      `SELECT * FROM otp_codes WHERE cp_number = ? AND expires_at > NOW()`,
+      [cpNumber]
+    );
+
+    if (!record || record.otp !== otp) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid or expired OTP" });
+    }
+
+    // Optional: delete OTP after successful verification
+    await Connection(`DELETE FROM otp_codes WHERE cp_number = ?`, [cpNumber]);
+
+    res.json({ success: true, message: "OTP verified" });
+  } catch (err) {
+    console.error("Error in verify-otp:", err);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+});
+
+router.post("/reset-password", async (req, res) => {
+  try {
+    const { cpNumber, newPassword } = req.body;
+
+    // Hash password (bcrypt recommended)
+    const bcrypt = require("bcryptjs");
+    const hashed = await bcrypt.hash(newPassword, 10);
+
+    // Update user password by cpNumber
+    const result = await Connection(
+      `UPDATE users SET password = ? WHERE cp_number = ?`,
+      [hashed, cpNumber]
+    );
+
+    if (result.affectedRows === 0) {
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found" });
+    }
+
+    res.json({ success: true, message: "Password reset successfully" });
+  } catch (err) {
+    console.error("Error in reset-password:", err);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+});
+
 module.exports = router;

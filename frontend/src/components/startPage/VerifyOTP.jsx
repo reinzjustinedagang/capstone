@@ -11,6 +11,8 @@ export default function VerifyOTP() {
   const navigate = useNavigate();
   // Retrieve the mobile number from localStorage
   const cpNumber = localStorage.getItem("recoveryCpNumber");
+  const backendUrl =
+    import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
 
   const handleVerify = async (e) => {
     e.preventDefault(); // Prevent default form submission behavior
@@ -38,32 +40,19 @@ export default function VerifyOTP() {
     try {
       // --- Placeholder for actual API call ---
       // In a real application, you would make an API call here, e.g., using axios:
-      /*
+
       const response = await axios.post(
-        "http://localhost:3000/api/verify-otp", // Ensure this URL is correct for your backend
-        {
-          cpNumber,
-          otp,
-        },
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-          withCredentials: true, // Important for sending cookies/sessions
-        }
+        `${backendUrl}/api/sms/verify-otp`,
+        { cpNumber, otp },
+        { withCredentials: true }
       );
 
       if (response.data.success) {
-        setSuccessMessage("OTP verified successfully! Redirecting to reset password...");
-        // Optionally clear the recoveryCpNumber from localStorage after successful verification
-        // localStorage.removeItem("recoveryCpNumber");
-        setTimeout(() => {
-          navigate("/reset-password"); // Proceed to password reset page
-        }, 1500); // Navigate after a short delay
+        setSuccessMessage("OTP verified successfully! Redirecting...");
+        setTimeout(() => navigate("/reset-password"), 1500);
       } else {
-        setError(response.data.message || "Invalid OTP. Please try again.");
+        setError(response.data.message || "Invalid OTP");
       }
-      */
 
       // --- Mock OTP Verification Success (for demonstration) ---
       await new Promise((resolve) => setTimeout(resolve, 1500)); // Simulate API call delay

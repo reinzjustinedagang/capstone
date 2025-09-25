@@ -9,6 +9,7 @@ export default function ForgotPassword() {
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
   const navigate = useNavigate();
+  backendUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
 
   const handleSubmit = async (e) => {
     e.preventDefault(); // Prevent default form submission behavior
@@ -31,28 +32,22 @@ export default function ForgotPassword() {
     try {
       // --- Placeholder for actual API call ---
       // In a real application, you would make an API call here, e.g., using axios:
-      /*
+
       const response = await axios.post(
-        "http://localhost:3000/api/request-otp", // Ensure this URL is correct for your backend
+        `${backendUrl}/api/sms/request-otp`,
         { cpNumber },
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-          withCredentials: true, // Important for sending cookies/sessions
-        }
+        { withCredentials: true }
       );
 
       if (response.data.success) {
-        setSuccessMessage("OTP sent successfully! Redirecting to verification...");
-        localStorage.setItem("recoveryCpNumber", cpNumber); // Store number for OTP verification
-        setTimeout(() => {
-          navigate("/verify-otp");
-        }, 1500); // Navigate after a short delay
+        setSuccessMessage(
+          "OTP sent successfully! Redirecting to verification..."
+        );
+        localStorage.setItem("recoveryCpNumber", cpNumber);
+        setTimeout(() => navigate("/verify-otp"), 1500);
       } else {
-        setError(response.data.message || "Failed to send OTP. Please try again.");
+        setError(response.data.message || "Failed to send OTP");
       }
-      */
 
       // --- Mock OTP Send Success (for demonstration) ---
       await new Promise((resolve) => setTimeout(resolve, 1500)); // Simulate API call delay
