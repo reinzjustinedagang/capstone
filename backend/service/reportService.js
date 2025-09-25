@@ -369,7 +369,8 @@ exports.getUTPReport = async (year) => {
 // 📊 Pensioner Report (Totals Only)
 exports.getPensionerReport = async () => {
   try {
-    const [results] = await Connection(
+    // Destructure to get the rows array
+    const [rows] = await Connection(
       `
       SELECT 
         JSON_UNQUOTE(JSON_EXTRACT(form_data, '$.pensioner')) AS pensioner,
@@ -384,7 +385,6 @@ exports.getPensionerReport = async () => {
       `
     );
 
-    // Map results into fixed structure
     const report = {
       GSIS: 0,
       SSS: 0,
@@ -392,7 +392,7 @@ exports.getPensionerReport = async () => {
       PWD: 0,
     };
 
-    results.forEach((r) => {
+    rows.forEach((r) => {
       if (report.hasOwnProperty(r.pensioner)) {
         report[r.pensioner] = r.count;
       }
