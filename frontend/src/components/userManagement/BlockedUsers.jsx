@@ -322,18 +322,18 @@ const BlockedUsers = () => {
           </p>
           <div className="flex justify-end gap-2">
             <Button
-              variant={actionType === "delete" ? "danger" : "primary"}
-              onClick={handleConfirmAction}
-              disabled={actionLoading}
-            >
-              {actionLoading ? "Processing..." : "Yes"}
-            </Button>
-            <Button
               variant="secondary"
               onClick={() => setShowConfirmModal(false)}
               disabled={actionLoading}
             >
               Cancel
+            </Button>
+            <Button
+              variant={actionType === "delete" ? "danger" : "primary"}
+              onClick={handleConfirmAction}
+              disabled={actionLoading}
+            >
+              {actionLoading ? "Processing..." : "Yes"}
             </Button>
           </div>
         </div>
