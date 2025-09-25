@@ -53,7 +53,7 @@ exports.getUnregisteredUsers = async () => {
   try {
     const users = await Connection(`
       SELECT id, username, email, cp_number, role, status, last_login, image
-      FROM users WHERE blocked = 0 registered = 0
+      FROM users WHERE blocked = 0 AND registered = 0
       ORDER BY username ASC
     `);
     return users;
