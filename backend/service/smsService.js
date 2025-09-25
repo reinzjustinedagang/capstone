@@ -1,6 +1,7 @@
 const axios = require("axios");
 const Connection = require("../db/Connection");
 const { logAudit } = require("./auditService");
+const bcrypt = require("bcryptjs");
 
 exports.sendSMS = async (message, recipients) => {
   try {
@@ -168,4 +169,70 @@ exports.getSmsCounts = async () => {
     console.error("Error fetching SMS counts:", err);
     throw err;
   }
+};
+
+/**
+ * Generate and send OTP
+ */
+exports.requestOtp = async (cpNumber) => {
+  if (!cpNumber) throw new Error("Mobile number required");
+
+  // Generate random 6-digit OTP
+  const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+  // Save OTP in DB with expiration (5 mins)
+  await Connection(
+    `INSERT INTO otp_codes (cp_number, otp, expires_at) 
+     VALUES (?, ?, DATE_ADD(NOW(), INTERVAL 5 MINUTE))
+     ON DUPLICATE KEY UPDATE otp = VALUES(otp), expires_at = VALUES(expires_at)`,
+    [cpNumber, otp]
+  );
+
+  // Send SMS
+  const smsResult = await smsService.sendSMS(`Your OTP code is ${otp}`, [
+    cpNumber,
+  ]);
+
+  if (!smsResult.success) {
+    throw new Error("Failed to send OTP");
+  }
+
+  return true;
+};
+
+/**
+ * Verify OTP
+ */
+exports.verifyOtp = async (cpNumber, otp) => {
+  const [record] = await Connection(
+    `SELECT * FROM otp_codes WHERE cp_number = ? AND expires_at > NOW()`,
+    [cpNumber]
+  );
+
+  if (!record || record.otp !== otp) {
+    throw new Error("Invalid or expired OTP");
+  }
+
+  // Optional: delete OTP after successful verification
+  await Connection(`DELETE FROM otp_codes WHERE cp_number = ?`, [cpNumber]);
+
+  return true;
+};
+
+/**
+ * Reset password by cpNumber
+ */
+exports.resetPassword = async (cpNumber, newPassword) => {
+  const hashed = await bcrypt.hash(newPassword, 10);
+
+  const result = await Connection(
+    `UPDATE users SET password = ? WHERE cp_number = ?`,
+    [hashed, cpNumber]
+  );
+
+  if (result.affectedRows === 0) {
+    throw new Error("User not found");
+  }
+
+  return true;
 };

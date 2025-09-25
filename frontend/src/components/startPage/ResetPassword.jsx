@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom"; // Import Link
 import { Lock, Loader2 } from "lucide-react"; // Import Lock for icon, Loader2 for loading spinner
-// import axios from "axios"; // Keep axios for actual API call
+import axios from "axios"; // Keep axios for actual API call
 
 export default function ResetPassword() {
   const navigate = useNavigate();

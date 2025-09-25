@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { KeyRound, Loader2, Send } from "lucide-react"; // Import KeyRound for the icon, Loader2 for loading, Send for button icon
-// import axios from "axios"; // Keep axios for actual API call
+import axios from "axios"; // Keep axios for actual API call
 
 export default function ForgotPassword() {
   const [cpNumber, setCpNumber] = useState("");
@@ -9,7 +9,8 @@ export default function ForgotPassword() {
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
   const navigate = useNavigate();
-  backendUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
+  const backendUrl =
+    import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
 
   const handleSubmit = async (e) => {
     e.preventDefault(); // Prevent default form submission behavior
