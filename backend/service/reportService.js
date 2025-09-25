@@ -369,8 +369,7 @@ exports.getUTPReport = async (year) => {
 // 📊 Pensioner Report (Totals Only)
 exports.getPensionerReport = async () => {
   try {
-    // Destructure to get the rows array
-    const [rows] = await Connection(
+    const rows = await Connection(
       `
       SELECT 
         JSON_UNQUOTE(JSON_EXTRACT(form_data, '$.pensioner')) AS pensioner,
@@ -385,12 +384,7 @@ exports.getPensionerReport = async () => {
       `
     );
 
-    const report = {
-      GSIS: 0,
-      SSS: 0,
-      PVAO: 0,
-      PWD: 0,
-    };
+    const report = { GSIS: 0, SSS: 0, PVAO: 0, PWD: 0 };
 
     rows.forEach((r) => {
       if (report.hasOwnProperty(r.pensioner)) {
