@@ -37,8 +37,23 @@ exports.getUser = async (id) => {
 exports.getAllUsers = async () => {
   try {
     const users = await Connection(`
-      SELECT id, username, email, cp_number, role, status, last_login
-      FROM users WHERE blocked = 0
+      SELECT id, username, email, cp_number, role, status, last_login, image
+      FROM users WHERE blocked = 0 registered = 1
+      ORDER BY username ASC
+    `);
+    return users;
+  } catch (error) {
+    console.error("Error fetching all users:", error);
+    throw error;
+  }
+};
+
+// GET ALL USERS SERVICE
+exports.getUnregisteredUsers = async () => {
+  try {
+    const users = await Connection(`
+      SELECT id, username, email, cp_number, role, status, last_login, image
+      FROM users WHERE blocked = 0 registered = 0
       ORDER BY username ASC
     `);
     return users;

@@ -70,9 +70,9 @@ const PensionerDistribution = () => {
                     className="inline-block w-4 h-4 rounded"
                     style={{ backgroundColor: chartColors[key] }}
                   ></span>
-                  <span className="font-medium">{key}</span>
+                  <span className="">{key}</span>
                 </div>
-                <span className="text-gray-700">{value}</span>
+                <span className="text-gray-800">{value}</span>
               </li>
             ))}
             <li className="flex items-center justify-between border-t pt-2 mt-2">

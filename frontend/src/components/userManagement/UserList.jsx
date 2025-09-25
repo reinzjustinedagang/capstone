@@ -3,6 +3,7 @@ import { useNavigate, NavLink } from "react-router-dom";
 import axios from "axios";
 import Button from "../UI/Button";
 import Modal from "../UI/Modal";
+import userIcon from "../../assets/user.png";
 import {
   Search,
   Plus,
@@ -278,7 +279,15 @@ const UserList = ({ onEdit }) => {
                 ) : (
                   filteredAndSortedUsers.map((user) => (
                     <tr key={user.id}>
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-6 py-4 whitespace-nowrap flex items-center gap-3">
+                        {/* User Image */}
+                        <img
+                          src={user.image || userIcon} // fallback if no image
+                          alt={user.username}
+                          className="h-10 w-10 rounded-full object-cover border"
+                        />
+
+                        {/* Username */}
                         <div className="text-sm font-medium text-gray-900">
                           {user.username}
                         </div>

@@ -836,7 +836,7 @@ exports.archiveSeniorCitizen = async (id, reason, deceasedDate, user, ip) => {
         user.id,
         user.email,
         user.role,
-        "Archive",
+        "ARCHIVE",
         `Archived senior citizen with ID: ${id}. Reason: ${reason}${
           deceasedDate ? `, Date of Death: ${deceasedDate}` : ""
         }`,
@@ -866,7 +866,7 @@ exports.restoreArchivedSeniorCitizen = async (id, user, ip) => {
         user.id,
         user.email,
         user.role,
-        "Restore",
+        "RESTORE",
         `Restored archived senior citizen with ID: ${id}`,
         ip
       );

@@ -53,6 +53,16 @@ router.get("/", async (req, res) => {
 });
 
 // Get all users
+router.get("/unregistered", async (req, res) => {
+  try {
+    const users = await userService.getUnregisteredUsers();
+    res.status(200).json(users);
+  } catch (error) {
+    res.status(500).json({ message: "Failed to fetch users." });
+  }
+});
+
+// Get all users
 router.get("/blocked", async (req, res) => {
   try {
     const users = await userService.getAllBlocked();
