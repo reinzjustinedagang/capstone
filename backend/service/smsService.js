@@ -226,7 +226,7 @@ exports.resetPassword = async (cpNumber, newPassword) => {
   const hashed = await bcrypt.hash(newPassword, 10);
 
   const result = await Connection(
-    `UPDATE users SET password = ? WHERE mobile = ?`,
+    `UPDATE users SET password = ? WHERE cp_number = ?`,
     [hashed, cpNumber]
   );
 
