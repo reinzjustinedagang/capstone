@@ -68,6 +68,15 @@ router.get("/ra", async (req, res) => {
   }
 });
 
+router.get("/allra", async (req, res) => {
+  try {
+    const data = await benefitService.getPublicRa();
+    res.status(200).json(data);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 router.get("/allbenefits", async (req, res) => {
   try {
     const data = await benefitService.getPublicBenefits();

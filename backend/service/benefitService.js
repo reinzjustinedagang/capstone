@@ -71,6 +71,15 @@ exports.getRa = async (user) => {
   }
 };
 
+exports.getPublicRa = async () => {
+  return await Connection(`
+    SELECT *
+    FROM benefits
+    WHERE type = 'republic-acts' AND approved = 1
+    ORDER BY created_at ASC
+  `);
+};
+
 exports.getPublicBenefits = async () => {
   return await Connection(`
     SELECT id, type, title, provider, description, enacted_date, image_url
