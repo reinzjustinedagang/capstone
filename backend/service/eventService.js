@@ -14,20 +14,47 @@ exports.getEventCount = async () => {
 };
 
 // GET all events
-exports.getEvent = async () => {
-  const query = `
-    SELECT * FROM events WHERE type = 'event'
-    ORDER BY date DESC
-  `;
-  return await Connection(query);
+exports.getEvent = async (user) => {
+  if (user && user.role === "admin") {
+    return await Connection(`
+      SELECT * FROM events WHERE type = 'event'
+      ORDER BY date DESC
+    `);
+  } else {
+    return await Connection(
+      `
+      SELECT * FROM events WHERE type = 'event' AND created_by = ?
+      ORDER BY date DESC
+    `,
+      [user.id]
+    );
+  }
 };
 
-exports.getSlideshow = async () => {
-  const query = `
-    SELECT * FROM events WHERE type = 'slideshow'
+exports.getPublicEvents = async () => {
+  return await Connection(`
+    SELECT * 
+    FROM events
+    WHERE type = 'event' AND approved = 1
     ORDER BY date DESC
-  `;
-  return await Connection(query);
+  `);
+};
+
+exports.getSlideshow = async (user) => {
+  if (user && user.role === "admin") {
+    return await Connection(`
+      SELECT * FROM events WHERE type = 'slideshow'
+      ORDER BY date DESC
+    `);
+  } else {
+    return await Connection(
+      `
+      SELECT * FROM events WHERE type = 'slideshow' AND created_by = ?
+      ORDER BY date DESC
+    `,
+      [user.id]
+    );
+  }
 };
 
 // GET last 5 events
@@ -41,35 +68,43 @@ exports.getFive = async () => {
   return await Connection(query);
 };
 
-exports.getById = async (id) => {
-  const rows = await Connection(`SELECT * FROM events WHERE id = ?`, [id]);
+exports.getById = async (id, user) => {
+  let query, params;
+
+  if (user && user.role === "admin") {
+    query = "SELECT * FROM events WHERE id = ?";
+    params = [id];
+  } else {
+    query = "SELECT * FROM events WHERE id = ? AND created_by = ?";
+    params = [id, user.id];
+  }
+
+  const rows = await Connection(query, params);
   return rows[0] || null;
 };
 
 exports.create = async (data, user, ip) => {
   let { title, type, description, date, image_url } = data;
 
-  if (!type) {
-    throw new Error("Event type is required.");
-  }
+  if (!type) throw new Error("Event type is required.");
 
   if (type === "slideshow") {
-    // Assign a default title if empty
     if (!title || title.trim() === "") title = "Slideshow";
     if (!description || description.trim() === "") description = "Slideshow";
     if (!date || date.trim() === "") date = "2025-05-31";
-    if (!image_url) {
-      throw new Error("Image is required for slideshow.");
-    }
+    if (!image_url) throw new Error("Image is required for slideshow.");
   } else {
     if (!title || !description || !date || !image_url) {
       throw new Error("All fields including image are required for an event.");
     }
   }
 
+  // auto-approve if admin
+  const approved = user.role === "admin" ? 1 : 0;
+
   const query = `
-    INSERT INTO events (title, type, description, date, image_url)
-    VALUES (?, ?, ?, ?, ?)
+    INSERT INTO events (title, type, description, date, image_url, created_by, approved)
+    VALUES (?, ?, ?, ?, ?, ?, ?)
   `;
 
   const result = await Connection(query, [
@@ -78,6 +113,8 @@ exports.create = async (data, user, ip) => {
     description || null,
     date || null,
     image_url,
+    user.id,
+    approved,
   ]);
 
   await logAudit(
@@ -85,29 +122,38 @@ exports.create = async (data, user, ip) => {
     user.email,
     user.role,
     "CREATE",
-    `Added event: '${title}'`,
+    `Added event: '${title}' (Approved: ${approved})`,
     ip
   );
 
   return result;
 };
 
+// UPDATE event
 exports.update = async (id, data, user, ip) => {
-  const { title, type, description, date, image_url } = data;
+  let { title, type, description, date, image_url } = data;
+
+  // Auto-approval logic
+  let approved = user.role === "admin" ? 1 : 0;
+  let approvedBy = user.role === "admin" ? user.id : null;
+  let approvedAt = user.role === "admin" ? new Date() : null;
 
   // Fetch current event
   const currentEvent = await this.getById(id);
   if (!currentEvent) throw new Error("Event not found");
 
+  // Restrict staff from editing other people’s events
+  if (user.role !== "admin" && currentEvent.created_by !== user.id) {
+    throw new Error("Permission denied: You can only edit your own events.");
+  }
+
   // Validation
   if (!type) throw new Error("Event type is required");
-
-  if (type === "slideshow") {
-    if (!image_url) throw new Error("Image is required for slideshow");
-  } else {
-    if (!title || !description || !date || !image_url) {
-      throw new Error("All fields including image are required for an event");
-    }
+  if (type === "slideshow" && !image_url) {
+    throw new Error("Image is required for slideshow");
+  }
+  if (type !== "slideshow" && (!title || !description || !date || !image_url)) {
+    throw new Error("All fields including image are required for an event");
   }
 
   // Handle image replacement
@@ -117,26 +163,26 @@ exports.update = async (id, data, user, ip) => {
     currentEvent.image_url !== image_url
   ) {
     const publicId = extractCloudinaryPublicId(currentEvent.image_url);
-    if (publicId) {
-      await safeCloudinaryDestroy(publicId);
-    } else {
-      await deleteLocalImage(currentEvent.image_url);
-    }
+    if (publicId) await safeCloudinaryDestroy(publicId);
+    else await deleteLocalImage(currentEvent.image_url);
   }
 
   // Update query
   const query = `
     UPDATE events
-    SET title = ?, type = ?, description = ?, date = ?, image_url = ?
+    SET title = ?, type = ?, description = ?, date = ?, image_url = ?,
+        approved = ?, approved_by = ?, approved_at = ?
     WHERE id = ?
   `;
-
   const result = await Connection(query, [
-    title || null,
+    title,
     type,
-    description || null,
-    date || null,
+    description,
+    date,
     image_url,
+    approved,
+    approvedBy,
+    approvedAt,
     id,
   ]);
 
@@ -146,7 +192,29 @@ exports.update = async (id, data, user, ip) => {
       user.email,
       user.role,
       "UPDATE",
-      `Updated event ID ${id}: '${title || "Slideshow"}'`,
+      `Updated event ID ${id} (Approved: ${approved})`,
+      ip
+    );
+  }
+
+  return result.affectedRows > 0;
+};
+
+exports.approve = async (id, user, ip) => {
+  const result = await Connection(
+    `UPDATE events 
+     SET approved = 1, approved_by = ?, approved_at = NOW() 
+     WHERE id = ?`,
+    [user.id, id]
+  );
+
+  if (result.affectedRows > 0) {
+    await logAudit(
+      user.id,
+      user.email,
+      user.role,
+      "APPROVE",
+      `Approved event ID ${id}`,
       ip
     );
   }
@@ -156,15 +224,20 @@ exports.update = async (id, data, user, ip) => {
 
 // DELETE event
 exports.remove = async (id, user, ip) => {
-  // Fetch the event first
+  // Fetch event
   const events = await Connection(
-    `SELECT title, image_url FROM events WHERE id = ?`,
+    `SELECT id, title, image_url, created_by FROM events WHERE id = ?`,
     [id]
   );
   const event = events[0];
   if (!event) return false;
 
-  // Delete the event from DB first
+  // Restrict staff from deleting other people’s events
+  if (user.role !== "admin" && event.created_by !== user.id) {
+    throw new Error("Permission denied: You can only delete your own events.");
+  }
+
+  // Delete event
   const result = await Connection(`DELETE FROM events WHERE id = ?`, [id]);
 
   if (result.affectedRows > 0) {
@@ -178,7 +251,7 @@ exports.remove = async (id, user, ip) => {
     );
   }
 
-  // Delete image from Cloudinary or local safely
+  // Delete image
   if (event.image_url) {
     const publicId = extractCloudinaryPublicId(event.image_url);
     if (publicId) {

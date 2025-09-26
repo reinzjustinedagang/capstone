@@ -16,19 +16,20 @@ router.get("/count/all", async (req, res) => {
 });
 
 // GET all events
-router.get("/event", async (req, res) => {
+router.get("/event", isAuthenticated, async (req, res) => {
   try {
-    const data = await eventService.getEvent();
+    const user = req.session.user;
+    const data = await eventService.getEvent(user);
     res.status(200).json(data);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 });
 
-// GET all events
-router.get("/slideshow", async (req, res) => {
+router.get("/slideshow", isAuthenticated, async (req, res) => {
   try {
-    const data = await eventService.getSlideshow();
+    const user = req.session.user;
+    const data = await eventService.getSlideshow(user);
     res.status(200).json(data);
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -45,9 +46,11 @@ router.get("/", async (req, res) => {
   }
 });
 
-router.get("/:id", async (req, res) => {
+router.get("/:id", isAuthenticated, async (req, res) => {
   try {
-    const data = await eventService.getById((id = req.params.id));
+    const user = req.session.user;
+    const data = await eventService.getById(req.params.id, user);
+    if (!data) return res.status(404).json({ message: "Event not found" });
     res.status(200).json(data);
   } catch (err) {
     res.status(500).json({ message: err.message });
