@@ -7,7 +7,14 @@ const RepublicActCard = ({ law, onEdit, onDelete }) => {
 
   return (
     <>
-      <div className="bg-white rounded-2xl shadow p-4 border border-gray-200 hover:shadow-lg transition flex flex-col">
+      <div className="relative bg-white rounded-2xl shadow p-4 border border-gray-200 hover:shadow-lg transition flex flex-col">
+        {/* Pending Badge */}
+        {law.approved === 0 && (
+          <span className="absolute top-1 right-2 bg-yellow-500 text-white text-xs font-medium px-2 py-1 rounded-xl">
+            Pending
+          </span>
+        )}
+
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>

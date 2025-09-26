@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { Info, Edit, Trash2 } from "lucide-react";
 import Modal from "../../UI/Modal";
-import Button from "../../UI/Button";
 
 const BenefitsCard = ({
   type,
@@ -33,7 +32,36 @@ const BenefitsCard = ({
             </div>
           )}
 
+          {/* Pending Badge */}
+          {type.approved === 0 && (
+            <span className="absolute top-2 left-2 bg-yellow-500 text-white text-xs font-medium px-2 py-1 rounded">
+              Pending
+            </span>
+          )}
+
           {/* Action buttons */}
+          <div className="absolute top-2 right-2 flex gap-2 z-10">
+            <button
+              onClick={(e) => {
+                e.stopPropagation(); // prevent opening modal
+                onEdit && onEdit(type.id);
+              }}
+              className="bg-white/90 hover:bg-white text-blue-500 hover:text-blue-700 p-2 rounded-full shadow"
+              title="Edit"
+            >
+              <Edit className="w-4 h-4" />
+            </button>
+            <button
+              onClick={(e) => {
+                e.stopPropagation(); // prevent opening modal
+                onDelete && onDelete(type.id);
+              }}
+              className="bg-white/90 hover:bg-white text-red-500 hover:text-red-700 p-2 rounded-full shadow"
+              title="Delete"
+            >
+              <Trash2 className="w-4 h-4" />
+            </button>
+          </div>
         </div>
 
         {/* Content */}

@@ -32,6 +32,13 @@ const BenefitsCard = ({
             </div>
           )}
 
+          {/* Pending Badge */}
+          {type.approved === 0 && (
+            <span className="absolute top-2 left-2 bg-yellow-500 text-white text-xs font-medium px-2 py-1 rounded">
+              Pending
+            </span>
+          )}
+
           {/* Action buttons */}
           <div className="absolute top-2 right-2 flex gap-2 z-10">
             <button

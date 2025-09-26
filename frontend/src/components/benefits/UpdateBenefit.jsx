@@ -95,6 +95,13 @@ const UpdateBenefit = ({ benefitId, onSuccess }) => {
 
   // Update benefit
   const handleUpdate = async () => {
+    if (formData.approved === 0) {
+      // if pending, call approve instead
+      await handleApprove();
+      return;
+    }
+
+    // otherwise, do normal update
     if (!formData.type || !formData.description) {
       setMessage("Type and description are required.");
       return;
@@ -124,13 +131,34 @@ const UpdateBenefit = ({ benefitId, onSuccess }) => {
         withCredentials: true,
       });
 
-      setShowSuccessModal(true); // ✅ show success modal
+      setShowSuccessModal(true);
       if (onSuccess) onSuccess();
     } catch (err) {
       console.error("Failed to update benefit:", err);
       setMessage("Failed to update benefit.");
     } finally {
       setSaving(false);
+    }
+  };
+
+  // Approve benefit
+  const handleApprove = async () => {
+    setSaving(true);
+    try {
+      await axios.put(
+        `${backendUrl}/api/benefits/${benefitId}/approve`,
+        {},
+        { withCredentials: true }
+      );
+
+      setShowSuccessModal(true);
+      if (onSuccess) onSuccess();
+    } catch (err) {
+      console.error("Failed to approve benefit:", err);
+      setMessage("Failed to approve benefit.");
+    } finally {
+      setSaving(false);
+      setShowConfirmModal(false);
     }
   };
 
@@ -298,7 +326,13 @@ const UpdateBenefit = ({ benefitId, onSuccess }) => {
             }
             disabled={saving}
           >
-            {saving ? "Updating..." : "Update Benefit"}
+            {saving
+              ? formData.approved === 0
+                ? "Approving..."
+                : "Updating..."
+              : formData.approved === 0
+              ? "Approve Benefit"
+              : "Update Benefit"}
           </Button>
         </div>
 

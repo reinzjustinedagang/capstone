@@ -8,14 +8,14 @@ const {
 
 exports.getBenefitsCounts = async () => {
   const [result] = await Connection(
-    "SELECT COUNT(*) AS count FROM benefits WHERE type != 'republic-acts'"
+    "SELECT COUNT(*) AS count FROM benefits WHERE type != 'republic-acts' AND approved = 1"
   );
   return result.count;
 };
 
 exports.getThreeRa = async () => {
   return await Connection(
-    `SELECT type, title, enacted_date, description FROM benefits WHERE type = 'republic-acts' ORDER BY created_at DESC LIMIT 3`
+    `SELECT type, title, enacted_date, description FROM benefits WHERE type = 'republic-acts' AND approved = 1 ORDER BY created_at DESC LIMIT 3`
   );
 };
 
@@ -24,7 +24,7 @@ exports.getAll = async () => {
   const query = `
     SELECT type, description, provider, image_url
     FROM benefits
-    WHERE type != 'republic-acts'
+    WHERE type != 'republic-acts' AND approved = 1
     ORDER BY created_at ASC
     LIMIT 5
   `;
