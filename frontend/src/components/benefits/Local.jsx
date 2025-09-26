@@ -24,7 +24,9 @@ const Local = ({ onEdit }) => {
     try {
       setLoading(true);
       setError("");
-      const response = await axios.get(`${backendUrl}/api/benefits/local`);
+      const response = await axios.get(`${backendUrl}/api/benefits/local`, {
+        withCredentials: true,
+      });
       setFinancial(response.data);
     } catch (error) {
       console.error("Failed to fetch Financial Assistance Programs: ", error);

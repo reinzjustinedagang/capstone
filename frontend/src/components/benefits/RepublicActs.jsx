@@ -25,7 +25,9 @@ const RepublicActs = ({ onEdit }) => {
     try {
       setLoading(true);
       setError("");
-      const response = await axios.get(`${backendUrl}/api/benefits/ra`);
+      const response = await axios.get(`${backendUrl}/api/benefits/ra`, {
+        withCredentials: true,
+      });
       setActs(response.data);
     } catch (error) {
       console.error("Failed to fetch Republic Acts: ", error);

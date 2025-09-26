@@ -39,7 +39,8 @@ exports.getNational = async (user) => {
     );
   } else {
     return await Connection(
-      `SELECT * FROM benefits WHERE type = 'national' AND approved = 1 ORDER BY created_at DESC`
+      `SELECT * FROM benefits WHERE type = 'national' AND created_by = ? ORDER BY created_at DESC`,
+      [user.id]
     );
   }
 };
@@ -51,7 +52,8 @@ exports.getLocal = async (user) => {
     );
   } else {
     return await Connection(
-      `SELECT * FROM benefits WHERE type = 'local' AND approved = 1 ORDER BY created_at DESC`
+      `SELECT * FROM benefits WHERE type = 'local' AND created_by = ? ORDER BY created_at DESC`,
+      [user.id]
     );
   }
 };
@@ -63,7 +65,8 @@ exports.getRa = async (user) => {
     );
   } else {
     return await Connection(
-      `SELECT * FROM benefits WHERE type = 'republic-acts' AND approved = 1 ORDER BY created_at DESC`
+      `SELECT * FROM benefits WHERE type = 'republic-acts' AND created_by = ? ORDER BY created_at DESC`,
+      [user.id]
     );
   }
 };

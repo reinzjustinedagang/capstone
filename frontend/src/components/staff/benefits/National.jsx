@@ -24,7 +24,9 @@ const National = ({ onEdit }) => {
     try {
       setLoading(true);
       setError("");
-      const response = await axios.get(`${backendUrl}/api/benefits/national`);
+      const response = await axios.get(`${backendUrl}/api/benefits/national`, {
+        withCredentials: true,
+      });
       setDiscounts(response.data);
     } catch (error) {
       console.error("Failed to fetch Discounts: ", error);

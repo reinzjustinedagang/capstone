@@ -16,6 +16,8 @@ import Local from "./Local";
 import RepublicActs from "./RepublicActs";
 import Modal from "../../UI/Modal";
 import Button from "../../UI/Button";
+import AddBenefit from "../../benefits/AddBenefit";
+import UpdateBenefit from "../../benefits/UpdateBenefit";
 
 const Benefits = () => {
   const [activeTab, setActiveTab] = useState("local");
@@ -36,6 +38,16 @@ const Benefits = () => {
 
   return (
     <>
+      <div className="mt-4 md:mt-0 flex flex-col sm:flex-row justify-end sm:items-center mb-4">
+        <Button
+          variant="primary"
+          icon={<Plus className="h-4 w-4 mr-2" />}
+          onClick={() => setActiveTab("addbenefits")}
+        >
+          Add New Benefits
+        </Button>
+      </div>
+
       <div className="bg-white rounded-lg shadow overflow-hidden">
         <div className="border-b border-gray-200">
           <nav className="flex flex-wrap -mb-px">
@@ -81,6 +93,13 @@ const Benefits = () => {
           {activeTab === "local" && <Local onEdit={handleEdit} />}
           {activeTab === "national" && <National onEdit={handleEdit} />}
           {activeTab === "ra" && <RepublicActs onEdit={handleEdit} />}
+          {activeTab === "addbenefits" && <AddBenefit />}
+          {activeTab === "updatebenefits" && (
+            <UpdateBenefit
+              benefitId={selectedBenefitId}
+              onSuccess={handleUpdateSuccess}
+            />
+          )}
         </div>
       </div>
       {/* Success Modal */}
