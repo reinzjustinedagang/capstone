@@ -157,8 +157,27 @@ router.put(
   }
 );
 
+// PUT approve event
+router.put("/:id/approve", isAuthenticated, async (req, res) => {
+  const { id } = req.params;
+  const user = req.session.user;
+  const ip = req.userIp;
+
+  if (!user) return res.status(401).json({ message: "Unauthorized" });
+
+  try {
+    const approved = await eventService.approve(id, user, ip);
+    if (!approved) return res.status(404).json({ message: "Event not found" });
+
+    res.status(200).json({ message: "Event approved" });
+  } catch (err) {
+    console.error("Failed to approve event:", err);
+    res.status(500).json({ message: err.message });
+  }
+});
+
 // DELETE event
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", isAuthenticated, async (req, res) => {
   const { id } = req.params;
   const user = req.session.user;
   const ip = req.userIp;

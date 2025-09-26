@@ -5,7 +5,7 @@ import { Calendar, Plus, CheckCircle, ArrowUp } from "lucide-react";
 import AddEvent from "../../event/AddEvent";
 import EventList from "../../event/EventList";
 import EventSlideshow from "../../event/EventSlideshow";
-import UpdateEvent from "../../event/UpdateEvent";
+import UpdateEvent from "./UpdateEvent";
 
 const Events = () => {
   const [activeTab, setActiveTab] = useState("eventlist");

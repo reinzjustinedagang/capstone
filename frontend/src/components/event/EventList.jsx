@@ -78,6 +78,12 @@ const EventList = ({ onEdit }) => {
             >
               {/* Image Container */}
               <div className="relative w-full aspect-[4/3] bg-gray-100">
+                {/* Pending Badge */}
+                {event.approved === 0 && (
+                  <span className="absolute top-2 left-2 bg-yellow-500 text-white text-xs font-medium px-2 py-1 rounded">
+                    Pending
+                  </span>
+                )}
                 {event.image_url ? (
                   <img
                     src={event.image_url}
@@ -115,7 +121,7 @@ const EventList = ({ onEdit }) => {
               </div>
 
               {/* Content */}
-              <div className="p-4 flex flex-col flex-grow">
+              <div className="p-4 flex flex-col flex-grow relative">
                 <p className="text-sm text-gray-600 mb-1">
                   {new Date(event.date).toLocaleDateString("en-US", {
                     year: "numeric",

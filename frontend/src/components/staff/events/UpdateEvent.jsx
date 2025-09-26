@@ -1,8 +1,8 @@
 import { useState, useRef, useEffect } from "react";
 import { SaveIcon, Loader2, ImagePlus, Edit2 } from "lucide-react";
-import Modal from "../UI/Modal";
-import Button from "../UI/Button";
-import CropperModal from "../UI/CropperModal";
+import Modal from "../../UI/Modal";
+import Button from "../../UI/Button";
+import CropperModal from "../../UI/CropperModal";
 import axios from "axios";
 
 const UpdateEvent = ({ eventId, onSuccess }) => {
@@ -111,24 +111,6 @@ const UpdateEvent = ({ eventId, onSuccess }) => {
     } catch (err) {
       console.error("Failed to update event:", err);
       alert("Failed to update event. Please try again.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleApprove = async () => {
-    if (!eventData) return;
-    setLoading(true);
-
-    try {
-      await axios.put(`${backendUrl}/api/events/${eventId}/approve`, null, {
-        withCredentials: true,
-      });
-
-      if (onSuccess) onSuccess();
-    } catch (err) {
-      console.error("Failed to approve event:", err);
-      alert("Failed to approve event. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -247,36 +229,19 @@ const UpdateEvent = ({ eventId, onSuccess }) => {
         >
           Cancel
         </Button>
-
-        {eventData?.approved === 0 ? (
-          <Button
-            onClick={handleApprove}
-            disabled={loading}
-            icon={
-              loading ? (
-                <Loader2 className="animate-spin w-4 h-4" />
-              ) : (
-                <SaveIcon className="w-4 h-4" />
-              )
-            }
-          >
-            {loading ? "Approving..." : "Approve"}
-          </Button>
-        ) : (
-          <Button
-            onClick={handleSubmit}
-            disabled={loading}
-            icon={
-              loading ? (
-                <Loader2 className="animate-spin w-4 h-4" />
-              ) : (
-                <SaveIcon className="w-4 h-4" />
-              )
-            }
-          >
-            {loading ? "Updating..." : "Update"}
-          </Button>
-        )}
+        <Button
+          onClick={handleSubmit}
+          disabled={loading}
+          icon={
+            loading ? (
+              <Loader2 className="animate-spin w-4 h-4" />
+            ) : (
+              <SaveIcon className="w-4 h-4" />
+            )
+          }
+        >
+          {loading ? "Updating..." : "Update"}
+        </Button>
       </div>
 
       {/* Cropper Modal */}

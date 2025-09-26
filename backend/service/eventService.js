@@ -139,7 +139,8 @@ exports.update = async (id, data, user, ip) => {
   let approvedAt = user.role === "admin" ? new Date() : null;
 
   // Fetch current event
-  const currentEvent = await this.getById(id);
+  const currentEvent = await exports.getById(id, user);
+
   if (!currentEvent) throw new Error("Event not found");
 
   // Restrict staff from editing other people’s events
