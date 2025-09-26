@@ -117,8 +117,19 @@ const Local = ({ onEdit }) => {
               >
                 Cancel
               </Button>
-              <Button variant="danger" onClick={handleDelete} loading={loading}>
-                Delete
+              <Button
+                variant="danger"
+                onClick={handleDelete}
+                disabled={loading}
+              >
+                {loading ? (
+                  <div className="flex items-center gap-2">
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Deleting...
+                  </div>
+                ) : (
+                  "Delete"
+                )}
               </Button>
             </div>
           </div>

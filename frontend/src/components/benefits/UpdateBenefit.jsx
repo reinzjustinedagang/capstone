@@ -166,7 +166,7 @@ const UpdateBenefit = ({ benefitId, onSuccess }) => {
 
   // Dynamic fields based on type
   const typeFields =
-    formData.type === "republic acts"
+    formData.type === "republic-acts"
       ? [
           {
             name: "title",
