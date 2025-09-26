@@ -207,8 +207,10 @@ async function initTables() {
     image_url VARCHAR(500),
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    deleted TINYINT(1) DEFAULT 0,
-    deleted_at TIMESTAMP NULL
+    deleted INT(1) DEFAULT 0,
+    deleted_at TIMESTAMP NULL,
+    created_by INT NOT NULL, 
+    approved INT(1) DEFAULT 0
   )
   `
     );

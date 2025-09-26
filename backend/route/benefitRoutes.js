@@ -38,8 +38,9 @@ router.get("/", async (req, res) => {
 
 // GET discounts
 router.get("/national", async (req, res) => {
+  const user = req.session.user;
   try {
-    const data = await benefitService.getNational();
+    const data = await benefitService.getNational(user);
     res.status(200).json(data);
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -48,8 +49,9 @@ router.get("/national", async (req, res) => {
 
 // GET
 router.get("/local", async (req, res) => {
+  const user = req.session.user;
   try {
-    const data = await benefitService.getLocal();
+    const data = await benefitService.getLocal(user);
     res.status(200).json(data);
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -57,8 +59,9 @@ router.get("/local", async (req, res) => {
 });
 
 router.get("/ra", async (req, res) => {
+  const user = req.session.user;
   try {
-    const data = await benefitService.getRa();
+    const data = await benefitService.getRa(user);
     res.status(200).json(data);
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -67,7 +70,7 @@ router.get("/ra", async (req, res) => {
 
 router.get("/allbenefits", async (req, res) => {
   try {
-    const data = await benefitService.getBenefits();
+    const data = await benefitService.getPublicBenefits();
     res.status(200).json(data);
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -180,6 +183,29 @@ router.put(
     }
   }
 );
+
+// APPROVE benefit (Admin only)
+router.put("/:id/approve", isAuthenticated, async (req, res) => {
+  const user = req.session.user;
+  const ip = req.userIp;
+
+  if (!user || user.role !== "admin") {
+    return res.status(403).json({ message: "Forbidden: Admins only" });
+  }
+
+  try {
+    const approved = await benefitService.approve(req.params.id, user, ip);
+
+    if (!approved) {
+      return res.status(404).json({ message: "Benefit not found" });
+    }
+
+    res.status(200).json({ message: "Benefit approved" });
+  } catch (err) {
+    console.error("Failed to approve benefit:", err);
+    res.status(500).json({ message: err.message });
+  }
+});
 
 // DELETE benefit
 router.delete("/:id", isAuthenticated, async (req, res) => {

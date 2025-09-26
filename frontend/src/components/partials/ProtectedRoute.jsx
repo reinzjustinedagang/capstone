@@ -26,8 +26,16 @@ const ProtectedRoute = ({ role, children }) => {
   // ✅ Show loading spinner or fallback
   if (authState.loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen text-gray-600">
-        <div className="animate-pulse">Checking authentication...</div>
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/60 backdrop-blur-sm">
+        <div className="flex flex-col items-center space-y-3">
+          {/* Subtle spinner */}
+          <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+
+          {/* Animated text */}
+          <p className="text-gray-700 text-lg font-medium animate-pulse">
+            Checking authentication...
+          </p>
+        </div>
       </div>
     );
   }

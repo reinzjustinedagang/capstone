@@ -44,7 +44,7 @@ const MessageTemplates = () => {
   };
 
   const handleAddTemplate = async () => {
-    if (!newTemplate.name || !newTemplate.category || !newTemplate.message) {
+    if (!newTemplate.name || !newTemplate.message) {
       setError("All fields are required.");
       return;
     }
@@ -149,10 +149,10 @@ const MessageTemplates = () => {
               >
                 <div className="bg-gray-50 px-4 py-2 border-b border-gray-200 flex justify-between items-center">
                   <div>
-                    <h3 className="font-medium">{template.name}</h3>
-                    <span className="text-xs text-gray-500 bg-gray-200 px-2 py-0.5 rounded-full">
+                    <h3 className="text-sm font-medium">{template.name}</h3>
+                    {/* <span className="text-xs text-gray-500 bg-gray-200 px-2 py-0.5 rounded-full">
                       {template.category}
-                    </span>
+                    </span> */}
                   </div>
                   <div className="flex space-x-2">
                     <button
@@ -203,7 +203,7 @@ const MessageTemplates = () => {
                 placeholder="e.g., Birthday Greeting"
               />
             </div>
-            <div>
+            {/* <div>
               <label
                 htmlFor="category"
                 className="block text-sm font-medium text-gray-700"
@@ -224,7 +224,7 @@ const MessageTemplates = () => {
                 <option value="Community">Community</option>
                 <option value="General">General</option>
               </select>
-            </div>
+            </div> */}
             <div>
               <label
                 htmlFor="message"
@@ -296,7 +296,7 @@ const MessageTemplates = () => {
                 className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
               />
             </div>
-            <div>
+            {/* <div>
               <label
                 htmlFor="editCategory"
                 className="block text-sm font-medium text-gray-700"
@@ -319,7 +319,7 @@ const MessageTemplates = () => {
                 <option value="Community">Community</option>
                 <option value="General">General</option>
               </select>
-            </div>
+            </div> */}
             <div>
               <label
                 htmlFor="editContent"

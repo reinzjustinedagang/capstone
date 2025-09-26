@@ -15,7 +15,13 @@ exports.getTemplateById = async (id) => {
   return result[0];
 };
 
-exports.createTemplate = async (name, category, message, user, ip) => {
+exports.createTemplate = async (
+  name,
+  category = "Template",
+  message,
+  user,
+  ip
+) => {
   const result = await Connection(
     "INSERT INTO sms_templates (name, category, message) VALUES (?, ?, ?)",
     [name, category, message]
@@ -27,7 +33,7 @@ exports.createTemplate = async (name, category, message, user, ip) => {
       user.email,
       user.role,
       "CREATE",
-      `Created SMS template '${name}' under category '${category}'.`,
+      `Created SMS template : ${name}.`,
       ip
     );
   }
@@ -35,7 +41,14 @@ exports.createTemplate = async (name, category, message, user, ip) => {
   return result;
 };
 
-exports.updateTemplate = async (id, name, category, message, user, ip) => {
+exports.updateTemplate = async (
+  id,
+  name,
+  category = "Template",
+  message,
+  user,
+  ip
+) => {
   const [oldData] = await Connection(
     "SELECT name, category, message FROM sms_templates WHERE id = ?",
     [id]
@@ -47,25 +60,12 @@ exports.updateTemplate = async (id, name, category, message, user, ip) => {
   );
 
   if (result.affectedRows === 1 && user) {
-    const changes = [];
-
-    if (oldData.name !== name) {
-      changes.push(`name: '${oldData.name}' → '${name}'`);
-    }
-    if (oldData.category !== category) {
-      changes.push(`category: '${oldData.category}' → '${category}'`);
-    }
-    if (oldData.message !== message) {
-      changes.push(`message: '[content changed]'`);
-    }
-
-    const details = changes.length > 0 ? changes.join(", ") : "No changes.";
     await logAudit(
       user.id,
       user.email,
       user.role,
       "UPDATE",
-      `Updated template ${name}: ${details}`,
+      `Updated template ${name}`,
       ip
     );
   }

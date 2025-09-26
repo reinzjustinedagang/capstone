@@ -108,7 +108,7 @@ const Dashboard = () => {
   return (
     <>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <NavLink to="/admin/senior-citizen-list">
+        <NavLink to="/staff/senior-citizen-list">
           <Card
             title="Total Registered Senior Citizens"
             value={loading ? "—" : citizenCount}
@@ -116,24 +116,8 @@ const Dashboard = () => {
             color="blue"
           />
         </NavLink>
-        <NavLink to="/admin/senior-citizen-list">
-          <Card
-            title="Not Registered Senior Citizens"
-            value={loading ? "—" : registerCount}
-            icon={<UsersIcon />}
-            color="blue"
-          />
-        </NavLink>
 
-        <NavLink to="/admin/barangays">
-          <Card
-            title="No. of Barangay"
-            value={loading ? "—" : barangayCount}
-            icon={<HouseIcon />}
-            color="green"
-          />
-        </NavLink>
-        <NavLink to="/admin/sms-management">
+        <NavLink to="/staff/sms-management">
           <Card
             title="SMS Sent (This Month)"
             value={loading ? "—" : smsCount}
@@ -141,7 +125,7 @@ const Dashboard = () => {
             color="indigo"
           />
         </NavLink>
-        <NavLink to="/admin/benefits">
+        <NavLink to="/staff/benefits">
           <Card
             title="Total Benefits"
             value={loading ? "—" : benefitsCount}
@@ -149,18 +133,10 @@ const Dashboard = () => {
             color="amber"
           />
         </NavLink>
-        <NavLink to="/admin/events">
+        <NavLink to="/staff/events">
           <Card
             title="Total Events"
             value={loading ? "—" : eventsCount}
-            icon={<BellIcon />}
-            color="amber"
-          />
-        </NavLink>
-        <NavLink to="/admin/user-management">
-          <Card
-            title="Total User"
-            value={loading ? "—" : userCount}
             icon={<BellIcon />}
             color="amber"
           />
