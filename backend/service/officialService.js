@@ -16,7 +16,7 @@ exports.getMunicipalPublic = async () => {
 
 exports.getBarangayPublic = async () => {
   return await Connection(
-    `SELECT * FROM barangay_officials WHERE approved = 1 ORDER BY type DESC, id ASC`
+    `SELECT * FROM barangay_officials WHERE approved = 1 ORDER BY barangay_name ASC`
   );
 };
 
