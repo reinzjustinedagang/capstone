@@ -260,7 +260,7 @@ const Sms = () => {
                     </div>
                   </div>
 
-                  <div className="max-h-80 overflow-y-auto">
+                  <div className="max-h-97 overflow-y-auto">
                     {loadingRecipients ? (
                       <div className="p-4 flex items-center justify-center text-blue-600">
                         <Loader2 className="animate-spin h-8 w-8" />
@@ -312,7 +312,7 @@ const Sms = () => {
                       htmlFor="template"
                       className="block text-sm font-medium text-gray-700 mb-1"
                     >
-                      Select Template (Optional)
+                      Select Template
                     </label>
                     <select
                       id="template"

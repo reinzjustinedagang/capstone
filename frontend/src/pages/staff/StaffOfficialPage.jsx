@@ -1,12 +1,12 @@
 import React from "react";
 import StaffLayout from "../../components/staff/layout/StaffLayout";
-import Official from "../../components/staff/official/Official";
+import Officials from "../../components/staff/official/Officials";
 
 export const StaffOfficialPage = () => {
   return (
     <div>
       <StaffLayout>
-        <Official />
+        <Officials />
       </StaffLayout>
     </div>
   );
