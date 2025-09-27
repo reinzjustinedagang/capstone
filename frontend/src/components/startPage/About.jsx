@@ -3,11 +3,15 @@ import axios from "axios";
 import Header from "./Header";
 import Footer from "./Footer";
 import user from "../../assets/user.png";
+import { Loader2 } from "lucide-react";
 
 const About = () => {
   const backendUrl = import.meta.env.VITE_API_BASE_URL;
+
   const [data, setData] = useState({});
   const [team, setTeam] = useState([]);
+  const [loadingData, setLoadingData] = useState(true);
+  const [loadingTeam, setLoadingTeam] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -16,6 +20,8 @@ const About = () => {
         setData(res.data);
       } catch (err) {
         console.error("Failed to fetch system settings:", err);
+      } finally {
+        setLoadingData(false);
       }
     };
 
@@ -28,11 +34,13 @@ const About = () => {
       } catch (err) {
         console.error("Failed to fetch team:", err);
         setTeam([]);
+      } finally {
+        setLoadingTeam(false);
       }
     };
 
-    fetchTeam();
     fetchData();
+    fetchTeam();
   }, []);
 
   return (
@@ -55,9 +63,18 @@ const About = () => {
             <h2 className="text-2xl font-semibold text-gray-900 mb-3">
               Preamble
             </h2>
-            <p className="text-gray-800 leading-relaxed text-justify">
-              {data.preamble}
-            </p>
+            {loadingData ? (
+              <div className="flex justify-center items-center py-10">
+                <Loader2 className="animate-spin h-8 w-8 text-blue-500" />
+                <p className="ml-3 text-gray-600 animate-pulse">
+                  Loading preamble...
+                </p>
+              </div>
+            ) : (
+              <p className="text-gray-800 leading-relaxed text-justify">
+                {data.preamble || "No preamble available."}
+              </p>
+            )}
           </div>
         </div>
 
@@ -68,17 +85,35 @@ const About = () => {
               <h3 className="text-2xl font-semibold text-gray-900 mb-3">
                 Mission
               </h3>
-              <p className="text-gray-800 leading-relaxed text-justify">
-                {data.mission}
-              </p>
+              {loadingData ? (
+                <div className="flex justify-center items-center py-10">
+                  <Loader2 className="animate-spin h-8 w-8 text-blue-500" />
+                  <p className="ml-3 text-gray-600 animate-pulse">
+                    Loading Mission...
+                  </p>
+                </div>
+              ) : (
+                <p className="text-gray-800 leading-relaxed text-justify">
+                  {data.mission || "No mission available."}
+                </p>
+              )}
             </div>
             <div className="p-4 text-center">
               <h3 className="text-2xl font-semibold text-gray-900 mb-3">
                 Vision
               </h3>
-              <p className="text-gray-800 leading-relaxed text-justify">
-                {data.vision}
-              </p>
+              {loadingData ? (
+                <div className="flex justify-center items-center py-10">
+                  <Loader2 className="animate-spin h-8 w-8 text-blue-500" />
+                  <p className="ml-3 text-gray-600 animate-pulse">
+                    Loading Vision...
+                  </p>
+                </div>
+              ) : (
+                <p className="text-gray-800 leading-relaxed text-justify">
+                  {data.vision || "No vision available."}
+                </p>
+              )}
             </div>
           </div>
         </div>
@@ -89,9 +124,18 @@ const About = () => {
             <h2 className="text-2xl font-semibold text-gray-900 mb-3">
               Introduction
             </h2>
-            <p className="text-gray-800 leading-relaxed text-justify">
-              {data.introduction}
-            </p>
+            {loadingData ? (
+              <div className="flex justify-center items-center py-10">
+                <Loader2 className="animate-spin h-8 w-8 text-blue-500" />
+                <p className="ml-3 text-gray-600 animate-pulse">
+                  Loading Introduction...
+                </p>
+              </div>
+            ) : (
+              <p className="text-gray-800 leading-relaxed text-justify">
+                {data.introduction || "No introduction available."}
+              </p>
+            )}
           </div>
         </div>
 
@@ -101,9 +145,18 @@ const About = () => {
             <h2 className="text-2xl font-semibold text-gray-900 mb-3">
               Objectives
             </h2>
-            <p className="text-gray-800 leading-relaxed text-justify">
-              {data.objective}
-            </p>
+            {loadingData ? (
+              <div className="flex justify-center items-center py-10">
+                <Loader2 className="animate-spin h-8 w-8 text-blue-500" />
+                <p className="ml-3 text-gray-600 animate-pulse">
+                  Loading Objectives...
+                </p>
+              </div>
+            ) : (
+              <p className="text-gray-800 leading-relaxed text-justify">
+                {data.objective || "No objectives available."}
+              </p>
+            )}
           </div>
         </div>
 
@@ -113,7 +166,14 @@ const About = () => {
             <h2 className="text-2xl font-semibold text-gray-900 mb-3">
               Our Team
             </h2>
-            {team.length === 0 ? (
+            {loadingTeam ? (
+              <div className="flex justify-center items-center py-10">
+                <Loader2 className="animate-spin h-8 w-8 text-blue-500" />
+                <p className="ml-3 text-gray-600 animate-pulse">
+                  Loading Team...
+                </p>
+              </div>
+            ) : team.length === 0 ? (
               <p className="text-gray-500">No team members added yet.</p>
             ) : (
               <div className="flex flex-wrap justify-center gap-6">

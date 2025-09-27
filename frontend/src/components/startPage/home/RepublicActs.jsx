@@ -1,7 +1,12 @@
 import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import Modal from "../../UI/Modal";
-import { ChevronLeft, ChevronRight, BookOpenTextIcon } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  BookOpenTextIcon,
+  Loader2,
+} from "lucide-react";
 import { Link } from "react-router-dom";
 
 const RepublicActs = () => {
@@ -51,8 +56,11 @@ const RepublicActs = () => {
 
         {/* Loading / Empty State */}
         {loading ? (
-          <div className="text-center py-16 text-gray-500">
-            <p>Loading Republic Acts...</p>
+          <div className="flex justify-center items-center py-10">
+            <Loader2 className="animate-spin h-8 w-8 text-blue-500" />
+            <p className="ml-3 text-gray-600 animate-pulse">
+              Loading Republic Acts...
+            </p>
           </div>
         ) : acts.length === 0 ? (
           <div className="text-center py-16 text-gray-500">
@@ -98,10 +106,8 @@ const RepublicActs = () => {
         )}
         {/* Footer Links */}
         <div className="flex flex-col sm:flex-row justify-center items-center mt-8 gap-4 text-sm text-gray-700">
-          <Link to="/republic-acts">
-            <a href="#" className="underline hover:text-blue-700">
-              See more...
-            </a>
+          <Link to="/republic-acts" className="underline hover:text-blue-700">
+            See more...
           </Link>
         </div>
       </div>

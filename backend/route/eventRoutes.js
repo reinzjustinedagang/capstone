@@ -16,7 +16,7 @@ router.get("/count/all", async (req, res) => {
 });
 
 // GET all events
-router.get("/event", isAuthenticated, async (req, res) => {
+router.get("/event", async (req, res) => {
   try {
     const user = req.session.user;
     const data = await eventService.getEvent(user);
@@ -26,7 +26,7 @@ router.get("/event", isAuthenticated, async (req, res) => {
   }
 });
 
-router.get("/slideshow", isAuthenticated, async (req, res) => {
+router.get("/slideshow", async (req, res) => {
   try {
     const user = req.session.user;
     const data = await eventService.getSlideshow(user);
@@ -46,7 +46,7 @@ router.get("/", async (req, res) => {
   }
 });
 
-router.get("/:id", isAuthenticated, async (req, res) => {
+router.get("/:id", async (req, res) => {
   try {
     const user = req.session.user;
     const data = await eventService.getById(req.params.id, user);

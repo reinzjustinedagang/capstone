@@ -1,26 +1,19 @@
 import React, { useState, useEffect } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
-import {
-  Menu,
-  X,
-  HomeIcon,
-  UserPlus,
-  InfoIcon,
-  LogIn,
-  Building,
-} from "lucide-react";
+import { Menu, X, HomeIcon, InfoIcon, LogIn, Building } from "lucide-react";
 import axios from "axios";
 
 const Header = () => {
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
-  const [faviconUrl, setFaviconUrl] = useState(null);
   const [systemSettings, setSystemSettings] = useState({
     system_name: "",
     municipality: "",
     province: "",
     seal: null,
   });
+
+  const [logoLoaded, setLogoLoaded] = useState(false);
   const backendUrl = import.meta.env.VITE_API_BASE_URL;
 
   useEffect(() => {
@@ -30,7 +23,7 @@ const Header = () => {
         const settings = res.data || {};
         setSystemSettings(settings);
 
-        // Set favicon dynamically using the seal from backend
+        // Set favicon dynamically
         if (settings.seal) {
           let link = document.querySelector("link[rel='icon']");
           if (!link) {
@@ -47,6 +40,7 @@ const Header = () => {
 
     fetchSystemSettings();
   }, []);
+
   useEffect(() => {
     if (systemSettings.system_name) {
       document.title = systemSettings.system_name;
@@ -56,9 +50,7 @@ const Header = () => {
   const navItems = [
     { to: "/", label: "Home", icon: HomeIcon },
     { to: "/organization", label: "Organization", icon: Building },
-
     { to: "/about", label: "About Us", icon: InfoIcon },
-    // { to: "/register-guide", label: "Register", icon: UserPlus },
     { to: "/login", label: "Login", icon: LogIn },
   ];
 
@@ -67,20 +59,31 @@ const Header = () => {
       <nav className="flex items-center justify-between p-5 lg:px-8 max-w-7xl mx-auto">
         {/* Logo */}
         <div className="flex items-center gap-2">
-          <img
-            src={systemSettings.seal || null}
-            alt="OSCA Logo"
-            className="h-20 w-auto object-contain"
-          />
+          <div className="h-20 w-20 rounded-full border-2 border-blue-700 flex items-center justify-center overflow-hidden">
+            {!logoLoaded && (
+              <div className="h-full w-full animate-pulse bg-gray-100 rounded-full"></div>
+            )}
+            {systemSettings.seal && (
+              <img
+                src={systemSettings.seal}
+                alt="OSCA Logo"
+                className={`h-full w-full object-contain rounded-full transition-opacity duration-500 ${
+                  logoLoaded ? "opacity-100" : "opacity-0 absolute"
+                }`}
+                onLoad={() => setLogoLoaded(true)}
+                onError={() => setLogoLoaded(true)}
+              />
+            )}
+          </div>
+
           <div className="hidden sm:block">
             <h1 className="font-bold text-blue-800 text-2xl">
-              {systemSettings.system_name ||
-                "Office of the Senior Citizen Affairs"}
+              {systemSettings.system_name || "————————"}
             </h1>
             <p className="text-base font-medium">
               {[systemSettings.municipality, systemSettings.province]
                 .filter(Boolean)
-                .join(", ")}
+                .join(", ") || "—————————"}
             </p>
           </div>
         </div>

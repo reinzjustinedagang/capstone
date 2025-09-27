@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import Modal from "../../UI/Modal";
-import { ChevronLeft, ChevronRight } from "lucide-react"; // ✅ Arrow icons
+import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react"; // ✅ Arrow icons
 import { Link } from "react-router-dom";
 
 const Benefits = () => {
@@ -53,8 +53,11 @@ const Benefits = () => {
 
         {/* Loading / Empty State */}
         {loading ? (
-          <div className="text-center py-16 text-gray-500">
-            <p>Loading benefits...</p>
+          <div className="flex justify-center items-center py-10">
+            <Loader2 className="animate-spin h-8 w-8 text-blue-500" />
+            <p className="ml-3 text-gray-600 animate-pulse">
+              Loading Benefits...
+            </p>
           </div>
         ) : benefits.length === 0 ? (
           <div className="text-center py-16 text-gray-500">
@@ -121,10 +124,8 @@ const Benefits = () => {
 
         {/* Footer Links */}
         <div className="flex flex-col sm:flex-row justify-center items-center mt-8 gap-4 text-sm text-gray-700">
-          <Link to="/benefits">
-            <a href="#" className="underline hover:text-blue-700">
-              See more...
-            </a>
+          <Link className="underline hover:text-blue-700" to="/benefits">
+            See more...
           </Link>
         </div>
       </div>
