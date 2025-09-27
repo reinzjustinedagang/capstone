@@ -52,7 +52,7 @@ exports.getSlideshow = async () => {
 exports.getFive = async () => {
   const query = `
     SELECT * 
-    FROM events WHERE type = 'event'
+    FROM events WHERE type = 'event' AND approved = 1
     ORDER BY date DESC
     LIMIT 5
   `;

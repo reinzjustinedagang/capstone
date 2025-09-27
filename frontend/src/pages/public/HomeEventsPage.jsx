@@ -13,7 +13,7 @@ export const HomeEventPage = () => {
   useEffect(() => {
     const fetchEvents = async () => {
       try {
-        const res = await axios.get(`${backendUrl}/api/events/public-event`);
+        const res = await axios.get(`${backendUrl}/api/events/public-events`);
         setEvents(res.data);
       } catch (err) {
         console.error("Error fetching events:", err);
