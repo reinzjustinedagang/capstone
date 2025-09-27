@@ -346,7 +346,7 @@ router.post(
     try {
       const imageUrl = req.file
         ? await uploadToCloudinary(req.file.buffer, "orgChart")
-        : null;
+        : "";
 
       const added = await officialService.addOrgChart(
         name,

@@ -413,7 +413,7 @@ exports.updateOrgChart = async (id, name, position, type, image, user, ip) => {
 
     const result = await Connection(
       `UPDATE orgChart SET name = ?, position = ?, type = ?, approved = ?, image = ? WHERE id = ?`,
-      [name, position, type, finalImage, approved, id]
+      [name, position, type, approved, finalImage, id] // ✅ fixed order
     );
 
     // Delete old image if replaced

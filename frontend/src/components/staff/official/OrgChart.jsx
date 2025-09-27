@@ -8,9 +8,9 @@ import {
   TrashIcon,
 } from "lucide-react";
 import OrgForm from "./form/OrgForm";
-import OrgCard from "./card/OrgCard";
-import Modal from "../UI/Modal";
-import Button from "../UI/Button";
+import OrgCard from "../../officials/card/OrgCard";
+import Modal from "../../UI/Modal";
+import Button from "../../UI/Button";
 import axios from "axios";
 
 const OrgChart = () => {
@@ -28,9 +28,7 @@ const OrgChart = () => {
     position: "",
     type: "bottom",
     existingImage: "",
-    approved: 0,
   });
-
   const [editingId, setEditingId] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [crudLoading, setCrudLoading] = useState(false);
@@ -162,7 +160,7 @@ const OrgChart = () => {
         open: true,
         type: "save-update",
         id: editingId,
-        payload: { ...formData, id: editingId, imageFile },
+        payload: { ...formData, imageFile },
       });
     } else {
       await savePosition(formData, imageFile);

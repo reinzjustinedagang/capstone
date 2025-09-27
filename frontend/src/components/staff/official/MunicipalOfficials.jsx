@@ -7,14 +7,14 @@ import {
   SaveIcon,
   TrashIcon,
 } from "lucide-react";
-import OrgForm from "./form/OrgForm";
-import OrgCard from "./card/OrgCard";
-import Modal from "../UI/Modal";
-import Button from "../UI/Button";
+import MunicipalForm from "./form/MunicipalForm";
+import MunicipalCard from "../../officials/card/MunicipalCard";
+import Modal from "../../UI/Modal";
+import Button from "../../UI/Button";
 import axios from "axios";
 
-const OrgChart = () => {
-  const [positions, setPositions] = useState([]);
+const MunicipalOfficials = ({ title }) => {
+  const [officials, setOfficials] = useState([]);
   const [showFormModal, setShowFormModal] = useState(false);
   const [imageFile, setImageFile] = useState(null);
   const [confirmModal, setConfirmModal] = useState({
@@ -26,42 +26,38 @@ const OrgChart = () => {
   const [formData, setFormData] = useState({
     name: "",
     position: "",
-    type: "bottom",
+    type: "officer",
     existingImage: "",
-    approved: 0,
   });
-
   const [editingId, setEditingId] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [crudLoading, setCrudLoading] = useState(false);
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
-  const [selectedPosition, setSelectedPosition] = useState(null);
-
+  const [selectedOfficial, setSelectedOfficial] = useState(null);
   const backendUrl =
     import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
 
-  // Separate positions by hierarchy
-  const president = positions.find((p) => p.type === "top");
-  const vicePresident = positions.find((p) => p.type === "mid");
-  const members = positions.filter((p) => p.type === "bottom");
+  const head = officials.find((m) => m.type === "top");
+  const vice = officials.find((m) => m.type === "mid");
+  const others = officials.filter((m) => m.type === "bottom");
+  const isHeadOccupied = !!head;
+  const isViceOccupied = !!vice;
 
-  const isPresidentOccupied = !!president;
-  const isViceOccupied = !!vicePresident;
-
-  const fetchPositions = useCallback(async () => {
+  const fetchOfficials = useCallback(async () => {
     setIsLoading(true);
     setError("");
     setSuccessMessage("");
     try {
-      const response = await axios.get(`${backendUrl}/api/officials/orgchart`, {
-        withCredentials: true,
-      });
-      setPositions(response.data);
+      const response = await axios.get(
+        `${backendUrl}/api/officials/municipal`,
+        { withCredentials: true }
+      );
+      setOfficials(response.data);
     } catch (err) {
       setError(
         err.response?.data?.message ||
-          "Failed to load organizational chart. Please try again."
+          "Failed to load municipal officials. Please try again."
       );
     } finally {
       setIsLoading(false);
@@ -69,24 +65,24 @@ const OrgChart = () => {
   }, [backendUrl]);
 
   useEffect(() => {
-    fetchPositions();
-  }, [fetchPositions]);
+    fetchOfficials();
+  }, [fetchOfficials]);
 
-  const handleApprove = async (id) => {
+  const handleApprove = async (officialId) => {
     setCrudLoading(true);
     setError("");
     setSuccessMessage("");
-
     try {
       await axios.put(
-        `${backendUrl}/api/officials/${id}/approve-orgchart`,
+        `${backendUrl}/api/officials/${officialId}/approve-municipal`,
         null,
-        { withCredentials: true }
+        {
+          withCredentials: true,
+        }
       );
-
-      setSuccessMessage("Official approved successfully!");
-      fetchPositions();
-      closeFormModal(); // ✅ close after approving
+      setSuccessMessage("Municipal official approved successfully!");
+      fetchOfficials();
+      closeFormModal(); // close modal after approve
     } catch (err) {
       setError(
         err.response?.data?.message ||
@@ -129,24 +125,21 @@ const OrgChart = () => {
 
     setError(null);
     setImageFile(file);
-    setFormData((prev) => ({ ...prev, imageFile: file }));
+    setFormData((prev) => ({
+      ...prev,
+      imageFile: file,
+    }));
   };
 
   const closeFormModal = () => {
     setShowFormModal(false);
-    setFormData({
-      name: "",
-      position: "",
-      type: "",
-      existingImage: "",
-      approved: 0,
-    });
+    setFormData({ name: "", position: "", type: "officer", existingImage: "" });
     setImageFile(null);
     setEditingId(null);
     setError("");
   };
 
-  const handleSubmitForm = async () => {
+  const handleSubmitFromForm = async () => {
     setError("");
     if (
       !formData.name.trim() ||
@@ -162,26 +155,17 @@ const OrgChart = () => {
         open: true,
         type: "save-update",
         id: editingId,
-        payload: { ...formData, id: editingId, imageFile },
+        payload: { ...formData, imageFile },
       });
     } else {
-      await savePosition(formData, imageFile);
+      await saveOfficial(formData, imageFile);
     }
   };
 
-  const savePosition = async (dataToSave, fileToUpload) => {
+  const saveOfficial = async (dataToSave, fileToUpload) => {
     setCrudLoading(true);
     setError("");
     setSuccessMessage("");
-
-    if (
-      !dataToSave.name?.trim() ||
-      !dataToSave.position?.trim() ||
-      !dataToSave.type?.trim()
-    ) {
-      setError("Please fill in all required fields.");
-      return;
-    }
     try {
       const form = new FormData();
       form.append("name", dataToSave.name);
@@ -192,32 +176,35 @@ const OrgChart = () => {
         form.append("existing_image", dataToSave.existingImage || "");
       }
 
-      if (fileToUpload) form.append("image", fileToUpload);
+      if (fileToUpload) {
+        form.append("image", fileToUpload);
+      }
 
       if (dataToSave.id) {
         await axios.put(
-          `${backendUrl}/api/officials/orgchart/${dataToSave.id}`,
+          `${backendUrl}/api/officials/municipal/${dataToSave.id}`,
           form,
           {
             withCredentials: true,
             headers: { "Content-Type": "multipart/form-data" },
           }
         );
-        setSuccessMessage("Position updated successfully!");
+        setSuccessMessage("Municipal official updated successfully!");
       } else {
-        await axios.post(`${backendUrl}/api/officials/orgchart`, form, {
+        await axios.post(`${backendUrl}/api/officials/municipal`, form, {
           withCredentials: true,
           headers: { "Content-Type": "multipart/form-data" },
         });
-        setSuccessMessage("New position added successfully!");
+        setSuccessMessage("New municipal official added successfully!");
       }
 
       closeFormModal();
-      fetchPositions();
+      fetchOfficials();
     } catch (err) {
+      console.error("Error saving barangay official:", err);
       setError(
         err.response?.data?.message ||
-          "Failed to save position. Please try again."
+          "Failed to save official. Please try again."
       );
     } finally {
       setCrudLoading(false);
@@ -225,38 +212,32 @@ const OrgChart = () => {
   };
 
   const openAddModal = () => {
-    // Change `type: ""` to a default value like `type: "bottom"`
-    setFormData({
-      name: "",
-      position: "",
-      type: "bottom", // ✅ SET A DEFAULT VALUE HERE
-      existingImage: "",
-    });
+    setFormData({ name: "", position: "", type: "officer", existingImage: "" });
     setImageFile(null);
     setEditingId(null);
     setShowFormModal(true);
   };
 
-  const openEditModal = (pos) => {
-    setSelectedPosition(pos);
+  const openEditModal = (official) => {
+    setSelectedOfficial(official);
     setFormData({
-      name: pos.name,
-      position: pos.position,
-      type: pos.type,
-      existingImage: pos.image || "",
-      approved: pos.approved, // ✅ include approval state
+      name: official.name,
+      position: official.position,
+      type: official.type,
+      existingImage: official.image || "",
+      approved: official.approved, // 👈 add this
     });
     setImageFile(null);
-    setEditingId(pos.id);
+    setEditingId(official.id);
     setShowFormModal(true);
   };
 
-  const openDeleteConfirmation = (pos) => {
-    setSelectedPosition(pos);
+  const openDeleteConfirmation = (official) => {
+    setSelectedOfficial(official);
     setConfirmModal({
       open: true,
       type: "delete",
-      id: pos.id,
+      id: official.id,
       payload: null,
     });
   };
@@ -268,24 +249,22 @@ const OrgChart = () => {
       setSuccessMessage("");
       try {
         await axios.delete(
-          `${backendUrl}/api/officials/orgchart/${confirmModal.id}`,
-          {
-            withCredentials: true,
-          }
+          `${backendUrl}/api/officials/municipal/${confirmModal.id}`,
+          { withCredentials: true }
         );
-        setSuccessMessage("Position deleted successfully!");
-        fetchPositions();
+        setSuccessMessage("Municipal official deleted successfully!");
+        fetchOfficials();
       } catch (err) {
         setError(
           err.response?.data?.message ||
-            "Failed to delete position. Please try again."
+            "Failed to delete official. Please try again."
         );
       } finally {
         setCrudLoading(false);
         setConfirmModal({ open: false, type: "", id: null, payload: null });
       }
     } else if (confirmModal.type === "save-update" && confirmModal.payload) {
-      await savePosition(
+      await saveOfficial(
         { ...confirmModal.payload, id: confirmModal.id },
         confirmModal.payload.imageFile
       );
@@ -297,7 +276,7 @@ const OrgChart = () => {
     return (
       <div className="flex justify-center items-center h-screen text-gray-700">
         <Loader2 className="animate-spin h-8 w-8 text-blue-500 mr-3" />
-        <p>Loading organizational chart...</p>
+        <p>Loading municipal officials...</p>
       </div>
     );
   }
@@ -310,100 +289,90 @@ const OrgChart = () => {
           variant="primary"
           icon={<PlusIcon className="h-4 w-4 mr-2" />}
         >
-          Add New Official in Organizational Chart
+          Add New Municipal Federation Officer
         </Button>
       </div>
 
-      {crudLoading && (
+      {crudLoading ? (
         <div className="flex justify-center items-center py-10">
           <Loader2 className="animate-spin h-8 w-8 text-blue-500" />
           <p className="ml-3 text-gray-600">Processing request...</p>
         </div>
-      )}
-
-      {error && (
+      ) : error ? (
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg mx-auto mb-4 flex items-center">
           <XCircle className="h-5 w-5 mr-2" />
           <span>{error}</span>
         </div>
-      )}
-
-      {successMessage && (
+      ) : successMessage ? (
         <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg mx-auto mb-4 flex items-center">
           <CheckCircle className="h-5 w-5 mr-2" />
           <span>{successMessage}</span>
         </div>
-      )}
+      ) : null}
 
-      {/* Organizational Chart */}
-      <div className="flex flex-col items-center space-y-0">
-        {positions.length === 0 && !isLoading && (
-          <p className="text-gray-500 mt-6">
-            No positions have been added yet. Click "Add New Position" to get
-            started.
-          </p>
-        )}
-
-        {president && (
-          <OrgCard
-            position={president}
-            onEdit={() => openEditModal(president)}
-            onDelete={() => openDeleteConfirmation(president)}
-            isTop
-            backendUrl={backendUrl}
-          />
-        )}
-
-        {vicePresident && (
-          <>
-            <div className="w-0.5 h-6 bg-blue-400"></div>
-            <OrgCard
-              position={vicePresident}
-              onEdit={() => openEditModal(vicePresident)}
-              onDelete={() => openDeleteConfirmation(vicePresident)}
+      {!isLoading && !error && (
+        <div className="flex flex-col items-center space-y-0">
+          {/* Head */}
+          {head && (
+            <MunicipalCard
+              official={head}
+              onEdit={() => openEditModal(head)}
+              onDelete={() => openDeleteConfirmation(head)}
+              isHead
               backendUrl={backendUrl}
             />
-          </>
-        )}
+          )}
 
-        {members.length > 0 && (
-          <>
-            <div className="relative flex justify-center items-center w-full mb-6">
+          {/* Vice */}
+          {vice && (
+            <>
               <div className="w-0.5 h-6 bg-blue-400"></div>
-              <div className="absolute top-6 h-0.5 w-3/4 bg-blue-400"></div>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full place-items-center">
-              {members.map((m) => (
-                <OrgCard
-                  key={m.id}
-                  position={m}
-                  onEdit={() => openEditModal(m)}
-                  onDelete={() => openDeleteConfirmation(m)}
-                  backendUrl={backendUrl}
-                />
-              ))}
-            </div>
-          </>
-        )}
-      </div>
+              <MunicipalCard
+                official={vice}
+                onEdit={() => openEditModal(vice)}
+                onDelete={() => openDeleteConfirmation(vice)}
+                backendUrl={backendUrl}
+              />
+            </>
+          )}
 
-      {/* Form Modal */}
+          {/* Others */}
+          {others.length > 0 && (
+            <>
+              <div className="relative flex justify-center items-center w-full mb-6">
+                <div className="w-0.5 h-6 bg-blue-400"></div>
+                <div className="absolute top-6 h-0.5 w-3/4 bg-blue-400"></div>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full place-items-center">
+                {others.map((o) => (
+                  <MunicipalCard
+                    key={o.id}
+                    official={o}
+                    onEdit={() => openEditModal(o)}
+                    onDelete={() => openDeleteConfirmation(o)}
+                    backendUrl={backendUrl}
+                  />
+                ))}
+              </div>
+            </>
+          )}
+        </div>
+      )}
+
       {showFormModal && (
         <Modal
           isOpen={showFormModal}
           title={
-            editingId
-              ? "Edit Officer in Organization Chart"
-              : "Add New Officer in Organization Chart"
+            editingId ? "Edit Federation Officer" : "Add New Federation Officer"
           }
           onClose={closeFormModal}
         >
           <div className="p-6">
-            <OrgForm
+            <MunicipalForm
               formData={formData}
               onChange={handleChange}
               onFileChange={handleFileChange}
-              onSubmit={handleSubmitForm}
+              onSubmit={handleSubmitFromForm}
               error={error}
               isLoading={crudLoading}
               isEditing={!!editingId}
@@ -411,16 +380,15 @@ const OrgChart = () => {
               backendUrl={backendUrl}
               onCancel={closeFormModal}
               imageFile={imageFile}
-              isPresidentOccupied={isPresidentOccupied}
+              isHeadOccupied={isHeadOccupied}
               isViceOccupied={isViceOccupied}
-              positionIdBeingEdited={editingId}
-              onApprove={handleApprove} // ✅ add this
+              officialIdBeingEdited={editingId}
+              onApprove={handleApprove}
             />
           </div>
         </Modal>
       )}
 
-      {/* Confirmation Modal */}
       {confirmModal.open && (
         <Modal
           isOpen={confirmModal.open}
@@ -439,7 +407,7 @@ const OrgChart = () => {
                 <>
                   Are you sure you want to delete{" "}
                   <strong className="text-red-600">
-                    {selectedPosition ? selectedPosition.name : "this position"}
+                    {selectedOfficial ? selectedOfficial.name : "this official"}
                   </strong>
                   ? This action cannot be undone.
                 </>
@@ -447,7 +415,7 @@ const OrgChart = () => {
                 <>
                   Are you sure you want to update{" "}
                   <strong className="text-blue-600">
-                    {confirmModal.payload?.name || "this position"}
+                    {confirmModal.payload?.name || "this official"}
                   </strong>
                   's information?
                 </>
@@ -497,4 +465,4 @@ const OrgChart = () => {
   );
 };
 
-export default OrgChart;
+export default MunicipalOfficials;

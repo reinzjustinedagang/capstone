@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import MunicipalOfficials from "../../officials/MunicipalOfficials";
+import MunicipalOfficials from "./MunicipalOfficials";
 import BarangayOfficials from "./BarangayOfficials";
 import AddPosition from "../../officials/AddPosition";
-import OrgChart from "../../officials/OrgChart";
+import OrgChart from "./OrgChart";
 import Button from "../../UI/Button";
 import { Landmark, User, ListTree, Plus } from "lucide-react";
 
