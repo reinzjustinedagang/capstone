@@ -76,9 +76,9 @@ const RepublicActs = () => {
               ref={scrollRef}
               className="flex flex-wrap justify-center gap-6"
             >
-              {acts.map((act) => (
+              {acts.map((act, index) => (
                 <div
-                  key={act.id}
+                  key={act.id || index}
                   onClick={() => openModal(act)}
                   className="w-full max-w-[280px] bg-gradient-to-br from-blue-50 to-white border border-blue-200 rounded-xl shadow-md cursor-pointer hover:shadow-lg hover:-translate-y-1 transition-transform p-5"
                 >

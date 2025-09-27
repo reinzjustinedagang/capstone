@@ -40,21 +40,12 @@ exports.getPublicEvents = async () => {
   `);
 };
 
-exports.getSlideshow = async (user) => {
-  if (user && user.role === "admin") {
-    return await Connection(`
-      SELECT * FROM events WHERE type = 'slideshow'
-      ORDER BY date DESC
-    `);
-  } else {
-    return await Connection(
-      `
-      SELECT * FROM events WHERE type = 'slideshow' AND created_by = ?
-      ORDER BY date DESC
-    `,
-      [user.id]
-    );
-  }
+exports.getSlideshow = async () => {
+  const query = `
+    SELECT * FROM events WHERE type = 'slideshow'
+    ORDER BY date DESC
+  `;
+  return await Connection(query);
 };
 
 // GET last 5 events

@@ -28,8 +28,7 @@ router.get("/event", async (req, res) => {
 
 router.get("/slideshow", async (req, res) => {
   try {
-    const user = req.session.user;
-    const data = await eventService.getSlideshow(user);
+    const data = await eventService.getSlideshow();
     res.status(200).json(data);
   } catch (err) {
     res.status(500).json({ message: err.message });

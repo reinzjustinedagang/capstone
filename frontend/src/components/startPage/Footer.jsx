@@ -25,25 +25,17 @@ const Footer = () => {
       <div className="container mx-auto flex flex-col items-center gap-4">
         {/* Links */}
         <div className="flex flex-wrap justify-center gap-6 text-sm font-medium">
-          <Link to="/">
-            <a href="#" className="hover:text-blue-700 transition-colors">
-              Home
-            </a>
+          <Link to="/" className="hover:text-blue-700 transition-colors">
+            Home
           </Link>
-          <Link to="/organization">
-            <a href="#" className="hover:text-blue-700 transition-colors">
-              Organization
-            </a>
+          <Link
+            to="/organization"
+            className="hover:text-blue-700 transition-colors"
+          >
+            Organization
           </Link>
-          <Link to="/about">
-            <a href="#" className="hover:text-blue-700 transition-colors">
-              About Us
-            </a>
-          </Link>
-          <Link to="/register-guide">
-            <a href="#" className="hover:text-blue-700 transition-colors">
-              Register
-            </a>
+          <Link to="/about" className="hover:text-blue-700 transition-colors">
+            About Us
           </Link>
         </div>
 
