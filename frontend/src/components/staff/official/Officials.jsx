@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import MunicipalOfficials from "../../officials/MunicipalOfficials";
-import BarangayOfficials from "../../officials/BarangayOfficials";
+import BarangayOfficials from "./BarangayOfficials";
 import AddPosition from "../../officials/AddPosition";
 import OrgChart from "../../officials/OrgChart";
 import Button from "../../UI/Button";

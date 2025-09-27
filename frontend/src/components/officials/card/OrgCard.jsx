@@ -29,6 +29,11 @@ const OrgCard = ({ position, onEdit, onDelete, isTop = false }) => {
           ${isTop ? "border-blue-500" : "border-gray-200"}
         `}
       >
+        {position.approved === 0 && (
+          <span className="absolute top-2 left-2 bg-yellow-500 text-white text-xs font-semibold px-2 py-1 rounded-md shadow">
+            Pending
+          </span>
+        )}
         {/* Left: Profile Picture */}
         <div className="flex-shrink-0 mr-4">
           <img

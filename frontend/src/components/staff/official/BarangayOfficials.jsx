@@ -1,11 +1,11 @@
 // BarangayOfficials.jsx
 import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
-import Button from "../UI/Button";
-import BarangayCard from "./card/BarangayCard";
+import Button from "../../UI/Button";
+import BarangayCard from "../../officials/card/BarangayCard";
 import BarangayForm from "./form/BarangayForm";
-import ConfirmationModal from "./ConfirmationModal";
-import StatusMessage from "./StatusMessage";
+import ConfirmationModal from "../../officials/ConfirmationModal";
+import StatusMessage from "../../officials/StatusMessage";
 import { PlusIcon, Loader2 } from "lucide-react";
 
 const BarangayOfficials = ({ title }) => {

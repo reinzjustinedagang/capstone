@@ -1,6 +1,13 @@
 import React, { useEffect, useState } from "react";
 import Button from "../../UI/Button"; // Importing your Button component
-import { Loader2, SaveIcon, XCircle, ImagePlus, UserIcon } from "lucide-react"; // Importing necessary icons
+import {
+  Loader2,
+  SaveIcon,
+  XCircle,
+  ImagePlus,
+  UserIcon,
+  CheckCircle,
+} from "lucide-react"; // Importing necessary icons
 import user from "../../../assets/user.png";
 import axios from "axios";
 
@@ -15,6 +22,8 @@ const OrgForm = ({
   isEditing, // Boolean to tell if the form is in edit mode
   existingImage, // The filename of the existing image if in edit mode
   backendUrl, // Backend URL for constructing the image source
+  onApprove,
+  positionIdBeingEdited, // ID of the position being edited (for approval)
 }) => {
   const [position, setPosition] = useState([]);
 
@@ -170,37 +179,52 @@ const OrgForm = ({
       )}
 
       <div className="flex justify-end space-x-3 pt-4">
-        {/* Cancel Button */}
         <Button
-          type="button" // Important: set type to "button" to prevent form submission
+          type="button"
           variant="secondary"
-          onClick={onCancel} // Calls the onCancel prop passed from the parent
-          disabled={isLoading} // Disable while loading/saving
-          icon={<XCircle className="h-4 w-4" />} // Icon for cancel
+          onClick={onCancel}
+          disabled={isLoading}
+          icon={<XCircle className="h-4 w-4" />}
         >
           Cancel
         </Button>
-        {/* Save/Update Button */}
-        <Button
-          type="submit" // This button will submit the form
-          variant="primary"
-          icon={
-            isLoading ? ( // Show Loader2 icon when isLoading is true
-              <Loader2 className="animate-spin h-4 w-4 mr-2" />
-            ) : (
-              // Show SaveIcon when not loading
-              <SaveIcon className="h-4 w-4 mr-2" />
-            )
-          }
-          disabled={isLoading} // Disable while loading/saving
-        >
-          {isLoading
-            ? "Saving..." // Text when loading
-            : isEditing
-            ? "Update Officer in Organization Chart" // Text when editing
-            : "Add Officer in Organization Chart"}{" "}
-          {/* Text when adding new */}
-        </Button>
+
+        {isEditing && formData.approved === 0 ? (
+          <Button
+            type="button"
+            variant="primary"
+            onClick={() => onApprove(positionIdBeingEdited)} // ✅ needs to be passed down
+            disabled={isLoading}
+            icon={
+              isLoading ? (
+                <Loader2 className="animate-spin h-4 w-4 mr-2" />
+              ) : (
+                <CheckCircle className="h-4 w-4 mr-2" />
+              )
+            }
+          >
+            {isLoading ? "Approving..." : "Approve"}
+          </Button>
+        ) : (
+          <Button
+            type="submit"
+            variant="primary"
+            icon={
+              isLoading ? (
+                <Loader2 className="animate-spin h-4 w-4 mr-2" />
+              ) : (
+                <SaveIcon className="h-4 w-4 mr-2" />
+              )
+            }
+            disabled={isLoading}
+          >
+            {isLoading
+              ? "Saving..."
+              : isEditing
+              ? "Update Officer in Organization Chart"
+              : "Add Officer in Organization Chart"}
+          </Button>
+        )}
       </div>
     </form>
   );

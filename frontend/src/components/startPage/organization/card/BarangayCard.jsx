@@ -7,10 +7,11 @@ const BarangayCard = ({ official, onEdit, onDelete }) => {
     <div className="relative flex flex-col items-center bg-white p-4 rounded-2xl shadow-md w-48 transition-transform transform ">
       {/* Barangay Name */}
       <h3
-        className="text-sm font-semibold text-center mb-2 max-w-full truncate"
+        className="text-sm font-semibold text-center mb-2 max-w-full"
         title={official.barangay_name}
       >
-        Brgy. {official.barangay_name.replace(/^Barangay\s+/i, "")}
+        Brgy.{" "}
+        {official.barangay_name.replace(/^Barangay\s+/i, "").toUpperCase()}
       </h3>
 
       {/* Profile Picture */}
@@ -29,7 +30,7 @@ const BarangayCard = ({ official, onEdit, onDelete }) => {
 
       {/* President Name */}
       <p
-        className="text-sm font-medium text-center max-w-full truncate"
+        className="text-sm font-medium text-center max-w-full"
         title={official.president_name}
       >
         {official.president_name}

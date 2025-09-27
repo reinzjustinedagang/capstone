@@ -267,7 +267,7 @@ const AddPosition = () => {
               handleDelete={handleDelete}
             />
             <PositionList
-              title="Municipal Federation"
+              title="Federation Officer"
               list={federationPositions}
               handleEdit={handleEdit}
               handleDelete={handleDelete}

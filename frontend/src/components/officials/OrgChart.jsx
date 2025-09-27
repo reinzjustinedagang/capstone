@@ -70,6 +70,31 @@ const OrgChart = () => {
     fetchPositions();
   }, [fetchPositions]);
 
+  const handleApprove = async (id) => {
+    setCrudLoading(true);
+    setError("");
+    setSuccessMessage("");
+
+    try {
+      await axios.put(
+        `${backendUrl}/api/officials/${id}/approve-orgchart`,
+        null,
+        { withCredentials: true }
+      );
+
+      setSuccessMessage("Official approved successfully!");
+      fetchPositions();
+      closeFormModal(); // ✅ close after approving
+    } catch (err) {
+      setError(
+        err.response?.data?.message ||
+          "Failed to approve official. Please try again."
+      );
+    } finally {
+      setCrudLoading(false);
+    }
+  };
+
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
@@ -112,6 +137,7 @@ const OrgChart = () => {
       position: "",
       type: "",
       existingImage: "",
+      approved: 0,
     });
     setImageFile(null);
     setEditingId(null);
@@ -216,6 +242,7 @@ const OrgChart = () => {
       position: pos.position,
       type: pos.type,
       existingImage: pos.image || "",
+      approved: pos.approved, // ✅ include approval state
     });
     setImageFile(null);
     setEditingId(pos.id);
@@ -385,6 +412,7 @@ const OrgChart = () => {
               isPresidentOccupied={isPresidentOccupied}
               isViceOccupied={isViceOccupied}
               positionIdBeingEdited={editingId}
+              onApprove={handleApprove} // ✅ add this
             />
           </div>
         </Modal>

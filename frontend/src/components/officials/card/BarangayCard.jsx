@@ -4,14 +4,23 @@ import user from "../../../assets/user.png";
 
 const BarangayCard = ({ official, onEdit, onDelete }) => {
   return (
-    <div className="relative flex flex-col items-center bg-white p-4 rounded-2xl shadow-md w-48 transition-transform transform ">
+    <div className="relative flex flex-col items-center bg-white p-4 rounded-2xl shadow-md w-48 transition-transform transform">
+      {/* Pending Badge */}
+      {official.approved === 0 && (
+        <span className="absolute top-2 left-2 bg-yellow-500 text-white text-xs font-semibold px-2 py-1 rounded-md shadow">
+          Pending
+        </span>
+      )}
+
       {/* Barangay Name */}
       <h3
-        className="text-sm font-semibold text-center mb-2 max-w-full truncate"
+        className="text-sm font-semibold text-center mb-2 max-w-full"
         title={official.barangay_name}
       >
-        Brgy. {official.barangay_name.replace(/^Barangay\s+/i, "")}
+        Brgy.{" "}
+        {official.barangay_name.replace(/^Barangay\s+/i, "").toUpperCase()}
       </h3>
+
       {/* Profile Picture */}
       <div className="relative mb-3">
         <img
@@ -28,7 +37,7 @@ const BarangayCard = ({ official, onEdit, onDelete }) => {
 
       {/* President Name */}
       <p
-        className="text-sm font-medium text-center max-w-full truncate"
+        className="text-sm font-medium text-center max-w-full"
         title={official.president_name}
       >
         {official.president_name}
@@ -36,7 +45,7 @@ const BarangayCard = ({ official, onEdit, onDelete }) => {
 
       {/* Position */}
       <p className="text-sm bg-blue-100 text-blue-700 mt-1 px-3 py-0.5 rounded-md font-medium">
-        {official.position}
+        {official.position.toUpperCase()}
       </p>
 
       {/* Action Buttons */}

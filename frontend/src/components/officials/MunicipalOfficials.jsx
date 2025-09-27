@@ -68,6 +68,31 @@ const MunicipalOfficials = ({ title }) => {
     fetchOfficials();
   }, [fetchOfficials]);
 
+  const handleApprove = async (officialId) => {
+    setCrudLoading(true);
+    setError("");
+    setSuccessMessage("");
+    try {
+      await axios.put(
+        `${backendUrl}/api/officials/${officialId}/approve-municipal`,
+        null,
+        {
+          withCredentials: true,
+        }
+      );
+      setSuccessMessage("Municipal official approved successfully!");
+      fetchOfficials();
+      closeFormModal(); // close modal after approve
+    } catch (err) {
+      setError(
+        err.response?.data?.message ||
+          "Failed to approve official. Please try again."
+      );
+    } finally {
+      setCrudLoading(false);
+    }
+  };
+
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
@@ -200,6 +225,7 @@ const MunicipalOfficials = ({ title }) => {
       position: official.position,
       type: official.type,
       existingImage: official.image || "",
+      approved: official.approved, // 👈 add this
     });
     setImageFile(null);
     setEditingId(official.id);
@@ -357,6 +383,7 @@ const MunicipalOfficials = ({ title }) => {
               isHeadOccupied={isHeadOccupied}
               isViceOccupied={isViceOccupied}
               officialIdBeingEdited={editingId}
+              onApprove={handleApprove}
             />
           </div>
         </Modal>

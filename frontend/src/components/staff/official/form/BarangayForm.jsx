@@ -1,21 +1,14 @@
 import React, { useState, useEffect } from "react";
-import Button from "../../UI/Button";
-import Modal from "../../UI/Modal";
-import {
-  Loader2,
-  SaveIcon,
-  XCircle,
-  ImagePlus,
-  CheckCircle,
-} from "lucide-react";
-import user from "../../../assets/user.png";
+import Button from "../../../UI/Button";
+import Modal from "../../../UI/Modal";
+import { Loader2, SaveIcon, XCircle, ImagePlus } from "lucide-react";
+import user from "../../../../assets/user.png";
 import axios from "axios";
 
 const BarangayForm = ({
   isOpen,
   onClose,
   onSubmit,
-  onApprove, // 👈 NEW PROP
   formData,
   setFormData,
   handleFileChange,
@@ -26,12 +19,13 @@ const BarangayForm = ({
   backendUrl,
 }) => {
   const [barangayOptions, setBarangayOptions] = useState([]);
+  const [previewUrl, setPreviewUrl] = useState(null);
   const [validationError, setValidationError] = useState(null);
 
   const fetchBarangays = async () => {
     try {
       const res = await axios.get(`${backendUrl}/api/barangays/All`);
-      const options = res.data.map((b) => b.barangay_name);
+      const options = res.data.map((b) => b.barangay_name); // or b.name depending on your DB
       setBarangayOptions(options);
     } catch (err) {
       console.error("Failed to fetch barangays:", err);
@@ -41,6 +35,20 @@ const BarangayForm = ({
   useEffect(() => {
     fetchBarangays();
   }, []);
+
+  useEffect(() => {
+    let previewUrl;
+
+    if (formData.imageFile instanceof File) {
+      previewUrl = URL.createObjectURL(formData.imageFile);
+    }
+
+    return () => {
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl);
+      }
+    };
+  }, [formData.imageFile]);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -64,7 +72,6 @@ const BarangayForm = ({
             onSubmit();
           }}
         >
-          {/* IMAGE UPLOAD */}
           <div className="flex justify-center">
             <div className="relative group w-24 h-24 sm:w-32 sm:h-32">
               <img
@@ -80,7 +87,8 @@ const BarangayForm = ({
                 htmlFor="image"
                 className="absolute bottom-0.5 right-0.5 bg-blue-600 text-white rounded-xl p-2 sm:p-1.5 cursor-pointer 
                  opacity-100 sm:opacity-0 sm:group-hover:opacity-100 
-                 transition-all duration-300 shadow-lg hover:bg-blue-700"
+                 transition-all duration-300 transform translate-y-0 sm:translate-y-1 sm:group-hover:translate-y-0 
+                 shadow-lg hover:bg-blue-700"
                 title="Change Image"
               >
                 <ImagePlus className="text-white w-5 h-5 sm:w-4 sm:h-4" />
@@ -95,7 +103,6 @@ const BarangayForm = ({
             </div>
           </div>
 
-          {/* BARANGAY SELECT */}
           <div>
             <label
               htmlFor="barangay"
@@ -120,7 +127,6 @@ const BarangayForm = ({
             </select>
           </div>
 
-          {/* NAME */}
           <div>
             <label
               htmlFor="president"
@@ -139,7 +145,6 @@ const BarangayForm = ({
             />
           </div>
 
-          {/* POSITION */}
           <div>
             <label
               htmlFor="position"
@@ -160,7 +165,6 @@ const BarangayForm = ({
             </select>
           </div>
 
-          {/* ERROR */}
           {(validationError || error) && (
             <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg flex items-center">
               <XCircle className="h-5 w-5 mr-2" />
@@ -168,49 +172,28 @@ const BarangayForm = ({
             </div>
           )}
 
-          {/* FOOTER BUTTONS */}
           <div className="flex justify-end space-x-3 pt-4">
             <Button variant="secondary" onClick={onClose} disabled={loading}>
               Cancel
             </Button>
-
-            {editingId && formData.approved === 0 ? (
-              // 👈 Replace Add/Update with Approve when unapproved
-              <Button
-                type="button"
-                variant="primary"
-                icon={
-                  loading ? (
-                    <Loader2 className="animate-spin h-4 w-4 mr-2" />
-                  ) : (
-                    <CheckCircle className="h-4 w-4 mr-2" />
-                  )
-                }
-                onClick={() => onApprove(editingId)}
-                disabled={loading}
-              >
-                Approve
-              </Button>
-            ) : (
-              <Button
-                type="submit"
-                variant="primary"
-                icon={
-                  loading ? (
-                    <Loader2 className="animate-spin h-4 w-4 mr-2" />
-                  ) : (
-                    <SaveIcon className="h-4 w-4 mr-2" />
-                  )
-                }
-                disabled={loading}
-              >
-                {loading
-                  ? "Saving..."
-                  : editingId
-                  ? "Update Official"
-                  : "Add Official"}
-              </Button>
-            )}
+            <Button
+              type="submit"
+              variant="primary"
+              icon={
+                loading ? (
+                  <Loader2 className="animate-spin h-4 w-4 mr-2" />
+                ) : (
+                  <SaveIcon className="h-4 w-4 mr-2" />
+                )
+              }
+              disabled={loading}
+            >
+              {loading
+                ? "Saving..."
+                : editingId
+                ? "Update Barangay Association Presidents"
+                : "Add Barangay Association Presidents"}
+            </Button>
           </div>
         </form>
       </div>
