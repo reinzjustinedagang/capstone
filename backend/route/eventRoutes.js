@@ -16,6 +16,16 @@ router.get("/count/all", async (req, res) => {
 });
 
 // GET all events
+router.get("/public-events", async (req, res) => {
+  try {
+    const data = await eventService.getPublicEvents();
+    res.status(200).json(data);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// GET all events
 router.get("/event", async (req, res) => {
   try {
     const user = req.session.user;
