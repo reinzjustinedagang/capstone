@@ -19,9 +19,12 @@ const BarangayOfficials = ({ title }) => {
     setError("");
     setSuccessMessage("");
     try {
-      const response = await axios.get(`${backendUrl}/api/officials/barangay`, {
-        withCredentials: true,
-      });
+      const response = await axios.get(
+        `${backendUrl}/api/officials/barangay-public`,
+        {
+          withCredentials: true,
+        }
+      );
       setBarangays(response.data);
     } catch (err) {
       console.error("Error fetching barangay officials:", err);

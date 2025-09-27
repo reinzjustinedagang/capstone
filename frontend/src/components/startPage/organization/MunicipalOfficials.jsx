@@ -30,7 +30,7 @@ const MunicipalOfficials = ({ title }) => {
     setSuccessMessage("");
     try {
       const response = await axios.get(
-        `${backendUrl}/api/officials/municipal`,
+        `${backendUrl}/api/officials/municipal-public`,
         { withCredentials: true }
       );
       setOfficials(response.data);

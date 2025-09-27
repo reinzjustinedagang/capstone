@@ -31,9 +31,12 @@ const OrgChart = () => {
     setError("");
     setSuccessMessage("");
     try {
-      const response = await axios.get(`${backendUrl}/api/officials/orgchart`, {
-        withCredentials: true,
-      });
+      const response = await axios.get(
+        `${backendUrl}/api/officials/orgchart-public`,
+        {
+          withCredentials: true,
+        }
+      );
       setPositions(response.data);
     } catch (err) {
       setError(

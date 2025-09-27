@@ -8,6 +8,24 @@ const {
   deleteLocalImage,
 } = require("../utils/serviceHelpers");
 
+exports.getMunicipalPublic = async () => {
+  return await Connection(
+    `SELECT * FROM municipal_officials WHERE approved = 1 ORDER BY type DESC, id ASC`
+  );
+};
+
+exports.getBarangayPublic = async () => {
+  return await Connection(
+    `SELECT * FROM barangay_officials WHERE approved = 1 ORDER BY type DESC, id ASC`
+  );
+};
+
+exports.getOrgPublic = async () => {
+  return await Connection(
+    `SELECT * FROM orgChart WHERE approved = 1 ORDER BY type DESC, id ASC`
+  );
+};
+
 // ─── MUNICIPAL OFFICIALS ──────────────────────────────────────────────────────
 
 exports.getMunicipalOfficials = async () => {
@@ -39,9 +57,11 @@ exports.addMunicipalOfficial = async (
         );
     }
 
+    const approved = user.role === "admin" ? 1 : 0;
+
     const result = await Connection(
-      `INSERT INTO municipal_officials (name, position, type, image) VALUES (?, ?, ?, ?)`,
-      [name, position, type, image]
+      `INSERT INTO municipal_officials (name, position, type, image, created_by, approved) VALUES (?, ?, ?, ?, ?, ?)`,
+      [name, position, type, image, user.id, approved]
     );
 
     if (result.affectedRows === 1 && user) {
@@ -50,7 +70,7 @@ exports.addMunicipalOfficial = async (
         user.email,
         user.role,
         "CREATE",
-        `Added municipal official '${name}' as ${position} (${type})`,
+        `Added municipal official '${name}' as ${position} (${type} by ${user.role})`,
         ip
       );
     }
@@ -73,6 +93,7 @@ exports.updateMunicipalOfficial = async (
   user,
   ip
 ) => {
+  const approved = user.role === "admin" ? 1 : 0;
   try {
     const oldRows = await Connection(
       `SELECT name, position, type, image FROM municipal_officials WHERE id = ?`,
@@ -97,8 +118,8 @@ exports.updateMunicipalOfficial = async (
     const finalImage = image ?? old.image;
 
     const result = await Connection(
-      `UPDATE municipal_officials SET name = ?, position = ?, type = ?, image = ? WHERE id = ?`,
-      [name, position, type, finalImage, id]
+      `UPDATE municipal_officials SET name = ?, position = ?, type = ?, image = ?, approved = ? WHERE id = ?`,
+      [name, position, type, finalImage, approved, id]
     );
 
     // Delete old image if replaced
@@ -197,6 +218,7 @@ exports.addBarangayOfficial = async (
   user,
   ip
 ) => {
+  const approved = user.role === "admin" ? 1 : 0;
   try {
     const duplicateRows = await Connection(
       `SELECT id FROM barangay_officials WHERE barangay_name = ? AND position = ?`,
@@ -208,8 +230,8 @@ exports.addBarangayOfficial = async (
       );
 
     const result = await Connection(
-      `INSERT INTO barangay_officials (barangay_name, president_name, position, image) VALUES (?, ?, ?, ?)`,
-      [barangay_name, president_name, position, image]
+      `INSERT INTO barangay_officials (barangay_name, president_name, position, image, created_by, approved) VALUES (?, ?, ?, ?, ?, ?)`,
+      [barangay_name, president_name, position, image, user.id, approved]
     );
 
     if (result.affectedRows === 1 && user) {
@@ -241,6 +263,7 @@ exports.updateBarangayOfficial = async (
   user,
   ip
 ) => {
+  const approved = user.role === "admin" ? 1 : 0;
   try {
     const oldRows = await Connection(
       `SELECT barangay_name, president_name, position, image FROM barangay_officials WHERE id = ?`,
@@ -252,8 +275,8 @@ exports.updateBarangayOfficial = async (
     const finalImage = image ?? old.image;
 
     const result = await Connection(
-      `UPDATE barangay_officials SET barangay_name = ?, president_name = ?, position = ?, image = ? WHERE id = ?`,
-      [barangay_name, president_name, position, finalImage, id]
+      `UPDATE barangay_officials SET barangay_name = ?, president_name = ?, position = ?, image = ?, approved = ? WHERE id = ?`,
+      [barangay_name, president_name, position, finalImage, approved, id]
     );
 
     if (image && old.image && image !== old.image) {
@@ -343,6 +366,7 @@ exports.getOrgChart = async () => {
 };
 
 exports.addOrgChart = async (name, position, type, image, user, ip) => {
+  const approved = user.role === "admin" ? 1 : 0;
   try {
     if (type === "top" || type === "mid") {
       const exists = await checkIfTypeExists(Connection, "orgChart", type);
@@ -350,8 +374,8 @@ exports.addOrgChart = async (name, position, type, image, user, ip) => {
     }
 
     const result = await Connection(
-      `INSERT INTO orgChart (name, position, type, image) VALUES (?, ?, ?, ?)`,
-      [name, position, type, image]
+      `INSERT INTO orgChart (name, position, type, image, created_by, approved) VALUES (?, ?, ?, ?, ?, ?)`,
+      [name, position, type, image, user.id, approved]
     );
 
     if (result.affectedRows === 1 && user) {
@@ -372,6 +396,7 @@ exports.addOrgChart = async (name, position, type, image, user, ip) => {
 };
 
 exports.updateOrgChart = async (id, name, position, type, image, user, ip) => {
+  const approved = user.role === "admin" ? 1 : 0;
   try {
     const oldRows = await Connection(`SELECT * FROM orgChart WHERE id = ?`, [
       id,
@@ -387,8 +412,8 @@ exports.updateOrgChart = async (id, name, position, type, image, user, ip) => {
     const finalImage = image ?? old.image;
 
     const result = await Connection(
-      `UPDATE orgChart SET name = ?, position = ?, type = ?, image = ? WHERE id = ?`,
-      [name, position, type, finalImage, id]
+      `UPDATE orgChart SET name = ?, position = ?, type = ?, approved = ?, image = ? WHERE id = ?`,
+      [name, position, type, finalImage, approved, id]
     );
 
     // Delete old image if replaced
@@ -456,4 +481,73 @@ exports.deleteOrgChart = async (id, user, ip) => {
   }
 
   return result;
+};
+
+// Approve municiapl officials (Admin only)
+exports.approveMunicipal = async (id, user, ip) => {
+  const result = await Connection(
+    `UPDATE municipal_officials 
+     SET approved = 1, approved_by = ?, approved_at = NOW() 
+     WHERE id = ?`,
+    [user.id, id]
+  );
+
+  if (result.affectedRows > 0) {
+    await logAudit(
+      user.id,
+      user.email,
+      user.role,
+      "APPROVE",
+      `Approved benefit ID ${id}`,
+      ip
+    );
+  }
+
+  return result.affectedRows > 0;
+};
+
+// Approve municiapl officials (Admin only)
+exports.approveBarangay = async (id, user, ip) => {
+  const result = await Connection(
+    `UPDATE barangay_officials 
+     SET approved = 1, approved_by = ?, approved_at = NOW() 
+     WHERE id = ?`,
+    [user.id, id]
+  );
+
+  if (result.affectedRows > 0) {
+    await logAudit(
+      user.id,
+      user.email,
+      user.role,
+      "APPROVE",
+      `Approved benefit ID ${id}`,
+      ip
+    );
+  }
+
+  return result.affectedRows > 0;
+};
+
+// Approve municiapl officials (Admin only)
+exports.approveOrgChart = async (id, user, ip) => {
+  const result = await Connection(
+    `UPDATE orgChart 
+     SET approved = 1, approved_by = ?, approved_at = NOW() 
+     WHERE id = ?`,
+    [user.id, id]
+  );
+
+  if (result.affectedRows > 0) {
+    await logAudit(
+      user.id,
+      user.email,
+      user.role,
+      "APPROVE",
+      `Approved benefit ID ${id}`,
+      ip
+    );
+  }
+
+  return result.affectedRows > 0;
 };

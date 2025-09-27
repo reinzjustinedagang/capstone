@@ -78,7 +78,11 @@ async function initTables() {
         position VARCHAR(255) NOT NULL,
         type ENUM('top', 'mid', 'bottom') NOT NULL,
         image VARCHAR(255),
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        approved INT(1) DEFAULT 0,
+        created_by INT NOT NULL,
+        approved_at TIMESTAMP NULL,
+        approved_by INT NULL
       )
     `);
     console.log("✅ municipal_officials table ready.");
@@ -91,25 +95,33 @@ async function initTables() {
         position VARCHAR(255) NOT NULL,
         type ENUM('top', 'mid', 'bottom') NOT NULL,
         image VARCHAR(255), -- stores file name or URL
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        approved INT(1) DEFAULT 0,
+        created_by INT NOT NULL,
+        approved_at TIMESTAMP NULL,
+        approved_by INT NULL
       )
       `
     );
-    console.log("✅ barangay table ready.");
+    console.log("✅ organizational chart table ready.");
 
     await pool.query(
       `
-  CREATE TABLE IF NOT EXISTS barangay_officials (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    barangay_name VARCHAR(255) NOT NULL,
-    president_name VARCHAR(255) NOT NULL,
-    position VARCHAR(100) DEFAULT 'President',
-    image VARCHAR(255), -- stores file name or URL
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      CREATE TABLE IF NOT EXISTS barangay_officials (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        barangay_name VARCHAR(255) NOT NULL,
+        president_name VARCHAR(255) NOT NULL,
+        position VARCHAR(100) DEFAULT 'President',
+        image VARCHAR(255), -- stores file name or URL
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        approved INT(1) DEFAULT 0,
+        created_by INT NOT NULL,
+        approved_at TIMESTAMP NULL,
+        approved_by INT NULL
   )
   `
     );
-    console.log("✅ barangay table ready.");
+    console.log("✅ barangay officials table ready.");
 
     await pool.query(
       `CREATE TABLE IF NOT EXISTS sms_templates (
@@ -121,7 +133,7 @@ async function initTables() {
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
   )`
     );
-    console.log("✅ barangay table ready.");
+    console.log("✅ sms template table ready.");
 
     await pool.query(
       `
@@ -132,7 +144,7 @@ async function initTables() {
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 )`
     );
-    console.log("✅ barangay table ready.");
+    console.log("✅ sms credentials table ready.");
 
     await pool.query(
       `
@@ -147,7 +159,7 @@ async function initTables() {
   )
 `
     );
-    console.log("✅ barangay table ready.");
+    console.log("✅ otp code table ready.");
 
     await pool.query(
       `CREATE TABLE IF NOT EXISTS sms_logs (
@@ -160,7 +172,7 @@ async function initTables() {
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP 
   )`
     );
-    console.log("✅ barangay table ready.");
+    console.log("✅ sms logs table ready.");
 
     await pool.query(
       `
@@ -176,7 +188,7 @@ async function initTables() {
   )
   `
     );
-    console.log("✅ barangay table ready.");
+    console.log("✅ audit logs table ready.");
 
     await pool.query(
       `
@@ -198,7 +210,7 @@ async function initTables() {
   )
   `
     );
-    console.log("✅ barangay table ready.");
+    console.log("✅ events table ready.");
 
     await pool.query(
       `
@@ -220,7 +232,7 @@ async function initTables() {
   )
   `
     );
-    console.log("✅ barangay table ready.");
+    console.log("✅ benefits table ready.");
 
     await pool.query(
       `
@@ -245,7 +257,7 @@ async function initTables() {
 )
   `
     );
-    console.log("✅ barangay table ready.");
+    console.log("✅ reports table ready.");
 
     await pool.query(
       `
@@ -289,7 +301,7 @@ async function initTables() {
   )
 `
     );
-    console.log("✅ barangay table ready.");
+    console.log("✅ senior citizen table ready.");
 
     await pool.query(
       `
@@ -301,7 +313,7 @@ async function initTables() {
       )
       `
     );
-    console.log("✅ barangay table ready.");
+    console.log("✅ dev key table ready.");
 
     await pool.query(
       `
@@ -321,7 +333,7 @@ async function initTables() {
       )
       `
     );
-    console.log("✅ barangay table ready.");
+    console.log("✅ system settings table ready.");
 
     // Ensure form_group table
     await pool.query(`

@@ -8,6 +8,119 @@ const {
   deleteCloudinaryImage,
 } = require("../utils/cloudinaryHelpers");
 
+router.get("/municipal-public", async (req, res) => {
+  try {
+    const officials = await officialService.getMunicipalPublic();
+    res.json(officials);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Failed to fetch municipal officials" });
+  }
+});
+
+router.get("/barangay-public", async (req, res) => {
+  try {
+    const officials = await officialService.getBarangayPublic();
+    res.json(officials);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Failed to fetch barangay officials" });
+  }
+});
+
+router.get("/orgchart-public", async (req, res) => {
+  try {
+    const officials = await officialService.getOrgPublic();
+    res.json(officials);
+  } catch (error) {
+    console.error(error);
+    res
+      .status(500)
+      .json({ message: "Failed to fetch organizational chart officials" });
+  }
+});
+
+// APPROVE municipal (Admin only)
+router.put("/:id/approve-municipal", isAuthenticated, async (req, res) => {
+  const user = req.session.user;
+  const ip = req.userIp;
+
+  if (!user || user.role !== "admin") {
+    return res.status(403).json({ message: "Forbidden: Admins only" });
+  }
+
+  try {
+    const approved = await officialService.approveMunicipal(
+      req.params.id,
+      user,
+      ip
+    );
+
+    if (!approved) {
+      return res.status(404).json({ message: "official not found" });
+    }
+
+    res.status(200).json({ message: "official approved" });
+  } catch (err) {
+    console.error("Failed to approve official:", err);
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// APPROVE barangay (Admin only)
+router.put("/:id/approve-barangay", isAuthenticated, async (req, res) => {
+  const user = req.session.user;
+  const ip = req.userIp;
+
+  if (!user || user.role !== "admin") {
+    return res.status(403).json({ message: "Forbidden: Admins only" });
+  }
+
+  try {
+    const approved = await officialService.approveBarangay(
+      req.params.id,
+      user,
+      ip
+    );
+
+    if (!approved) {
+      return res.status(404).json({ message: "official not found" });
+    }
+
+    res.status(200).json({ message: "official approved" });
+  } catch (err) {
+    console.error("Failed to approve official:", err);
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// APPROVE orgchart (Admin only)
+router.put("/:id/approve-orgchart", isAuthenticated, async (req, res) => {
+  const user = req.session.user;
+  const ip = req.userIp;
+
+  if (!user || user.role !== "admin") {
+    return res.status(403).json({ message: "Forbidden: Admins only" });
+  }
+
+  try {
+    const approved = await officialService.approveOrgChart(
+      req.params.id,
+      user,
+      ip
+    );
+
+    if (!approved) {
+      return res.status(404).json({ message: "official not found" });
+    }
+
+    res.status(200).json({ message: "official approved" });
+  } catch (err) {
+    console.error("Failed to approve official:", err);
+    res.status(500).json({ message: err.message });
+  }
+});
+
 // ----------------- MUNICIPAL ROUTES -----------------
 
 router.get("/municipal", async (req, res) => {
@@ -73,8 +186,6 @@ router.put(
           req.file.buffer,
           "municipal_officials"
         );
-        if (existing_image?.includes("res.cloudinary.com"))
-          await deleteCloudinaryImage(existing_image);
       }
 
       await officialService.updateMunicipalOfficial(
