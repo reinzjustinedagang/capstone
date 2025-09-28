@@ -549,19 +549,34 @@ router.put("/archive/restore/:id", async (req, res) => {
 });
 
 // Get archived senior citizens (with pagination)
+// GET archived citizens with filters + pagination
 router.get("/archived", async (req, res) => {
-  try {
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
+  const {
+    page = 1,
+    limit = 10,
+    search = "",
+    barangay = "All Barangays",
+    gender = "All",
+    ageRange = "All",
+    sortBy = "archive_date",
+    sortOrder = "desc",
+  } = req.query;
 
-    const result = await seniorCitizenService.getArchivedSeniorCitizens(
-      page,
-      limit
-    );
+  try {
+    const result = await seniorCitizenService.getArchivedSeniorCitizens({
+      page: parseInt(page, 10),
+      limit: parseInt(limit, 10),
+      search,
+      barangay,
+      gender,
+      ageRange,
+      sortBy,
+      sortOrder,
+    });
 
     res.status(200).json(result);
   } catch (error) {
-    console.error("❌ Error fetching archived senior citizens:", error);
+    console.error("Error fetching archived citizens:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 });

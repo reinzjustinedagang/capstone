@@ -880,33 +880,107 @@ exports.restoreArchivedSeniorCitizen = async (id, user, ip) => {
 };
 
 // Get archived senior citizens with pagination
-exports.getArchivedSeniorCitizens = async (page = 1, limit = 10) => {
-  try {
-    const offset = (page - 1) * limit;
+// Get archived senior citizens with pagination + filtering
+exports.getArchivedSeniorCitizens = async (options) => {
+  const {
+    page = 1,
+    limit = 10,
+    search,
+    barangay,
+    gender,
+    ageRange,
+    sortBy,
+    sortOrder,
+  } = options;
 
+  const safePage = Number.isInteger(page) && page > 0 ? page : 1;
+  const safeLimit = Number.isInteger(limit) && limit > 0 ? limit : 10;
+  const offset = (safePage - 1) * safeLimit;
+
+  const params = [];
+  let where = "WHERE sc.archived = 1 AND sc.deleted = 0"; // archived only
+
+  // 🔍 Search by name, barangay, or ID number
+  if (search) {
+    where += ` AND (
+      sc.firstName LIKE ? OR sc.lastName LIKE ? OR sc.middleName LIKE ? OR sc.suffix LIKE ?
+      OR b.barangay_name LIKE ?
+      OR JSON_UNQUOTE(JSON_EXTRACT(sc.form_data, '$.idNumber')) LIKE ?
+    )`;
+    const s = `%${search}%`;
+    params.push(s, s, s, s, s, s);
+  }
+
+  // 🏘 Barangay filter
+  if (barangay && barangay !== "All Barangays") {
+    where += ` AND b.barangay_name = ?`;
+    params.push(barangay);
+  }
+
+  // 🚻 Gender filter
+  if (gender && gender !== "All") {
+    where += ` AND sc.gender = ?`;
+    params.push(gender);
+  }
+
+  // 🎂 Age range filter
+  if (ageRange && ageRange !== "All") {
+    const [min, maxRaw] = ageRange.split(" - ");
+    const max = maxRaw.includes("+") ? 200 : parseInt(maxRaw);
+    where += ` AND sc.age BETWEEN ? AND ?`;
+    params.push(parseInt(min), max);
+  }
+
+  // 🔽 Sorting
+  const allowedSort = [
+    "lastName",
+    "firstName",
+    "gender",
+    "age",
+    "archive_date",
+    "barangay_name",
+  ];
+  const orderBy = allowedSort.includes(sortBy) ? sortBy : "archive_date";
+  const order = sortOrder === "asc" ? "ASC" : "DESC";
+
+  try {
+    // Total count
+    const totalResult = await Connection(
+      `SELECT COUNT(*) AS total
+       FROM senior_citizens sc
+       LEFT JOIN barangays b ON sc.barangay_id = b.id
+       ${where}`,
+      params
+    );
+    const total = totalResult[0].total;
+    const totalPages = Math.ceil(total / safeLimit);
+
+    // Data
     const rows = await Connection(
-      `SELECT SQL_CALC_FOUND_ROWS 
-          id, firstName, lastName, middleName, suffix, gender,
-          barangay_id, deceased_date, archive_date, archive_reason
-       FROM senior_citizens
-       WHERE archived = 1 AND deleted = 0
-       ORDER BY archive_date DESC
+      `SELECT sc.id, sc.firstName, sc.lastName, sc.middleName, sc.suffix, sc.gender,
+              sc.age, sc.form_data,
+              sc.barangay_id, b.barangay_name,
+              sc.deceased_date, sc.archive_date, sc.archive_reason
+       FROM senior_citizens sc
+       LEFT JOIN barangays b ON sc.barangay_id = b.id
+       ${where}
+       ORDER BY ${orderBy} ${order}
        LIMIT ? OFFSET ?`,
-      [parseInt(limit), parseInt(offset)]
+      [...params, safeLimit, offset]
     );
 
-    const countRows = await Connection(`SELECT FOUND_ROWS() as total`);
-    const total = countRows[0]?.total || 0;
-    const totalPages = Math.ceil(total / limit);
+    const citizens = rows.map((citizen) => ({
+      ...citizen,
+      form_data:
+        typeof citizen.form_data === "string"
+          ? JSON.parse(citizen.form_data || "{}")
+          : citizen.form_data || {},
+    }));
 
-    return {
-      citizens: rows,
-      total,
-      totalPages,
-    };
+    return { citizens, total, totalPages };
   } catch (error) {
-    console.error("Error fetching archived senior citizens:", error);
-    throw error;
+    console.error("❌ Error fetching archived senior citizens:", error);
+    throw new Error("Failed to fetch archived senior citizens.");
   }
 };
 
