@@ -7,20 +7,14 @@ const RemarksDistribution = () => {
   const backendUrl = import.meta.env.VITE_API_BASE_URL;
   const [counts, setCounts] = useState({});
 
-  // Predefined colors for known remarks
-  const chartColors = {
-    SOCIALPENSION: "#6366F1", // indigo
-    NONSOCIALPENSION: "#10B981", // green
-    INDIGENT: "#F59E0B", // amber
-  };
-
   // Fallback color palette for extra remarks
   const defaultColors = [
     "#EF4444", // red
     "#3B82F6", // blue
     "#8B5CF6", // purple
     "#EC4899", // pink
-    "#14B8A6", // teal
+    "#14B8A6",
+    "#F59E0B",
   ];
 
   useEffect(() => {
@@ -45,8 +39,7 @@ const RemarksDistribution = () => {
       {
         data: values,
         backgroundColor: labels.map(
-          (key, idx) =>
-            chartColors[key] || defaultColors[idx % defaultColors.length]
+          (key, idx) => defaultColors[idx % defaultColors.length]
         ),
       },
     ],

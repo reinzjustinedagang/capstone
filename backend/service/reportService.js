@@ -403,24 +403,27 @@ exports.getRemarksReport = async () => {
   try {
     const rows = await Connection(`
       SELECT 
-        JSON_UNQUOTE(JSON_EXTRACT(form_data, '$.remarks')) AS remarks,
-        COUNT(*) AS count
+        JSON_UNQUOTE(JSON_EXTRACT(form_data, '$.remarks')) AS remarks
       FROM senior_citizens
       WHERE registered = 1
         AND deleted = 0
         AND archived = 0
         AND CAST(JSON_UNQUOTE(JSON_EXTRACT(form_data, '$.age')) AS UNSIGNED) >= 60
-      GROUP BY remarks
     `);
 
-    // Build dynamic report object
     const report = {};
-    rows.forEach((r) => {
-      if (r.remarks) {
-        // Normalize the key if you want (remove spaces, uppercase, etc.)
-        const key = r.remarks.replace(/\s+/g, "").toUpperCase();
-        report[key] = r.count;
-      }
+
+    rows.forEach(({ remarks }) => {
+      if (!remarks) return;
+
+      // normalize
+      let key = remarks.trim().toUpperCase();
+      key = key.replace(/[\[\]"]/g, ""); // remove brackets/quotes
+
+      // Optional: handle known typos or variants
+      if (key === "DSWDSOCIALPENSIONSOCIALPENSION") key = "DSWDSOCIALPENSION";
+
+      report[key] = (report[key] || 0) + 1;
     });
 
     return report;
