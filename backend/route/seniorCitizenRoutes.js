@@ -549,7 +549,6 @@ router.put("/archive/restore/:id", async (req, res) => {
 });
 
 // Get archived senior citizens (with pagination)
-// GET archived citizens with filters + pagination
 router.get("/archived", async (req, res) => {
   const {
     page = 1,
@@ -557,7 +556,7 @@ router.get("/archived", async (req, res) => {
     search = "",
     barangay = "All Barangays",
     gender = "All",
-    ageRange = "All",
+    reason = "All",
     sortBy = "archive_date",
     sortOrder = "desc",
   } = req.query;
@@ -569,7 +568,7 @@ router.get("/archived", async (req, res) => {
       search,
       barangay,
       gender,
-      ageRange,
+      reason,
       sortBy,
       sortOrder,
     });

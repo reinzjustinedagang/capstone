@@ -4,7 +4,16 @@ import Modal from "../UI/Modal";
 import Pagination from "../UI/Component/Pagination";
 import SearchAndFilterBar from "../UI/Component/SearchAndFilterBar";
 import axios from "axios";
-import { Loader2, ArchiveRestore, Trash2, CheckCircle } from "lucide-react";
+import {
+  Search,
+  Filter,
+  ChevronDown,
+  X,
+  Loader2,
+  ArchiveRestore,
+  Trash2,
+  CheckCircle,
+} from "lucide-react";
 
 const Archive = ({ onView }) => {
   const backendUrl =
@@ -24,21 +33,14 @@ const Archive = ({ onView }) => {
   // Filters
   const [searchTerm, setSearchTerm] = useState("");
   const [filterBarangay, setFilterBarangay] = useState("All Barangays");
-  const [filterAge, setFilterAge] = useState("All");
+  const [filterReason, setFilterReason] = useState("All");
   const [filterGender, setFilterGender] = useState("All");
   const [sortBy, setSortBy] = useState("lastName");
   const [sortOrder, setSortOrder] = useState("asc");
   const [showFilters, setShowFilters] = useState(false);
 
   const genderOptions = ["All", "Male", "Female"];
-  const AgeOptions = [
-    "All",
-    "60 - 69",
-    "70 - 79",
-    "80 - 89",
-    "90 - 99",
-    "100+",
-  ];
+  const reasonOptions = ["All", "Deceased", "Delete", "Other"];
 
   // UI states
   const [loading, setLoading] = useState(false);
@@ -83,7 +85,7 @@ const Archive = ({ onView }) => {
         search: searchTerm,
         barangay: filterBarangay,
         gender: filterGender,
-        ageRange: filterAge,
+        reason: filterReason, // ✅ use archive reason
         sortBy,
         sortOrder,
       };
@@ -156,7 +158,7 @@ const Archive = ({ onView }) => {
   const clearFilters = () => {
     setSearchTerm("");
     setFilterBarangay("All Barangays");
-    setFilterAge("All");
+    setFilterReason("All");
     setFilterGender("All");
     setShowFilters(false);
   };
@@ -186,23 +188,109 @@ const Archive = ({ onView }) => {
   return (
     <div>
       <div className="bg-white rounded-lg shadow overflow-hidden">
-        {/* Search + Filters */}
-        <SearchAndFilterBar
-          searchTerm={searchTerm}
-          setSearchTerm={setSearchTerm}
-          showFilters={showFilters}
-          setShowFilters={setShowFilters}
-          filterAge={filterAge}
-          setFilterAge={setFilterAge}
-          filterGender={filterGender}
-          setFilterGender={setFilterGender}
-          filterBarangay={filterBarangay}
-          setFilterBarangay={setFilterBarangay}
-          clearFilters={clearFilters}
-          AgeOptions={AgeOptions}
-          genderOptions={genderOptions}
-          barangayOptions={barangayOptions}
-        />
+        {/* Header Controls */}
+        <div className="p-4 border-b border-gray-200 flex flex-col sm:flex-row justify-between items-center space-y-3 sm:space-y-0">
+          {/* Search */}
+          <div className="relative w-full sm:w-64">
+            <input
+              type="text"
+              placeholder="Search archived citizens..."
+              className="pl-10 pr-4 py-2 border border-gray-300 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+            <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
+          </div>
+
+          {/* Filter Toggle + Clear */}
+          <div className="flex items-center gap-4">
+            <button
+              className={`flex items-center text-sm text-gray-600 hover:text-gray-900 transition-colors ${
+                showFilters ? "text-gray-900 font-semibold" : ""
+              }`}
+              onClick={() => setShowFilters(!showFilters)}
+            >
+              <Filter className="h-4 w-4 mr-1" />
+              Advanced Filters
+              <ChevronDown
+                className={`h-4 w-4 ml-1 transform transition-transform ${
+                  showFilters ? "rotate-180" : ""
+                }`}
+              />
+            </button>
+
+            {(searchTerm ||
+              filterBarangay !== "All Barangays" ||
+              filterGender !== "All" ||
+              filterAge !== "All") && (
+              <button
+                onClick={clearFilters}
+                className="flex items-center text-sm text-red-600 hover:text-red-700 transition-colors"
+              >
+                <X className="h-4 w-4 mr-1" />
+                Clear
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Collapsible Filters */}
+        {showFilters && (
+          <div className="p-4 border-b border-gray-200 bg-gray-50">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Barangay
+                </label>
+                <select
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                  value={filterBarangay}
+                  onChange={(e) => setFilterBarangay(e.target.value)}
+                >
+                  {barangayOptions.map((barangay) => (
+                    <option key={barangay} value={barangay}>
+                      {barangay}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Gender
+                </label>
+                <select
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                  value={filterGender}
+                  onChange={(e) => setFilterGender(e.target.value)}
+                >
+                  {genderOptions.map((gender) => (
+                    <option key={gender} value={gender}>
+                      {gender}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Archive Reason
+                </label>
+                <select
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                  value={filterReason}
+                  onChange={(e) => setFilterReason(e.target.value)}
+                >
+                  {reasonOptions.map((reason) => (
+                    <option key={reason} value={reason}>
+                      {reason}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Table */}
         <div className="overflow-x-auto">
@@ -324,8 +412,108 @@ const Archive = ({ onView }) => {
         />
       </div>
 
-      {/* Modals (Delete, Restore, Success) remain same */}
-      {/* ... */}
+      {/* Delete Confirmation Modal */}
+      <Modal
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        title="Confirm Deletion"
+      >
+        <div className="p-4">
+          Permanently delete{" "}
+          <strong>
+            {selectedCitizen?.firstName} {selectedCitizen?.lastName}
+          </strong>
+          ?
+        </div>
+        <div className="flex justify-end space-x-3 p-4">
+          <Button variant="secondary" onClick={() => setShowDeleteModal(false)}>
+            Cancel
+          </Button>
+          <Button
+            variant="danger"
+            onClick={handleDeleteConfirm}
+            disabled={deleting}
+          >
+            {deleting ? "Deleting..." : "Delete"}
+          </Button>
+        </div>
+      </Modal>
+
+      {/* Success Modal (Delete) */}
+      <Modal
+        isOpen={showSuccessModal}
+        onClose={() => setShowSuccessModal(false)}
+        title="Success"
+      >
+        <div className="p-6 text-center">
+          <div className="mx-auto mb-4 w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+            <CheckCircle className="w-6 h-6 text-green-500" />
+          </div>
+          <h3 className="text-lg font-medium text-gray-800 mb-2">Success</h3>
+          <p className="text-sm text-gray-600 mb-4">
+            Senior Citizen deleted successfully!
+          </p>
+          <Button variant="primary" onClick={() => setShowSuccessModal(false)}>
+            OK
+          </Button>
+        </div>
+      </Modal>
+
+      {/* Restore Confirmation Modal */}
+      <Modal
+        isOpen={!!restoreTarget}
+        onClose={() => setRestoreTarget(null)}
+        title="Confirm Restore"
+      >
+        <div className="p-4">
+          Restore{" "}
+          <strong>
+            {restoreTarget?.firstName} {restoreTarget?.lastName}
+          </strong>
+          ?
+        </div>
+        <div className="flex justify-end space-x-3 p-4">
+          <Button variant="secondary" onClick={() => setRestoreTarget(null)}>
+            Cancel
+          </Button>
+          <Button
+            variant="primary"
+            onClick={handleRestore}
+            disabled={restoring}
+          >
+            {restoring ? (
+              <span className="flex items-center">
+                <Loader2 className="w-4 h-4 animate-spin mr-2" /> Restoring...
+              </span>
+            ) : (
+              "Restore"
+            )}
+          </Button>
+        </div>
+      </Modal>
+
+      {/* Success Modal (Restore) */}
+      <Modal
+        isOpen={showRestoreSuccess}
+        onClose={() => setShowRestoreSuccess(false)}
+        title="Success"
+      >
+        <div className="p-6 text-center">
+          <div className="mx-auto mb-4 w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+            <CheckCircle className="w-6 h-6 text-green-500" />
+          </div>
+          <h3 className="text-lg font-medium text-gray-800 mb-2">Success</h3>
+          <p className="text-sm text-gray-600 mb-4">
+            Senior Citizen restored successfully!
+          </p>
+          <Button
+            variant="primary"
+            onClick={() => setShowRestoreSuccess(false)}
+          >
+            OK
+          </Button>
+        </div>
+      </Modal>
     </div>
   );
 };

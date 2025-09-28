@@ -880,7 +880,6 @@ exports.restoreArchivedSeniorCitizen = async (id, user, ip) => {
 };
 
 // Get archived senior citizens with pagination
-// Get archived senior citizens with pagination + filtering
 exports.getArchivedSeniorCitizens = async (options) => {
   const {
     page = 1,
@@ -888,7 +887,7 @@ exports.getArchivedSeniorCitizens = async (options) => {
     search,
     barangay,
     gender,
-    ageRange,
+    reason,
     sortBy,
     sortOrder,
   } = options;
@@ -898,9 +897,9 @@ exports.getArchivedSeniorCitizens = async (options) => {
   const offset = (safePage - 1) * safeLimit;
 
   const params = [];
-  let where = "WHERE sc.archived = 1 AND sc.deleted = 0"; // archived only
+  let where = "WHERE sc.archived = 1 AND sc.deleted = 0";
 
-  // 🔍 Search by name, barangay, or ID number
+  // 🔍 Search
   if (search) {
     where += ` AND (
       sc.firstName LIKE ? OR sc.lastName LIKE ? OR sc.middleName LIKE ? OR sc.suffix LIKE ?
@@ -923,12 +922,10 @@ exports.getArchivedSeniorCitizens = async (options) => {
     params.push(gender);
   }
 
-  // 🎂 Age range filter
-  if (ageRange && ageRange !== "All") {
-    const [min, maxRaw] = ageRange.split(" - ");
-    const max = maxRaw.includes("+") ? 200 : parseInt(maxRaw);
-    where += ` AND sc.age BETWEEN ? AND ?`;
-    params.push(parseInt(min), max);
+  // 🗂 Archive Reason filter
+  if (reason && reason !== "All") {
+    where += ` AND sc.archive_reason = ?`;
+    params.push(reason);
   }
 
   // 🔽 Sorting
@@ -936,7 +933,7 @@ exports.getArchivedSeniorCitizens = async (options) => {
     "lastName",
     "firstName",
     "gender",
-    "age",
+    "archive_reason",
     "archive_date",
     "barangay_name",
   ];
@@ -944,7 +941,6 @@ exports.getArchivedSeniorCitizens = async (options) => {
   const order = sortOrder === "asc" ? "ASC" : "DESC";
 
   try {
-    // Total count
     const totalResult = await Connection(
       `SELECT COUNT(*) AS total
        FROM senior_citizens sc
@@ -955,10 +951,9 @@ exports.getArchivedSeniorCitizens = async (options) => {
     const total = totalResult[0].total;
     const totalPages = Math.ceil(total / safeLimit);
 
-    // Data
     const rows = await Connection(
       `SELECT sc.id, sc.firstName, sc.lastName, sc.middleName, sc.suffix, sc.gender,
-              sc.age, sc.form_data,
+              sc.form_data,
               sc.barangay_id, b.barangay_name,
               sc.deceased_date, sc.archive_date, sc.archive_reason
        FROM senior_citizens sc
