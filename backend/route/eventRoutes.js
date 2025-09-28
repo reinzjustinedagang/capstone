@@ -198,7 +198,13 @@ router.delete("/:id", isAuthenticated, async (req, res) => {
     if (!deleted) return res.status(404).json({ message: "Event not found" });
     res.status(200).json({ message: "Event deleted" });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    console.error("Delete event error:", err);
+
+    if (err.message.startsWith("Permission denied")) {
+      return res.status(403).json({ message: err.message });
+    }
+
+    res.status(500).json({ message: "Internal Server Error" });
   }
 });
 
