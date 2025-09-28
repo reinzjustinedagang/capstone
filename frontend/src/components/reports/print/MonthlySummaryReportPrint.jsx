@@ -289,7 +289,7 @@ const MonthlySummaryReportPrint = () => {
                     border: "1px solid #333",
                     padding: 8,
                     fontWeight: "bold",
-                    color: "#2563eb",
+                    color: "#000000",
                   }}
                 >
                   {label}
@@ -302,7 +302,7 @@ const MonthlySummaryReportPrint = () => {
                     border: "1px solid #333",
                     padding: 8,
                     fontWeight: "bold",
-                    color: "#dc2626",
+                    color: "#000000",
                   }}
                 >
                   {label}
@@ -343,7 +343,7 @@ const MonthlySummaryReportPrint = () => {
                       style={{
                         border: "1px solid #333",
                         padding: 8,
-                        color: "#2563eb",
+                        color: "#000000",
                         fontWeight: "bold",
                       }}
                     >
@@ -354,7 +354,7 @@ const MonthlySummaryReportPrint = () => {
                       style={{
                         border: "1px solid #333",
                         padding: 8,
-                        color: "#dc2626",
+                        color: "#000000",
                         fontWeight: "bold",
                       }}
                     >
@@ -381,7 +381,7 @@ const MonthlySummaryReportPrint = () => {
                   style={{
                     border: "1px solid #333",
                     padding: 8,
-                    color: "#2563eb",
+                    color: "#000000",
                     fontWeight: "bold",
                   }}
                 >
@@ -392,7 +392,7 @@ const MonthlySummaryReportPrint = () => {
                   style={{
                     border: "1px solid #333",
                     padding: 8,
-                    color: "#dc2626",
+                    color: "#000000",
                     fontWeight: "bold",
                   }}
                 >
@@ -439,7 +439,7 @@ const MonthlySummaryReportPrint = () => {
               </div>
               <div
                 className="total-value"
-                style={{ fontSize: 18, color: "#059669" }}
+                style={{ fontSize: 18, color: "#000000" }}
               >
                 {data.total}
               </div>

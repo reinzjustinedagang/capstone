@@ -449,3 +449,40 @@ exports.getRemarksReport = async () => {
     throw err;
   }
 };
+
+// service
+exports.getFilteredCitizensForPrint = async (options) => {
+  const {
+    search,
+    barangay,
+    gender,
+    ageRange,
+    healthStatus,
+    sortBy,
+    sortOrder,
+  } = options;
+  const params = [];
+  let where =
+    "WHERE sc.deleted = 0 AND sc.age >= 60 AND registered = 1 AND archived = 0";
+
+  // reuse same filtering logic (search, barangay, etc.)...
+
+  const data = await Connection(
+    `SELECT sc.id, sc.firstName, sc.middleName, sc.lastName, sc.suffix,
+            sc.age, sc.gender, sc.form_data, sc.created_at,
+            sc.barangay_id, b.barangay_name
+     FROM senior_citizens sc
+     LEFT JOIN barangays b ON sc.barangay_id = b.id
+     ${where}
+     ORDER BY ${sortBy || "lastName"} ${sortOrder === "desc" ? "DESC" : "ASC"}`,
+    params
+  );
+
+  return data.map((c) => ({
+    ...c,
+    form_data:
+      typeof c.form_data === "string"
+        ? JSON.parse(c.form_data || "{}")
+        : c.form_data || {},
+  }));
+};

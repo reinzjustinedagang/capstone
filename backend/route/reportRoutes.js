@@ -178,4 +178,14 @@ router.get("/remarks", async (req, res) => {
   }
 });
 
+router.get("/citizens/print", async (req, res) => {
+  try {
+    const citizens = await reportService.getFilteredCitizensForPrint(req.query);
+    res.json({ citizens });
+  } catch (err) {
+    console.error("❌ Failed to fetch citizens for print:", err);
+    res.status(500).json({ message: "Failed to fetch citizens for print." });
+  }
+});
+
 module.exports = router;

@@ -11,6 +11,8 @@ import UtpReportsChart from "./chart/UtpReportsChart";
 import MonthlySummaryReportPrint from "./print/MonthlySummaryReportPrint";
 import PensionerDistribution from "./chart/PensionerDistribution";
 import RemarksDistribution from "./chart/RemarksDistribution";
+import PensionerRemarksReportPrint from "./print/PensionerRemarksReportPrint";
+import CitizenListPrint from "./print/CitizenListPrint";
 
 const OscaReportsChart = () => {
   const chartOptions = [
@@ -67,6 +69,26 @@ const OscaReportsChart = () => {
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     <div className="flex justify-end">
                       <MonthlySummaryReportPrint />
+                    </div>
+                  </td>
+                </tr>
+                <tr className="hover:bg-gray-50">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                    Pensioner and Remarks Report
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                    <div className="flex justify-end">
+                      <PensionerRemarksReportPrint />
+                    </div>
+                  </td>
+                </tr>
+                <tr className="hover:bg-gray-50">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                    Senior Citizen List Report
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                    <div className="flex justify-end">
+                      <CitizenListPrint />
                     </div>
                   </td>
                 </tr>
