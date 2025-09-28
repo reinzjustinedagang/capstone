@@ -178,13 +178,35 @@ router.get("/remarks", async (req, res) => {
   }
 });
 
+// routes/chartRoutes.js
 router.get("/citizens/print", async (req, res) => {
   try {
-    const citizens = await reportService.getFilteredCitizensForPrint(req.query);
-    res.json({ citizens });
+    const {
+      search,
+      barangay,
+      gender,
+      ageRange,
+      healthStatus,
+      sortBy,
+      sortOrder,
+    } = req.query;
+
+    const result = await citizenService.getPaginatedFilteredCitizens({
+      search,
+      barangay,
+      gender,
+      ageRange,
+      healthStatus,
+      sortBy,
+      sortOrder,
+      page: 1,
+      limit: 1000000, // very high so it returns "all"
+    });
+
+    res.json({ citizens: result.citizens });
   } catch (err) {
-    console.error("❌ Failed to fetch citizens for print:", err);
-    res.status(500).json({ message: "Failed to fetch citizens for print." });
+    console.error("Error fetching citizens for print:", err);
+    res.status(500).json({ error: "Failed to fetch citizens for print." });
   }
 });
 

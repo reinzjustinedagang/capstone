@@ -13,6 +13,7 @@ import PensionerDistribution from "./chart/PensionerDistribution";
 import RemarksDistribution from "./chart/RemarksDistribution";
 import PensionerRemarksReportPrint from "./print/PensionerRemarksReportPrint";
 import CitizenListPrint from "./print/CitizenListPrint";
+import CitizenListFilters from "./print/CitizenListFilters";
 
 const OscaReportsChart = () => {
   const chartOptions = [
@@ -25,6 +26,11 @@ const OscaReportsChart = () => {
     { label: "Deceased", component: <DeceasedReportsChart /> },
     { label: "UTP", component: <UtpReportsChart /> },
   ];
+  const [filters, setFilters] = useState({
+    gender: "All",
+    barangay: "All Barangays",
+    remarks: "All Remarks",
+  });
 
   const [selectedChart, setSelectedChart] = useState(chartOptions[0].label);
 
@@ -85,10 +91,17 @@ const OscaReportsChart = () => {
                 <tr className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                     Senior Citizen List Report
+                    <CitizenListFilters
+                      filters={filters}
+                      setFilters={setFilters}
+                    />
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     <div className="flex justify-end">
-                      <CitizenListPrint />
+                      <CitizenListPrint
+                        filters={filters}
+                        fields={["name", "gender", "barangay", "remarks"]}
+                      />
                     </div>
                   </td>
                 </tr>

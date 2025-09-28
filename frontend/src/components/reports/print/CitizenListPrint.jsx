@@ -1,18 +1,21 @@
+// CitizenListPrint.jsx
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import Button from "../../UI/Button";
 import { Printer } from "lucide-react";
 
-const CitizenListPrint = ({ filters }) => {
+const CitizenListPrint = ({
+  filters,
+  fields = ["name", "gender", "barangay"],
+}) => {
   const backendUrl = import.meta.env.VITE_API_BASE_URL;
   const [citizens, setCitizens] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Call a backend endpoint that ignores pagination (create if not existing)
         const res = await axios.get(`${backendUrl}/api/charts/citizens/print`, {
-          params: filters,
+          params: filters, // ✅ pass filters to backend
         });
         setCitizens(res.data?.citizens || []);
       } catch (err) {
@@ -23,48 +26,56 @@ const CitizenListPrint = ({ filters }) => {
   }, [backendUrl, filters]);
 
   const handlePrint = () => {
+    const headers = [];
+    if (fields.includes("name")) headers.push("Full Name");
+    if (fields.includes("gender")) headers.push("Gender");
+    if (fields.includes("barangay")) headers.push("Barangay");
+    if (fields.includes("remarks")) headers.push("Remarks");
+
+    const rows = citizens.map((c, idx) => {
+      const cols = [];
+      if (fields.includes("name")) {
+        cols.push(
+          `${c.lastName}, ${c.firstName} ${c.middleName || ""} ${
+            c.suffix || ""
+          }`
+        );
+      }
+      if (fields.includes("gender")) cols.push(c.gender);
+      if (fields.includes("barangay")) cols.push(c.barangay_name || "");
+      if (fields.includes("remarks")) cols.push(c.form_data?.remarks || "");
+
+      return `<tr>
+        <td style="border:1px solid #333; padding:6px;">${idx + 1}</td>
+        ${cols
+          .map(
+            (col) =>
+              `<td style="border:1px solid #333; padding:6px;">${col}</td>`
+          )
+          .join("")}
+      </tr>`;
+    });
+
     const printContents = `
       <h2 style="text-align:center;">Senior Citizens Report</h2>
       <table style="width:100%; border-collapse: collapse; margin-top:20px;">
         <thead>
           <tr>
             <th style="border:1px solid #333; padding:6px;">#</th>
-            <th style="border:1px solid #333; padding:6px;">Full Name</th>
-            <th style="border:1px solid #333; padding:6px;">Gender</th>
-            <th style="border:1px solid #333; padding:6px;">Age</th>
-            <th style="border:1px solid #333; padding:6px;">Barangay</th>
-            <th style="border:1px solid #333; padding:6px;">Remarks</th>
-            <th style="border:1px solid #333; padding:6px;">Created At</th>
+            ${headers
+              .map(
+                (h) =>
+                  `<th style="border:1px solid #333; padding:6px;">${h}</th>`
+              )
+              .join("")}
           </tr>
         </thead>
         <tbody>
-          ${citizens
-            .map(
-              (c, idx) => `
-            <tr>
-              <td style="border:1px solid #333; padding:6px;">${idx + 1}</td>
-              <td style="border:1px solid #333; padding:6px;">
-                ${c.lastName}, ${c.firstName} ${c.middleName || ""} ${
-                c.suffix || ""
-              }
-              </td>
-              <td style="border:1px solid #333; padding:6px;">${c.gender}</td>
-              <td style="border:1px solid #333; padding:6px;">${c.age}</td>
-              <td style="border:1px solid #333; padding:6px;">${
-                c.barangay_name || ""
-              }</td>
-              <td style="border:1px solid #333; padding:6px;">
-                ${c.form_data?.remarks || ""}
-              </td>
-              <td style="border:1px solid #333; padding:6px;">
-                ${new Date(c.created_at).toLocaleDateString()}
-              </td>
-            </tr>
-          `
-            )
-            .join("")}
+          ${rows.join("")}
           <tr>
-            <td colspan="7" style="border:1px solid #333; padding:6px; font-weight:bold; text-align:right;">
+            <td colspan="${
+              headers.length + 1
+            }" style="border:1px solid #333; padding:6px; font-weight:bold; text-align:right;">
               Total: ${citizens.length}
             </td>
           </tr>
@@ -75,9 +86,7 @@ const CitizenListPrint = ({ filters }) => {
     const newWindow = window.open("", "", "width=1000,height=700");
     newWindow.document.write(`
       <html>
-        <head>
-          <title>Senior Citizens Report</title>
-        </head>
+        <head><title>Senior Citizens Report</title></head>
         <body style="font-family: Arial, sans-serif; padding:20px;">
           ${printContents}
         </body>
