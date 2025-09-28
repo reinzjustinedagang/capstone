@@ -589,6 +589,7 @@ const SeniorCitizenList = ({ onEdit, onId }) => {
             >
               <option value="">Select a reason</option>
               <option value="Delete">Delete</option>
+              <option value="Transferred">Transferred</option>
               <option value="Deceased">Deceased</option>
               <option value="Other">Other</option>
             </select>

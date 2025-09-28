@@ -924,8 +924,13 @@ exports.getArchivedSeniorCitizens = async (options) => {
 
   // 🗂 Archive Reason filter
   if (reason && reason !== "All") {
-    where += ` AND sc.archive_reason = ?`;
-    params.push(reason);
+    if (reason === "Other") {
+      // Anything not in the predefined categories
+      where += ` AND sc.archive_reason NOT IN ('Deceased', 'Transferred', 'Deleted')`;
+    } else {
+      where += ` AND sc.archive_reason = ?`;
+      params.push(reason);
+    }
   }
 
   // 🔽 Sorting

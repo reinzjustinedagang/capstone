@@ -40,7 +40,7 @@ const Archive = ({ onView }) => {
   const [showFilters, setShowFilters] = useState(false);
 
   const genderOptions = ["All", "Male", "Female"];
-  const reasonOptions = ["All", "Deceased", "Delete", "Other"];
+  const reasonOptions = ["All", "Delete", "Transferred", "Deceased", "Other"];
 
   // UI states
   const [loading, setLoading] = useState(false);
@@ -174,7 +174,7 @@ const Archive = ({ onView }) => {
     page,
     searchTerm,
     filterBarangay,
-    filterAge,
+    filterReason,
     filterGender,
     sortBy,
     sortOrder,
@@ -182,7 +182,7 @@ const Archive = ({ onView }) => {
 
   useEffect(() => {
     setPage(1);
-  }, [searchTerm, filterBarangay, filterAge, filterGender]);
+  }, [searchTerm, filterBarangay, filterReason, filterGender]);
 
   // ─── Render ───────────────────────────────────────────────────────
   return (
@@ -222,7 +222,7 @@ const Archive = ({ onView }) => {
             {(searchTerm ||
               filterBarangay !== "All Barangays" ||
               filterGender !== "All" ||
-              filterAge !== "All") && (
+              filterReason !== "All") && (
               <button
                 onClick={clearFilters}
                 className="flex items-center text-sm text-red-600 hover:text-red-700 transition-colors"
@@ -236,8 +236,8 @@ const Archive = ({ onView }) => {
 
         {/* Collapsible Filters */}
         {showFilters && (
-          <div className="p-4 border-b border-gray-200 bg-gray-50">
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="p-4 border-b border-gray-200">
+            <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-4 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Barangay
