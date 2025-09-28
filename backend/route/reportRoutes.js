@@ -164,18 +164,16 @@ router.get("/pensioner", async (req, res) => {
   }
 });
 
-// GET /api/charts/pensioner
+// GET /api/charts/remarks
 router.get("/remarks", async (req, res) => {
   try {
     const data = await reportService.getRemarksReport();
     res.json(data);
   } catch (err) {
     console.error("❌ Failed to fetch remarks reports:", err);
-    res.status(500).json({ message: "Failed to fetch remarks reports." });
-    res.json({
-      SOCIALPENSION: 0,
-      NONSOCIALPENSION: 0,
-      INDIGENT: 0,
+    res.status(500).json({
+      message: "Failed to fetch remarks reports.",
+      data: {},
     });
   }
 });
