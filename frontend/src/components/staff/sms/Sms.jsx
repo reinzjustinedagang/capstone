@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { SendIcon, Loader2, Search } from "lucide-react";
+import { SendIcon, Loader2, Search, CheckCircle, XCircle } from "lucide-react";
 import Button from "../../UI/Button";
+import Modal from "../../UI/Modal"; // ✅ reuse your existing modal component
 import axios from "axios";
 
 const Sms = () => {
@@ -11,9 +12,16 @@ const Sms = () => {
   const [seniorCitizens, setSeniorCitizens] = useState([]);
   const [templates, setTemplates] = useState([]);
   const [selectedTemplateId, setSelectedTemplateId] = useState("");
-  const [loadingPage, setLoadingPage] = useState(false); // ✅ global actions (send SMS, etc.)
-  const [loadingRecipients, setLoadingRecipients] = useState(false); // ✅ only for recipients list
+  const [loadingPage, setLoadingPage] = useState(false);
+  const [loadingRecipients, setLoadingRecipients] = useState(false);
   const [searchText, setSearchText] = useState("");
+
+  // ✅ modal states
+  const [successModal, setSuccessModal] = useState({
+    show: false,
+    message: "",
+  });
+  const [errorModal, setErrorModal] = useState({ show: false, message: "" });
 
   const backendUrl = import.meta.env.VITE_API_BASE_URL;
 
@@ -28,10 +36,10 @@ const Sms = () => {
     }
   };
 
-  // Fetch senior citizens by barangay ID
+  // Fetch senior citizens
   const fetchCitizens = async (barangayId = "", search = "") => {
     try {
-      setLoadingRecipients(true); // ✅ only affects recipients panel
+      setLoadingRecipients(true);
       const params = {};
       if (barangayId) params.barangay_id = barangayId;
       if (search) params.search = search;
@@ -101,7 +109,7 @@ const Sms = () => {
 
     if (!numbers.length || !messageText) return;
 
-    setLoadingPage(true); // ✅ global loader for sending
+    setLoadingPage(true);
     try {
       const res = await axios.post(`${backendUrl}/api/sms/send-sms`, {
         numbers,
@@ -112,7 +120,8 @@ const Sms = () => {
         res.data?.message ||
         res.data?.response?.data?.message ||
         "✅ Broadcast sent successfully";
-      alert(msg);
+
+      setSuccessModal({ show: true, message: msg });
 
       // Reset form
       setMessageText("");
@@ -124,7 +133,7 @@ const Sms = () => {
         err.response?.data?.message ||
         err.response?.data?.error ||
         "❌ Failed to send messages.";
-      alert(msg);
+      setErrorModal({ show: true, message: msg });
     } finally {
       setLoadingPage(false);
     }
@@ -132,7 +141,7 @@ const Sms = () => {
 
   return (
     <div className="relative">
-      {/* ✅ Only block full page when sending SMS */}
+      {/* ✅ Global overlay while sending */}
       {loadingPage && (
         <div className="absolute inset-0 z-50 flex items-center justify-center bg-white/70 backdrop-blur-sm">
           <div className="flex flex-col items-center">
@@ -140,6 +149,50 @@ const Sms = () => {
             <span className="text-blue-700 font-medium">Sending...</span>
           </div>
         </div>
+      )}
+
+      {/* ✅ Success Modal */}
+      {successModal.show && (
+        <Modal
+          isOpen={successModal.show}
+          onClose={() => setSuccessModal({ show: false, message: "" })}
+        >
+          <div className="flex flex-col items-center text-center p-6">
+            <CheckCircle className="h-12 w-12 text-green-600 mb-3" />
+            <h3 className="text-lg font-semibold text-gray-900">Success</h3>
+            <p className="mt-2 text-sm text-gray-600">{successModal.message}</p>
+            <div className="mt-4">
+              <Button
+                variant="primary"
+                onClick={() => setSuccessModal({ show: false, message: "" })}
+              >
+                OK
+              </Button>
+            </div>
+          </div>
+        </Modal>
+      )}
+
+      {/* ✅ Error Modal */}
+      {errorModal.show && (
+        <Modal
+          isOpen={errorModal.show}
+          onClose={() => setErrorModal({ show: false, message: "" })}
+        >
+          <div className="flex flex-col items-center text-center p-6">
+            <XCircle className="h-12 w-12 text-red-600 mb-3" />
+            <h3 className="text-lg font-semibold text-gray-900">Failed</h3>
+            <p className="mt-2 text-sm text-gray-600">{errorModal.message}</p>
+            <div className="mt-4">
+              <Button
+                variant="danger"
+                onClick={() => setErrorModal({ show: false, message: "" })}
+              >
+                Close
+              </Button>
+            </div>
+          </div>
+        </Modal>
       )}
 
       <div className="bg-white rounded-lg shadow overflow-hidden">

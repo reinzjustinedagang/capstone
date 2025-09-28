@@ -3,16 +3,23 @@ const Connection = require("../db/Connection");
 const { logAudit } = require("./auditService");
 const bcrypt = require("bcrypt");
 
-exports.sendSMS = async (message, recipients) => {
+exports.sendSMS = async (message, recipients, options = {}) => {
   try {
     const [credentials] = await Connection(
       "SELECT * FROM sms_credentials LIMIT 1"
     );
-
     if (!credentials) throw new Error("SMS credentials not found.");
 
-    // Convert recipients array to comma-separated string
-    const numbersStr = recipients.join(",");
+    // ✅ Filter out null/empty/invalid numbers
+    const validRecipients = (recipients || []).filter(
+      (num) => num && num.toString().trim() !== ""
+    );
+    if (validRecipients.length === 0) {
+      throw new Error("No valid recipients to send SMS.");
+    }
+
+    // Convert to comma-separated string
+    const numbersStr = validRecipients.join(",");
 
     // Prepare payload as URL-encoded form data
     const params = new URLSearchParams();
@@ -26,39 +33,41 @@ exports.sendSMS = async (message, recipients) => {
     const response = await axios.post(
       "https://api.semaphore.co/api/v4/messages",
       params.toString(),
-      {
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      }
+      { headers: { "Content-Type": "application/x-www-form-urlencoded" } }
     );
 
     const data = response.data;
-
-    // Save each message individually in SMS logs
     const logs = Array.isArray(data) ? data : [data];
-    for (const log of logs) {
-      await Connection(
-        `INSERT INTO sms_logs (recipients, message, status, reference_id, credit_used)
-     VALUES (?, ?, ?, ?, ?)`,
-        [
-          log.recipient,
-          log.message,
-          log.status === "Pending" ? "Sent" : log.status, // ⬅️ Default to Success
-          log.message_id || null,
-          log.credits_used || 0,
-        ]
-      );
+
+    // ✅ Only log if NOT OTP (skipLogging flag is false)
+    if (!options.skipLogging) {
+      for (const log of logs) {
+        await Connection(
+          `INSERT INTO sms_logs (recipients, message, status, reference_id, credit_used)
+           VALUES (?, ?, ?, ?, ?)`,
+          [
+            log.recipient,
+            log.message,
+            log.status || "Unknown",
+            log.message_id || null,
+            log.credits_used || 0,
+          ]
+        );
+      }
     }
 
-    return { success: true, response: data };
+    return { success: true, response: logs };
   } catch (error) {
     console.error("Error sending SMS:", error);
 
-    // Log failure for all recipients
-    await Connection(
-      `INSERT INTO sms_logs (recipients, message, status, reference_id, credit_used)
-       VALUES (?, ?, ?, ?, ?)`,
-      [JSON.stringify(recipients), message, "Failed", null, 0]
-    );
+    // ✅ Only log if NOT OTP (skipLogging flag is false)
+    if (!options.skipLogging) {
+      await Connection(
+        `INSERT INTO sms_logs (recipients, message, status, reference_id, credit_used)
+         VALUES (?, ?, ?, ?, ?)`,
+        [JSON.stringify(recipients), message, "Failed", null, 0]
+      );
+    }
 
     return { success: false, response: error.message };
   }
@@ -177,10 +186,8 @@ exports.getSmsCounts = async () => {
 exports.requestOtp = async (cpNumber) => {
   if (!cpNumber) throw new Error("Mobile number required");
 
-  // Generate random 6-digit OTP
   const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
-  // Save OTP in DB with expiration (5 mins)
   await Connection(
     `INSERT INTO otp_codes (mobile, otp, expires_at) 
      VALUES (?, ?, DATE_ADD(NOW(), INTERVAL 5 MINUTE))
@@ -188,15 +195,14 @@ exports.requestOtp = async (cpNumber) => {
     [cpNumber, otp]
   );
 
-  // Send SMS (use exports.sendSMS, not smsService.sendSMS)
-  const smsResult = await exports.sendSMS(`Your OTP code is ${otp}`, [
-    cpNumber,
-  ]);
+  // ✅ Skip logging OTP messages
+  const smsResult = await exports.sendSMS(
+    `Your OTP code is ${otp}`,
+    [cpNumber],
+    { skipLogging: true }
+  );
 
-  if (!smsResult.success) {
-    throw new Error("Failed to send OTP");
-  }
-
+  if (!smsResult.success) throw new Error("Failed to send OTP");
   return true;
 };
 
