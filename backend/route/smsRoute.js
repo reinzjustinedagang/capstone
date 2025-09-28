@@ -16,7 +16,7 @@ router.get("/count", async (req, res) => {
 // ✅ Send SMS to one or multiple numbers
 router.post("/send-sms", async (req, res) => {
   const { number, numbers, message } = req.body;
-
+  const user = req.session.user;
   const recipients = numbers || (number ? [number] : null);
 
   if (
@@ -31,7 +31,7 @@ router.post("/send-sms", async (req, res) => {
   }
 
   try {
-    const result = await smsService.sendSMS(message, recipients);
+    const result = await smsService.sendSMS(message, recipients, user);
 
     if (result.success) {
       res.json({
@@ -53,7 +53,6 @@ router.post("/send-sms", async (req, res) => {
 // ✅ Delete SMS log by ID
 router.delete("/delete/:id", async (req, res) => {
   const id = req.params.id;
-
   try {
     const success = await smsService.deleteSms(id);
 

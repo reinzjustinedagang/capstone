@@ -3,7 +3,7 @@ const Connection = require("../db/Connection");
 const { logAudit } = require("./auditService");
 const bcrypt = require("bcrypt");
 
-exports.sendSMS = async (message, recipients, options = {}) => {
+exports.sendSMS = async (message, recipients, options = {}, user) => {
   try {
     const [credentials] = await Connection(
       "SELECT * FROM sms_credentials LIMIT 1"
@@ -43,14 +43,15 @@ exports.sendSMS = async (message, recipients, options = {}) => {
     if (!options.skipLogging) {
       for (const log of logs) {
         await Connection(
-          `INSERT INTO sms_logs (recipients, message, status, reference_id, credit_used)
-           VALUES (?, ?, ?, ?, ?)`,
+          `INSERT INTO sms_logs (recipients, message, status, reference_id, credit_used, sent_by)
+           VALUES (?, ?, ?, ?, ?, ?)`,
           [
             log.recipient,
             log.message,
-            log.status || "Unknown",
+            log.status === "Pending" ? "Success" : log.status,
             log.message_id || null,
             log.credits_used || 0,
+            user ? user.id : null,
           ]
         );
       }
@@ -164,6 +165,8 @@ exports.getSmsCounts = async () => {
         SUM(CASE WHEN status = 'Pending' THEN 1 ELSE 0 END) AS pending_count,
         COUNT(*) AS total
       FROM sms_logs
+      WHERE MONTH(created_at) = MONTH(CURRENT_DATE())
+      AND YEAR(created_at) = YEAR(CURRENT_DATE())
     `);
 
     return (

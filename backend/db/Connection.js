@@ -169,7 +169,8 @@ async function initTables() {
     status VARCHAR(20) NOT NULL,          
     reference_id VARCHAR(100),            
     credit_used DECIMAL(10,2) DEFAULT 0,  
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP 
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    sent_by INT
   )`
     );
     console.log("✅ sms logs table ready.");
