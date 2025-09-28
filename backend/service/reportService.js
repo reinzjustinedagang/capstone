@@ -398,3 +398,40 @@ exports.getPensionerReport = async () => {
     throw err;
   }
 };
+
+exports.getRemarksReport = async () => {
+  try {
+    const rows = await Connection(`
+      SELECT 
+        JSON_UNQUOTE(JSON_EXTRACT(form_data, '$.remarks')) AS remarks,
+        COUNT(*) AS count
+      FROM senior_citizens
+      WHERE registered = 1
+        AND deleted = 0
+        AND archived = 0
+        AND CAST(JSON_UNQUOTE(JSON_EXTRACT(form_data, '$.age')) AS UNSIGNED) >= 60
+        AND JSON_UNQUOTE(JSON_EXTRACT(form_data, '$.remarks')) IN ('SOCIAL PENSION','NON-SOCIAL PENSION','INDIGENT')
+      GROUP BY remarks
+    `);
+
+    // Desired output keys
+    const report = { SOCIALPENSION: 0, NONSOCIALPENSION: 0, INDIGENT: 0 };
+
+    // Map DB values to keys
+    const mapping = {
+      "SOCIAL PENSION": "SOCIALPENSION",
+      "NON-SOCIAL PENSION": "NONSOCIALPENSION",
+      INDIGENT: "INDIGENT",
+    };
+
+    rows.forEach((r) => {
+      const key = mapping[r.remarks];
+      if (key) report[key] = r.count;
+    });
+
+    return report;
+  } catch (err) {
+    console.error("❌ Error fetching remarks report:", err);
+    throw err;
+  }
+};

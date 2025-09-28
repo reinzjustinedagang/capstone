@@ -45,23 +45,23 @@ const PensionerDistribution = () => {
   return (
     <div className="bg-white p-6 rounded-lg shadow">
       <h3 className="text-lg font-medium mb-4">Pensioner Distribution</h3>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Chart */}
-        <div className="h-72">
-          <Pie
-            data={chartData}
-            options={{
-              responsive: true,
-              maintainAspectRatio: false,
-              plugins: {
-                legend: { position: "bottom" },
-              },
-            }}
-          />
-        </div>
+      {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-6"> */}
+      {/* Chart */}
+      <div className="h-72">
+        <Pie
+          data={chartData}
+          options={{
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { position: "bottom" },
+            },
+          }}
+        />
+      </div>
 
-        {/* Summary List */}
-        <div className="flex flex-col justify-center">
+      {/* Summary List */}
+      {/* <div className="flex flex-col justify-center">
           <ul className="space-y-3">
             {Object.entries(counts).map(([key, value]) => (
               <li key={key} className="flex items-center justify-between">
@@ -82,8 +82,8 @@ const PensionerDistribution = () => {
               </span>
             </li>
           </ul>
-        </div>
-      </div>
+        </div> */}
+      {/* </div> */}
     </div>
   );
 };
