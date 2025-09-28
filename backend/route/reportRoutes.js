@@ -191,7 +191,7 @@ router.get("/citizens/print", async (req, res) => {
       sortOrder,
     } = req.query;
 
-    const result = await citizenService.getPaginatedFilteredCitizens({
+    const citizens = await reportService.getFilteredCitizensForPrint({
       search,
       barangay,
       gender,
@@ -199,11 +199,9 @@ router.get("/citizens/print", async (req, res) => {
       healthStatus,
       sortBy,
       sortOrder,
-      page: 1,
-      limit: 1000000, // very high so it returns "all"
     });
 
-    res.json({ citizens: result.citizens });
+    res.json({ citizens });
   } catch (err) {
     console.error("Error fetching citizens for print:", err);
     res.status(500).json({ error: "Failed to fetch citizens for print." });
