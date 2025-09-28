@@ -461,11 +461,59 @@ exports.getFilteredCitizensForPrint = async (options) => {
     sortBy,
     sortOrder,
   } = options;
+
   const params = [];
   let where =
     "WHERE sc.deleted = 0 AND sc.age >= 60 AND registered = 1 AND archived = 0";
 
-  // reuse same filtering logic (search, barangay, etc.)...
+  // Search
+  if (search) {
+    where += ` AND (
+      sc.firstName LIKE ? OR sc.lastName LIKE ? OR sc.middleName LIKE ? OR sc.suffix LIKE ?
+      OR b.barangay_name LIKE ?
+      OR JSON_UNQUOTE(JSON_EXTRACT(sc.form_data, '$.idNumber')) LIKE ?
+    )`;
+    const s = `%${search}%`;
+    params.push(s, s, s, s, s, s);
+  }
+
+  // Barangay filter
+  if (barangay && barangay !== "" && barangay !== "All Barangays") {
+    where += ` AND b.barangay_name = ?`;
+    params.push(barangay);
+  }
+
+  // Gender filter
+  if (gender && gender !== "" && gender !== "All") {
+    where += ` AND sc.gender = ?`;
+    params.push(gender);
+  }
+
+  // Health status filter
+  if (healthStatus && healthStatus !== "" && healthStatus !== "All Remarks") {
+    where += ` AND JSON_UNQUOTE(JSON_EXTRACT(sc.form_data, '$.remarks')) = ?`;
+    params.push(healthStatus);
+  }
+
+  // Age range filter
+  if (ageRange && ageRange !== "" && ageRange !== "All") {
+    const [min, maxRaw] = ageRange.split(" - ");
+    const max = maxRaw.includes("+") ? 200 : parseInt(maxRaw);
+    where += ` AND sc.age BETWEEN ? AND ?`;
+    params.push(parseInt(min), max);
+  }
+
+  // Sorting
+  const allowedSort = [
+    "lastName",
+    "firstName",
+    "gender",
+    "age",
+    "created_at",
+    "barangay_name",
+  ];
+  const orderBy = allowedSort.includes(sortBy) ? sortBy : "lastName";
+  const order = sortOrder === "desc" ? "DESC" : "ASC";
 
   const data = await Connection(
     `SELECT sc.id, sc.firstName, sc.middleName, sc.lastName, sc.suffix,
@@ -474,7 +522,7 @@ exports.getFilteredCitizensForPrint = async (options) => {
      FROM senior_citizens sc
      LEFT JOIN barangays b ON sc.barangay_id = b.id
      ${where}
-     ORDER BY ${sortBy || "lastName"} ${sortOrder === "desc" ? "DESC" : "ASC"}`,
+     ORDER BY ${orderBy} ${order}`,
     params
   );
 
