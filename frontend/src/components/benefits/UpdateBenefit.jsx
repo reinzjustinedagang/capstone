@@ -46,9 +46,16 @@ const UpdateBenefit = ({ benefitId, onSuccess }) => {
     const fetchBenefit = async () => {
       try {
         const res = await axios.get(`${backendUrl}/api/benefits/${benefitId}`);
-        setFormData(res.data);
-        if (res.data.image_url) {
-          setImagePreview(res.data.image_url);
+        const data = res.data;
+
+        // Normalize enacted_date to YYYY-MM-DD if it exists
+        if (data.enacted_date) {
+          data.enacted_date = data.enacted_date.split("T")[0];
+        }
+
+        setFormData(data);
+        if (data.image_url) {
+          setImagePreview(data.image_url);
         }
       } catch (err) {
         console.error("Failed to fetch benefit:", err);
@@ -222,7 +229,7 @@ const UpdateBenefit = ({ benefitId, onSuccess }) => {
         }}
       >
         {/* Image Upload - only show if type is NOT "republic acts" */}
-        {formData.type !== "republic acts" && (
+        {formData.type !== "republic-acts" && (
           <div>
             <label className="block text-sm font-medium">Benefits Image</label>
             <div className="flex items-center gap-4 mt-2">
