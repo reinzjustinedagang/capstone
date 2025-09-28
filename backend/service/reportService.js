@@ -401,27 +401,45 @@ exports.getPensionerReport = async () => {
 
 exports.getRemarksReport = async () => {
   try {
-    const rows = await Connection(`
-    SELECT 
-      TRIM(BOTH '"' FROM 
-        TRIM(BOTH '[]' FROM JSON_UNQUOTE(JSON_EXTRACT(form_data, '$.remarks')))
-      ) AS clean_remarks,
-      COUNT(*) AS count
-    FROM senior_citizens
-    WHERE registered = 1
-      AND deleted = 0
-      AND archived = 0
-      AND CAST(JSON_UNQUOTE(JSON_EXTRACT(form_data, '$.age')) AS UNSIGNED) >= 60
-    GROUP BY clean_remarks
+    // 1. Fetch valid options from your form_fields definition
+    const [field] = await Connection(`
+      SELECT options 
+      FROM form_fields 
+      WHERE field_name = 'remarks'
+      LIMIT 1
     `);
 
-    // Build dynamic report object
+    if (!field) throw new Error("Remarks field not found in form_fields");
+
+    // Split and normalize options into a list of valid values
+    const validOptions = field.options
+      .split(",")
+      .map((opt) => opt.trim().toUpperCase());
+
+    // 2. Fetch senior citizen remarks
+    const rows = await Connection(`
+      SELECT 
+        JSON_UNQUOTE(JSON_EXTRACT(form_data, '$.remarks')) AS remarks
+      FROM senior_citizens
+      WHERE registered = 1
+        AND deleted = 0
+        AND archived = 0
+        AND CAST(JSON_UNQUOTE(JSON_EXTRACT(form_data, '$.age')) AS UNSIGNED) >= 60
+    `);
+
+    // 3. Initialize report with all valid options set to 0
     const report = {};
-    rows.forEach((r) => {
-      if (r.remarks) {
-        // Normalize the key if you want (remove spaces, uppercase, etc.)
-        const key = r.remarks.replace(/\s+/g, "").toUpperCase();
-        report[key] = r.count;
+    validOptions.forEach((opt) => (report[opt] = 0));
+
+    // 4. Count only valid remarks
+    rows.forEach(({ remarks }) => {
+      if (!remarks) return;
+
+      let key = remarks.trim().toUpperCase();
+      key = key.replace(/[\[\]"]/g, ""); // cleanup ["X"]
+
+      if (validOptions.includes(key)) {
+        report[key] += 1;
       }
     });
 
