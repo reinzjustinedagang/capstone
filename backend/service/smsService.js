@@ -184,13 +184,24 @@ exports.getSmsCounts = async () => {
 };
 
 /**
- * Generate and send OTP
+ * Generate and send OTP only if user exists
  */
 exports.requestOtp = async (cpNumber) => {
   if (!cpNumber) throw new Error("Mobile number required");
 
+  // ✅ Check if number exists in users table
+  const [user] = await Connection(
+    "SELECT id FROM users WHERE cp_number = ? LIMIT 1",
+    [cpNumber]
+  );
+  if (!user) {
+    throw new Error("This number is not registered");
+  }
+
+  // ✅ Generate OTP
   const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
+  // ✅ Insert/update OTP
   await Connection(
     `INSERT INTO otp_codes (mobile, otp, expires_at) 
      VALUES (?, ?, DATE_ADD(NOW(), INTERVAL 5 MINUTE))
@@ -198,7 +209,7 @@ exports.requestOtp = async (cpNumber) => {
     [cpNumber, otp]
   );
 
-  // ✅ Skip logging OTP messages
+  // ✅ Send SMS without logging OTP in sms_logs
   const smsResult = await exports.sendSMS(
     `Your OTP code is ${otp}`,
     [cpNumber],
