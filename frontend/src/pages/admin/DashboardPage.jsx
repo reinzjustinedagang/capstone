@@ -6,9 +6,5 @@ export const DashboardPage = () => {
   useEffect(() => {
     document.title = "Dashboard";
   }, []);
-  return (
-    <Layout>
-      <Dashboard />
-    </Layout>
-  );
+  return <Dashboard />;
 };

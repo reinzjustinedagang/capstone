@@ -6,9 +6,5 @@ export const EventsPage = () => {
   useEffect(() => {
     document.title = "Events";
   }, []);
-  return (
-    <Layout>
-      <Events />
-    </Layout>
-  );
+  return <Events />;
 };

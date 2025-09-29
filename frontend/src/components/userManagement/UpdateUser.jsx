@@ -200,7 +200,7 @@ export default function UpdateUser({ id, onSuccess }) {
         </div>
 
         {/* Password (optional) */}
-        <div className="flex gap-2">
+        {/* <div className="flex gap-2">
           <div className="w-1/2">
             <label className="block text-sm font-medium text-gray-800 mb-1">
               New Password
@@ -226,7 +226,7 @@ export default function UpdateUser({ id, onSuccess }) {
               className="block w-full rounded-lg border border-gray-300 px-4 py-2.5"
             />
           </div>
-        </div>
+        </div> */}
 
         {/* Phone + Role */}
         <div className="flex gap-2">

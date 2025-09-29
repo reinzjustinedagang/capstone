@@ -6,9 +6,5 @@ export const UserManagementPage = () => {
   useEffect(() => {
     document.title = "User Management";
   }, []);
-  return (
-    <Layout>
-      <UserManagement />
-    </Layout>
-  );
+  return <UserManagement />;
 };

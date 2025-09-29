@@ -6,9 +6,5 @@ export const SettingsPage = () => {
   useEffect(() => {
     document.title = "Settings";
   }, []);
-  return (
-    <Layout>
-      <Settings />
-    </Layout>
-  );
+  return <Settings />;
 };

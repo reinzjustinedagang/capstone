@@ -7,9 +7,5 @@ export const ArchivePage = () => {
   useEffect(() => {
     document.title = "Archive";
   }, []);
-  return (
-    <Layout>
-      <Archive />
-    </Layout>
-  );
+  return <Archive />;
 };

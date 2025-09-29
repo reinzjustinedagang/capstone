@@ -14,6 +14,7 @@ import {
   InfoIcon,
   History,
   UserCheck,
+  File,
 } from "lucide-react";
 
 const StaffSidebar = () => {
@@ -62,6 +63,7 @@ const StaffSidebar = () => {
       label: "SMS Management",
       icon: MessageSquareIcon,
     },
+    { to: "/staff/reports", label: "Reports", icon: FileTextIcon },
     { to: "/staff/benefits", label: "Benefits", icon: GiftIcon },
     { to: "/staff/events", label: "Events", icon: Calendar },
     { to: "/staff/official", label: "Official", icon: UserCheck },

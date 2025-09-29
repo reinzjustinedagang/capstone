@@ -6,9 +6,5 @@ export const OfficialsPage = () => {
   useEffect(() => {
     document.title = "Osca Official";
   }, []);
-  return (
-    <Layout>
-      <Officials />
-    </Layout>
-  );
+  return <Officials />;
 };

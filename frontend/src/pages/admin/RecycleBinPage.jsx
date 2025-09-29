@@ -6,9 +6,5 @@ export const RecycleBinPage = () => {
   useEffect(() => {
     document.title = "Recycle bin";
   }, []);
-  return (
-    <Layout>
-      <RecycleBin />
-    </Layout>
-  );
+  return <RecycleBin />;
 };

@@ -4,9 +4,5 @@ import Dashboard from "../../components/staff/dashboard/Dashboard";
 import Benefits from "../../components/staff/benefits/Benefits";
 
 export const StaffBenefitsPage = () => {
-  return (
-    <StaffLayout>
-      <Benefits />
-    </StaffLayout>
-  );
+  return <Benefits />;
 };

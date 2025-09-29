@@ -6,9 +6,5 @@ export const BenefitsPage = () => {
   useEffect(() => {
     document.title = "Benefits";
   }, []);
-  return (
-    <Layout>
-      <Benefits />
-    </Layout>
-  );
+  return <Benefits />;
 };

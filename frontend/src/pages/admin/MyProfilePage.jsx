@@ -6,9 +6,5 @@ export const MyProfilePage = () => {
   useEffect(() => {
     document.title = "My profile";
   }, []);
-  return (
-    <Layout>
-      <MyProfile />
-    </Layout>
-  );
+  return <MyProfile />;
 };

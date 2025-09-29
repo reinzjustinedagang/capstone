@@ -6,9 +6,5 @@ export const SmsPage = () => {
   useEffect(() => {
     document.title = "Sms Management";
   }, []);
-  return (
-    <Layout>
-      <Sms />
-    </Layout>
-  );
+  return <Sms />;
 };

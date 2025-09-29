@@ -4,9 +4,5 @@ import Dashboard from "../../components/staff/dashboard/Dashboard";
 import LoginTrail from "../../components/staff/login-trail/LoginTrail";
 
 export const StaffLoginTrailPage = () => {
-  return (
-    <StaffLayout>
-      <LoginTrail />
-    </StaffLayout>
-  );
+  return <LoginTrail />;
 };

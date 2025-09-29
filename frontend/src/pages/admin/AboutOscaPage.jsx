@@ -6,9 +6,5 @@ export const AboutOscaPage = () => {
   useEffect(() => {
     document.title = "About OSCA";
   }, []);
-  return (
-    <Layout>
-      <AboutOSCA />
-    </Layout>
-  );
+  return <AboutOSCA />;
 };

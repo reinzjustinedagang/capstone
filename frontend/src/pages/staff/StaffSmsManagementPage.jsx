@@ -6,9 +6,7 @@ import Sms from "../../components/staff/sms/Sms";
 export const StaffSmsManagementPage = () => {
   return (
     <div>
-      <StaffLayout>
-        <Sms />
-      </StaffLayout>
+      <Sms />
     </div>
   );
 };

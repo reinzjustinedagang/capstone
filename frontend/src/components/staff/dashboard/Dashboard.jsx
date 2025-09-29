@@ -24,7 +24,9 @@ const Dashboard = () => {
 
   const fetchEventsCount = async () => {
     try {
-      const res = await axios.get(`${backendUrl}/api/events/count/all`);
+      const res = await axios.get(`${backendUrl}/api/events/count/all`, {
+        withCredentials: true,
+      });
       setEventsCount(res.data.count || 0);
     } catch (err) {
       console.error("Failed to fetch barangay count", err);
@@ -73,7 +75,9 @@ const Dashboard = () => {
 
   const fetchBenefitsCount = async () => {
     try {
-      const res = await axios.get(`${backendUrl}/api/benefits/count/all`);
+      const res = await axios.get(`${backendUrl}/api/benefits/count/all`, {
+        withCredentials: true,
+      });
       setBenefitsCount(res.data.count || 0);
     } catch (err) {
       console.error("Failed to fetch senior citizen count", err);

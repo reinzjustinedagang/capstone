@@ -6,9 +6,5 @@ export const BarangayManagementPage = () => {
   useEffect(() => {
     document.title = "Barangay";
   }, []);
-  return (
-    <Layout>
-      <BarangayManagement />
-    </Layout>
-  );
+  return <BarangayManagement />;
 };

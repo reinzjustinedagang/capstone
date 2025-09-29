@@ -6,9 +6,5 @@ export const AuditLogsPage = () => {
   useEffect(() => {
     document.title = "Audit logs";
   }, []);
-  return (
-    <Layout>
-      <AuditLogs />
-    </Layout>
-  );
+  return <AuditLogs />;
 };

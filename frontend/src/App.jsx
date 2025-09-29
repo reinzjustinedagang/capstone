@@ -51,6 +51,9 @@ import { StaffProfilePage } from "./pages/staff/StaffProfilePage.jsx";
 import { StaffOfficialPage } from "./pages/staff/StaffOfficialPage.jsx";
 import { StaffEventsPage } from "./pages/staff/StaffEventsPage.jsx";
 import { HomeBenefitsPage } from "./pages/public/HomeBenefitsPage.jsx";
+import { StaffReportsPage } from "./pages/staff/StaffReportsPage.jsx";
+import StaffLayout from "./components/staff/layout/StaffLayout.jsx";
+import Layout from "./components/layouts/Layout.jsx";
 
 function App() {
   return (
@@ -172,223 +175,56 @@ function App() {
 
       {/* Admin Routes */}
       <Route
-        path="/admin/dashboard"
+        path="/admin"
         element={
           <ProtectedRoute role="Admin">
-            <DashboardPage />
+            <Layout />
           </ProtectedRoute>
         }
-      />
-      <Route
-        path="/admin/senior-citizen-list"
-        element={
-          <ProtectedRoute role="Admin">
-            <SeniorCitizenPage />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/admin/osca-officials"
-        element={
-          <ProtectedRoute role="Admin">
-            <OfficialsPage />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/admin/pension-list"
-        element={
-          <ProtectedRoute role="Admin">
-            <PensionListPage />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/admin/benefits"
-        element={
-          <ProtectedRoute role="Admin">
-            <BenefitsPage />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/admin/sms-management"
-        element={
-          <ProtectedRoute role="Admin">
-            <SmsPage />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/admin/reports"
-        element={
-          <ProtectedRoute role="Admin">
-            <ReportPage />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/admin/audit-logs"
-        element={
-          <ProtectedRoute role="Admin">
-            <AuditLogsPage />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/admin/my-profile"
-        element={
-          <ProtectedRoute role="Admin">
-            <MyProfilePage />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/admin/user-management"
-        element={
-          <ProtectedRoute role="Admin">
-            <UserManagementPage />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/admin/settings"
-        element={
-          <ProtectedRoute role="Admin">
-            <SettingsPage />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/admin/barangays"
-        element={
-          <ProtectedRoute role="Admin">
-            <BarangayManagementPage />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/admin/notifications"
-        element={
-          <ProtectedRoute role="Admin">
-            <NotificationPage />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/admin/recycle-bin"
-        element={
-          <ProtectedRoute role="Admin">
-            <RecycleBinPage />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/admin/login-trail/:userId"
-        element={
-          <ProtectedRoute role="Admin">
-            <LoginTrailPage />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/admin/events"
-        element={
-          <ProtectedRoute role="Admin">
-            <EventsPage />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/admin/about"
-        element={
-          <ProtectedRoute role="Admin">
-            <AboutOscaPage />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/admin/archive"
-        element={
-          <ProtectedRoute role="Admin">
-            <ArchivePage />
-          </ProtectedRoute>
-        }
-      />
+      >
+        <Route path="dashboard" element={<DashboardPage />} />
+        <Route path="senior-citizen-list" element={<SeniorCitizenPage />} />
+        <Route path="osca-officials" element={<OfficialsPage />} />
+        <Route path="pension-list" element={<PensionListPage />} />
+        <Route path="benefits" element={<BenefitsPage />} />
+        <Route path="sms-management" element={<SmsPage />} />
+        <Route path="reports" element={<ReportPage />} />
+        <Route path="audit-logs" element={<AuditLogsPage />} />
+        <Route path="my-profile" element={<MyProfilePage />} />
+        <Route path="user-management" element={<UserManagementPage />} />
+        <Route path="settings" element={<SettingsPage />} />
+        <Route path="barangays" element={<BarangayManagementPage />} />
+        <Route path="notifications" element={<NotificationPage />} />
+        <Route path="recycle-bin" element={<RecycleBinPage />} />
+        <Route path="login-trail/:userId" element={<LoginTrailPage />} />
+        <Route path="events" element={<EventsPage />} />
+        <Route path="about" element={<AboutOscaPage />} />
+        <Route path="archive" element={<ArchivePage />} />
+      </Route>
 
       {/* Staff Routes */}
       <Route
-        path="/staff/dashboard"
+        path="/staff"
         element={
           <ProtectedRoute role="Staff">
-            <StaffDashboardPage />
+            <StaffLayout />
           </ProtectedRoute>
         }
-      />
-      <Route
-        path="/staff/senior-citizen-list"
-        element={
-          <ProtectedRoute role="Staff">
-            <StaffSeniorCitizenPage />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/staff/sms-management"
-        element={
-          <ProtectedRoute role="Staff">
-            <StaffSmsManagementPage />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/staff/benefits"
-        element={
-          <ProtectedRoute role="Staff">
-            <StaffBenefitsPage />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/staff/official"
-        element={
-          <ProtectedRoute role="Staff">
-            <StaffOfficialPage />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/staff/login-trails"
-        element={
-          <ProtectedRoute role="Staff">
-            <StaffLoginTrailPage />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/staff/about"
-        element={
-          <ProtectedRoute role="Staff">
-            <StaffAboutPage />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/staff/my-profile"
-        element={
-          <ProtectedRoute role="Staff">
-            <StaffProfilePage />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/staff/events"
-        element={
-          <ProtectedRoute role="Staff">
-            <StaffEventsPage />
-          </ProtectedRoute>
-        }
-      />
+      >
+        <Route path="dashboard" element={<StaffDashboardPage />} />
+        <Route
+          path="senior-citizen-list"
+          element={<StaffSeniorCitizenPage />}
+        />
+        <Route path="sms-management" element={<StaffSmsManagementPage />} />
+        <Route path="benefits" element={<StaffBenefitsPage />} />
+        <Route path="official" element={<StaffOfficialPage />} />
+        <Route path="login-trails" element={<StaffLoginTrailPage />} />
+        <Route path="about" element={<StaffAboutPage />} />
+        <Route path="my-profile" element={<StaffProfilePage />} />
+        <Route path="events" element={<StaffEventsPage />} />
+        <Route path="reports" element={<StaffReportsPage />} />
+      </Route>
 
       {/* Not Found */}
       <Route path="*" element={<NotFoundPage />} />

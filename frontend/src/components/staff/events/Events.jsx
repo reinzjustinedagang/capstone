@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import Modal from "../../UI/Modal";
 import Button from "../../UI/Button";
 import { Calendar, Plus, CheckCircle, ArrowUp } from "lucide-react";
-import AddEvent from "../../event/AddEvent";
+import AddEvent from "./AddEvent";
 import EventList from "../../event/EventList";
 import EventSlideshow from "../../event/EventSlideshow";
 import UpdateEvent from "./UpdateEvent";
@@ -61,7 +61,7 @@ const Events = () => {
       <div className="bg-white rounded-lg shadow overflow-hidden">
         <div className="border-b border-gray-200">
           <nav className="flex flex-wrap -mb-px">
-            {/* <button
+            <button
               onClick={() => setActiveTab("eventlist")}
               className={`py-4 px-6 text-center border-b-2 font-medium text-sm transition-colors duration-200
                 ${
@@ -71,7 +71,7 @@ const Events = () => {
                 }`}
             >
               <Calendar className="inline-block h-4 w-4 mr-2" /> Events
-            </button> */}
+            </button>
             {/* <button
               onClick={() => setActiveTab("slideshow")}
               className={`py-4 px-6 text-center border-b-2 font-medium text-sm transition-colors duration-200

@@ -6,9 +6,5 @@ export const NotificationPage = () => {
   useEffect(() => {
     document.title = "Notification";
   }, []);
-  return (
-    <Layout>
-      <Notification />
-    </Layout>
-  );
+  return <Notification />;
 };

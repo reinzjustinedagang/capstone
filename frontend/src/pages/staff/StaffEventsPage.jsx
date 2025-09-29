@@ -5,9 +5,5 @@ import Benefits from "../../components/staff/benefits/Benefits";
 import Events from "../../components/staff/events/Events";
 
 export const StaffEventsPage = () => {
-  return (
-    <StaffLayout>
-      <Events />
-    </StaffLayout>
-  );
+  return <Events />;
 };

@@ -6,9 +6,5 @@ export const LoginTrailPage = () => {
   useEffect(() => {
     document.title = "Log trail";
   }, []);
-  return (
-    <Layout>
-      <LoginTrail />
-    </Layout>
-  );
+  return <LoginTrail />;
 };

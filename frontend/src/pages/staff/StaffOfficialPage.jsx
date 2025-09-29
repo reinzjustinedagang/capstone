@@ -5,9 +5,7 @@ import Officials from "../../components/staff/official/Officials";
 export const StaffOfficialPage = () => {
   return (
     <div>
-      <StaffLayout>
-        <Officials />
-      </StaffLayout>
+      <Officials />
     </div>
   );
 };

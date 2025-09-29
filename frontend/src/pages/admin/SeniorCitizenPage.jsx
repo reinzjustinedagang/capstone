@@ -6,9 +6,5 @@ export const SeniorCitizenPage = () => {
   useEffect(() => {
     document.title = "Senior Citizen";
   }, []);
-  return (
-    <Layout>
-      <SeniorCitizen />
-    </Layout>
-  );
+  return <SeniorCitizen />;
 };
