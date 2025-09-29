@@ -119,10 +119,14 @@ const Sms = () => {
 
     setLoadingPage(true);
     try {
-      const res = await axios.post(`${backendUrl}/api/sms/send-sms`, {
-        numbers,
-        message: messageText,
-      });
+      const res = await axios.post(
+        `${backendUrl}/api/sms/send-sms`,
+        {
+          numbers,
+          message: messageText,
+        },
+        { withCredentials: true }
+      );
 
       const msg =
         res.data?.message ||

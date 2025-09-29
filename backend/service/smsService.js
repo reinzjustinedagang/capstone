@@ -52,7 +52,7 @@ exports.sendSMS = async (message, recipients, options = {}, user) => {
             log.status === "Pending" ? "Success" : log.status,
             log.message_id || null,
             log.credits_used || 0,
-            user?.id || null,
+            user.id,
           ]
         );
       }
@@ -72,7 +72,7 @@ exports.sendSMS = async (message, recipients, options = {}, user) => {
           "Failed",
           null,
           0,
-          user?.id || null,
+          user.id || null,
         ]
       );
     }

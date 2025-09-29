@@ -20,7 +20,7 @@ router.post("/send-sms", isAuthenticated, async (req, res) => {
   const { number, numbers, message } = req.body;
   const user = req.session.user;
   const recipients = numbers || (number ? [number] : null);
-  console.log(user);
+
   if (
     !recipients ||
     !Array.isArray(recipients) ||
@@ -34,7 +34,7 @@ router.post("/send-sms", isAuthenticated, async (req, res) => {
 
   try {
     const result = await smsService.sendSMS(message, recipients, user);
-
+    console.log(user);
     if (result.success) {
       res.json({
         message: "✅ Broadcast sent successfully",

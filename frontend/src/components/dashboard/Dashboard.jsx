@@ -89,7 +89,9 @@ const Dashboard = () => {
 
   const fetchSmsCount = async () => {
     try {
-      const res = await axios.get(`${backendUrl}/api/sms/count`);
+      const res = await axios.get(`${backendUrl}/api/sms/count`, {
+        withCredentials: true,
+      });
       setSmsCount(res.data.success_count || 0); // only successful sent
     } catch (err) {
       console.error("Failed to fetch SMS count", err);

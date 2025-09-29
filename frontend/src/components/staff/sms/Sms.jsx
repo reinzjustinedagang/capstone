@@ -1,8 +1,18 @@
 import React, { useState, useEffect } from "react";
-import { SendIcon, Loader2, Search, CheckCircle, XCircle } from "lucide-react";
+import {
+  SendIcon,
+  Loader2,
+  Search,
+  CheckCircle,
+  XCircle,
+  MessageSquareQuote,
+  MessageSquare,
+  History,
+} from "lucide-react";
 import Button from "../../UI/Button";
 import Modal from "../../UI/Modal"; // ✅ reuse your existing modal component
 import axios from "axios";
+import MessageHistory from "../../sms/MessageHistory";
 
 const Sms = () => {
   const [selectedRecipients, setSelectedRecipients] = useState([]);
@@ -15,7 +25,7 @@ const Sms = () => {
   const [loadingPage, setLoadingPage] = useState(false);
   const [loadingRecipients, setLoadingRecipients] = useState(false);
   const [searchText, setSearchText] = useState("");
-
+  const [activeTab, setActiveTab] = useState("send");
   // ✅ modal states
   const [successModal, setSuccessModal] = useState({
     show: false,
@@ -111,10 +121,14 @@ const Sms = () => {
 
     setLoadingPage(true);
     try {
-      const res = await axios.post(`${backendUrl}/api/sms/send-sms`, {
-        numbers,
-        message: messageText,
-      });
+      const res = await axios.post(
+        `${backendUrl}/api/sms/send-sms`,
+        {
+          numbers,
+          message: messageText,
+        },
+        { withCredentials: true }
+      );
 
       const msg =
         res.data?.message ||
@@ -138,6 +152,11 @@ const Sms = () => {
       setLoadingPage(false);
     }
   };
+
+  const tabs = [
+    { key: "send", label: "Send SMS", icon: MessageSquare },
+    { key: "history", label: "Message History", icon: History },
+  ];
 
   return (
     <div className="relative">
@@ -197,184 +216,204 @@ const Sms = () => {
 
       <div className="bg-white rounded-lg shadow overflow-hidden">
         {/* Tabs */}
+        <div className="border-b border-gray-200">
+          <nav className="flex -mb-px">
+            {tabs.map(({ key, label, icon: Icon }) => (
+              <button
+                key={key}
+                onClick={() => setActiveTab(key)}
+                className={`flex items-center py-4 px-6 border-b-2 font-medium text-sm ${
+                  activeTab === key
+                    ? "border-blue-500 text-blue-600"
+                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                }`}
+              >
+                <Icon className="h-4 w-4 mr-2" />
+                {label}
+              </button>
+            ))}
+          </nav>
+        </div>
 
         {/* Send SMS Tab */}
-
-        <div className="p-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Recipients */}
-            <div>
-              <h2 className="text-lg font-medium mb-4">Select Recipients</h2>
-              <div className="border border-gray-300 rounded-md overflow-hidden">
-                <div className="bg-gray-50 px-4 py-2 border-b border-gray-300">
-                  <div className="flex items-center">
-                    <input
-                      type="checkbox"
-                      id="selectAll"
-                      onChange={handleSelectAll}
-                      checked={
-                        seniorCitizens.length > 0 &&
-                        selectedRecipients.length === seniorCitizens.length
-                      }
-                      className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                    />
-                    <label
-                      htmlFor="selectAll"
-                      className="ml-2 text-sm text-gray-700"
-                    >
-                      Select All
-                    </label>
-                    <span className="ml-auto text-sm text-gray-500">
-                      {selectedRecipients.length} selected
-                    </span>
-                  </div>
-
-                  <div className="mt-4 flex flex-col sm:flex-row sm:space-x-4 space-y-4 sm:space-y-0 w-full">
-                    {/* Search input */}
-                    <div className="relative w-full sm:w-1/2">
+        {activeTab === "send" && (
+          <div className="p-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Recipients */}
+              <div>
+                <h2 className="text-lg font-medium mb-4">Select Recipients</h2>
+                <div className="border border-gray-300 rounded-md overflow-hidden">
+                  <div className="bg-gray-50 px-4 py-2 border-b border-gray-300">
+                    <div className="flex items-center">
                       <input
-                        type="text"
-                        id="search"
-                        value={searchText}
-                        onChange={(e) => {
-                          setSearchText(e.target.value);
-                          fetchCitizens(barangayFilter, e.target.value);
-                        }}
-                        placeholder="Search by Name or Contact..."
-                        className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+                        type="checkbox"
+                        id="selectAll"
+                        onChange={handleSelectAll}
+                        checked={
+                          seniorCitizens.length > 0 &&
+                          selectedRecipients.length === seniorCitizens.length
+                        }
+                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                       />
-                      <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
-                    </div>
-
-                    {/* Barangay filter */}
-                    <div className="w-full sm:w-1/2">
-                      <select
-                        id="barangayFilter"
-                        value={barangayFilter}
-                        className="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                        onChange={(e) => {
-                          const selected = e.target.value;
-                          setBarangayFilter(selected);
-                          fetchCitizens(selected, searchText);
-                        }}
+                      <label
+                        htmlFor="selectAll"
+                        className="ml-2 text-sm text-gray-700"
                       >
-                        <option value="">All Barangays</option>
-                        {barangays.map((b) => (
-                          <option key={b.id} value={b.id}>
-                            {b.barangay_name}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="max-h-80 overflow-y-auto">
-                  {loadingRecipients ? (
-                    <div className="p-4 flex items-center justify-center text-blue-600">
-                      <Loader2 className="animate-spin h-8 w-8" />
-                      <span className="ml-2 text-gray-600">
-                        Loading recipients...
+                        Select All
+                      </label>
+                      <span className="ml-auto text-sm text-gray-500">
+                        {selectedRecipients.length} selected
                       </span>
                     </div>
-                  ) : seniorCitizens.length > 0 ? (
-                    seniorCitizens.map((citizen) => (
-                      <div
-                        key={citizen.id}
-                        className="px-4 py-2 border-b border-gray-200 last:border-b-0 flex items-center"
-                      >
+
+                    <div className="mt-4 flex flex-col sm:flex-row sm:space-x-4 space-y-4 sm:space-y-0 w-full">
+                      {/* Search input */}
+                      <div className="relative w-full sm:w-1/2">
                         <input
-                          type="checkbox"
-                          id={`citizen-${citizen.id}`}
-                          checked={selectedRecipients.includes(citizen.id)}
-                          onChange={() => handleSelectRecipient(citizen.id)}
-                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                          type="text"
+                          id="search"
+                          value={searchText}
+                          onChange={(e) => {
+                            setSearchText(e.target.value);
+                            fetchCitizens(barangayFilter, e.target.value);
+                          }}
+                          placeholder="Search by Name or Contact..."
+                          className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
                         />
-                        <label
-                          htmlFor={`citizen-${citizen.id}`}
-                          className="ml-2 flex-1"
-                        >
-                          <div className="text-sm font-medium text-gray-700">
-                            {citizen.name}
-                          </div>
-                          <div className="text-xs text-gray-500">
-                            {citizen.contact}
-                          </div>
-                        </label>
+                        <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
                       </div>
-                    ))
-                  ) : (
-                    <div className="p-4 text-center text-gray-500">
-                      No senior citizens found in this barangay.
+
+                      {/* Barangay filter */}
+                      <div className="w-full sm:w-1/2">
+                        <select
+                          id="barangayFilter"
+                          value={barangayFilter}
+                          className="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                          onChange={(e) => {
+                            const selected = e.target.value;
+                            setBarangayFilter(selected);
+                            fetchCitizens(selected, searchText);
+                          }}
+                        >
+                          <option value="">All Barangays</option>
+                          {barangays.map((b) => (
+                            <option key={b.id} value={b.id}>
+                              {b.barangay_name}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
                     </div>
-                  )}
+                  </div>
+
+                  <div className="max-h-80 overflow-y-auto">
+                    {loadingRecipients ? (
+                      <div className="p-4 flex items-center justify-center text-blue-600">
+                        <Loader2 className="animate-spin h-8 w-8" />
+                        <span className="ml-2 text-gray-600">
+                          Loading recipients...
+                        </span>
+                      </div>
+                    ) : seniorCitizens.length > 0 ? (
+                      seniorCitizens.map((citizen) => (
+                        <div
+                          key={citizen.id}
+                          className="px-4 py-2 border-b border-gray-200 last:border-b-0 flex items-center"
+                        >
+                          <input
+                            type="checkbox"
+                            id={`citizen-${citizen.id}`}
+                            checked={selectedRecipients.includes(citizen.id)}
+                            onChange={() => handleSelectRecipient(citizen.id)}
+                            className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                          />
+                          <label
+                            htmlFor={`citizen-${citizen.id}`}
+                            className="ml-2 flex-1"
+                          >
+                            <div className="text-sm font-medium text-gray-700">
+                              {citizen.name}
+                            </div>
+                            <div className="text-xs text-gray-500">
+                              {citizen.contact}
+                            </div>
+                          </label>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="p-4 text-center text-gray-500">
+                        No senior citizens found in this barangay.
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
-            </div>
 
-            {/* Compose Message */}
-            <div>
-              <h2 className="text-lg font-medium mb-4">Compose Message</h2>
-              <div className="space-y-4">
-                <div>
-                  <label
-                    htmlFor="template"
-                    className="block text-sm font-medium text-gray-700 mb-1"
-                  >
-                    Select Template (Optional)
-                  </label>
-                  <select
-                    id="template"
-                    value={selectedTemplateId}
-                    onChange={handleTemplateChange}
-                    className="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                  >
-                    <option value="">-- Select a template --</option>
-                    {templates.map((t) => (
-                      <option key={t.id} value={t.id}>
-                        {t.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label
-                    htmlFor="message"
-                    className="block text-sm font-medium text-gray-700 mb-1"
-                  >
-                    Message
-                  </label>
-                  <textarea
-                    id="message"
-                    rows={6}
-                    value={messageText}
-                    onChange={(e) => setMessageText(e.target.value)}
-                    placeholder="Type your message here..."
-                    className="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                  ></textarea>
-                  <p className="mt-2 text-sm text-gray-500 flex justify-between">
-                    <span></span>
-                    <span>{messageText.length} / 160 characters</span>
-                  </p>
-                </div>
-                <div className="flex justify-end">
-                  <Button
-                    variant="primary"
-                    onClick={handleSendMessage}
-                    disabled={
-                      selectedRecipients.length === 0 ||
-                      !messageText ||
-                      loadingPage
-                    }
-                    icon={<SendIcon className="h-4 w-4 mr-2" />}
-                  >
-                    {loadingPage ? "Sending..." : "Send Message"}
-                  </Button>
+              {/* Compose Message */}
+              <div>
+                <h2 className="text-lg font-medium mb-4">Compose Message</h2>
+                <div className="space-y-4">
+                  <div>
+                    <label
+                      htmlFor="template"
+                      className="block text-sm font-medium text-gray-700 mb-1"
+                    >
+                      Select Template (Optional)
+                    </label>
+                    <select
+                      id="template"
+                      value={selectedTemplateId}
+                      onChange={handleTemplateChange}
+                      className="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                    >
+                      <option value="">-- Select a template --</option>
+                      {templates.map((t) => (
+                        <option key={t.id} value={t.id}>
+                          {t.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label
+                      htmlFor="message"
+                      className="block text-sm font-medium text-gray-700 mb-1"
+                    >
+                      Message
+                    </label>
+                    <textarea
+                      id="message"
+                      rows={6}
+                      value={messageText}
+                      onChange={(e) => setMessageText(e.target.value)}
+                      placeholder="Type your message here..."
+                      className="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                    ></textarea>
+                    <p className="mt-2 text-sm text-gray-500 flex justify-between">
+                      <span></span>
+                      <span>{messageText.length} / 160 characters</span>
+                    </p>
+                  </div>
+                  <div className="flex justify-end">
+                    <Button
+                      variant="primary"
+                      onClick={handleSendMessage}
+                      disabled={
+                        selectedRecipients.length === 0 ||
+                        !messageText ||
+                        loadingPage
+                      }
+                      icon={<SendIcon className="h-4 w-4 mr-2" />}
+                    >
+                      {loadingPage ? "Sending..." : "Send Message"}
+                    </Button>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
+        )}
+        {activeTab === "history" && <MessageHistory />}
       </div>
     </div>
   );
