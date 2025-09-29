@@ -186,46 +186,21 @@ exports.getPaginatedSMSHistory = async (limit, offset, user) => {
   return { logs, total };
 };
 
-exports.getSmsCounts = async (user) => {
+exports.getSmsCounts = async () => {
   try {
-    let query;
-    let params = [];
+    const result = await Connection(`
+      SELECT 
+        SUM(CASE WHEN status = 'Success' THEN 1 ELSE 0 END) AS success_count,
+        SUM(CASE WHEN status = 'Failed' THEN 1 ELSE 0 END) AS failed_count,
+        SUM(CASE WHEN status = 'Pending' THEN 1 ELSE 0 END) AS pending_count,
+        COUNT(*) AS total
+      FROM sms_logs
+      WHERE MONTH(created_at) = MONTH(CURRENT_DATE())
+      AND YEAR(created_at) = YEAR(CURRENT_DATE())
+    `);
 
-    if (user && user.role?.toLowerCase() === "admin") {
-      // Admin → see ALL messages
-      query = `
-        SELECT 
-          SUM(CASE WHEN status = 'Success' THEN 1 ELSE 0 END) AS success_count,
-          SUM(CASE WHEN status = 'Failed' THEN 1 ELSE 0 END) AS failed_count,
-          SUM(CASE WHEN status = 'Pending' THEN 1 ELSE 0 END) AS pending_count,
-          COUNT(*) AS total
-        FROM sms_logs
-        WHERE created_at IS NOT NULL
-          AND MONTH(created_at) = MONTH(CURRENT_DATE())
-          AND YEAR(created_at) = YEAR(CURRENT_DATE())
-      `;
-    } else if (user && user.id) {
-      // Staff → only see their own messages
-      query = `
-        SELECT 
-          SUM(CASE WHEN status = 'Success' THEN 1 ELSE 0 END) AS success_count,
-          SUM(CASE WHEN status = 'Failed' THEN 1 ELSE 0 END) AS failed_count,
-          SUM(CASE WHEN status = 'Pending' THEN 1 ELSE 0 END) AS pending_count,
-          COUNT(*) AS total
-        FROM sms_logs
-        WHERE created_at IS NOT NULL
-          AND MONTH(created_at) = MONTH(CURRENT_DATE())
-          AND YEAR(created_at) = YEAR(CURRENT_DATE())
-          AND sent_by = ?
-      `;
-      params.push(user.id);
-    } else {
-      return { success_count: 0, failed_count: 0, pending_count: 0, total: 0 };
-    }
-
-    const [result] = await Connection(query, params);
     return (
-      result || {
+      result[0] || {
         success_count: 0,
         failed_count: 0,
         pending_count: 0,

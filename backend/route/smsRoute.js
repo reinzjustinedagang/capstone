@@ -5,10 +5,11 @@ const { isAuthenticated } = require("../middleware/authMiddleware");
 
 // ✅ Get SMS counts (success, failed, pending, total)
 router.get("/count", async (req, res) => {
+  const user = req.session.user;
   try {
-    const user = req.session.user;
-    const counts = await smsService.getSmsCounts(user);
+    const counts = await smsService.getSmsCounts();
     res.json(counts);
+    console.log(user);
   } catch (error) {
     console.error("Error fetching SMS counts:", error);
     res.status(500).json({ message: "Failed to fetch SMS counts" });
