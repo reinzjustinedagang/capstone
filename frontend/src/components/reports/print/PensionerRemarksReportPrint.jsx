@@ -115,7 +115,7 @@ const PensionerRemarksReportPrint = () => {
       onClick={handlePrint}
       className="w-full sm:w-auto flex justify-center"
     >
-      Print Pensioner & Remarks Report
+      Print
     </Button>
   );
 };

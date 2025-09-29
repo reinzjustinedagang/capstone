@@ -84,7 +84,7 @@ const BarangayReportPrint = () => {
         onClick={handlePrint}
         className="w-full sm:w-auto flex justify-center"
       >
-        Print Barangay Report
+        Print
       </Button>
 
       {/* The table is no longer rendered in the page */}

@@ -233,7 +233,7 @@ const MonthlySummaryReportPrint = () => {
           disabled={loading}
           className="self-end"
         >
-          {loading ? "Loading..." : "Print Monthly Summary"}
+          {loading ? "Loading..." : "Print"}
         </Button>
       </div>
 

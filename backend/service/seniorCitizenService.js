@@ -926,7 +926,7 @@ exports.getArchivedSeniorCitizens = async (options) => {
   if (reason && reason !== "All") {
     if (reason === "Other") {
       // Anything not in the predefined categories
-      where += ` AND sc.archive_reason NOT IN ('Deceased', 'Transferred', 'Deleted')`;
+      where += ` AND sc.archive_reason NOT IN ('Deceased', 'Transferred', 'Delete')`;
     } else {
       where += ` AND sc.archive_reason = ?`;
       params.push(reason);

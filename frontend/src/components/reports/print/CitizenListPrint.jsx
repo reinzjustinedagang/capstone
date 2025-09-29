@@ -134,7 +134,7 @@ const CitizenListPrint = () => {
           disabled={loading}
           className="self-end"
         >
-          {loading ? "Loading..." : "Print Citizens Report"}
+          {loading ? "Loading..." : "Print"}
         </Button>
       </div>
 
