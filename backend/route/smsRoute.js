@@ -1,6 +1,7 @@
 const express = require("express");
 const smsService = require("../service/smsService");
 const router = express.Router();
+const { isAuthenticated } = require("../middleware/authMiddleware");
 
 // ✅ Get SMS counts (success, failed, pending, total)
 router.get("/count", async (req, res) => {
