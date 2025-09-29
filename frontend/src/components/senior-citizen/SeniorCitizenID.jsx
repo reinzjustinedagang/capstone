@@ -160,7 +160,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     fontSize: 10,
     borderBottom: "1px solid #000",
-    paddingBottom: 6,
+    paddingBottom: 10,
     width: "100%",
   },
   benefitItem: {
@@ -190,7 +190,7 @@ const styles = StyleSheet.create({
     fontSize: 8,
     fontWeight: "bold",
     textAlign: "center",
-    marginBottom: 2,
+    marginBottom: 4,
   },
 
   designationText: {

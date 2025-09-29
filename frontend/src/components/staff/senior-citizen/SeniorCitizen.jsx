@@ -15,11 +15,14 @@ import Button from "../../UI/Button";
 import SeniorCitizenForm from "../../senior-citizen/form/SeniorCitizenForm";
 import UpdateSeniorCitizenForm from "../../senior-citizen/form/UpdateSeniorCitizenForm";
 import SeniorCitizenList from "../../senior-citizen/SeniorCitizenList";
+import SeniorCitizenID from "../../senior-citizen/SeniorCitizenID";
+import SeniorCitizenIDPDF from "../../senior-citizen/SeniorCitizenIDPDF";
 
 const SeniorCitizen = () => {
   const [activeTab, setActiveTab] = useState("list");
   const [selectedCitizenId, setSelectedCitizenId] = useState(null);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [selectedIDCitizen, setSelectedIDCitizen] = useState(null);
   const [showUpdateModal, setShowUpdateModal] = useState(false);
 
   const handleAddSuccess = () => {
@@ -35,6 +38,11 @@ const SeniorCitizen = () => {
   const handleEdit = (id) => {
     setSelectedCitizenId(id); // Set the ID of the benefit to be updated
     setActiveTab("update"); // Switch to the update tab
+  };
+
+  const handleId = (citizen) => {
+    setSelectedIDCitizen(citizen);
+    setActiveTab("id");
   };
 
   return (
@@ -68,7 +76,9 @@ const SeniorCitizen = () => {
       </div>
 
       <div className="bg-white rounded-lg shadow overflow-hidden">
-        {activeTab === "list" && <SeniorCitizenList onEdit={handleEdit} />}
+        {activeTab === "list" && (
+          <SeniorCitizenList onEdit={handleEdit} onId={handleId} />
+        )}
 
         {activeTab === "update" && (
           <UpdateSeniorCitizenForm
@@ -84,6 +94,15 @@ const SeniorCitizen = () => {
             onSuccess={handleAddSuccess}
             onCancel={() => {
               setActiveTab("list");
+            }}
+          />
+        )}
+        {activeTab === "id" && (
+          <SeniorCitizenIDPDF
+            citizen={selectedIDCitizen}
+            onSuccess={handleUpdateSuccess}
+            onCancel={() => {
+              setActiveTab("unregistered");
             }}
           />
         )}
