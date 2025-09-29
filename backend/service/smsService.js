@@ -4,16 +4,17 @@ const { logAudit } = require("./auditService");
 const bcrypt = require("bcrypt");
 
 exports.sendSMS = async (message, recipients, options = {}, user) => {
+  let validRecipients = [];
   try {
     const [credentials] = await Connection(
       "SELECT * FROM sms_credentials LIMIT 1"
     );
     if (!credentials) throw new Error("SMS credentials not found.");
 
-    // ✅ Filter out null/empty/invalid numbers
-    const validRecipients = (recipients || []).filter(
+    validRecipients = (recipients || []).filter(
       (num) => num && num.toString().trim() !== ""
     );
+
     if (validRecipients.length === 0) {
       throw new Error("No valid recipients to send SMS.");
     }
@@ -44,14 +45,14 @@ exports.sendSMS = async (message, recipients, options = {}, user) => {
       for (const log of logs) {
         await Connection(
           `INSERT INTO sms_logs (recipients, message, status, reference_id, credit_used, sent_by)
-           VALUES (?, ?, ?, ?, ?, ?)`,
+            VALUES (?, ?, ?, ?, ?, ?)`,
           [
-            log.recipient,
-            log.message,
+            JSON.stringify(validRecipients), // cleaned list only
+            message,
             log.status === "Pending" ? "Success" : log.status,
             log.message_id || null,
             log.credits_used || 0,
-            user.id,
+            user?.id || null,
           ]
         );
       }
@@ -59,18 +60,27 @@ exports.sendSMS = async (message, recipients, options = {}, user) => {
 
     return { success: true, response: logs };
   } catch (error) {
-    console.error("Error sending SMS:", error);
+    console.error("Error sending SMS:", error?.response?.data || error.message);
 
-    // ✅ Only log if NOT OTP (skipLogging flag is false)
     if (!options.skipLogging) {
       await Connection(
-        `INSERT INTO sms_logs (recipients, message, status, reference_id, credit_used)
-         VALUES (?, ?, ?, ?, ?)`,
-        [JSON.stringify(recipients), message, "Failed", null, 0]
+        `INSERT INTO sms_logs (recipients, message, status, reference_id, credit_used, sent_by)
+       VALUES (?, ?, ?, ?, ?, ?)`,
+        [
+          JSON.stringify(validRecipients), // clean recipients
+          message,
+          "Failed",
+          null,
+          0,
+          user?.id || null,
+        ]
       );
     }
 
-    return { success: false, response: error.message };
+    return {
+      success: false,
+      response: error?.response?.data || { message: error.message },
+    };
   }
 };
 
@@ -181,7 +191,8 @@ exports.getSmsCounts = async (user) => {
     let query;
     let params = [];
 
-    if (user && user.role === "admin") {
+    if (user && user.role?.toLowerCase() === "admin") {
+      // Admin → see ALL messages
       query = `
         SELECT 
           SUM(CASE WHEN status = 'Success' THEN 1 ELSE 0 END) AS success_count,
@@ -189,10 +200,12 @@ exports.getSmsCounts = async (user) => {
           SUM(CASE WHEN status = 'Pending' THEN 1 ELSE 0 END) AS pending_count,
           COUNT(*) AS total
         FROM sms_logs
-        WHERE MONTH(created_at) = MONTH(CURRENT_DATE())
+        WHERE created_at IS NOT NULL
+          AND MONTH(created_at) = MONTH(CURRENT_DATE())
           AND YEAR(created_at) = YEAR(CURRENT_DATE())
       `;
     } else if (user && user.id) {
+      // Staff → only see their own messages
       query = `
         SELECT 
           SUM(CASE WHEN status = 'Success' THEN 1 ELSE 0 END) AS success_count,
@@ -200,7 +213,8 @@ exports.getSmsCounts = async (user) => {
           SUM(CASE WHEN status = 'Pending' THEN 1 ELSE 0 END) AS pending_count,
           COUNT(*) AS total
         FROM sms_logs
-        WHERE MONTH(created_at) = MONTH(CURRENT_DATE())
+        WHERE created_at IS NOT NULL
+          AND MONTH(created_at) = MONTH(CURRENT_DATE())
           AND YEAR(created_at) = YEAR(CURRENT_DATE())
           AND sent_by = ?
       `;

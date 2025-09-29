@@ -19,7 +19,7 @@ router.post("/send-sms", async (req, res) => {
   const { number, numbers, message } = req.body;
   const user = req.session.user;
   const recipients = numbers || (number ? [number] : null);
-
+  console.log(user);
   if (
     !recipients ||
     !Array.isArray(recipients) ||
