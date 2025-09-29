@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import Modal from "../../components/UI/Modal";
-import Header from "../../components/startPage/Header";
+import Header from "../../components/startPage/layout/Header";
 
 export const HomeBenefitsPage = () => {
   const backendUrl = import.meta.env.VITE_API_BASE_URL;
@@ -29,7 +29,6 @@ export const HomeBenefitsPage = () => {
 
   return (
     <>
-      <Header />
       <div className="bg-white py-10">
         <div className="max-w-6xl mx-auto px-5 lg:px-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-8 text-center">

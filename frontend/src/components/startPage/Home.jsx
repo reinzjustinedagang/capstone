@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
 import RegistrationBanner from "./home/RegistrationBanner";
 import Events from "./home/Events";
-import Header from "./Header";
+import Header from "./layout/Header";
 import Slideshow from "./home/Slideshow";
-import Footer from "./Footer";
+import Footer from "./layout/Footer";
 import slider5 from "../../assets/slider5.jpg";
 import Benefits from "./home/Benefits";
 import RepublicActs from "./home/RepublicActs";
@@ -16,14 +16,12 @@ const Home = () => {
         <div className="absolute w-72 h-72 bg-purple-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob top-1/4 left-1/4 transform -translate-x-1/2 -translate-y-1/2"></div>
         <div className="absolute w-64 h-64 bg-pink-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000 bottom-1/4 right-1/4 transform translate-x-1/2 -translate-y-1/2"></div>
       </div>
-      <Header />
 
       <Slideshow />
       <RegistrationBanner />
       <RepublicActs />
       <Benefits />
       <Events />
-      <Footer />
     </div>
   );
 };

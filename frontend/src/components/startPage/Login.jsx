@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import Header from "./Header";
+import Header from "./layout/Header";
 import { useNavigate, Link } from "react-router-dom";
 import { LogIn, Loader2, EyeIcon, EyeOffIcon, Lock } from "lucide-react";
 import axios from "axios";

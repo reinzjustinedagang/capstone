@@ -54,124 +54,128 @@ import { HomeBenefitsPage } from "./pages/public/HomeBenefitsPage.jsx";
 import { StaffReportsPage } from "./pages/staff/StaffReportsPage.jsx";
 import StaffLayout from "./components/staff/layout/StaffLayout.jsx";
 import Layout from "./components/layouts/Layout.jsx";
+import LandingLayout from "./components/startPage/layout/LandingLayout.jsx";
 
 function App() {
   return (
     <Routes>
       {/* Public Routes */}
+      <Route element={<LandingLayout />}>
+        <Route
+          path="/"
+          element={
+            <PublicOnlyRoute>
+              <HomePage />
+            </PublicOnlyRoute>
+          }
+        />
+        <Route
+          path="/republic-acts"
+          element={
+            <PublicOnlyRoute>
+              <RepublicActsPage />
+            </PublicOnlyRoute>
+          }
+        />
+        <Route
+          path="/events"
+          element={
+            <PublicOnlyRoute>
+              <HomeEventPage />
+            </PublicOnlyRoute>
+          }
+        />
+        <Route
+          path="/benefits"
+          element={
+            <PublicOnlyRoute>
+              <HomeBenefitsPage />
+            </PublicOnlyRoute>
+          }
+        />
+        <Route
+          path="/organization"
+          element={
+            <PublicOnlyRoute>
+              <OrganizationPage />
+            </PublicOnlyRoute>
+          }
+        />
+        <Route
+          path="/about"
+          element={
+            <PublicOnlyRoute>
+              <AboutPage />
+            </PublicOnlyRoute>
+          }
+        />
+        <Route
+          path="/developer"
+          element={
+            <PublicOnlyRoute>
+              <DeveloperPage />
+            </PublicOnlyRoute>
+          }
+        />
+        <Route
+          path="/login"
+          element={
+            <PublicOnlyRoute>
+              <LoginPage />
+            </PublicOnlyRoute>
+          }
+        />
+        <Route
+          path="/register"
+          element={
+            <PublicOnlyRoute>
+              <RegisterPage />
+            </PublicOnlyRoute>
+          }
+        />
+        <Route
+          path="/register-senior"
+          element={
+            <PublicOnlyRoute>
+              <RegisterSeniorPage />
+            </PublicOnlyRoute>
+          }
+        />
+        <Route
+          path="/register-guide"
+          element={
+            <PublicOnlyRoute>
+              <GuidePage />
+            </PublicOnlyRoute>
+          }
+        />
+        <Route
+          path="/forgot-password"
+          element={
+            <PublicOnlyRoute>
+              <ForgotPasswordPage />
+            </PublicOnlyRoute>
+          }
+        />
+        <Route
+          path="/verify-otp"
+          element={
+            <PublicOnlyRoute>
+              <VerifyOTPPage />
+            </PublicOnlyRoute>
+          }
+        />
+        <Route
+          path="/reset-password"
+          element={
+            <PublicOnlyRoute>
+              <ResetPasswordPage />
+            </PublicOnlyRoute>
+          }
+        />
+      </Route>
 
-      <Route
-        path="/"
-        element={
-          <PublicOnlyRoute>
-            <HomePage />
-          </PublicOnlyRoute>
-        }
-      />
-      <Route
-        path="/republic-acts"
-        element={
-          <PublicOnlyRoute>
-            <RepublicActsPage />
-          </PublicOnlyRoute>
-        }
-      />
-      <Route
-        path="/events"
-        element={
-          <PublicOnlyRoute>
-            <HomeEventPage />
-          </PublicOnlyRoute>
-        }
-      />
-      <Route
-        path="/benefits"
-        element={
-          <PublicOnlyRoute>
-            <HomeBenefitsPage />
-          </PublicOnlyRoute>
-        }
-      />
-      <Route
-        path="/organization"
-        element={
-          <PublicOnlyRoute>
-            <OrganizationPage />
-          </PublicOnlyRoute>
-        }
-      />
-      <Route
-        path="/about"
-        element={
-          <PublicOnlyRoute>
-            <AboutPage />
-          </PublicOnlyRoute>
-        }
-      />
-      <Route
-        path="/login"
-        element={
-          <PublicOnlyRoute>
-            <LoginPage />
-          </PublicOnlyRoute>
-        }
-      />
-      <Route
-        path="/register"
-        element={
-          <PublicOnlyRoute>
-            <RegisterPage />
-          </PublicOnlyRoute>
-        }
-      />
-      <Route
-        path="/register-senior"
-        element={
-          <PublicOnlyRoute>
-            <RegisterSeniorPage />
-          </PublicOnlyRoute>
-        }
-      />
-      <Route
-        path="/register-guide"
-        element={
-          <PublicOnlyRoute>
-            <GuidePage />
-          </PublicOnlyRoute>
-        }
-      />
-      <Route
-        path="/forgot-password"
-        element={
-          <PublicOnlyRoute>
-            <ForgotPasswordPage />
-          </PublicOnlyRoute>
-        }
-      />
-      <Route
-        path="/verify-otp"
-        element={
-          <PublicOnlyRoute>
-            <VerifyOTPPage />
-          </PublicOnlyRoute>
-        }
-      />
-      <Route
-        path="/reset-password"
-        element={
-          <PublicOnlyRoute>
-            <ResetPasswordPage />
-          </PublicOnlyRoute>
-        }
-      />
-      <Route
-        path="/developer"
-        element={
-          <PublicOnlyRoute>
-            <DeveloperPage />
-          </PublicOnlyRoute>
-        }
-      />
+      {/* Auth-related routes (no Header/Footer needed) */}
 
       {/* Admin Routes */}
       <Route

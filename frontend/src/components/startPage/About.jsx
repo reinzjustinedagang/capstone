@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import Header from "./Header";
-import Footer from "./Footer";
+import Header from "./layout/Header";
+import Footer from "./layout/Footer";
 import user from "../../assets/user.png";
 import { Loader2 } from "lucide-react";
 
@@ -45,8 +45,6 @@ const About = () => {
 
   return (
     <div>
-      <Header />
-
       <div>
         {/* Section Header */}
         <div className="w-full text-center px-5 py-5 md:px-8 lg:px-25">
@@ -193,8 +191,6 @@ const About = () => {
           </div>
         </div>
       </div>
-
-      <Footer />
     </div>
   );
 };

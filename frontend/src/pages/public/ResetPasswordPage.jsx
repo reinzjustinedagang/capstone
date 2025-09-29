@@ -1,12 +1,11 @@
 import React from "react";
-import Header from "../../components/startPage/Header";
+import Header from "../../components/startPage/layout/Header";
 import ResetPassword from "../../components/startPage/ResetPassword";
-import Footer from "../../components/startPage/Footer";
+import Footer from "../../components/startPage/layout/Footer";
 
 export const ResetPasswordPage = () => {
   return (
     <div>
-      <Header />
       <ResetPassword />
     </div>
   );

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { BookOpenTextIcon } from "lucide-react";
 import Modal from "../../components/UI/Modal";
-import Header from "../../components/startPage/Header";
+import Header from "../../components/startPage/layout/Header";
 
 export const RepublicActsPage = () => {
   const backendUrl = import.meta.env.VITE_API_BASE_URL;
@@ -29,7 +29,6 @@ export const RepublicActsPage = () => {
 
   return (
     <>
-      <Header />
       <div className="bg-white py-10">
         <div className="max-w-6xl mx-auto px-5 lg:px-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-8 text-center">

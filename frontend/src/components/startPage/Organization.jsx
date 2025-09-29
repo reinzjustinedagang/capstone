@@ -1,8 +1,8 @@
 import React from "react";
 import { Pie } from "react-chartjs-2";
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
-import Header from "./Header";
-import Footer from "./Footer";
+import Header from "./layout/Header";
+import Footer from "./layout/Footer";
 import OrgChart from "./organization/OrgChart";
 import MunicipalOfficials from "./organization/MunicipalOfficials";
 import BarangayOfficials from "./organization/BarangayOfficials";
@@ -11,8 +11,6 @@ import BarangayDistribution from "../reports/chart/BarangayDistribution";
 const Organization = () => {
   return (
     <div>
-      <Header />
-
       {/* Section Header */}
       <div className="text-center px-5 py-6 md:px-25 ">
         <h2 className="text-3xl font-bold text-gray-900">Organization</h2>
@@ -61,8 +59,6 @@ const Organization = () => {
         </h3>
         <BarangayDistribution />
       </div>
-
-      <Footer />
     </div>
   );
 };
