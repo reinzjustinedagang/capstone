@@ -7,8 +7,9 @@ const { isAuthenticated } = require("../middleware/authMiddleware");
 
 // GET benefit counts
 router.get("/count/all", async (req, res) => {
+  const user = req.session.user;
   try {
-    const count = await benefitService.getBenefitsCounts();
+    const count = await benefitService.getBenefitsCounts(user);
     res.json({ count });
   } catch (error) {
     console.error("Error fetching benefit count:", error);

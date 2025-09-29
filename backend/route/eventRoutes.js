@@ -6,12 +6,13 @@ const cloudinary = require("../utils/cloudinary");
 const { isAuthenticated } = require("../middleware/authMiddleware");
 
 router.get("/count/all", async (req, res) => {
+  const user = req.session.user;
   try {
-    const count = await eventService.getEventCount();
+    const count = await eventService.getEventCount(user);
     res.json({ count });
   } catch (error) {
-    console.error("Error fetching user count:", error);
-    res.status(500).json({ message: "Failed to fetch user count" });
+    console.error("Error fetching event count:", error);
+    res.status(500).json({ message: "Failed to fetch event count" });
   }
 });
 

@@ -6,11 +6,22 @@ const {
   deleteLocalImage,
 } = require("../utils/serviceHelpers");
 
-exports.getBenefitsCounts = async () => {
-  const [result] = await Connection(
-    "SELECT COUNT(*) AS count FROM benefits WHERE type != 'republic-acts' AND approved = 1"
-  );
-  return result.count;
+exports.getBenefitsCounts = async (user) => {
+  if (user && user.role === "admin") {
+    const [result] = await Connection(
+      "SELECT COUNT(*) AS count FROM benefits WHERE type != 'republic-acts' AND approved = 1"
+    );
+    return result.count;
+  } else if (user) {
+    const [result] = await Connection(
+      "SELECT COUNT(*) AS count FROM benefits WHERE type != 'republic-acts' AND approved = 1 AND created_by = ?",
+      [user.id]
+    );
+    return result.count;
+  } else {
+    // no session user
+    return 0;
+  }
 };
 
 exports.getThreeRa = async () => {
