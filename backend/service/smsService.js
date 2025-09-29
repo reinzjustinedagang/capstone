@@ -150,10 +150,11 @@ exports.updateSmsCredentials = async (api_key, sender_id, user, ip) => {
 exports.getPaginatedSMSHistory = async (limit, offset, user) => {
   let logs, totalResult;
 
-  if (user && user.role === "admin") {
+  if (user && user.role?.toLowerCase() === "admin") {
+    // Admin → see all SMS logs
     logs = await Connection(
       `
-      SELECT id, recipients, message, status, reference_id, credit_used, created_at
+      SELECT id, recipients, message, status, reference_id, credit_used, created_at, sent_by
       FROM sms_logs
       ORDER BY created_at DESC
       LIMIT ? OFFSET ?
@@ -163,9 +164,10 @@ exports.getPaginatedSMSHistory = async (limit, offset, user) => {
 
     totalResult = await Connection(`SELECT COUNT(*) AS total FROM sms_logs`);
   } else if (user && user.id) {
+    // Staff → only see their SMS logs
     logs = await Connection(
       `
-      SELECT id, recipients, message, status, reference_id, credit_used, created_at
+      SELECT id, recipients, message, status, reference_id, credit_used, created_at, sent_by
       FROM sms_logs
       WHERE sent_by = ?
       ORDER BY created_at DESC
@@ -186,21 +188,44 @@ exports.getPaginatedSMSHistory = async (limit, offset, user) => {
   return { logs, total };
 };
 
-exports.getSmsCounts = async () => {
+exports.getSmsCounts = async (user) => {
   try {
-    const result = await Connection(`
-      SELECT 
-        SUM(CASE WHEN status = 'Success' THEN 1 ELSE 0 END) AS success_count,
-        SUM(CASE WHEN status = 'Failed' THEN 1 ELSE 0 END) AS failed_count,
-        SUM(CASE WHEN status = 'Pending' THEN 1 ELSE 0 END) AS pending_count,
-        COUNT(*) AS total
-      FROM sms_logs
-      WHERE MONTH(created_at) = MONTH(CURRENT_DATE())
-      AND YEAR(created_at) = YEAR(CURRENT_DATE())
-    `);
+    let query;
+    let params = [];
 
+    if (user && user.role?.toLowerCase() === "admin") {
+      // Admin → all messages
+      query = `
+        SELECT 
+          SUM(CASE WHEN status = 'Success' THEN 1 ELSE 0 END) AS success_count,
+          SUM(CASE WHEN status = 'Failed' THEN 1 ELSE 0 END) AS failed_count,
+          SUM(CASE WHEN status = 'Pending' THEN 1 ELSE 0 END) AS pending_count,
+          COUNT(*) AS total
+        FROM sms_logs
+        WHERE MONTH(created_at) = MONTH(CURRENT_DATE())
+          AND YEAR(created_at) = YEAR(CURRENT_DATE())
+      `;
+    } else if (user && user.id) {
+      // Staff → only their messages
+      query = `
+        SELECT 
+          SUM(CASE WHEN status = 'Success' THEN 1 ELSE 0 END) AS success_count,
+          SUM(CASE WHEN status = 'Failed' THEN 1 ELSE 0 END) AS failed_count,
+          SUM(CASE WHEN status = 'Pending' THEN 1 ELSE 0 END) AS pending_count,
+          COUNT(*) AS total
+        FROM sms_logs
+        WHERE MONTH(created_at) = MONTH(CURRENT_DATE())
+          AND YEAR(created_at) = YEAR(CURRENT_DATE())
+          AND sent_by = ?
+      `;
+      params.push(user.id);
+    } else {
+      return { success_count: 0, failed_count: 0, pending_count: 0, total: 0 };
+    }
+
+    const [result] = await Connection(query, params);
     return (
-      result[0] || {
+      result || {
         success_count: 0,
         failed_count: 0,
         pending_count: 0,

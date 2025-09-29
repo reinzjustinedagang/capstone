@@ -4,12 +4,11 @@ const router = express.Router();
 const { isAuthenticated } = require("../middleware/authMiddleware");
 
 // ✅ Get SMS counts (success, failed, pending, total)
-router.get("/count", async (req, res) => {
+router.get("/count", isAuthenticated, async (req, res) => {
   const user = req.session.user;
   try {
-    const counts = await smsService.getSmsCounts();
+    const counts = await smsService.getSmsCounts(user);
     res.json(counts);
-    console.log(user);
   } catch (error) {
     console.error("Error fetching SMS counts:", error);
     res.status(500).json({ message: "Failed to fetch SMS counts" });
@@ -17,7 +16,7 @@ router.get("/count", async (req, res) => {
 });
 
 // ✅ Send SMS to one or multiple numbers
-router.post("/send-sms", async (req, res) => {
+router.post("/send-sms", isAuthenticated, async (req, res) => {
   const { number, numbers, message } = req.body;
   const user = req.session.user;
   const recipients = numbers || (number ? [number] : null);
@@ -73,7 +72,7 @@ router.delete("/delete/:id", async (req, res) => {
 });
 
 // GET paginated SMS history
-router.get("/history", async (req, res) => {
+router.get("/history", isAuthenticated, async (req, res) => {
   try {
     const user = req.session.user;
     const page = parseInt(req.query.page) || 1;
@@ -85,6 +84,7 @@ router.get("/history", async (req, res) => {
       offset,
       user
     );
+
     res.json({ logs, total });
   } catch (error) {
     console.error("Error fetching SMS history:", error);
