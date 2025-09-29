@@ -118,6 +118,7 @@ export default function ForgotPassword() {
               value={cpNumber}
               onChange={(e) => setCpNumber(e.target.value)}
               placeholder="e.g., 09123456789"
+              maxLength={11}
               className="block w-full rounded-lg border border-gray-300 px-4 py-2.5 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:border-transparent text-base transition-all duration-200"
             />
           </div>

@@ -5,7 +5,8 @@ const router = express.Router();
 // ✅ Get SMS counts (success, failed, pending, total)
 router.get("/count", async (req, res) => {
   try {
-    const counts = await smsService.getSmsCounts();
+    const user = req.session.user;
+    const counts = await smsService.getSmsCounts(user);
     res.json(counts);
   } catch (error) {
     console.error("Error fetching SMS counts:", error);
@@ -72,13 +73,15 @@ router.delete("/delete/:id", async (req, res) => {
 // GET paginated SMS history
 router.get("/history", async (req, res) => {
   try {
+    const user = req.session.user;
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
     const offset = (page - 1) * limit;
 
     const { logs, total } = await smsService.getPaginatedSMSHistory(
       limit,
-      offset
+      offset,
+      user
     );
     res.json({ logs, total });
   } catch (error) {

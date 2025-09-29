@@ -58,17 +58,14 @@ export default function VerifyOTP() {
       await new Promise((resolve) => setTimeout(resolve, 1500)); // Simulate API call delay
 
       // Simulate successful verification
-      if (otp === "123456") {
-        // Example OTP for testing
-        setSuccessMessage(
-          "OTP verified successfully! Redirecting to reset password..."
-        );
-        localStorage.removeItem("recoveryCpNumber"); // Clear after successful verification
-        setTimeout(() => {
-          navigate("/reset-password"); // Proceed to password reset page
-        }, 2000); // Navigate after 2 seconds
+      if (response.data.success) {
+        setSuccessMessage("OTP verified successfully! Redirecting...");
+
+        // ✅ Save verified flag
+        localStorage.setItem("otpVerified", "true");
+        setTimeout(() => navigate("/reset-password"), 1500);
       } else {
-        setError("Invalid OTP. Please try again.");
+        setError(response.data.message || "Invalid OTP");
       }
     } catch (err) {
       console.error("OTP verification error:", err);

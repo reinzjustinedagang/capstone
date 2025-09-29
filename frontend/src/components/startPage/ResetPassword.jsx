@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Lock, Loader2, Eye, EyeOff } from "lucide-react";
 import axios from "axios";
@@ -6,6 +6,7 @@ import axios from "axios";
 export default function ResetPassword() {
   const navigate = useNavigate();
   const cpNumber = localStorage.getItem("recoveryCpNumber");
+  const otpVerified = localStorage.getItem("otpVerified"); // ✅ add this
 
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -17,6 +18,13 @@ export default function ResetPassword() {
 
   const backendUrl =
     import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
+
+  useEffect(() => {
+    // 🚫 Block access if OTP was not verified
+    if (!cpNumber || otpVerified !== "true") {
+      navigate("/forgot-password");
+    }
+  }, [cpNumber, otpVerified, navigate]);
 
   // 🔑 Password strength checker
   const checkStrength = (password) => {
@@ -69,6 +77,7 @@ export default function ResetPassword() {
       if (response.data.success) {
         setSuccessMessage("Password reset successfully! Redirecting...");
         localStorage.removeItem("recoveryCpNumber");
+        localStorage.removeItem("otpVerified"); // ✅ clear flag
         setTimeout(() => navigate("/login"), 2000);
       } else {
         setError(response.data.message || "Failed to reset password");
