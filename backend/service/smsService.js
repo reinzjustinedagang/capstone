@@ -3,7 +3,7 @@ const Connection = require("../db/Connection");
 const { logAudit } = require("./auditService");
 const bcrypt = require("bcrypt");
 
-exports.sendSMS = async (message, recipients, options = {}, user) => {
+exports.sendSMS = async (message, recipients, user, options = {}) => {
   let validRecipients = [];
   try {
     const [credentials] = await Connection(
