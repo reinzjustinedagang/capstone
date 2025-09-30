@@ -189,7 +189,7 @@ const SeniorCitizenList = ({ onEdit, onId }) => {
     setSearchTerm("");
     setFilterBarangay("All Barangays");
     setFilterHealthStatus("All Remarks");
-    setFilterPensioner("All Pensioner");
+    setFilterPensioner("All Pensions");
     setFilterAge("All");
     setFilterGender("All");
     setShowFilters(false);
@@ -206,6 +206,8 @@ const SeniorCitizenList = ({ onEdit, onId }) => {
     "90 - 99",
     "100 - 100+",
   ];
+
+  const pensionOptions = ["All Pensions", "GSIS", "SSS", "PVAO", "PWD", "NONE"];
 
   // Effects
   useEffect(() => {
@@ -254,6 +256,7 @@ const SeniorCitizenList = ({ onEdit, onId }) => {
           genderOptions={genderOptions}
           barangayOptions={barangayOptions}
           healthStatusOptions={healthStatusOptions}
+          pensionOptions={pensionOptions}
         />
 
         {/* Table */}

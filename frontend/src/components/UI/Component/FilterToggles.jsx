@@ -11,7 +11,8 @@ const FilterToggles = ({
     filters.filterBarangay !== "All Barangays" ||
     filters.filterHealthStatus !== "All Remarks" ||
     filters.filterAge !== "All" ||
-    filters.filterGender !== "All";
+    filters.filterGender !== "All" ||
+    filters.filterPensioner !== "All Pensions";
 
   return (
     <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4 space-y-2 sm:space-y-0">

@@ -28,10 +28,13 @@ const AdvancedFilters = ({
   setFilterBarangay,
   filterHealthStatus,
   setFilterHealthStatus,
+  filterPensioner,
+  setFilterPensioner,
   AgeOptions,
   genderOptions,
   barangayOptions,
   healthStatusOptions,
+  pensionOptions,
 }) => (
   <div className="grid grid-cols-4 md:grid-cols-5 gap-4 pt-2 border-t border-gray-200">
     <SelectFilter
@@ -57,6 +60,12 @@ const AdvancedFilters = ({
       value={filterHealthStatus}
       onChange={setFilterHealthStatus}
       options={healthStatusOptions}
+    />
+    <SelectFilter
+      label="Pension"
+      value={filterPensioner}
+      onChange={setFilterPensioner}
+      options={pensionOptions}
     />
   </div>
 );
