@@ -44,9 +44,10 @@ const OscaReportsChart = () => {
         <h2 className="text-lg font-medium mb-4">Printable Reports</h2>
 
         <div className="bg-white rounded-lg shadow overflow-hidden">
+          {/* Horizontal scroll on small screens */}
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200 table-fixed">
-              <thead className="bg-gray-50">
+            <table className="min-w-full divide-y divide-gray-200 table-auto">
+              <thead className="bg-gray-50 hidden sm:table-header-group">
                 <tr>
                   <th className="w-3/4 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Report Name
@@ -56,44 +57,75 @@ const OscaReportsChart = () => {
                   </th>
                 </tr>
               </thead>
+
               <tbody className="bg-white divide-y divide-gray-200">
-                <tr className="hover:bg-gray-50">
+                {/* Row */}
+                <tr className="hover:bg-gray-50 flex flex-col sm:table-row">
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                    <span className="sm:hidden block text-xs font-semibold text-gray-500 mb-1">
+                      Report Name
+                    </span>
                     Barangay Demographic Report
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    <div className="flex justify-end">
+                    <span className="sm:hidden block text-xs font-semibold text-gray-500 mb-1">
+                      Actions
+                    </span>
+                    <div className="flex justify-end sm:justify-center">
                       <BarangayReportPrint />
                     </div>
                   </td>
                 </tr>
-                <tr className="hover:bg-gray-50">
+
+                {/* Row */}
+                <tr className="hover:bg-gray-50 flex flex-col sm:table-row">
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                    <span className="sm:hidden block text-xs font-semibold text-gray-500 mb-1">
+                      Report Name
+                    </span>
                     Pensioner and Remarks Report
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    <div className="flex justify-end">
+                    <span className="sm:hidden block text-xs font-semibold text-gray-500 mb-1">
+                      Actions
+                    </span>
+                    <div className="flex justify-end sm:justify-center">
                       <PensionerRemarksReportPrint />
                     </div>
                   </td>
                 </tr>
-                <tr className="hover:bg-gray-50">
+
+                {/* Row */}
+                <tr className="hover:bg-gray-50 flex flex-col sm:table-row">
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                    Monthly Summary Report
+                    <span className="sm:hidden block text-xs font-semibold text-gray-500 mb-1">
+                      Report Name
+                    </span>
+                    Annual Summary Report
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    <div className="flex justify-end">
+                    <span className="sm:hidden block text-xs font-semibold text-gray-500 mb-1">
+                      Actions
+                    </span>
+                    <div className="flex justify-end sm:justify-center">
                       <MonthlySummaryReportPrint />
                     </div>
                   </td>
                 </tr>
 
-                <tr className="hover:bg-gray-50">
+                {/* Row */}
+                <tr className="hover:bg-gray-50 flex flex-col sm:table-row">
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                    <span className="sm:hidden block text-xs font-semibold text-gray-500 mb-1">
+                      Report Name
+                    </span>
                     Senior Citizen List Report
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    <div className="flex justify-end">
+                    <span className="sm:hidden block text-xs font-semibold text-gray-500 mb-1">
+                      Actions
+                    </span>
+                    <div className="flex justify-end sm:justify-center">
                       <CitizenListPrint />
                     </div>
                   </td>

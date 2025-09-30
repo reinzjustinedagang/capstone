@@ -108,7 +108,7 @@ const MonthlySummaryReportPrint = () => {
     newWindow.document.write(`
       <html>
         <head>
-          <title>Monthly Summary Report ${year}</title>
+          <title>Annual Summary Report ${year}</title>
           <style>
             body { 
               font-family: Arial, sans-serif; 
@@ -246,7 +246,7 @@ const MonthlySummaryReportPrint = () => {
             className="report-title"
             style={{ fontSize: 24, fontWeight: "bold", marginBottom: 10 }}
           >
-            MONTHLY SUMMARY REPORT
+            Annual Summary Report
           </div>
           <div className="report-year" style={{ fontSize: 18, color: "#666" }}>
             {year}

@@ -68,8 +68,22 @@ const BookletReportsChart = () => {
             data={chartData}
             options={{
               responsive: true,
-              maintainAspectRatio: false, // fill the h-96 container
-              plugins: { legend: { position: "bottom" } },
+              maintainAspectRatio: false,
+              layout: {
+                padding: {
+                  top: 30, // 👈 extra space above chart
+                },
+              }, // fill the h-96 container
+              plugins: {
+                legend: { position: "bottom" },
+                datalabels: {
+                  display: (context) =>
+                    context.dataset.data[context.dataIndex] !== 0,
+                  anchor: "end",
+                  align: "top",
+                  formatter: (value) => value,
+                },
+              },
               scales: {
                 x: {
                   stacked: false,

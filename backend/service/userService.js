@@ -301,7 +301,7 @@ exports.register = async (
       `SELECT * FROM dev_keys 
        WHERE \`key\` = ? 
        AND used = 0
-       AND created_at >= NOW() - INTERVAL 5 MINUTE
+       AND created_at >= NOW() - INTERVAL 10 MINUTE
        LIMIT 1`,
       [devKey]
     );

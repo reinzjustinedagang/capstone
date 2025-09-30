@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import Card from "../../UI/Card";
-import { NavLink } from "react-router-dom";
+import { NavLink, useLocation } from "react-router-dom";
 import {
   UsersIcon,
   MessageSquareIcon,
@@ -21,6 +21,21 @@ const Dashboard = () => {
   const [benefitsCount, setBenefitsCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const backendUrl = import.meta.env.VITE_API_BASE_URL;
+  const location = useLocation();
+  const [showLoginNotification, setShowLoginNotification] = useState(false);
+
+  useEffect(() => {
+    if (location.state?.loginSuccess) {
+      setShowLoginNotification(true);
+
+      // Auto hide after 3 seconds
+      const timer = setTimeout(() => setShowLoginNotification(false), 3000);
+
+      // Clear state so it doesn’t persist on refresh
+      window.history.replaceState({}, document.title);
+      return () => clearTimeout(timer);
+    }
+  }, [location]);
 
   const fetchEventsCount = async () => {
     try {
@@ -114,6 +129,11 @@ const Dashboard = () => {
 
   return (
     <>
+      {showLoginNotification && (
+        <div className="mb-4 p-3 rounded-lg bg-green-100 border border-green-400 text-green-700">
+          ✅ Login successful! Welcome back.
+        </div>
+      )}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <NavLink to="/staff/senior-citizen-list">
           <Card

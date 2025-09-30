@@ -213,6 +213,17 @@ const MyProfile = () => {
     }
   };
 
+  const checkPasswordStrength = (password) => {
+    const strongRegex =
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    const mediumRegex =
+      /^(((?=.*[a-z])(?=.*[A-Z]))|((?=.*[a-z])(?=.*\d))|((?=.*[A-Z])(?=.*\d)))(?=.{8,})/;
+
+    if (strongRegex.test(password)) return "strong";
+    if (mediumRegex.test(password)) return "medium";
+    return "weak";
+  };
+
   // Handler for changing password (triggers confirmation)
   const handleChangePassword = async (e) => {
     e.preventDefault();
@@ -220,6 +231,16 @@ const MyProfile = () => {
       showNotification("All password fields are required.", "error");
       return;
     }
+
+    if (checkPasswordStrength(newPassword) === "weak") {
+      showNotification(
+        "New password must be at least medium strength.",
+        "error"
+      );
+
+      return;
+    }
+
     if (newPassword !== confirmNewPassword) {
       showNotification("New passwords do not match.", "error");
       return;

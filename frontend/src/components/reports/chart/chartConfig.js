@@ -13,6 +13,10 @@ import {
   Filler,
 } from "chart.js";
 
+// ✅ Import the plugin
+import ChartDataLabels from "chartjs-plugin-datalabels";
+
+// ✅ Register everything once globally
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -23,5 +27,6 @@ ChartJS.register(
   ArcElement,
   LineElement,
   PointElement,
-  Filler
+  Filler,
+  ChartDataLabels // 👈 add plugin here
 );

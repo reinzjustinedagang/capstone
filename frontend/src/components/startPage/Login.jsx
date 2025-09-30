@@ -14,8 +14,8 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
 
   // 🔒 Max attempt state
-  const maxAttempts = 3;
-  const lockDuration = 30 * 1000; // 30 seconds
+  const maxAttempts = 5;
+  const lockDuration = 10 * 1000; // 30 seconds
   const [attempts, setAttempts] = useState(0);
   const [locked, setLocked] = useState(false);
   const [unlockTime, setUnlockTime] = useState(null);
@@ -92,9 +92,9 @@ export default function Login() {
       if (user && user.role) {
         const role = user.role.toLowerCase();
         if (role === "admin") {
-          navigate("/admin/dashboard");
+          navigate("/admin/dashboard", { state: { loginSuccess: true } });
         } else if (role === "staff") {
-          navigate("/staff/dashboard");
+          navigate("/staff/dashboard", { state: { loginSuccess: true } });
         } else {
           setError("Login successful, but user role not recognized.");
           navigate("/");

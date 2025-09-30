@@ -55,13 +55,27 @@ const BarangayDistribution = () => {
             data={chartData}
             options={{
               responsive: true,
-              maintainAspectRatio: false, // make it fill h-96
-              plugins: { legend: { position: "bottom" } },
+              maintainAspectRatio: false,
+              layout: {
+                padding: {
+                  top: 30, // 👈 extra space above chart
+                },
+              },
+              plugins: {
+                legend: { position: "bottom" },
+                datalabels: {
+                  display: (context) =>
+                    context.dataset.data[context.dataIndex] !== 0,
+                  anchor: "end",
+                  align: "top",
+                  formatter: (value) => value,
+                },
+              },
               scales: {
                 x: {
                   stacked: false,
                   ticks: {
-                    maxRotation: 45, // tilt labels
+                    maxRotation: 45,
                     minRotation: 30,
                   },
                 },

@@ -76,9 +76,11 @@ export default function ResetPassword() {
 
       if (response.data.success) {
         setSuccessMessage("Password reset successfully! Redirecting...");
-        localStorage.removeItem("recoveryCpNumber");
-        localStorage.removeItem("otpVerified"); // ✅ clear flag
-        setTimeout(() => navigate("/login"), 2000);
+        setTimeout(() => {
+          localStorage.removeItem("recoveryCpNumber");
+          localStorage.removeItem("otpVerified");
+          navigate("/login");
+        }, 2000);
       } else {
         setError(response.data.message || "Failed to reset password");
       }

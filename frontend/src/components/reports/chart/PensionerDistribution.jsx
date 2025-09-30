@@ -55,6 +55,13 @@ const PensionerDistribution = () => {
             maintainAspectRatio: false,
             plugins: {
               legend: { position: "bottom" },
+              datalabels: {
+                display: (context) =>
+                  context.dataset.data[context.dataIndex] !== 0,
+
+                color: "#374151",
+                formatter: (value) => value,
+              },
             },
           }}
         />

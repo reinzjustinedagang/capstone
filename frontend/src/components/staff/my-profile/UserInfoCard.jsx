@@ -4,7 +4,7 @@ import { UserCheck, MailIcon, PhoneCallIcon, Clock } from "lucide-react";
 export default function UserInfoCard({ userData }) {
   return (
     <div className="text-center sm:text-left">
-      <h2 className="text-md font-semibold text-gray-900">
+      <h2 className="text-xl font-semibold text-gray-900">
         {userData.username}
       </h2>
       <p className="text-sm text-gray-600 flex items-center justify-center sm:justify-start mt-1">

@@ -71,7 +71,16 @@ const AgeDistribution = () => {
         data={chartData}
         options={{
           responsive: true,
-          plugins: { legend: { position: "bottom" } },
+          plugins: {
+            legend: { position: "bottom" },
+            datalabels: {
+              display: (context) =>
+                context.dataset.data[context.dataIndex] !== 0,
+              anchor: "end",
+              align: "right",
+              formatter: (value) => value,
+            },
+          },
           scales: {
             y: {
               beginAtZero: true,

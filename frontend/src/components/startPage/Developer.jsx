@@ -50,10 +50,10 @@ export default function Developer() {
 
   const generateKey = () => {
     const randomKey = Math.random().toString(36).substring(2, 12).toUpperCase();
-    const expiry = new Date(Date.now() + 5 * 60 * 1000); // 5 min later
+    const expiry = new Date(Date.now() + 10 * 60 * 1000); // 5 min later
 
     setKey(randomKey);
-    setCooldown(5 * 60); // 5 minutes in seconds
+    setCooldown(10 * 60); // 5 minutes in seconds
     localStorage.setItem("devKey", randomKey);
     localStorage.setItem("devKeyExpiry", expiry.toISOString());
   };

@@ -46,7 +46,15 @@ const GenderDistribution = () => {
           options={{
             responsive: true,
             maintainAspectRatio: false, // lets it shrink inside h-72
-            plugins: { legend: { position: "bottom" } },
+            plugins: {
+              legend: { position: "bottom" },
+              datalabels: {
+                display: (context) =>
+                  context.dataset.data[context.dataIndex] !== 0,
+                color: "#374151",
+                formatter: (value) => value,
+              },
+            },
           }}
         />
       </div>
