@@ -1,14 +1,12 @@
 import React, { useEffect, useState, useRef } from "react";
 import axios from "axios";
-import Modal from "../../UI/Modal";
-import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react"; // ✅ Arrow icons
+import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const Benefits = () => {
   const backendUrl = import.meta.env.VITE_API_BASE_URL;
   const [benefits, setBenefits] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [selectedBenefit, setSelectedBenefit] = useState(null);
   const scrollRef = useRef(null);
 
   useEffect(() => {
@@ -25,25 +23,17 @@ const Benefits = () => {
     fetchBenefits();
   }, [backendUrl]);
 
-  const openModal = (benefit) => setSelectedBenefit(benefit);
-  const closeModal = () => setSelectedBenefit(null);
-
   const scrollLeft = () => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollBy({ left: -300, behavior: "smooth" });
-    }
+    scrollRef.current?.scrollBy({ left: -300, behavior: "smooth" });
   };
 
   const scrollRight = () => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollBy({ left: 300, behavior: "smooth" });
-    }
+    scrollRef.current?.scrollBy({ left: 300, behavior: "smooth" });
   };
 
   return (
     <div className="bg-white py-8 rounded-lg relative">
       <div className="max-w-7xl mx-auto px-5 lg:px-8">
-        {/* Header */}
         {/* Header */}
         <div className="flex flex-col md:flex-row justify-center items-center mb-8">
           <h2 className="text-2xl font-semibold text-gray-900 mb-4 text-center">
@@ -79,13 +69,13 @@ const Benefits = () => {
               ref={scrollRef}
               className="flex space-x-4 overflow-x-auto scrollbar-hide scroll-smooth px-2"
             >
-              {benefits.map((benefit, index) => (
-                <div
-                  key={index}
-                  onClick={() => openModal(benefit)}
-                  className="min-w-[250px] max-w-[250px] bg-gray-100 rounded-xl shadow-md overflow-hidden flex-shrink-0 cursor-pointer hover:shadow-lg transition"
+              {benefits.map((benefit) => (
+                <Link
+                  key={benefit.id}
+                  to={`/benefits/${benefit.id}`} // ✅ Navigate to details page
+                  className="min-w-[250px] max-w-[250px] bg-gray-100 rounded-xl shadow-md overflow-hidden flex-shrink-0 cursor-pointer hover:shadow-lg transition block"
                 >
-                  {/* Placeholder Image */}
+                  {/* Image */}
                   <div className="relative">
                     <img
                       src={benefit.image_url || "https://placehold.co/600x400"}
@@ -108,7 +98,7 @@ const Benefits = () => {
                       {benefit.description}
                     </p>
                   </div>
-                </div>
+                </Link>
               ))}
             </div>
 
@@ -122,34 +112,13 @@ const Benefits = () => {
           </div>
         )}
 
-        {/* Footer Links */}
+        {/* Footer Link */}
         <div className="flex flex-col sm:flex-row justify-center items-center mt-8 gap-4 text-sm text-gray-700">
           <Link className="underline hover:text-blue-700" to="/benefits">
             See more...
           </Link>
         </div>
       </div>
-
-      {/* Modal */}
-      <Modal
-        isOpen={!!selectedBenefit}
-        onClose={closeModal}
-        title={selectedBenefit?.provider}
-      >
-        {selectedBenefit && (
-          <div>
-            <img
-              src={selectedBenefit.image_url || "https://placehold.co/600x400"}
-              alt={selectedBenefit.type}
-              className="w-full h-full object-cover rounded-lg mb-4"
-            />
-            <p className="text-sm text-gray-600 mb-2 capitalize">
-              Type: {selectedBenefit.type}
-            </p>
-            <p className="text-gray-700">{selectedBenefit.description}</p>
-          </div>
-        )}
-      </Modal>
     </div>
   );
 };

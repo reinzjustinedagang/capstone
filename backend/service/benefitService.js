@@ -33,7 +33,7 @@ exports.getThreeRa = async () => {
 // Get all benefits (limit 5)
 exports.getAll = async () => {
   const query = `
-    SELECT type, description, provider, image_url
+    SELECT id, type, description, provider, image_url
     FROM benefits
     WHERE type != 'republic-acts' AND approved = 1
     ORDER BY created_at ASC

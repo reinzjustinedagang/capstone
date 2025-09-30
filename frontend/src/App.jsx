@@ -56,10 +56,7 @@ import StaffLayout from "./components/staff/layout/StaffLayout.jsx";
 import Layout from "./components/layouts/Layout.jsx";
 import LandingLayout from "./components/startPage/layout/LandingLayout.jsx";
 import { EventDetailsPage } from "./pages/public/EventDetailsPage.jsx";
-import {
-  BenefitDetailsPage,
-  MyBenefitDetailsPage,
-} from "./pages/public/BenefitDetailsPage.jsx";
+import { BenefitDetailsPage } from "./pages/public/BenefitDetailsPage.jsx";
 
 function App() {
   return (
