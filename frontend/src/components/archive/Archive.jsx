@@ -35,8 +35,10 @@ const Archive = ({ onView }) => {
   const [filterBarangay, setFilterBarangay] = useState("All Barangays");
   const [filterReason, setFilterReason] = useState("All");
   const [filterGender, setFilterGender] = useState("All");
-  const [sortBy, setSortBy] = useState("lastName");
-  const [sortOrder, setSortOrder] = useState("asc");
+  // Instead of sorting by lastName asc
+  const [sortBy, setSortBy] = useState("archive_date");
+  const [sortOrder, setSortOrder] = useState("desc");
+
   const [showFilters, setShowFilters] = useState(false);
 
   const genderOptions = ["All", "Male", "Female"];
