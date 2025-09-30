@@ -4,6 +4,12 @@ const { logAudit } = require("./auditService");
 const bcrypt = require("bcrypt");
 
 exports.sendSMS = async (message, recipients, user, options = {}) => {
+  // If user looks like options (has skipLogging), swap
+  if (user && user.skipLogging) {
+    options = user;
+    user = null;
+  }
+
   let validRecipients = [];
   try {
     const [credentials] = await Connection(
@@ -52,7 +58,7 @@ exports.sendSMS = async (message, recipients, user, options = {}) => {
             log.status === "Pending" ? "Success" : log.status,
             log.message_id || null,
             log.credits_used || 0,
-            user.id,
+            user ? user.id : null,
           ]
         );
       }
@@ -122,7 +128,9 @@ exports.updateSmsCredentials = async (api_key, sender_id, user, ip) => {
         user.email,
         user.role,
         actionType,
-        `SMS credentials added: API Key: ${api_key}, Sender ID: ${sender_id}`,
+        `SMS credentials added: API Key ending in ${api_key.slice(
+          -4
+        )}, Sender ID: ${sender_id}`,
         ip
       );
     }
@@ -268,6 +276,7 @@ exports.requestOtp = async (cpNumber) => {
   const smsResult = await exports.sendSMS(
     `Your OTP code is ${otp}`,
     [cpNumber],
+    null,
     { skipLogging: true }
   );
 

@@ -137,7 +137,9 @@ exports.create = async (data, user, ip) => {
     user.email,
     user.role,
     "CREATE",
-    `Added ${type}: '${title}' (Approved: ${approved})`,
+    `Added new ${type} benefit: '${title}' (Approved: ${
+      approved === 1 ? "true" : "false"
+    })`,
     ip
   );
 
@@ -176,7 +178,9 @@ exports.update = async (id, data, user, ip) => {
       user.email,
       user.role,
       "UPDATE",
-      `Updated benefit ID ${id}: '${title}' (Approved: ${approved})`,
+      `Update ${type} benefit: '${title}' (Approved: ${
+        approved === 1 ? "true" : "false"
+      })`,
       ip
     );
   }
@@ -193,13 +197,18 @@ exports.approve = async (id, user, ip) => {
     [user.id, id]
   );
 
-  if (result.affectedRows > 0) {
+  const [benefit] = await Connection(
+    `SELECT title, type FROM benefits WHERE id = ?`,
+    [id]
+  );
+
+  if (result.affectedRows > 0 && benefit) {
     await logAudit(
       user.id,
       user.email,
       user.role,
       "APPROVE",
-      `Approved benefit ID ${id}`,
+      `Approved ${benefit.type} benefit: '${benefit.title}'`,
       ip
     );
   }
@@ -210,7 +219,7 @@ exports.approve = async (id, user, ip) => {
 // DELETE benefit
 exports.remove = async (id, user, ip) => {
   const benefits = await Connection(
-    `SELECT title, image_url FROM benefits WHERE id = ?`,
+    `SELECT type, title, image_url FROM benefits WHERE id = ?`,
     [id]
   );
   const benefit = benefits[0];
@@ -224,7 +233,7 @@ exports.remove = async (id, user, ip) => {
       user.email,
       user.role,
       "DELETE",
-      `Deleted benefit: '${benefit.title}'`,
+      `Deleted ${benefit.type} benefit: '${benefit.title}'`,
       ip
     );
   }

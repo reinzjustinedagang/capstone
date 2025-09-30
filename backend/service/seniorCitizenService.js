@@ -326,7 +326,7 @@ exports.createSeniorCitizen = async (data, user, ip) => {
         user.email,
         user.role,
         "CREATE",
-        `Created Senior Citizen: '${data.firstName} ${data.lastName}'.`,
+        `Created New Senior Citizen: '${data.lastName}, ${data.firstName} ${data.middleName}'.`,
         ip
       );
     }
@@ -451,7 +451,7 @@ exports.updateSeniorCitizen = async (id, updatedData, user, ip) => {
         user.email,
         user.role,
         "UPDATE",
-        `Updated Senior Citizen: '${updatedData.firstName} ${updatedData.lastName}'.`,
+        `Updated Senior Citizen: '${updatedData.lastName}, ${updatedData.firstName} ${updatedData.middleName}'.`,
         ip
       );
     }
@@ -656,13 +656,20 @@ exports.restoreSeniorCitizen = async (id, user, ip) => {
       [id]
     );
 
+    const [citizen] = await Connection(
+      `SELECT * 
+       FROM senior_citizens 
+       WHERE id = ?`,
+      [id]
+    );
+
     if (result.affectedRows > 0 && user) {
       await logAudit(
         user.id,
         user.email,
         user.role,
         "RESTORE",
-        `Restored Senior Citizen ID: ${id}`,
+        `Restored Senior Citizen: '${citizen.lastName}, ${citizen.firstName} ${citizen.middleName}'`,
         ip
       );
     }
@@ -831,13 +838,22 @@ exports.archiveSeniorCitizen = async (id, reason, deceasedDate, user, ip) => {
       [reason, deceasedDate || null, id]
     );
 
+    const [citizen] = await Connection(
+      `SELECT * 
+       FROM senior_citizens 
+       WHERE id = ?`,
+      [id]
+    );
+
     if (result.affectedRows > 0) {
       await logAudit(
         user.id,
         user.email,
         user.role,
         "ARCHIVE",
-        `Archived senior citizen with ID: ${id}. Reason: ${reason}${
+        `Archived senior citizen: '${citizen.firstName}, ${citizen.firstName} ${
+          citizen.middleName
+        }'. Reason: ${reason}${
           deceasedDate ? `, Date of Death: ${deceasedDate}` : ""
         }`,
         ip
@@ -861,13 +877,20 @@ exports.restoreArchivedSeniorCitizen = async (id, user, ip) => {
       [id]
     );
 
+    const [citizen] = await Connection(
+      `SELECT * 
+       FROM senior_citizens 
+       WHERE id = ?`,
+      [id]
+    );
+
     if (result.affectedRows > 0) {
       await logAudit(
         user.id,
         user.email,
         user.role,
         "RESTORE",
-        `Restored archived senior citizen with ID: ${id}`,
+        `Restored Archived Senior Citizen: '${citizen.firstName}, ${citizen.firstName} ${citizen.middleName}'`,
         ip
       );
       return true;

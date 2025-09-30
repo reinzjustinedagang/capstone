@@ -81,17 +81,12 @@ exports.updateBarangay = async (id, name, user) => {
   );
 
   if (result.affectedRows === 1 && user) {
-    const changes =
-      oldData.barangay_name !== name
-        ? `barangay_name: '${oldData.barangay_name}' → '${name}'`
-        : "No changes.";
-
     await logAudit(
       user.id,
       user.email,
       user.role,
       "UPDATE",
-      `Updated barangay ${name}: ${changes}`
+      `Updated barangay ${oldData.barangay_name} → ${name}.`
     );
   }
 

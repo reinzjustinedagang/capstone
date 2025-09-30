@@ -439,7 +439,18 @@ export default function AuditLogs() {
                           {log.action.replace(/_/g, " ")}
                         </span>
                       </td>
-                      <td className="px-6 py-4 text-sm">{log.userRole}</td>
+                      <td className="px-6 py-4 text-sm">
+                        <span
+                          className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                            log.userRole === "admin"
+                              ? "bg-purple-100 text-purple-800"
+                              : "bg-yellow-100 text-yellow-800"
+                          }`}
+                        >
+                          {log.userRole.charAt(0).toUpperCase() +
+                            log.userRole.slice(1)}
+                        </span>
+                      </td>
                       <td className="px-6 py-4 text-sm">{log.details}</td>
                       {/* <td className="px-6 py-4 text-sm">{log.ipAddress}</td> */}
                     </tr>

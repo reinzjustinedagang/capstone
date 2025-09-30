@@ -124,7 +124,9 @@ exports.create = async (data, user, ip) => {
     user.email,
     user.role,
     "CREATE",
-    `Added event: '${title}' (Approved: ${approved})`,
+    `Added new event: '${title}' (Approved: ${
+      approved === 1 ? "true" : "false"
+    })`,
     ip
   );
 
@@ -195,7 +197,9 @@ exports.update = async (id, data, user, ip) => {
       user.email,
       user.role,
       "UPDATE",
-      `Updated event ID ${id} (Approved: ${approved})`,
+      `Update event: '${title}' (Approved: ${
+        approved === 1 ? "true" : "false"
+      })`,
       ip
     );
   }
@@ -211,13 +215,17 @@ exports.approve = async (id, user, ip) => {
     [user.id, id]
   );
 
+  const [event] = await Connection(`SELECT title FROM events WHERE id = ?`, [
+    id,
+  ]);
+
   if (result.affectedRows > 0) {
     await logAudit(
       user.id,
       user.email,
       user.role,
       "APPROVE",
-      `Approved event ID ${id}`,
+      `Approved event: ${event.title}`,
       ip
     );
   }

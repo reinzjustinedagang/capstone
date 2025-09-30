@@ -7,6 +7,9 @@ const {
   safeCloudinaryDestroy,
   deleteLocalImage,
 } = require("../utils/serviceHelpers");
+const {
+  position,
+} = require("html2canvas/dist/types/css/property-descriptors/position");
 
 exports.getMunicipalPublic = async () => {
   return await Connection(
@@ -147,9 +150,7 @@ exports.updateMunicipalOfficial = async (
           user.email,
           user.role,
           "UPDATE",
-          `Updated municipal official ${name} (ID: ${id}): ${changes.join(
-            ", "
-          )}`,
+          `Updated municipal official ${name}: ${changes.join(", ")}`,
           ip
         );
       }
@@ -384,7 +385,7 @@ exports.addOrgChart = async (name, position, type, image, user, ip) => {
         user.email,
         user.role,
         "CREATE",
-        `Added orgChart '${name}' as ${position} (${type})`,
+        `Added Organizational Chart Official: '${name}' as ${position}`,
         ip
       );
     }
@@ -440,7 +441,7 @@ exports.updateOrgChart = async (id, name, position, type, image, user, ip) => {
           user.email,
           user.role,
           "UPDATE",
-          `Updated orgChart ID ${id}: ${changes.join(", ")}`,
+          `Updated Organizational Chart Official: ${changes.join(", ")}`,
           ip
         );
       }
@@ -466,7 +467,7 @@ exports.deleteOrgChart = async (id, user, ip) => {
       user.email,
       user.role,
       "DELETE",
-      `Deleted orgChart '${entry.name}'`,
+      `Deleted Organizational Chart Official: '${entry.name}'`,
       ip
     );
 
@@ -492,13 +493,18 @@ exports.approveMunicipal = async (id, user, ip) => {
     [user.id, id]
   );
 
+  const [official] = await Connection(
+    `SELECT name, position FROM municipal_officials WHERE id = ? `,
+    [id]
+  );
+
   if (result.affectedRows > 0) {
     await logAudit(
       user.id,
       user.email,
       user.role,
       "APPROVE",
-      `Approved benefit ID ${id}`,
+      `Approved Municipal Official: ${official.name} as ${official.position}`,
       ip
     );
   }
@@ -515,13 +521,18 @@ exports.approveBarangay = async (id, user, ip) => {
     [user.id, id]
   );
 
+  const [official] = await Connection(
+    `SELECT barangay_name, president_name, position FROM barangay_officials WHERE id = ? `,
+    [id]
+  );
+
   if (result.affectedRows > 0) {
     await logAudit(
       user.id,
       user.email,
       user.role,
       "APPROVE",
-      `Approved benefit ID ${id}`,
+      `Approved Barangay Official: ${position.president_name} as ${official.position} from Barangay ${official.barangay_name}`,
       ip
     );
   }
@@ -538,13 +549,18 @@ exports.approveOrgChart = async (id, user, ip) => {
     [user.id, id]
   );
 
+  const [official] = await Connection(
+    `SELECT name, position FROM orgChart WHERE id = ? `,
+    [id]
+  );
+
   if (result.affectedRows > 0) {
     await logAudit(
       user.id,
       user.email,
       user.role,
       "APPROVE",
-      `Approved benefit ID ${id}`,
+      `Approved Organizational Chart Official: ${official.name} as ${official.position}`,
       ip
     );
   }

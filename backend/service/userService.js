@@ -273,7 +273,7 @@ exports.registerInternal = async (
         result.insertId,
         email,
         role,
-        "REGISTER",
+        "USER REGISTER",
         `New user '${username}' registered.`,
         ip
       );
@@ -355,8 +355,8 @@ exports.register = async (
         result.insertId,
         email,
         role,
-        "REGISTER",
-        `New user '${username}' registered (registered=${registered}).`,
+        "USER REGISTER",
+        `New User: '${username}'`,
         ip
       );
     }
@@ -377,13 +377,15 @@ exports.approveUser = async (id, user, ip) => {
       [id]
     );
 
+    const [users] = await Connection("SELECT * FROM users WHERE id = ?", [id]);
+
     if (result.affectedRows === 1) {
       await logAudit(
         user.id,
         user.email,
         user.role,
-        "REGISTER",
-        `User has been approved (registered).`,
+        "USER APPROVE",
+        `User has been Approved: '${users.username}'.`,
         ip
       );
     }
@@ -420,13 +422,13 @@ exports.updateUserProfile = async (id, username, email, cp_number, ip) => {
 
       // Compare each field and record changes
       if (oldData.username !== username) {
-        changes.push(`username: '${oldData.username}' → '${username}'`);
+        changes.push(`Updated Username: '${username}'`);
       }
       if (oldData.email !== email) {
-        changes.push(`email: '${oldData.email}' → '${email}'`);
+        changes.push(`Updated Email: '${email}'`);
       }
       if (oldData.cp_number !== cp_number) {
-        changes.push(`contact number: '${oldData.cp_number}' → '${cp_number}'`);
+        changes.push(`Updated Cellphone Number: '${cp_number}'`);
       }
 
       // Construct the audit detail message
@@ -516,7 +518,7 @@ exports.updateUserInfo = async (
         changes.push(`role: '${oldData.role}' → '${role}'`);
       }
       if (passwordChanged) {
-        changes.push(`password: '[REDACTED]' → '[REDACTED]'`);
+        changes.push(`Change password`);
       }
 
       const details =
@@ -527,7 +529,7 @@ exports.updateUserInfo = async (
         email,
         oldData.role,
         "UPDATE",
-        `Updated user info for ${username}: ${details}`,
+        `Updated User info of ${username}: ${details}`,
         ip
       );
     }

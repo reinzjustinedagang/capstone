@@ -69,7 +69,7 @@ exports.update = async (id, data, user, ip) => {
       user.email,
       user.role,
       "UPDATE",
-      `Updated position ID ${id} to '${name}'`,
+      `Updated position: '${name}'`,
       ip
     );
   }
