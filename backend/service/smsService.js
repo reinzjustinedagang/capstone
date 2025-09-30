@@ -50,8 +50,8 @@ exports.sendSMS = async (message, recipients, user, options = {}) => {
     if (!options.skipLogging) {
       for (const log of logs) {
         await Connection(
-          `INSERT INTO sms_logs (recipients, message, status, reference_id, credit_used, sent_by)
-            VALUES (?, ?, ?, ?, ?, ?)`,
+          `INSERT INTO sms_logs (recipients, message, status, reference_id, credit_used, sent_by, sent_role, sent_email)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
           [
             JSON.stringify(validRecipients), // cleaned list only
             message,
@@ -59,6 +59,8 @@ exports.sendSMS = async (message, recipients, user, options = {}) => {
             log.message_id || null,
             log.credits_used || 0,
             user ? user.id : null,
+            user ? user.role : null,
+            user ? user.email : null,
           ]
         );
       }
@@ -70,8 +72,8 @@ exports.sendSMS = async (message, recipients, user, options = {}) => {
 
     if (!options.skipLogging) {
       await Connection(
-        `INSERT INTO sms_logs (recipients, message, status, reference_id, credit_used, sent_by)
-       VALUES (?, ?, ?, ?, ?, ?)`,
+        `INSERT INTO sms_logs (recipients, message, status, reference_id, credit_used, sent_by, sent_role, sent_email)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
         [
           JSON.stringify(validRecipients), // clean recipients
           message,
@@ -79,6 +81,8 @@ exports.sendSMS = async (message, recipients, user, options = {}) => {
           null,
           0,
           user.id || null,
+          user ? user.role : null,
+          user ? user.email : null,
         ]
       );
     }
@@ -162,7 +166,7 @@ exports.getPaginatedSMSHistory = async (limit, offset, user) => {
     // Admin → see all SMS logs
     logs = await Connection(
       `
-      SELECT id, recipients, message, status, reference_id, credit_used, created_at, sent_by
+      SELECT id, recipients, message, status, reference_id, credit_used, created_at, sent_by, sent_role, sent_email
       FROM sms_logs
       ORDER BY created_at DESC
       LIMIT ? OFFSET ?
