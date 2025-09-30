@@ -48,22 +48,35 @@ exports.sendSMS = async (message, recipients, user, options = {}) => {
 
     // ✅ Only log if NOT OTP (skipLogging flag is false)
     if (!options.skipLogging) {
-      for (const log of logs) {
-        await Connection(
-          `INSERT INTO sms_logs (recipients, message, status, reference_id, credit_used, sent_by, sent_role, sent_email)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-          [
-            JSON.stringify(validRecipients), // cleaned list only
-            message,
-            log.status === "Pending" ? "Success" : log.status,
-            log.message_id || null,
-            log.credits_used || 0,
-            user ? user.id : null,
-            user ? user.role : null,
-            user ? user.email : null,
-          ]
-        );
-      }
+      const overallStatus = logs.every((l) => l.status === "Success")
+        ? "Success"
+        : logs.some((l) => l.status === "Success")
+        ? "Partial"
+        : "Failed";
+
+      const referenceIds = logs
+        .map((l) => l.message_id)
+        .filter(Boolean)
+        .join(",");
+      const totalCredits = logs.reduce(
+        (sum, l) => sum + (l.credits_used || 0),
+        0
+      );
+
+      await Connection(
+        `INSERT INTO sms_logs (recipients, message, status, reference_id, credit_used, sent_by, sent_role, sent_email)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+        [
+          JSON.stringify(validRecipients), // full batch list
+          message,
+          overallStatus,
+          referenceIds || null,
+          totalCredits,
+          user ? user.id : null,
+          user ? user.role : null,
+          user ? user.email : null,
+        ]
+      );
     }
 
     return { success: true, response: logs };
@@ -73,14 +86,14 @@ exports.sendSMS = async (message, recipients, user, options = {}) => {
     if (!options.skipLogging) {
       await Connection(
         `INSERT INTO sms_logs (recipients, message, status, reference_id, credit_used, sent_by, sent_role, sent_email)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
         [
-          JSON.stringify(validRecipients), // clean recipients
+          JSON.stringify(validRecipients), // full batch list
           message,
           "Failed",
           null,
           0,
-          user.id || null,
+          user ? user.id : null,
           user ? user.role : null,
           user ? user.email : null,
         ]

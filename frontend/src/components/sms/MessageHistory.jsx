@@ -118,7 +118,7 @@ const MessageHistory = () => {
                 {loading ? (
                   <tr>
                     <td
-                      colSpan="4"
+                      colSpan="6"
                       className="px-6 py-12 text-center text-gray-500 text-sm"
                     >
                       <div className="flex justify-center items-center">
@@ -170,7 +170,18 @@ const MessageHistory = () => {
                           {log.sent_email}
                         </td>
                         <td className="px-6 py-4 text-sm text-gray-700">
-                          {log.sent_role}
+                          <span
+                            className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                              log.sent_role === "admin"
+                                ? "bg-purple-100 text-purple-800"
+                                : "bg-yellow-100 text-yellow-800"
+                            }`}
+                          >
+                            {log.sent_role
+                              ? log.sent_role.charAt(0).toUpperCase() +
+                                log.sent_role.slice(1)
+                              : "Unknown"}
+                          </span>
                         </td>
                         <td className="px-6 py-4 text-sm text-gray-500">
                           {new Date(log.created_at).toLocaleString()}
