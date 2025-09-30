@@ -529,7 +529,7 @@ exports.approveBarangay = async (id, user, ip) => {
       user.email,
       user.role,
       "APPROVE",
-      `Approved Barangay Official: ${position.president_name} as ${official.position} from Barangay ${official.barangay_name}`,
+      `Approved Barangay Official: ${official.president_name} as ${official.position} from Barangay ${official.barangay_name}`,
       ip
     );
   }
