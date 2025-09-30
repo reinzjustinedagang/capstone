@@ -38,7 +38,7 @@ const SeniorCitizenList = ({ onEdit, onId }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterBarangay, setFilterBarangay] = useState("All Barangays");
   const [filterHealthStatus, setFilterHealthStatus] = useState("All Remarks");
-  const [filterPensioner, setFilterPensioner] = useState("All Pensioner");
+  const [filterPensioner, setFilterPensioner] = useState("All Pensions");
   const [healthStatusOptions, setHealthStatusOptions] = useState([
     "All Remarks",
   ]);

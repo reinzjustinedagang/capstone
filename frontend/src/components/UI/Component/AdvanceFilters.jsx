@@ -62,7 +62,7 @@ const AdvancedFilters = ({
       options={healthStatusOptions}
     />
     <SelectFilter
-      label="Pension"
+      label="Pensions"
       value={filterPensioner}
       onChange={setFilterPensioner}
       options={pensionOptions}
