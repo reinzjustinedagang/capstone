@@ -510,7 +510,7 @@ exports.getPaginatedFilteredCitizens = async (options) => {
   }
 
   //Pensioner filter
-  if (pensioner && pensioner !== "All Pension") {
+  if (pensioner && pensioner !== "All Pensions") {
     where += ` AND JSON_UNQUOTE(JSON_EXTRACT(sc.form_data, '$.pensioner')) = ?`;
     params.push(pensioner);
   }
