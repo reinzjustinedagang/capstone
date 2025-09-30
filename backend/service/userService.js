@@ -273,7 +273,7 @@ exports.registerInternal = async (
         result.insertId,
         email,
         role,
-        "USER REGISTER",
+        "REGISTER",
         `New user '${username}' registered.`,
         ip
       );
@@ -355,7 +355,7 @@ exports.register = async (
         result.insertId,
         email,
         role,
-        "USER REGISTER",
+        "REGISTER",
         `New User: '${username}'`,
         ip
       );
@@ -384,7 +384,7 @@ exports.approveUser = async (id, user, ip) => {
         user.id,
         user.email,
         user.role,
-        "USER APPROVE",
+        "APPROVE",
         `User has been Approved: '${users.username}'.`,
         ip
       );

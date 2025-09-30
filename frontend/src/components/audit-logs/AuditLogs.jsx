@@ -425,14 +425,21 @@ export default function AuditLogs() {
                           className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
                             log.action === "LOGIN"
                               ? "bg-blue-100 text-blue-800"
-                              : log.action === "CREATE"
-                              ? "bg-green-100 text-green-800"
-                              : log.action === "UPDATE"
-                              ? "bg-yellow-100 text-yellow-800"
-                              : log.action === "DELETE"
-                              ? "bg-red-100 text-red-800"
                               : log.action === "LOGOUT"
                               ? "bg-gray-300 text-black"
+                              : log.action === "CREATE" ||
+                                log.action === "REGISTER"
+                              ? "bg-green-100 text-green-800"
+                              : log.action === "UPDATE" ||
+                                log.action === "APPROVE" ||
+                                log.action === "UNBLOCK"
+                              ? "bg-yellow-100 text-yellow-800"
+                              : log.action === "DELETE" ||
+                                log.action === "BLOCK" ||
+                                log.action === "ARCHIVE"
+                              ? "bg-red-100 text-red-800"
+                              : log.action === "RESTORE"
+                              ? "bg-purple-100 text-purple-800"
                               : "bg-gray-100 text-gray-800"
                           }`}
                         >
