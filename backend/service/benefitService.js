@@ -26,7 +26,7 @@ exports.getBenefitsCounts = async (user) => {
 
 exports.getThreeRa = async () => {
   return await Connection(
-    `SELECT type, title, enacted_date, description FROM benefits WHERE type = 'republic-acts' AND approved = 1 ORDER BY created_at DESC LIMIT 3`
+    `SELECT * FROM benefits WHERE type = 'republic-acts' AND approved = 1 ORDER BY created_at DESC LIMIT 3`
   );
 };
 

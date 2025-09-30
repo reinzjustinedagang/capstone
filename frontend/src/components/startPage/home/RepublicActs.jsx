@@ -1,20 +1,14 @@
 import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
-import Modal from "../../UI/Modal";
-import {
-  ChevronLeft,
-  ChevronRight,
-  BookOpenTextIcon,
-  Loader2,
-} from "lucide-react";
-import { Link } from "react-router-dom";
+import { BookOpenTextIcon, Loader2 } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
 
 const RepublicActs = () => {
   const backendUrl = import.meta.env.VITE_API_BASE_URL;
   const [acts, setActs] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [selectedAct, setSelectedAct] = useState(null);
   const scrollRef = useRef(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchActs = async () => {
@@ -29,9 +23,6 @@ const RepublicActs = () => {
     };
     fetchActs();
   }, [backendUrl]);
-
-  const openModal = (act) => setSelectedAct(act);
-  const closeModal = () => setSelectedAct(null);
 
   const scroll = (direction) => {
     if (scrollRef.current) {
@@ -79,7 +70,7 @@ const RepublicActs = () => {
               {acts.map((act, index) => (
                 <div
                   key={act.id || index}
-                  onClick={() => openModal(act)}
+                  onClick={() => navigate(`/ra/${act.id}`)}
                   className="w-full max-w-[280px] bg-gradient-to-br from-blue-50 to-white border border-blue-200 rounded-xl shadow-md cursor-pointer hover:shadow-lg hover:-translate-y-1 transition-transform p-5"
                 >
                   <div className="flex items-center gap-2 mb-3">
@@ -111,27 +102,6 @@ const RepublicActs = () => {
           </Link>
         </div>
       </div>
-
-      {/* Modal */}
-      <Modal
-        isOpen={!!selectedAct}
-        onClose={closeModal}
-        title={selectedAct?.title}
-      >
-        {selectedAct && (
-          <div>
-            <p className="text-sm text-gray-600 mb-2">
-              Enacted on:{" "}
-              {new Date(selectedAct.enacted_date).toLocaleDateString("en-US", {
-                year: "numeric",
-                month: "long",
-                day: "numeric",
-              })}
-            </p>
-            <p className="text-gray-700">{selectedAct.description}</p>
-          </div>
-        )}
-      </Modal>
     </div>
   );
 };

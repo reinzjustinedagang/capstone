@@ -12,7 +12,7 @@ export const RepublicActDetailsPage = () => {
     const fetchAct = async () => {
       try {
         const res = await axios.get(
-          `${backendUrl}/api/benefits/public-events/${id}`
+          `${backendUrl}/api/benefits/public-benefits/${id}`
         );
         setAct(res.data);
       } catch (err) {
