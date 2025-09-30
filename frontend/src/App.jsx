@@ -57,6 +57,7 @@ import Layout from "./components/layouts/Layout.jsx";
 import LandingLayout from "./components/startPage/layout/LandingLayout.jsx";
 import { EventDetailsPage } from "./pages/public/EventDetailsPage.jsx";
 import { BenefitDetailsPage } from "./pages/public/BenefitDetailsPage.jsx";
+import { RepublicActDetailsPage } from "./pages/public/RepublicActDetailsPage.jsx";
 
 function App() {
   return (
@@ -188,6 +189,14 @@ function App() {
           element={
             <PublicOnlyRoute>
               <BenefitDetailsPage />
+            </PublicOnlyRoute>
+          }
+        />
+        <Route
+          path="/ra/:id"
+          element={
+            <PublicOnlyRoute>
+              <RepublicActDetailsPage />
             </PublicOnlyRoute>
           }
         />

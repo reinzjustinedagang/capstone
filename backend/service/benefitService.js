@@ -93,9 +93,9 @@ exports.getPublicRa = async () => {
 
 exports.getPublicBenefits = async () => {
   return await Connection(`
-    SELECT id, type, title, provider, description, enacted_date, image_url
+    SELECT *
     FROM benefits
-    WHERE type != 'republic-acts' AND approved = 1
+    WHERE approved = 1
     ORDER BY created_at ASC
   `);
 };
