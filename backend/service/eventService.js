@@ -70,6 +70,17 @@ exports.getFive = async () => {
   return await Connection(query);
 };
 
+// eventService.js
+exports.getPublicById = async (id) => {
+  const query = `
+    SELECT * 
+    FROM events 
+    WHERE id = ? AND type = 'event' AND approved = 1
+  `;
+  const rows = await Connection(query, [id]);
+  return rows[0] || null;
+};
+
 exports.getById = async (id, user) => {
   let query, params;
 

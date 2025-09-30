@@ -55,6 +55,7 @@ import { StaffReportsPage } from "./pages/staff/StaffReportsPage.jsx";
 import StaffLayout from "./components/staff/layout/StaffLayout.jsx";
 import Layout from "./components/layouts/Layout.jsx";
 import LandingLayout from "./components/startPage/layout/LandingLayout.jsx";
+import { EventDetailsPage } from "./pages/public/EventDetailsPage.jsx";
 
 function App() {
   return (
@@ -170,6 +171,14 @@ function App() {
           element={
             <PublicOnlyRoute>
               <ResetPasswordPage />
+            </PublicOnlyRoute>
+          }
+        />
+        <Route
+          path="/events/:id"
+          element={
+            <PublicOnlyRoute>
+              <EventDetailsPage />
             </PublicOnlyRoute>
           }
         />

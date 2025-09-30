@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import Modal from "../../components/UI/Modal";
-import { Home } from "lucide-react";
-import Header from "../../components/startPage/layout/Header";
+import { Link } from "react-router-dom";
 
 export const HomeEventPage = () => {
   const backendUrl = import.meta.env.VITE_API_BASE_URL;
@@ -47,35 +46,30 @@ export const HomeEventPage = () => {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {events.map((event) => (
-                <div
-                  key={event.id}
-                  onClick={() => openModal(event)}
-                  className="bg-gray-100 rounded-xl shadow-md overflow-hidden cursor-pointer hover:shadow-lg transition"
-                >
-                  {/* Image */}
-                  <img
-                    src={event.image_url || "https://placehold.co/400x250"}
-                    alt={event.title}
-                    className="w-full h-48 object-cover"
-                  />
-
-                  {/* Content */}
-                  <div className="p-4">
-                    <p className="text-sm text-gray-600 mb-1">
-                      {new Date(event.date).toLocaleDateString("en-US", {
-                        year: "numeric",
-                        month: "short",
-                        day: "numeric",
-                      })}
-                    </p>
-                    <h3 className="text-base font-semibold text-gray-900 mb-2 line-clamp-2">
-                      {event.title}
-                    </h3>
-                    <p className="text-gray-700 text-sm line-clamp-3">
-                      {event.description}
-                    </p>
+                <Link key={event.id} to={`/events/${event.id}`}>
+                  <div className="bg-gray-100 rounded-xl shadow-md overflow-hidden cursor-pointer hover:shadow-lg transition">
+                    <img
+                      src={event.image_url || "https://placehold.co/400x250"}
+                      alt={event.title}
+                      className="w-full h-48 object-cover"
+                    />
+                    <div className="p-4">
+                      <p className="text-sm text-gray-600 mb-1">
+                        {new Date(event.date).toLocaleDateString("en-US", {
+                          year: "numeric",
+                          month: "short",
+                          day: "numeric",
+                        })}
+                      </p>
+                      <h3 className="text-base font-semibold text-gray-900 mb-2 line-clamp-2">
+                        {event.title}
+                      </h3>
+                      <p className="text-gray-700 text-sm line-clamp-3">
+                        {event.description}
+                      </p>
+                    </div>
                   </div>
-                </div>
+                </Link>
               ))}
             </div>
           )}

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { SaveIcon, Loader2, KeyRound, Eye, EyeOff } from "lucide-react";
-import Button from "../../UI/Button";
+import Button from "../UI/Button";
 
 export default function ChangePasswordForm({
   currentPassword,
