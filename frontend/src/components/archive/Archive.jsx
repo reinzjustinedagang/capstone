@@ -1,8 +1,4 @@
 import React, { useState, useEffect } from "react";
-import Button from "../UI/Button";
-import Modal from "../UI/Modal";
-import Pagination from "../UI/Component/Pagination";
-import SearchAndFilterBar from "../UI/Component/SearchAndFilterBar";
 import axios from "axios";
 import {
   Search,
@@ -14,6 +10,8 @@ import {
   Trash2,
   CheckCircle,
 } from "lucide-react";
+import Button from "../UI/Button";
+import Modal from "../UI/Modal";
 
 const Archive = ({ onView }) => {
   const backendUrl =
@@ -127,7 +125,7 @@ const Archive = ({ onView }) => {
       setShowRestoreSuccess(true);
     } catch (err) {
       console.error("Error restoring:", err);
-      alert("Failed to restore citizen.");
+      // In-app notifications are better than alert()
     } finally {
       setRestoring(false);
     }
@@ -185,6 +183,64 @@ const Archive = ({ onView }) => {
   useEffect(() => {
     setPage(1);
   }, [searchTerm, filterBarangay, filterReason, filterGender]);
+
+  // ─── Pagination Renderer ───────────────────────────────────────────
+  const renderPageButtons = () => {
+    const visiblePages = [];
+    const maxVisible = 5;
+
+    if (totalPages <= maxVisible) {
+      for (let i = 1; i <= totalPages; i++) {
+        visiblePages.push(i);
+      }
+    } else {
+      visiblePages.push(1); // Always show first page
+
+      if (page > 3) {
+        visiblePages.push("ellipsis-prev");
+      }
+
+      const start = Math.max(2, page - 1);
+      const end = Math.min(totalPages - 1, page + 1);
+
+      for (let i = start; i <= end; i++) {
+        if (i !== 1 && i !== totalPages) {
+          visiblePages.push(i);
+        }
+      }
+
+      if (page < totalPages - 2) {
+        visiblePages.push("ellipsis-next");
+      }
+
+      if (totalPages !== 1) {
+        visiblePages.push(totalPages); // Avoid duplicate if totalPages is already 1
+      }
+    }
+
+    return visiblePages.map((p, index) =>
+      p === "ellipsis-prev" || p === "ellipsis-next" ? (
+        <span
+          key={`ellipsis-${index}`}
+          className="px-2 py-2 text-gray-500 text-sm select-none"
+        >
+          ...
+        </span>
+      ) : (
+        <button
+          key={p}
+          onClick={() => setPage(p)}
+          className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${
+            page === p
+              ? "z-10 bg-blue-50 border-blue-500 text-blue-600"
+              : "bg-white border-gray-300 text-gray-700 hover:bg-gray-50"
+          }`}
+        >
+          {p}
+        </button>
+      )
+    );
+  };
 
   // ─── Render ───────────────────────────────────────────────────────
   return (
@@ -405,13 +461,62 @@ const Archive = ({ onView }) => {
         </div>
 
         {/* Pagination */}
-        <Pagination
-          page={page}
-          limit={limit}
-          totalCount={totalCount}
-          totalPages={totalPages}
-          setPage={setPage}
-        />
+        <div className="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
+          <div className="flex-1 flex justify-between sm:hidden">
+            <button
+              onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
+              disabled={page === 1}
+              className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
+            >
+              Previous
+            </button>
+            <button
+              onClick={() => setPage((prev) => Math.min(prev + 1, totalPages))}
+              disabled={page === totalPages}
+              className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
+            >
+              Next
+            </button>
+          </div>
+          <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+            <div>
+              <p className="text-sm text-gray-700">
+                Showing{" "}
+                <span className="font-medium">{(page - 1) * limit + 1}</span> to{" "}
+                <span className="font-medium">
+                  {Math.min(page * limit, totalCount)}
+                </span>{" "}
+                of <span className="font-medium">{totalCount}</span> results
+              </p>
+            </div>
+            <div>
+              <nav
+                className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px"
+                aria-label="Pagination"
+              >
+                <button
+                  onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
+                  disabled={page === 1}
+                  className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
+                >
+                  Previous
+                </button>
+
+                {renderPageButtons()}
+
+                <button
+                  onClick={() =>
+                    setPage((prev) => Math.min(prev + 1, totalPages))
+                  }
+                  disabled={page === totalPages}
+                  className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
+                >
+                  Next
+                </button>
+              </nav>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Delete Confirmation Modal */}

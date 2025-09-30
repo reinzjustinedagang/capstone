@@ -41,7 +41,8 @@ export default function AuditLogs() {
   const [error, setError] = useState("");
   const [showFilters, setShowFilters] = useState(false);
 
-  const backendUrl = import.meta.env.VITE_API_BASE_URL;
+  const backendUrl =
+    import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
 
   useEffect(() => {
     const fetchFilterOptions = async () => {
