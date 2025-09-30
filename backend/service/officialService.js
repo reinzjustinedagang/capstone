@@ -7,9 +7,6 @@ const {
   safeCloudinaryDestroy,
   deleteLocalImage,
 } = require("../utils/serviceHelpers");
-const {
-  position,
-} = require("html2canvas/dist/types/css/property-descriptors/position");
 
 exports.getMunicipalPublic = async () => {
   return await Connection(
