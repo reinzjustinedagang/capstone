@@ -87,6 +87,17 @@ router.get("/allbenefits", async (req, res) => {
   }
 });
 
+// eventRoute.js
+router.get("/public-benefits/:id", async (req, res) => {
+  try {
+    const data = await benefitService.getPublicById(req.params.id);
+    if (!data) return res.status(404).json({ message: "Benefits not found" });
+    res.status(200).json(data);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 // GET benefit by ID
 router.get("/:id", async (req, res) => {
   const { id } = req.params;

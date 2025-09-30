@@ -79,39 +79,40 @@ const Events = () => {
               className="flex space-x-4 overflow-x-auto scrollbar-hide scroll-smooth px-2"
             >
               {events.map((event) => (
-                <div
-                  key={event.id}
-                  onClick={() => openModal(event)}
-                  className="min-w-[250px] max-w-[250px] bg-gray-100 rounded-xl shadow-md overflow-hidden flex-shrink-0 cursor-pointer hover:shadow-lg transition"
-                >
-                  {/* Image */}
-                  <div className="relative">
-                    <img
-                      src={event.image_url || "https://placehold.co/300x200"}
-                      alt={event.title}
-                      className="w-full h-40 object-cover"
-                    />
-                  </div>
+                <Link key={event.id} to={`/events/${event.id}`}>
+                  <div
+                    key={event.id}
+                    className="min-w-[250px] max-w-[250px] bg-gray-100 rounded-xl shadow-md overflow-hidden flex-shrink-0 cursor-pointer hover:shadow-lg transition"
+                  >
+                    {/* Image */}
+                    <div className="relative">
+                      <img
+                        src={event.image_url || "https://placehold.co/300x200"}
+                        alt={event.title}
+                        className="w-full h-40 object-cover"
+                      />
+                    </div>
 
-                  {/* Content */}
-                  <div className="p-4 flex flex-col justify-between flex-grow">
-                    <div>
-                      <p className="text-sm text-gray-600 mb-1">
-                        {new Date(event.date).toLocaleDateString("en-US", {
-                          year: "numeric",
-                          month: "short",
-                          day: "numeric",
-                        })}
-                      </p>
-                      <h3 className="text-base font-semibold text-gray-900 mb-2 line-clamp-2">
-                        {event.title}
-                      </h3>
-                      <p className="text-gray-700 text-sm mb-4 line-clamp-3">
-                        {event.description}
-                      </p>
+                    {/* Content */}
+                    <div className="p-4 flex flex-col justify-between flex-grow">
+                      <div>
+                        <p className="text-sm text-gray-600 mb-1">
+                          {new Date(event.date).toLocaleDateString("en-US", {
+                            year: "numeric",
+                            month: "short",
+                            day: "numeric",
+                          })}
+                        </p>
+                        <h3 className="text-base font-semibold text-gray-900 mb-2 line-clamp-2">
+                          {event.title}
+                        </h3>
+                        <p className="text-gray-700 text-sm mb-4 line-clamp-3">
+                          {event.description}
+                        </p>
+                      </div>
                     </div>
                   </div>
-                </div>
+                </Link>
               ))}
             </div>
 

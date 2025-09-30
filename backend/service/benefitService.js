@@ -100,6 +100,17 @@ exports.getPublicBenefits = async () => {
   `);
 };
 
+// benefitsService.js
+exports.getPublicById = async (id) => {
+  const query = `
+    SELECT * 
+    FROM benefits 
+    WHERE id = ? AND approved = 1
+  `;
+  const rows = await Connection(query, [id]);
+  return rows[0] || null;
+};
+
 exports.getBenefitsById = async (id) => {
   return await Connection(`SELECT * FROM benefits WHERE id = ? LIMIT 1`, [id]);
 };
