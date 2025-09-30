@@ -38,6 +38,7 @@ const SeniorCitizenList = ({ onEdit, onId }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterBarangay, setFilterBarangay] = useState("All Barangays");
   const [filterHealthStatus, setFilterHealthStatus] = useState("All Remarks");
+  const [filterPensioner, setFilterPensioner] = useState("All Pensioner");
   const [healthStatusOptions, setHealthStatusOptions] = useState([
     "All Remarks",
   ]);
@@ -99,6 +100,7 @@ const SeniorCitizenList = ({ onEdit, onId }) => {
         gender: filterGender,
         ageRange: filterAge,
         healthStatus: filterHealthStatus,
+        pensioner: filterPensioner,
         sortBy,
         sortOrder,
       };
@@ -187,6 +189,7 @@ const SeniorCitizenList = ({ onEdit, onId }) => {
     setSearchTerm("");
     setFilterBarangay("All Barangays");
     setFilterHealthStatus("All Remarks");
+    setFilterPensioner("All Pensioner");
     setFilterAge("All");
     setFilterGender("All");
     setShowFilters(false);
@@ -212,6 +215,7 @@ const SeniorCitizenList = ({ onEdit, onId }) => {
     searchTerm,
     filterBarangay,
     filterHealthStatus,
+    filterPensioner,
     filterAge,
     filterGender,
     sortBy,
@@ -243,6 +247,8 @@ const SeniorCitizenList = ({ onEdit, onId }) => {
           setFilterBarangay={setFilterBarangay}
           filterHealthStatus={filterHealthStatus}
           setFilterHealthStatus={setFilterHealthStatus}
+          filterPensioner={filterPensioner}
+          setFilterPensioner={setFilterPensioner}
           clearFilters={clearFilters}
           AgeOptions={AgeOptions}
           genderOptions={genderOptions}
@@ -285,6 +291,9 @@ const SeniorCitizenList = ({ onEdit, onId }) => {
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Remarks
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Pension
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Actions
@@ -330,6 +339,9 @@ const SeniorCitizenList = ({ onEdit, onId }) => {
                       {citizen.form_data?.mobileNumber}
                     </td>
                     <td className="px-6 py-4">{citizen.form_data?.remarks}</td>
+                    <td className="px-6 py-4">
+                      {citizen.form_data?.pensioner}
+                    </td>
                     <td className="px-6 py-4 text-sm font-xs">
                       <div className="flex space-x-2">
                         <button

@@ -473,6 +473,7 @@ exports.getPaginatedFilteredCitizens = async (options) => {
     gender,
     ageRange,
     healthStatus,
+    pensioner,
     sortBy,
     sortOrder,
   } = options;
@@ -506,6 +507,12 @@ exports.getPaginatedFilteredCitizens = async (options) => {
   if (healthStatus && healthStatus !== "All Remarks") {
     where += ` AND JSON_UNQUOTE(JSON_EXTRACT(sc.form_data, '$.remarks')) = ?`;
     params.push(healthStatus);
+  }
+
+  //Pensioner filter
+  if (pensioner && pensioner !== "All Pensioner") {
+    where += ` AND JSON_UNQUOTE(JSON_EXTRACT(sc.form_data, '$.pensioner')) = ?`;
+    params.push(pensioner);
   }
 
   // Gender filter
