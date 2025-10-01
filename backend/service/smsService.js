@@ -4,97 +4,87 @@ const { logAudit } = require("./auditService");
 const bcrypt = require("bcrypt");
 
 exports.sendSMS = async (message, recipients, user, options = {}) => {
+  // If user looks like options (has skipLogging), swap
   if (user && user.skipLogging) {
     options = user;
     user = null;
   }
 
-  let validRecipients = (recipients || []).filter(
-    (num) => num && num.toString().trim() !== ""
-  );
-
-  if (validRecipients.length === 0) {
-    throw new Error("No valid recipients to send SMS.");
-  }
-
+  let validRecipients = [];
   try {
     const [credentials] = await Connection(
       "SELECT * FROM sms_credentials LIMIT 1"
     );
     if (!credentials) throw new Error("SMS credentials not found.");
 
-    const logs = [];
+    validRecipients = (recipients || []).filter(
+      (num) => num && num.toString().trim() !== ""
+    );
 
-    for (const number of validRecipients) {
-      const params = new URLSearchParams();
-      params.append("apikey", credentials.api_key);
-      params.append("number", number);
-      params.append("message", message);
-      if (credentials.sender_id)
-        params.append("sendername", credentials.sender_id);
-
-      const response = await axios.post(
-        "https://api.semaphore.co/api/v4/messages",
-        params.toString(),
-        { headers: { "Content-Type": "application/x-www-form-urlencoded" } }
-      );
-
-      logs.push(response.data);
+    if (validRecipients.length === 0) {
+      throw new Error("No valid recipients to send SMS.");
     }
 
-    // Logging after sending all
-    if (!options.skipLogging && logs.length) {
-      const allStatuses = logs.map((l) => l.status);
-      const overallStatus = allStatuses.every((s) => s === "Success")
-        ? "Success"
-        : allStatuses.some((s) => s === "Success")
-        ? "Partial"
-        : `Failed: ${allStatuses.join(",")}`;
+    // Convert to comma-separated string
+    const numbersStr = validRecipients.join(",");
 
-      const referenceIds = logs
-        .map((l) => l.message_id)
-        .filter(Boolean)
-        .join(",");
-      const totalCredits = logs.reduce(
-        (sum, l) => sum + (l.credits_used || 0),
-        0
-      );
+    // Prepare payload as URL-encoded form data
+    const params = new URLSearchParams();
+    params.append("apikey", credentials.api_key);
+    params.append("number", numbersStr);
+    params.append("message", message);
+    if (credentials.sender_id)
+      params.append("sendername", credentials.sender_id);
 
-      await Connection(
-        `INSERT INTO sms_logs (recipients, message, status, reference_id, credit_used, sent_by, sent_role, sent_email)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-        [
-          JSON.stringify(validRecipients),
-          message,
-          overallStatus,
-          referenceIds || null,
-          totalCredits,
-          user ? user.id : null,
-          user ? user.role : null,
-          user ? user.email : null,
-        ]
-      );
+    // Send SMS via Semaphore
+    const response = await axios.post(
+      "https://api.semaphore.co/api/v4/messages",
+      params.toString(),
+      { headers: { "Content-Type": "application/x-www-form-urlencoded" } }
+    );
+
+    const data = response.data;
+    const logs = Array.isArray(data) ? data : [data];
+
+    // ✅ Only log if NOT OTP (skipLogging flag is false)
+    if (!options.skipLogging) {
+      for (const log of logs) {
+        await Connection(
+          `INSERT INTO sms_logs (recipients, message, status, reference_id, credit_used, sent_by, sent_role, sent_email)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+          [
+            JSON.stringify(validRecipients), // cleaned list only
+            message,
+            log.status === "Pending" ? "Success" : log.status,
+            log.message_id || null,
+            log.credits_used || 0,
+            user ? user.id : null,
+            user ? user.role : null,
+            user ? user.email : null,
+          ]
+        );
+      }
     }
 
     return { success: true, response: logs };
   } catch (error) {
     console.error("Error sending SMS:", error?.response?.data || error.message);
+
     if (!options.skipLogging) {
       await Connection(
-        `INSERT INTO sms_logs (recipients, message, status, reference_id, credit_used, sent_by, sent_role, sent_email)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+        `INSERT INTO sms_logs (recipients, message, status, reference_id, credit_used, sent_by)
+       VALUES (?, ?, ?, ?, ?, ?)`,
         [
-          JSON.stringify(validRecipients),
+          JSON.stringify(validRecipients), // clean recipients
           message,
-          `Failed: ${error?.response?.data?.error || error.message}`,
+          "Failed",
           null,
           0,
-          user ? user.id : null,
-          user ? user.role : null,
-          user ? user.email : null,
+          user.id || null,
         ]
       );
     }
+
     return {
       success: false,
       response: error?.response?.data || { message: error.message },
@@ -253,62 +243,51 @@ exports.getPaginatedSMSHistory = async (limit, offset, user, filters = {}) => {
 
 exports.getSmsCounts = async (user) => {
   try {
-    let query = "";
+    let query;
     let params = [];
 
-    // Base WHERE clause: current month/year
-    const baseWhere = `
-      WHERE MONTH(created_at) = MONTH(CURRENT_DATE())
-        AND YEAR(created_at) = YEAR(CURRENT_DATE())
-    `;
-
-    // Role-based filtering
-    if (user && user.role?.toLowerCase() !== "admin") {
-      query = `
-        SELECT 
-          SUM(CASE WHEN status = 'Success' THEN 1 ELSE 0 END) AS success_count,
-          SUM(CASE WHEN status LIKE 'Failed%' THEN 1 ELSE 0 END) AS failed_count,
-          SUM(CASE WHEN status = 'Partial' THEN 1 ELSE 0 END) AS partial_count,
-          SUM(CASE WHEN status = 'Pending' THEN 1 ELSE 0 END) AS pending_count,
-          COUNT(*) AS total
-        FROM sms_logs
-        ${baseWhere} AND sent_by = ?
-      `;
-      params.push(user.id);
-    } else {
+    if (user && user.role?.toLowerCase() === "admin") {
       // Admin → all messages
       query = `
         SELECT 
           SUM(CASE WHEN status = 'Success' THEN 1 ELSE 0 END) AS success_count,
-          SUM(CASE WHEN status LIKE 'Failed%' THEN 1 ELSE 0 END) AS failed_count,
-          SUM(CASE WHEN status = 'Partial' THEN 1 ELSE 0 END) AS partial_count,
+          SUM(CASE WHEN status = 'Failed' THEN 1 ELSE 0 END) AS failed_count,
           SUM(CASE WHEN status = 'Pending' THEN 1 ELSE 0 END) AS pending_count,
           COUNT(*) AS total
         FROM sms_logs
-        ${baseWhere}
+        WHERE MONTH(created_at) = MONTH(CURRENT_DATE())
+          AND YEAR(created_at) = YEAR(CURRENT_DATE())
       `;
+    } else if (user && user.id) {
+      // Staff → only their messages
+      query = `
+        SELECT 
+          SUM(CASE WHEN status = 'Success' THEN 1 ELSE 0 END) AS success_count,
+          SUM(CASE WHEN status = 'Failed' THEN 1 ELSE 0 END) AS failed_count,
+          SUM(CASE WHEN status = 'Pending' THEN 1 ELSE 0 END) AS pending_count,
+          COUNT(*) AS total
+        FROM sms_logs
+        WHERE MONTH(created_at) = MONTH(CURRENT_DATE())
+          AND YEAR(created_at) = YEAR(CURRENT_DATE())
+          AND sent_by = ?
+      `;
+      params.push(user.id);
+    } else {
+      return { success_count: 0, failed_count: 0, pending_count: 0, total: 0 };
     }
 
     const [result] = await Connection(query, params);
-
     return (
       result || {
         success_count: 0,
         failed_count: 0,
-        partial_count: 0,
         pending_count: 0,
         total: 0,
       }
     );
   } catch (err) {
     console.error("Error fetching SMS counts:", err);
-    return {
-      success_count: 0,
-      failed_count: 0,
-      partial_count: 0,
-      pending_count: 0,
-      total: 0,
-    };
+    throw err;
   }
 };
 

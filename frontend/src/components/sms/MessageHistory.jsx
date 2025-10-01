@@ -56,9 +56,9 @@ const MessageHistory = () => {
     }
   };
 
-  useEffect(() => {
-    fetchFilterOptions();
-  }, []);
+  // useEffect(() => {
+  //   fetchFilterOptions();
+  // }, []);
 
   useEffect(() => {
     fetchHistory();
@@ -181,7 +181,7 @@ const MessageHistory = () => {
               </select>
             </div>
 
-            {/* Email Filter */}
+            {/* Email Filter
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Email
@@ -197,7 +197,7 @@ const MessageHistory = () => {
                   </option>
                 ))}
               </select>
-            </div>
+            </div> */}
 
             {/* Status Filter */}
             <div>
