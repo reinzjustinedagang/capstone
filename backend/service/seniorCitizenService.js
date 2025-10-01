@@ -897,7 +897,7 @@ exports.restoreArchivedSeniorCitizen = async (id, user, ip) => {
         user.email,
         user.role,
         "RESTORE",
-        `Restored Archived Senior Citizen: '${citizen.firstName}, ${citizen.firstName} ${citizen.middleName}'`,
+        `Restored Archived Senior Citizen: '${citizen.lastName}, ${citizen.firstName} ${citizen.middleName}'`,
         ip
       );
       return true;
