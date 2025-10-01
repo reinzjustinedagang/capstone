@@ -163,6 +163,8 @@ const Archive = ({ onView }) => {
     setFilterBarangay("All Barangays");
     setFilterReason("All");
     setFilterGender("All");
+    setSortBy("archive_date"); // ✅ Reset sort to default
+    setSortOrder("desc"); // ✅ Reset order to default
     setShowFilters(false);
   };
 
@@ -313,7 +315,8 @@ const Archive = ({ onView }) => {
             {(searchTerm ||
               filterBarangay !== "All Barangays" ||
               filterGender !== "All" ||
-              filterReason !== "All") && (
+              filterReason !== "All" ||
+              !(sortBy === "archive_date" && sortOrder === "desc")) && (
               <button
                 onClick={clearFilters}
                 className="flex items-center text-sm text-red-600 hover:text-red-700 transition-colors"
