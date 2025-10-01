@@ -14,6 +14,16 @@ router.get("/all", async (req, res) => {
   }
 });
 
+router.get("/new", async (req, res) => {
+  try {
+    const citizens = await seniorCitizenService.getRecentSeniorCitizens();
+    res.status(200).json(citizens);
+  } catch (error) {
+    console.error("Error fetching all senior citizens:", error);
+    res.status(500).json({ message: "Failed to fetch senior citizens." });
+  }
+});
+
 // GET: Senior citizen by ID
 router.get("/get/:id", async (req, res) => {
   try {

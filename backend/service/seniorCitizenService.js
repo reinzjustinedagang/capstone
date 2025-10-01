@@ -42,6 +42,45 @@ const isDuplicateIdNumber = async (idNumber, excludeId = null) => {
   return result.length > 0;
 };
 
+exports.getRecentSeniorCitizens = async () => {
+  try {
+    const result = await Connection(`
+      SELECT * 
+      FROM senior_citizens 
+      WHERE deleted = 0 
+        AND age >= 60 
+        AND registered = 1 
+        AND archived = 0
+      ORDER BY created_at DESC
+      LIMIT 5
+    `);
+
+    // Ensure form_data is always an object and map frontend-friendly fields
+    return result.map((citizen) => {
+      const formData =
+        typeof citizen.form_data === "string"
+          ? JSON.parse(citizen.form_data || "{}")
+          : citizen.form_data || {};
+
+      return {
+        id: citizen.id,
+        name: `${citizen.firstName} ${citizen.middleName || ""} ${
+          citizen.lastName
+        }`.trim(),
+        age: formData.age || citizen.age,
+        address: `${formData.street || ""}, ${formData.barangay || ""}`.replace(
+          /^, |, $/g,
+          ""
+        ),
+        dateRegistered: citizen.created_at,
+      };
+    });
+  } catch (error) {
+    console.error("Error fetching recent senior citizens:", error);
+    throw new Error("Failed to retrieve recent senior citizens.");
+  }
+};
+
 exports.getAllSeniorCitizens = async () => {
   try {
     const result = await Connection(`SELECT * FROM senior_citizens`);
