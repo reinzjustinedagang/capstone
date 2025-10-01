@@ -36,9 +36,9 @@ const Archive = ({ onView }) => {
   const [filterReason, setFilterReason] = useState("All");
   const [filterGender, setFilterGender] = useState("All");
   // Instead of sorting by lastName asc
+  // Default: archive_date desc
   const [sortBy, setSortBy] = useState("archive_date");
-
-  const [sortOrder, setSortOrder] = useState("asc");
+  const [sortOrder, setSortOrder] = useState("desc");
 
   const [showFilters, setShowFilters] = useState(false);
 
@@ -169,7 +169,17 @@ const Archive = ({ onView }) => {
   // Sorting
   const toggleSortOrder = (column) => {
     if (sortBy === column) {
-      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+      if (sortOrder === "asc") {
+        setSortOrder("desc");
+      } else {
+        // If already "desc" on Name, clear sort → fallback to archive_date
+        if (column === "lastName") {
+          setSortBy("archive_date");
+          setSortOrder("desc");
+        } else {
+          setSortOrder("asc");
+        }
+      }
     } else {
       setSortBy(column);
       setSortOrder("asc");
@@ -256,7 +266,7 @@ const Archive = ({ onView }) => {
   };
 
   const columns = [
-    { label: "Name", key: "lastName", sortable: true }, // ✅ only this is sortable
+    { label: "Name", key: "lastName", sortable: true },
     { label: "Gender", key: "gender", sortable: false },
     { label: "Barangay", key: "barangay", sortable: false },
     { label: "Archive Reason", key: "archive_reason", sortable: false },

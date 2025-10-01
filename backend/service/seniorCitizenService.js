@@ -984,13 +984,15 @@ exports.getArchivedSeniorCitizens = async (options) => {
   const allowedSort = ["lastName", "archive_date", "deceased_date"]; // add whatever columns you allow sorting on
 
   // 🔽 Sorting
+  // 🔽 Sorting
   let orderByClause = "";
   if (sortBy && allowedSort.includes(sortBy)) {
     const order = sortOrder === "asc" ? "ASC" : "DESC";
     orderByClause = `ORDER BY ${sortBy} ${order}`;
+  } else {
+    // Default fallback
+    orderByClause = "ORDER BY sc.archive_date DESC";
   }
-
-  const order = sortOrder === "asc" ? "ASC" : "DESC";
 
   try {
     const totalResult = await Connection(
