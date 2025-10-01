@@ -18,19 +18,20 @@ const MessageHistory = () => {
   const [filterRole, setFilterRole] = useState("All");
   const [filterEmail, setFilterEmail] = useState("All");
   const [filterStatus, setFilterStatus] = useState("All");
-  const [allEmails, setAllEmails] = useState(["All"]);
+  const [allUsers, setAllUsers] = useState(["All"]);
   const [showFilters, setShowFilters] = useState(false);
 
-  // const fetchFilterOptions = async () => {
-  //   try {
-  //     const res = await axios.get(`${backendUrl}/api/sms/filter-options`, {
-  //       withCredentials: true,
-  //     });
-  //     setAllEmails(["All", ...(res.data.emails || [])]);
-  //   } catch (err) {
-  //     console.error("Failed to fetch SMS filter options:", err);
-  //   }
-  // };
+  useEffect(() => {
+    const fetchFilterOptions = async () => {
+      try {
+        const response = await axios.get(`${backendUrl}/api/sms/filters`);
+        setAllUsers(["All", ...response.data.users]);
+      } catch (err) {
+        console.error("Failed to fetch filter options:", err);
+      }
+    };
+    fetchFilterOptions();
+  }, []);
 
   const fetchHistory = async () => {
     setLoading(true);
@@ -181,23 +182,22 @@ const MessageHistory = () => {
               </select>
             </div>
 
-            {/* Email Filter
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Email
+                User
               </label>
               <select
-                value={filterEmail}
-                onChange={(e) => setFilterEmail(e.target.value)}
                 className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                value={filterEmail}
+                onChange={(e) => setFilterEmail(e.target.value)} // ✅ correct
               >
-                {allEmails.map((email) => (
-                  <option key={email} value={email}>
-                    {email === "All" ? "All Emails" : email}
+                {allUsers.map((user) => (
+                  <option key={user} value={user}>
+                    {user === "All" ? "All Emails" : user}
                   </option>
                 ))}
               </select>
-            </div> */}
+            </div>
 
             {/* Status Filter */}
             <div>

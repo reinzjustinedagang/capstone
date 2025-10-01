@@ -482,6 +482,12 @@ const UpdateSeniorCitizenForm = ({ id, onSuccess, onCancel }) => {
                     src={documentPreview || citizenData?.document_image}
                     alt="Document"
                     className="object-contain h-40 w-full transition-transform duration-200 hover:scale-105 mb-2"
+                    onClick={() =>
+                      window.open(
+                        documentPreview || citizenData?.document_image,
+                        "_blank"
+                      )
+                    }
                   />
                 ) : (
                   <span className="text-gray-400 text-sm mb-2">
@@ -515,6 +521,9 @@ const UpdateSeniorCitizenForm = ({ id, onSuccess, onCancel }) => {
                   src={photoPreview || citizenData?.photo}
                   alt="Photo"
                   className="object-cover h-full w-full transition-transform duration-200 hover:scale-110 mb-2"
+                  onClick={() =>
+                    window.open(photoPreview || citizenData?.photo, "_blank")
+                  }
                 />
               ) : (
                 <span className="text-gray-400 text-sm mb-2">

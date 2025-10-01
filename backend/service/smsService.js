@@ -72,15 +72,17 @@ exports.sendSMS = async (message, recipients, user, options = {}) => {
 
     if (!options.skipLogging) {
       await Connection(
-        `INSERT INTO sms_logs (recipients, message, status, reference_id, credit_used, sent_by)
-       VALUES (?, ?, ?, ?, ?, ?)`,
+        `INSERT INTO sms_logs (recipients, message, status, reference_id, credit_used, sent_by, sent_role, sent_email)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
         [
           JSON.stringify(validRecipients), // clean recipients
           message,
           "Failed",
           null,
           0,
-          user.id || null,
+          user ? user.id : null,
+          user ? user.role : null,
+          user ? user.email : null,
         ]
       );
     }
@@ -364,4 +366,20 @@ exports.resetPassword = async (cpNumber, newPassword) => {
   }
 
   return true;
+};
+
+// smsService.js
+exports.getSmsFilters = async () => {
+  try {
+    const usersResult = await Connection(
+      `SELECT DISTINCT sent_email FROM sms_logs WHERE sent_email IS NOT NULL ORDER BY sent_email ASC`
+    );
+
+    const users = usersResult.map((row) => row.sent_email);
+
+    return { users };
+  } catch (err) {
+    console.error("❌ Failed to fetch SMS filter options:", err);
+    throw err;
+  }
 };

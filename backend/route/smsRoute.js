@@ -185,4 +185,15 @@ router.post("/reset-password", async (req, res) => {
   }
 });
 
+// routes/sms.js
+router.get("/filters", async (req, res) => {
+  try {
+    const filters = await smsService.getSmsFilters();
+    res.status(200).json(filters);
+  } catch (err) {
+    console.error("Error in /sms/filters:", err);
+    res.status(500).json({ message: "Failed to fetch SMS filter options." });
+  }
+});
+
 module.exports = router;

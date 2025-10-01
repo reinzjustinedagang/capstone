@@ -45,7 +45,7 @@ const DeceasedReportsChart = () => {
   return (
     <div className="bg-white p-6 rounded-lg shadow">
       <div className="flex justify-between items-center mb-4">
-        <h3 className="text-lg font-medium">Monthly Deceased Seniors Report</h3>
+        <h3 className="text-lg font-medium">Annual Deceased Seniors Report</h3>
         <div className="flex items-center gap-2">
           <label className="font-semibold text-sm">Year:</label>
           <select

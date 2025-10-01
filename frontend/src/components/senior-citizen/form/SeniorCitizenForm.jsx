@@ -478,6 +478,11 @@ const SeniorCitizenForm = ({ onSubmit, onCancel, onSuccess }) => {
                   src={documentPreview || "/placeholder-doc.png"}
                   alt="Document Preview"
                   className="object-contain h-40 w-full transition-transform duration-200 hover:scale-105 mb-2"
+                  onClick={() => {
+                    if (documentPreview) {
+                      window.open(documentPreview, "_blank");
+                    }
+                  }}
                 />
               </div>
               <input
@@ -502,6 +507,11 @@ const SeniorCitizenForm = ({ onSubmit, onCancel, onSuccess }) => {
                 src={photoPreview || "/placeholder-photo.png"}
                 alt="Photo Preview"
                 className="object-cover h-full w-full transition-transform duration-200 hover:scale-110 mb-2"
+                onClick={() => {
+                  if (photoPreview) {
+                    window.open(photoPreview, "_blank");
+                  }
+                }}
               />
             </div>
             <input

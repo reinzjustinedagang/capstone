@@ -47,7 +47,7 @@ const TransfereeReportsChart = () => {
     <div className="bg-white p-6 rounded-lg shadow">
       <div className="flex justify-between items-center mb-4">
         <h3 className="text-lg font-medium">
-          Monthly Transferee Seniors Report
+          Annual Transferee Seniors Report
         </h3>
 
         {/* Year Selector */}

@@ -46,7 +46,7 @@ const NonSocPenReportsChart = () => {
     <div className="bg-white p-6 rounded-lg shadow">
       <div className="flex justify-between items-center mb-4">
         <h3 className="text-lg font-medium">
-          Monthly Non-Social Pension Seniors Report
+          Annual Non-Social Pension Seniors Report
         </h3>
         <div className="flex items-center gap-2">
           <label className="font-semibold text-sm">Year:</label>
