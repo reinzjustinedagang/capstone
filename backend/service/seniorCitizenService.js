@@ -241,57 +241,50 @@ exports.createSeniorCitizen = async (data, user, ip) => {
     let documentUrl = null;
     let photoUrl = null;
 
-    // Upload document if provided
+    // Upload document
     if (data.documentFile) {
       const file = data.documentFile;
       const result = await new Promise((resolve, reject) => {
         const stream = cloudinary.uploader.upload_stream(
           { folder: "seniors/documents" },
-          (error, result) => {
-            if (error) reject(error);
-            else resolve(result);
-          }
+          (error, result) => (error ? reject(error) : resolve(result))
         );
         stream.end(file.buffer);
       });
       documentUrl = result.secure_url;
     }
 
-    // Upload photo if provided
+    // Upload photo
     if (data.photoFile) {
       const file = data.photoFile;
       const result = await new Promise((resolve, reject) => {
         const stream = cloudinary.uploader.upload_stream(
           { folder: "seniors/photos" },
-          (error, result) => {
-            if (error) reject(error);
-            else resolve(result);
-          }
+          (error, result) => (error ? reject(error) : resolve(result))
         );
         stream.end(file.buffer);
       });
       photoUrl = result.secure_url;
     }
 
-    // Handle conditional date fields based on form_data
     const formData = data.form_data || {};
 
+    // Normalize and validate ID number
     if (formData.idNumber) {
-      formData.idNumber = formData.idNumber.replace(/\D/g, ""); // remove non-digits
-      formData.idNumber = formData.idNumber.padStart(6, "0");
+      formData.idNumber = formData.idNumber.replace(/\D/g, "").padStart(6, "0");
     }
 
-    // ✅ Handle idNumber
     if (!formData.idNumber || formData.idNumber.trim() === "") {
       formData.idNumber = await generateUniqueIdNumber();
-    } else {
-      if (await isDuplicateIdNumber(formData.idNumber)) {
-        const err = new Error(
-          `ID Number '${formData.idNumber}' already exists.`
-        );
-        err.code = 409;
-        throw err;
-      }
+    } else if (await isDuplicateIdNumber(formData.idNumber)) {
+      const err = new Error(`ID Number '${formData.idNumber}' already exists.`);
+      err.code = 409;
+      throw err;
+    }
+
+    // ✅ Auto-force pensioner to "none" if SOCIAL PENSION
+    if (formData.remarks === "SOCIAL PENSION") {
+      formData.pensioner = "NONE";
     }
 
     const now = new Date();
@@ -306,7 +299,7 @@ exports.createSeniorCitizen = async (data, user, ip) => {
       document_image: documentUrl,
       document_type: data.documentType || null,
       photo: photoUrl,
-      // ✅ set dates based on form_data
+      // Set date fields
       pdl_date: formData.pdl?.toLowerCase() === "yes" ? now : null,
       socpen_date: formData.remarks === "SOCIAL PENSION" ? now : null,
       nonsocpen_date: formData.remarks === "NON-SOCIAL PENSION" ? now : null,
@@ -334,6 +327,7 @@ exports.createSeniorCitizen = async (data, user, ip) => {
     return result.insertId;
   } catch (error) {
     console.error("Error creating senior citizen:", error);
+    if (error.code === 400 || error.code === 409) throw error;
     throw new Error("Failed to create senior citizen.");
   }
 };
@@ -341,8 +335,9 @@ exports.createSeniorCitizen = async (data, user, ip) => {
 //update
 exports.updateSeniorCitizen = async (id, updatedData, user, ip) => {
   try {
+    // Fetch existing record
     const [existing] = await Connection(
-      `SELECT document_image, document_public_id, photo, photo_public_id
+      `SELECT document_image, document_public_id, photo, photo_public_id, form_data
        FROM senior_citizens
        WHERE id = ? AND deleted = 0`,
       [id]
@@ -355,6 +350,7 @@ exports.updateSeniorCitizen = async (id, updatedData, user, ip) => {
     let photoUrl = existing.photo;
     let photoPublicId = existing.photo_public_id;
 
+    // Helper for Cloudinary uploads
     const uploadToCloudinary = (file, folder) =>
       new Promise((resolve, reject) => {
         const stream = cloudinary.uploader.upload_stream(
@@ -367,6 +363,7 @@ exports.updateSeniorCitizen = async (id, updatedData, user, ip) => {
         stream.end(file.buffer);
       });
 
+    // Upload document if updated
     if (updatedData.documentFile) {
       if (documentPublicId) await cloudinary.uploader.destroy(documentPublicId);
       const result = await uploadToCloudinary(
@@ -377,6 +374,7 @@ exports.updateSeniorCitizen = async (id, updatedData, user, ip) => {
       documentPublicId = result.public_id;
     }
 
+    // Upload photo if updated
     if (updatedData.photoFile) {
       if (photoPublicId) await cloudinary.uploader.destroy(photoPublicId);
       const result = await uploadToCloudinary(
@@ -387,20 +385,25 @@ exports.updateSeniorCitizen = async (id, updatedData, user, ip) => {
       photoPublicId = result.public_id;
     }
 
-    // ✅ Logic for special date fields based on form_data
+    // Extract form_data
     const formData = updatedData.form_data || {};
-
     const oldFormData =
       typeof existing.form_data === "string"
         ? JSON.parse(existing.form_data)
         : existing.form_data || {};
 
+    // Normalize ID number
     if (formData.idNumber) {
-      formData.idNumber = formData.idNumber.replace(/\D/g, ""); // remove non-digits
+      formData.idNumber = formData.idNumber.replace(/\D/g, "");
       formData.idNumber = formData.idNumber.padStart(6, "0");
     }
 
-    // ✅ Check for duplicate idNumber if changed
+    // Force pensioner to "none" if SOCIAL PENSION
+    if (formData.remarks === "SOCIAL PENSION") {
+      formData.pensioner = "none";
+    }
+
+    // Check duplicate ID if changed
     if (formData.idNumber && formData.idNumber !== oldFormData.idNumber) {
       if (await isDuplicateIdNumber(formData.idNumber, id)) {
         const err = new Error(
@@ -411,6 +414,7 @@ exports.updateSeniorCitizen = async (id, updatedData, user, ip) => {
       }
     }
 
+    // Prepare update data
     const updateData = {
       firstName: updatedData.firstName,
       lastName: updatedData.lastName,
@@ -423,10 +427,10 @@ exports.updateSeniorCitizen = async (id, updatedData, user, ip) => {
       document_type: updatedData.documentType || null,
       photo: photoUrl,
       photo_public_id: photoPublicId,
-      // 👇 handle conditional date fields
+      // Conditional date fields
       pdl_date:
         formData.pdl && formData.pdl.toLowerCase() === "yes"
-          ? new Date() // sets to NOW()
+          ? new Date()
           : null,
       socpen_date: formData.remarks === "SOCIAL PENSION" ? new Date() : null,
       nonsocpen_date:
@@ -436,15 +440,22 @@ exports.updateSeniorCitizen = async (id, updatedData, user, ip) => {
           ? new Date()
           : null,
       booklet_date:
-        formData.booklet.toLowerCase() === "yes" ? new Date() : null,
-      utp_date: formData.utp.toLowerCase() === "yes" ? new Date() : null,
+        formData.booklet && formData.booklet.toLowerCase() === "yes"
+          ? new Date()
+          : null,
+      utp_date:
+        formData.utp && formData.utp.toLowerCase() === "yes"
+          ? new Date()
+          : null,
     };
 
+    // Update DB
     const result = await Connection(
       `UPDATE senior_citizens SET ? WHERE id = ? AND deleted = 0`,
       [updateData, id]
     );
 
+    // Audit log
     if (result.affectedRows > 0 && user) {
       await logAudit(
         user.id,
