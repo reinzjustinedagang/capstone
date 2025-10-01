@@ -42,9 +42,10 @@ const isDuplicateIdNumber = async (idNumber, excludeId = null) => {
   return result.length > 0;
 };
 
+// Fetch recent senior citizens
 exports.getRecentSeniorCitizens = async () => {
   try {
-    const result = await Connection(`
+    const citizens = await Connection(`
       SELECT * 
       FROM senior_citizens 
       WHERE deleted = 0 
@@ -55,23 +56,31 @@ exports.getRecentSeniorCitizens = async () => {
       LIMIT 5
     `);
 
-    // Ensure form_data is always an object and map frontend-friendly fields
-    return result.map((citizen) => {
+    // Fetch all barangays once
+    const barangays = await Connection("SELECT * FROM barangays");
+    const barangayMap = barangays.reduce((acc, b) => {
+      acc[b.id] = b.barangay_name;
+      return acc;
+    }, {});
+
+    // Map citizens to frontend-friendly format
+    return citizens.map((citizen) => {
       const formData =
         typeof citizen.form_data === "string"
           ? JSON.parse(citizen.form_data || "{}")
           : citizen.form_data || {};
 
+      const barangayName = barangayMap[formData.barangay_id] || "";
+
       return {
         id: citizen.id,
-        name: `${citizen.firstName} ${citizen.middleName || ""} ${
-          citizen.lastName
+        name: `${citizen.lastName}, ${citizen.firstName}${
+          citizen.middleName ? ` ${citizen.middleName}` : ""
         }`.trim(),
         age: formData.age || citizen.age,
-        address: `${formData.street || ""}, ${formData.barangay || ""}`.replace(
-          /^, |, $/g,
-          ""
-        ),
+        address: `${formData.street || ""}${
+          barangayName ? `, ${barangayName}` : ""
+        }`.trim(),
         dateRegistered: citizen.created_at,
       };
     });
