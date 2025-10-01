@@ -27,9 +27,15 @@ const RecentSmsActivities = () => {
             recipientCount = 0;
           }
 
+          // Truncate message to 50 characters
+          const truncatedMessage =
+            sms.message && sms.message.length > 50
+              ? sms.message.substring(0, 50) + "..."
+              : sms.message || "No message";
+
           return {
             id: sms.id,
-            title: sms.message || "No message",
+            title: truncatedMessage,
             recipients: recipientCount,
             date: sms.created_at
               ? new Date(sms.created_at).toLocaleString()

@@ -852,7 +852,7 @@ exports.getSmsRecipients = async (
     let sql = `
       SELECT 
         sc.id,
-        CONCAT_WS(' ', sc.firstName, sc.middleName, sc.lastName, sc.suffix) AS name,
+        CONCAT_WS(' ', sc.lastName, sc.firstName, sc.middleName,  sc.suffix) AS name,
         COALESCE(
           JSON_UNQUOTE(JSON_EXTRACT(sc.form_data, '$.mobileNumber')),
           JSON_UNQUOTE(JSON_EXTRACT(sc.form_data, '$.emergencyContactNumber'))
