@@ -38,6 +38,11 @@ export const RepublicActDetailsPage = () => {
 
   return (
     <div className="max-w-4xl mx-auto px-5 py-10">
+      <img
+        src={act.image_url || "https://placehold.co/800x400"}
+        alt={act.title}
+        className="w-full h-[400px] object-cover rounded-lg mb-6"
+      />
       <h1 className="text-2xl font-bold mb-4">{act.title}</h1>
       <p className="text-sm text-gray-600 mb-2">
         Enacted on:{" "}

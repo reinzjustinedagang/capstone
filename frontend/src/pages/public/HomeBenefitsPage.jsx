@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
+import { Gift } from "lucide-react";
 
 export const HomeBenefitsPage = () => {
   const backendUrl = import.meta.env.VITE_API_BASE_URL;
@@ -22,7 +23,7 @@ export const HomeBenefitsPage = () => {
   }, [backendUrl]);
 
   return (
-    <div className="bg-white py-10">
+    <div className="bg-white px-5 py-6">
       <div className="max-w-6xl mx-auto px-5 lg:px-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-8 text-center">
           Benefits
@@ -38,30 +39,44 @@ export const HomeBenefitsPage = () => {
             <p>Check back later for new benefits and offers.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {benefits.map((benefit) => (
               <Link
                 key={benefit.id}
                 to={`/benefits/${benefit.id}`}
-                className="bg-gray-100 rounded-xl shadow-md overflow-hidden cursor-pointer hover:shadow-lg transition block"
+                className="bg-gradient-to-br from-blue-50 to-white border border-blue-200 
+                           rounded-xl shadow-md cursor-pointer hover:shadow-lg 
+                           hover:-translate-y-1 transition-transform overflow-hidden flex flex-col"
               >
-                <img
-                  src={benefit.image_url || "https://placehold.co/600x400"}
-                  alt={benefit.type}
-                  className="w-full h-48 object-cover"
-                />
-                <div className="p-4">
-                  <p className="text-sm text-gray-600 mb-1 capitalize">
+                {/* Image */}
+                <div className="relative w-full h-40">
+                  <img
+                    src={benefit.image_url || "https://placehold.co/400x250"}
+                    alt={benefit.type}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+
+                {/* Content */}
+                <div className="p-5 flex flex-col justify-between flex-grow">
+                  <div>
+                    <div className="flex items-center gap-2 mb-3">
+                      <Gift className="w-5 h-5 text-blue-600" />
+                      <h3 className="text-lg font-semibold line-clamp-2 text-gray-900">
+                        {benefit.provider}
+                      </h3>
+                    </div>
+                    <p className="text-sm text-gray-700 mb-4 line-clamp-3">
+                      {benefit.description}
+                    </p>
+                  </div>
+
+                  {/* Footer Tag with Benefit Type */}
+                  <span className="inline-block bg-blue-100 text-blue-700 text-xs font-medium px-3 py-1 rounded-full capitalize">
                     {benefit.type === "national"
-                      ? "National Benefits"
-                      : "Local Benefits"}
-                  </p>
-                  <h3 className="text-base font-semibold text-gray-900 mb-2 line-clamp-2">
-                    {benefit.provider}
-                  </h3>
-                  <p className="text-gray-700 text-sm line-clamp-3">
-                    {benefit.description}
-                  </p>
+                      ? "National Benefit"
+                      : "Local Benefit"}
+                  </span>
                 </div>
               </Link>
             ))}

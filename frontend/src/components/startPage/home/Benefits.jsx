@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import axios from "axios";
-import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, Loader2, Gift } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const Benefits = () => {
@@ -32,11 +32,11 @@ const Benefits = () => {
   };
 
   return (
-    <div className="bg-white py-8 rounded-lg relative">
+    <div className="bg-white py-8 relative">
       <div className="max-w-7xl mx-auto px-5 lg:px-8">
         {/* Header */}
         <div className="flex flex-col md:flex-row justify-center items-center mb-8">
-          <h2 className="text-2xl font-semibold text-gray-900 mb-4 text-center">
+          <h2 className="text-2xl font-semibold text-gray-900 mb-4 text-center flex items-center gap-2">
             Benefits
           </h2>
         </div>
@@ -67,36 +67,43 @@ const Benefits = () => {
             {/* Scrollable Container */}
             <div
               ref={scrollRef}
-              className="flex space-x-4 overflow-x-auto scrollbar-hide scroll-smooth px-2"
+              className="flex space-x-6 overflow-x-auto scrollbar-hide scroll-smooth px-2"
             >
               {benefits.map((benefit) => (
                 <Link
                   key={benefit.id}
-                  to={`/benefits/${benefit.id}`} // ✅ Navigate to details page
-                  className="min-w-[250px] max-w-[250px] bg-gray-100 rounded-xl shadow-md overflow-hidden flex-shrink-0 cursor-pointer hover:shadow-lg transition block"
+                  to={`/benefits/${benefit.id}`}
+                  className="min-w-[260px] max-w-[280px] bg-gradient-to-br from-blue-50 to-white 
+                             border border-blue-200 rounded-xl shadow-md cursor-pointer 
+                             hover:shadow-lg hover:-translate-y-1 transition-transform flex-shrink-0 overflow-hidden"
                 >
                   {/* Image */}
-                  <div className="relative">
+                  <div className="relative w-full h-40">
                     <img
                       src={benefit.image_url || "https://placehold.co/600x400"}
-                      alt={benefit.type}
-                      className="w-full h-40 object-cover"
+                      alt={benefit.provider}
+                      className="w-full h-full object-cover"
                     />
                   </div>
 
                   {/* Content */}
-                  <div className="p-4">
-                    <p className="text-sm text-gray-600 mb-1 capitalize">
-                      {benefit.type === "national"
-                        ? "National Benefits"
-                        : "Local Benefits"}
-                    </p>
-                    <h3 className="text-base font-semibold text-gray-900 mb-2 line-clamp-2">
-                      {benefit.provider}
-                    </h3>
-                    <p className="text-gray-700 text-sm line-clamp-3">
+                  <div className="p-5">
+                    <div className="flex items-center gap-2 mb-3">
+                      <Gift className="w-5 h-5 text-blue-600" />
+                      <h3 className="text-lg font-semibold line-clamp-2 text-gray-900">
+                        {benefit.provider}
+                      </h3>
+                    </div>
+                    <p className="text-sm text-gray-700 mb-4 line-clamp-3">
                       {benefit.description}
                     </p>
+
+                    {/* Footer Tag */}
+                    <span className="inline-block bg-blue-100 text-blue-700 text-xs font-medium px-3 py-1 rounded-full">
+                      {benefit.type === "national"
+                        ? "National Benefit"
+                        : "Local Benefit"}
+                    </span>
                   </div>
                 </Link>
               ))}

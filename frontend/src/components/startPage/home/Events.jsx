@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import Modal from "../../UI/Modal";
-import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, Loader2, Calendar } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const Events = () => {
@@ -43,7 +43,6 @@ const Events = () => {
     <div className="bg-white py-8 relative">
       <div className="max-w-7xl mx-auto px-5 lg:px-8">
         {/* Header */}
-        {/* Header */}
         <div className="flex flex-col md:flex-row justify-center items-center mb-8">
           <h2 className="text-2xl font-semibold text-gray-900 mb-4 text-center">
             Events
@@ -68,49 +67,53 @@ const Events = () => {
             {/* Left Arrow */}
             <button
               onClick={() => scroll("left")}
-              className="absolute left-0 top-1/2 -translate-y-1/2 bg-white p-2 rounded-full shadow-md hover:bg-gray-100 z-10"
+              className="absolute -left-6 top-1/2 -translate-y-1/2 bg-white shadow-md p-2 rounded-full z-10 hover:bg-gray-100"
             >
-              <ChevronLeft className="w-5 h-5 text-gray-700" />
+              <ChevronLeft className="w-6 h-6 text-gray-700" />
             </button>
 
             {/* Events Scrollable Row */}
             <div
               ref={scrollRef}
-              className="flex space-x-4 overflow-x-auto scrollbar-hide scroll-smooth px-2"
+              className="flex space-x-6 overflow-x-auto scrollbar-hide scroll-smooth px-2"
             >
               {events.map((event) => (
-                <Link key={event.id} to={`/events/${event.id}`}>
-                  <div
-                    key={event.id}
-                    className="min-w-[250px] max-w-[250px] bg-gray-100 rounded-xl shadow-md overflow-hidden flex-shrink-0 cursor-pointer hover:shadow-lg transition"
-                  >
-                    {/* Image */}
-                    <div className="relative">
-                      <img
-                        src={event.image_url || "https://placehold.co/300x200"}
-                        alt={event.title}
-                        className="w-full h-40 object-cover"
-                      />
-                    </div>
+                <Link
+                  key={event.id}
+                  to={`/events/${event.id}`}
+                  className="min-w-[260px] max-w-[280px] bg-gradient-to-br from-blue-50 to-white
+                             border border-blue-200 rounded-xl shadow-md cursor-pointer
+                             hover:shadow-lg hover:-translate-y-1 transition-transform flex-shrink-0 overflow-hidden"
+                >
+                  {/* Image */}
+                  <div className="relative w-full h-40">
+                    <img
+                      src={event.image_url || "https://placehold.co/300x200"}
+                      alt={event.title}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
 
-                    {/* Content */}
-                    <div className="p-4 flex flex-col justify-between flex-grow">
-                      <div>
-                        <p className="text-sm text-gray-600 mb-1">
-                          {new Date(event.date).toLocaleDateString("en-US", {
-                            year: "numeric",
-                            month: "short",
-                            day: "numeric",
-                          })}
-                        </p>
-                        <h3 className="text-base font-semibold text-gray-900 mb-2 line-clamp-2">
-                          {event.title}
-                        </h3>
-                        <p className="text-gray-700 text-sm mb-4 line-clamp-3">
-                          {event.description}
-                        </p>
-                      </div>
+                  {/* Content */}
+                  <div className="p-5">
+                    <div className="flex items-center gap-2 mb-3">
+                      <Calendar className="w-5 h-5 text-blue-600" />
+                      <h3 className="text-lg font-semibold line-clamp-2 text-gray-900">
+                        {event.title}
+                      </h3>
                     </div>
+                    <p className="text-sm text-gray-700 mb-4 line-clamp-3">
+                      {event.description}
+                    </p>
+
+                    {/* Footer Tag with Event Date */}
+                    <span className="inline-block bg-blue-100 text-blue-700 text-xs font-medium px-3 py-1 rounded-full">
+                      {new Date(event.date).toLocaleDateString("en-US", {
+                        year: "numeric",
+                        month: "short",
+                        day: "numeric",
+                      })}
+                    </span>
                   </div>
                 </Link>
               ))}
@@ -119,9 +122,9 @@ const Events = () => {
             {/* Right Arrow */}
             <button
               onClick={() => scroll("right")}
-              className="absolute right-0 top-1/2 -translate-y-1/2 bg-white p-2 rounded-full shadow-md hover:bg-gray-100 z-10"
+              className="absolute -right-6 top-1/2 -translate-y-1/2 bg-white shadow-md p-2 rounded-full z-10 hover:bg-gray-100"
             >
-              <ChevronRight className="w-5 h-5 text-gray-700" />
+              <ChevronRight className="w-6 h-6 text-gray-700" />
             </button>
           </div>
         )}
