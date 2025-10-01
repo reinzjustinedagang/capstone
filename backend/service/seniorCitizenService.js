@@ -982,15 +982,12 @@ exports.getArchivedSeniorCitizens = async (options) => {
   }
 
   // 🔽 Sorting
-  const allowedSort = [
-    "lastName",
-    "firstName",
-    "gender",
-    "archive_reason",
-    "archive_date",
-    "barangay_name",
-  ];
-  const orderBy = allowedSort.includes(sortBy) ? sortBy : "archive_date";
+  let orderByClause = "";
+  if (sortBy && allowedSort.includes(sortBy)) {
+    const order = sortOrder === "asc" ? "ASC" : "DESC";
+    orderByClause = `ORDER BY ${sortBy} ${order}`;
+  }
+
   const order = sortOrder === "asc" ? "ASC" : "DESC";
 
   try {
@@ -1006,14 +1003,14 @@ exports.getArchivedSeniorCitizens = async (options) => {
 
     const rows = await Connection(
       `SELECT sc.id, sc.firstName, sc.lastName, sc.middleName, sc.suffix, sc.gender,
-              sc.form_data,
-              sc.barangay_id, b.barangay_name,
-              sc.deceased_date, sc.archive_date, sc.archive_reason
-       FROM senior_citizens sc
-       LEFT JOIN barangays b ON sc.barangay_id = b.id
-       ${where}
-       ORDER BY ${orderBy} ${order}
-       LIMIT ? OFFSET ?`,
+          sc.form_data,
+          sc.barangay_id, b.barangay_name,
+          sc.deceased_date, sc.archive_date, sc.archive_reason
+   FROM senior_citizens sc
+   LEFT JOIN barangays b ON sc.barangay_id = b.id
+   ${where}
+   ${orderByClause}
+   LIMIT ? OFFSET ?`,
       [...params, safeLimit, offset]
     );
 

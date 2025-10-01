@@ -9,6 +9,8 @@ import {
   ArchiveRestore,
   Trash2,
   CheckCircle,
+  ArrowDown,
+  ArrowUp,
 } from "lucide-react";
 import Button from "../UI/Button";
 import Modal from "../UI/Modal";
@@ -35,7 +37,8 @@ const Archive = ({ onView }) => {
   const [filterGender, setFilterGender] = useState("All");
   // Instead of sorting by lastName asc
   const [sortBy, setSortBy] = useState("archive_date");
-  const [sortOrder, setSortOrder] = useState("desc");
+
+  const [sortOrder, setSortOrder] = useState("asc");
 
   const [showFilters, setShowFilters] = useState(false);
 
@@ -163,6 +166,16 @@ const Archive = ({ onView }) => {
     setShowFilters(false);
   };
 
+  // Sorting
+  const toggleSortOrder = (column) => {
+    if (sortBy === column) {
+      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+    } else {
+      setSortBy(column);
+      setSortOrder("asc");
+    }
+  };
+
   // ─── Effects ──────────────────────────────────────────────────────
   useEffect(() => {
     fetchBarangays();
@@ -241,6 +254,16 @@ const Archive = ({ onView }) => {
       )
     );
   };
+
+  const columns = [
+    { label: "Name", key: "lastName", sortable: true }, // ✅ only this is sortable
+    { label: "Gender", key: "gender", sortable: false },
+    { label: "Barangay", key: "barangay", sortable: false },
+    { label: "Archive Reason", key: "archive_reason", sortable: false },
+    { label: "Archived Date", key: "archive_date", sortable: false },
+    { label: "Deceased Date", key: "deceased_date", sortable: false },
+    { label: "Action", key: "action", sortable: false },
+  ];
 
   // ─── Render ───────────────────────────────────────────────────────
   return (
@@ -355,24 +378,28 @@ const Archive = ({ onView }) => {
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
-                {[
-                  "Name",
-                  "Gender",
-                  "Barangay",
-                  "Archive Reason",
-                  "Archived Date",
-                  "Deceased Date",
-                  "Action",
-                ].map((col) => (
+                {columns.map((col) => (
                   <th
-                    key={col}
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    key={col.key}
+                    onClick={() => col.sortable && toggleSortOrder(col.key)}
+                    className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider 
+          ${col.sortable ? "cursor-pointer text-gray-700" : "text-gray-500"}`}
                   >
-                    {col}
+                    <div className="flex items-center">
+                      {col.label}
+                      {col.sortable &&
+                        sortBy === col.key &&
+                        (sortOrder === "asc" ? (
+                          <ArrowUp className="h-4 w-4 ml-1" />
+                        ) : (
+                          <ArrowDown className="h-4 w-4 ml-1" />
+                        ))}
+                    </div>
                   </th>
                 ))}
               </tr>
             </thead>
+
             <tbody className="bg-white divide-y divide-gray-200">
               {archivedCitizens.length > 0 ? (
                 archivedCitizens.map((citizen) => (
