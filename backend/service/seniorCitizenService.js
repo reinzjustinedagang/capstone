@@ -78,9 +78,7 @@ exports.getRecentSeniorCitizens = async () => {
           citizen.middleName ? ` ${citizen.middleName}` : ""
         }`.trim(),
         age: formData.age || citizen.age,
-        address: `${formData.street || ""}${
-          barangayName ? `, ${barangayName}` : ""
-        }`.trim(),
+        address: `${barangayName ? `${barangayName}` : ""}`.trim(),
         dateRegistered: citizen.created_at,
       };
     });

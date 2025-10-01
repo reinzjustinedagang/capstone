@@ -1,21 +1,72 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 
-const RecentSmsActivities = ({ activities = [] }) => {
+const RecentSmsActivities = () => {
+  const [activities, setActivities] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const backendUrl =
+    import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
+
+  useEffect(() => {
+    const fetchRecentSMS = async () => {
+      try {
+        const response = await axios.get(`${backendUrl}/api/sms/recent`);
+        const logsArray = Array.isArray(response.data.logs)
+          ? response.data.logs
+          : response.data;
+
+        const formattedLogs = logsArray.map((sms) => {
+          let recipientCount = 0;
+
+          try {
+            recipientCount = Array.isArray(sms.recipients)
+              ? sms.recipients.length
+              : JSON.parse(sms.recipients).length;
+          } catch {
+            recipientCount = 0;
+          }
+
+          return {
+            id: sms.id,
+            title: sms.message || "No message",
+            recipients: recipientCount,
+            date: sms.created_at
+              ? new Date(sms.created_at).toLocaleString()
+              : "N/A",
+            status: sms.status || "Unknown",
+          };
+        });
+
+        setActivities(formattedLogs);
+      } catch (error) {
+        console.error("Error fetching recent SMS activities:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchRecentSMS();
+  }, [backendUrl]);
+
   return (
     <div className="bg-white rounded-lg shadow p-6">
       <h2 className="text-lg font-semibold mb-4">Recent SMS Activities</h2>
       <div className="space-y-4">
-        {activities.length > 0 ? (
+        {loading ? (
+          <p className="text-sm text-gray-500">Loading...</p>
+        ) : activities.length > 0 ? (
           activities.map((sms, idx) => (
             <div
-              key={idx}
+              key={sms.id}
               className={`pb-3 ${
                 idx < activities.length - 1 ? "border-b border-gray-200" : ""
               }`}
             >
               <p className="text-sm font-medium">{sms.title}</p>
               <p className="text-xs text-gray-500">
-                Sent to {sms.recipients} recipients • {sms.date}
+                Sent to {sms.recipients} recipient
+                {sms.recipients !== 1 ? "s" : ""} • {sms.date}
               </p>
             </div>
           ))

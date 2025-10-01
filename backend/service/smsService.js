@@ -180,6 +180,21 @@ exports.updateSmsCredentials = async (api_key, sender_id, user, ip) => {
   return { actionType };
 };
 
+exports.getRecentSMSHistory = async () => {
+  try {
+    const recentHistory = await Connection(`
+      SELECT * 
+      FROM sms_logs 
+      ORDER BY created_at DESC 
+      LIMIT 5
+    `);
+    return recentHistory;
+  } catch (error) {
+    console.error("Error fetching recent SMS history:", error);
+    throw new Error("Failed to retrieve recent SMS history.");
+  }
+};
+
 exports.getPaginatedSMSHistory = async (limit, offset, user, filters = {}) => {
   const { role = "All", email = "All", status = "All" } = filters;
 

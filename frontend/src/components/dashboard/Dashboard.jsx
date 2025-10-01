@@ -206,30 +206,7 @@ const Dashboard = () => {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
         <RecentRegistrations />
 
-        <RecentSmsActivities
-          activities={[
-            {
-              title: "Monthly Pension Notification",
-              recipients: 45,
-              date: "June 16, 2023",
-            },
-            {
-              title: "Health Checkup Reminder",
-              recipients: 78,
-              date: "June 14, 2023",
-            },
-            {
-              title: "Community Meeting Invitation",
-              recipients: 120,
-              date: "June 10, 2023",
-            },
-            {
-              title: "Medicine Distribution Notice",
-              recipients: 56,
-              date: "June 5, 2023",
-            },
-          ]}
-        />
+        <RecentSmsActivities />
       </div>
       <div>
         <BarangayDistribution />

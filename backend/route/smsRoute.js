@@ -71,6 +71,16 @@ router.delete("/delete/:id", async (req, res) => {
   }
 });
 
+router.get("/recent", async (req, res) => {
+  try {
+    const result = await smsService.getRecentSMSHistory();
+    res.status(200).json({ logs: result }); // ✅ wrap in { logs: ... } for consistency
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Failed to fetch recent sms history." });
+  }
+});
+
 // GET paginated SMS history
 router.get("/history", isAuthenticated, async (req, res) => {
   try {
