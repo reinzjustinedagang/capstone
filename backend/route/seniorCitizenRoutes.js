@@ -316,6 +316,7 @@ router.get("/page", async (req, res) => {
     ageRange = "All",
     healthStatus = "All",
     pensioner = "All",
+    reports = "All",
     sortBy = "lastName",
     sortOrder = "asc",
   } = req.query;
@@ -330,6 +331,7 @@ router.get("/page", async (req, res) => {
       ageRange,
       healthStatus,
       pensioner,
+      reports,
       sortBy,
       sortOrder,
     });

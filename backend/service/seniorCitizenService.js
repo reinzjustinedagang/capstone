@@ -474,6 +474,7 @@ exports.getPaginatedFilteredCitizens = async (options) => {
     ageRange,
     healthStatus,
     pensioner,
+    reports,
     sortBy,
     sortOrder,
   } = options;
@@ -527,6 +528,23 @@ exports.getPaginatedFilteredCitizens = async (options) => {
     const max = maxRaw.includes("+") ? 200 : parseInt(maxRaw);
     where += ` AND sc.age BETWEEN ? AND ?`;
     params.push(parseInt(min), max);
+  }
+
+  // Report filter
+  if (reports === "Booklet") {
+    where += ` AND JSON_UNQUOTE(JSON_EXTRACT(sc.form_data, '$.booklet')) = 'yes'`;
+  }
+
+  if (reports === "UTP") {
+    where += ` AND JSON_UNQUOTE(JSON_EXTRACT(sc.form_data, '$.utp')) = 'yes'`;
+  }
+
+  if (reports === "Transferee") {
+    where += ` AND JSON_UNQUOTE(JSON_EXTRACT(sc.form_data, '$.tranfer')) = 'yes'`;
+  }
+
+  if (reports === "PDL") {
+    where += ` AND JSON_UNQUOTE(JSON_EXTRACT(sc.form_data, '$.pdl')) = 'yes'`;
   }
 
   // Sorting

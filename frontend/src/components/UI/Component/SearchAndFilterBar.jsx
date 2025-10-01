@@ -18,12 +18,15 @@ const SearchAndFilterBar = ({
   setFilterHealthStatus,
   filterPensioner,
   setFilterPensioner,
+  filterReports,
+  setFilterReports,
   clearFilters,
   AgeOptions,
   genderOptions,
   barangayOptions,
   healthStatusOptions,
   pensionOptions,
+  reportsOptions,
 }) => {
   return (
     <div className="border-b border-gray-200 space-y-4">
@@ -40,6 +43,7 @@ const SearchAndFilterBar = ({
             filterBarangay,
             filterHealthStatus,
             filterPensioner,
+            filterReports,
           }}
         />
       </div>
@@ -57,11 +61,14 @@ const SearchAndFilterBar = ({
           setFilterHealthStatus={setFilterHealthStatus}
           filterPensioner={filterPensioner}
           setFilterPensioner={setFilterPensioner}
+          filterReports={filterReports}
+          setFilterReports={setFilterReports}
           AgeOptions={AgeOptions}
           genderOptions={genderOptions}
           barangayOptions={barangayOptions}
           healthStatusOptions={healthStatusOptions}
           pensionOptions={pensionOptions}
+          reportsOptions={reportsOptions}
         />
       )}
     </div>

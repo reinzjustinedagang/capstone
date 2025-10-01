@@ -42,7 +42,7 @@ const SeniorCitizenList = ({ onEdit, onId }) => {
   const [healthStatusOptions, setHealthStatusOptions] = useState([
     "All Remarks",
   ]);
-
+  const [filterReports, setFilterReports] = useState("All");
   const [filterAge, setFilterAge] = useState("All");
   const [filterGender, setFilterGender] = useState("All");
   const [sortBy, setSortBy] = useState("lastName");
@@ -101,6 +101,7 @@ const SeniorCitizenList = ({ onEdit, onId }) => {
         ageRange: filterAge,
         healthStatus: filterHealthStatus,
         pensioner: filterPensioner,
+        reports: filterReports,
         sortBy,
         sortOrder,
       };
@@ -190,6 +191,7 @@ const SeniorCitizenList = ({ onEdit, onId }) => {
     setFilterBarangay("All Barangays");
     setFilterHealthStatus("All Remarks");
     setFilterPensioner("All Pensions");
+    setFilterReports("All");
     setFilterAge("All");
     setFilterGender("All");
     setShowFilters(false);
@@ -209,6 +211,8 @@ const SeniorCitizenList = ({ onEdit, onId }) => {
 
   const pensionOptions = ["All Pensions", "GSIS", "SSS", "PVAO", "PWD", "NONE"];
 
+  const reportsOptions = ["All", "Booklet", "UTP", "Transferee", "PDL"];
+
   // Effects
   useEffect(() => {
     fetchCitizens();
@@ -218,6 +222,7 @@ const SeniorCitizenList = ({ onEdit, onId }) => {
     filterBarangay,
     filterHealthStatus,
     filterPensioner,
+    filterReports,
     filterAge,
     filterGender,
     sortBy,
@@ -251,12 +256,15 @@ const SeniorCitizenList = ({ onEdit, onId }) => {
           setFilterHealthStatus={setFilterHealthStatus}
           filterPensioner={filterPensioner}
           setFilterPensioner={setFilterPensioner}
+          filterReports={filterReports}
+          setFilterReports={setFilterReports}
           clearFilters={clearFilters}
           AgeOptions={AgeOptions}
           genderOptions={genderOptions}
           barangayOptions={barangayOptions}
           healthStatusOptions={healthStatusOptions}
           pensionOptions={pensionOptions}
+          reportsOptions={reportsOptions}
         />
 
         {/* Table */}
