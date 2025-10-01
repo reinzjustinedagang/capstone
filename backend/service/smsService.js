@@ -266,51 +266,62 @@ exports.getPaginatedSMSHistory = async (limit, offset, user, filters = {}) => {
 
 exports.getSmsCounts = async (user) => {
   try {
-    let query;
+    let query = "";
     let params = [];
 
-    if (user && user.role?.toLowerCase() === "admin") {
+    // Base WHERE clause: current month/year
+    const baseWhere = `
+      WHERE MONTH(created_at) = MONTH(CURRENT_DATE())
+        AND YEAR(created_at) = YEAR(CURRENT_DATE())
+    `;
+
+    // Role-based filtering
+    if (user && user.role?.toLowerCase() !== "admin") {
+      query = `
+        SELECT 
+          SUM(CASE WHEN status = 'Success' THEN 1 ELSE 0 END) AS success_count,
+          SUM(CASE WHEN status LIKE 'Failed%' THEN 1 ELSE 0 END) AS failed_count,
+          SUM(CASE WHEN status = 'Partial' THEN 1 ELSE 0 END) AS partial_count,
+          SUM(CASE WHEN status = 'Pending' THEN 1 ELSE 0 END) AS pending_count,
+          COUNT(*) AS total
+        FROM sms_logs
+        ${baseWhere} AND sent_by = ?
+      `;
+      params.push(user.id);
+    } else {
       // Admin → all messages
       query = `
         SELECT 
           SUM(CASE WHEN status = 'Success' THEN 1 ELSE 0 END) AS success_count,
-          SUM(CASE WHEN status = 'Failed' THEN 1 ELSE 0 END) AS failed_count,
+          SUM(CASE WHEN status LIKE 'Failed%' THEN 1 ELSE 0 END) AS failed_count,
+          SUM(CASE WHEN status = 'Partial' THEN 1 ELSE 0 END) AS partial_count,
           SUM(CASE WHEN status = 'Pending' THEN 1 ELSE 0 END) AS pending_count,
           COUNT(*) AS total
         FROM sms_logs
-        WHERE MONTH(created_at) = MONTH(CURRENT_DATE())
-          AND YEAR(created_at) = YEAR(CURRENT_DATE())
+        ${baseWhere}
       `;
-    } else if (user && user.id) {
-      // Staff → only their messages
-      query = `
-        SELECT 
-          SUM(CASE WHEN status = 'Success' THEN 1 ELSE 0 END) AS success_count,
-          SUM(CASE WHEN status = 'Failed' THEN 1 ELSE 0 END) AS failed_count,
-          SUM(CASE WHEN status = 'Pending' THEN 1 ELSE 0 END) AS pending_count,
-          COUNT(*) AS total
-        FROM sms_logs
-        WHERE MONTH(created_at) = MONTH(CURRENT_DATE())
-          AND YEAR(created_at) = YEAR(CURRENT_DATE())
-          AND sent_by = ?
-      `;
-      params.push(user.id);
-    } else {
-      return { success_count: 0, failed_count: 0, pending_count: 0, total: 0 };
     }
 
     const [result] = await Connection(query, params);
+
     return (
       result || {
         success_count: 0,
         failed_count: 0,
+        partial_count: 0,
         pending_count: 0,
         total: 0,
       }
     );
   } catch (err) {
     console.error("Error fetching SMS counts:", err);
-    throw err;
+    return {
+      success_count: 0,
+      failed_count: 0,
+      partial_count: 0,
+      pending_count: 0,
+      total: 0,
+    };
   }
 };
 
