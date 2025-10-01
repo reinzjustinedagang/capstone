@@ -3,7 +3,8 @@ import Button from "../UI/Button";
 import axios from "axios";
 
 const BarangayForm = ({ barangay, onClose, onSuccess }) => {
-  const [name, setName] = useState(barangay?.name || "");
+  const [name, setName] = useState(barangay?.barangay_name || "");
+  const [controlNo, setControlNo] = useState(barangay?.controlNo || "");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -11,7 +12,8 @@ const BarangayForm = ({ barangay, onClose, onSuccess }) => {
 
   useEffect(() => {
     if (barangay) {
-      setName(barangay.name);
+      setName(barangay.barangay_name);
+      setControlNo(barangay.controlNo);
     }
   }, [barangay]);
 
@@ -25,19 +27,19 @@ const BarangayForm = ({ barangay, onClose, onSuccess }) => {
         // Update existing
         await axios.put(
           `${backendUrl}/api/barangays/${barangay.id}`,
-          { name: name },
+          { name, controlNo },
           { withCredentials: true }
         );
       } else {
         // Create new
         await axios.post(
-          `${backendUrl}/api/barangays/`,
-          { name: name },
+          `${backendUrl}/api/barangays`,
+          { name, controlNo },
           { withCredentials: true }
         );
       }
 
-      onSuccess(); // trigger re-fetch and close modal
+      onSuccess(); // refresh list + close modal
     } catch (err) {
       console.error("Failed to submit form:", err);
       setError(
@@ -50,12 +52,14 @@ const BarangayForm = ({ barangay, onClose, onSuccess }) => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="p-4" disabled={loading}>
+    <form onSubmit={handleSubmit} className="p-4">
       {error && (
         <div className="mb-4 p-3 bg-red-100 text-red-700 border-l-4 border-red-500 rounded">
           {error}
         </div>
       )}
+
+      {/* Barangay Name */}
       <div className="mb-4">
         <label className="block text-sm font-semibold text-gray-700 mb-1">
           Barangay Name
@@ -71,6 +75,23 @@ const BarangayForm = ({ barangay, onClose, onSuccess }) => {
           autoFocus
         />
       </div>
+
+      {/* Control Number */}
+      <div className="mb-4">
+        <label className="block text-sm font-semibold text-gray-700 mb-1">
+          Control No.
+        </label>
+        <input
+          type="text"
+          className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          value={controlNo}
+          onChange={(e) => setControlNo(e.target.value)}
+          required
+          minLength={1}
+          disabled={loading}
+        />
+      </div>
+
       <div className="flex justify-end space-x-3">
         <Button variant="secondary" onClick={onClose} type="button">
           Cancel

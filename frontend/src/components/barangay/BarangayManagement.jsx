@@ -35,12 +35,14 @@ const BarangayManagement = () => {
   const fetchBarangays = async () => {
     try {
       setLoading(true);
-      setError(""); // Clear previous errors
+      setError("");
       const res = await axios.get(
-        `${backendUrl}/api/barangays?page=${page}&limit=${limit}`
+        `${backendUrl}/api/barangays?page=${page}&limit=${limit}&search=${encodeURIComponent(
+          searchTerm
+        )}&sortBy=${sortBy}&sortOrder=${sortOrder}`
       );
-      setBarangays(res.data.barangays); // Assuming backend sends { barangays: [...], total: N }
-      setTotal(res.data.total); // Set total count from backend response
+      setBarangays(res.data.barangays);
+      setTotal(res.data.total);
     } catch (err) {
       console.error("Failed to fetch barangays:", err);
       setError(err.response?.data?.message || "Failed to fetch barangays.");
@@ -51,7 +53,7 @@ const BarangayManagement = () => {
 
   useEffect(() => {
     fetchBarangays();
-  }, [page, limit, backendUrl]); // Depend on page, limit, and backendUrl
+  }, [page, limit, searchTerm, sortBy, sortOrder, backendUrl]);
 
   const handleDeleteConfirm = async () => {
     try {
@@ -88,17 +90,9 @@ const BarangayManagement = () => {
   // Memoized filtered and sorted barangays for display on the current page
   // The sorting is applied to the *current page's* data, not the whole dataset
   // as pagination handles the fetching of limited data.
-  const displayedBarangays = barangays
-    .filter((b) =>
-      b.barangay_name.toLowerCase().includes(searchTerm.trim().toLowerCase())
-    )
-    .sort((a, b) => {
-      const aValue = a[sortBy];
-      const bValue = b[sortBy];
-      if (aValue < bValue) return sortOrder === "asc" ? -1 : 1;
-      if (aValue > bValue) return sortOrder === "asc" ? 1 : -1;
-      return 0;
-    });
+  const displayedBarangays = barangays.filter((b) =>
+    b.barangay_name.toLowerCase().includes(searchTerm.trim().toLowerCase())
+  );
 
   const totalPages = Math.ceil(total / limit);
 
@@ -239,6 +233,9 @@ const BarangayManagement = () => {
                     </div>
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                    Control No.
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                     Created At
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
@@ -261,6 +258,9 @@ const BarangayManagement = () => {
                     <tr key={barangay.id}>
                       <td className="px-6 py-4 text-sm font-medium text-gray-900">
                         {barangay.barangay_name}
+                      </td>
+                      <td className="px-6 py-4 text-sm font-medium text-gray-900">
+                        {barangay.controlNo}
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-500">
                         {new Date(barangay.created_at).toLocaleString()}

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { Loader2 } from "lucide-react";
 
 const RecentSmsActivities = () => {
   const [activities, setActivities] = useState([]);
@@ -60,7 +61,10 @@ const RecentSmsActivities = () => {
       <h2 className="text-lg font-semibold mb-4">Recent SMS Activities</h2>
       <div className="space-y-4">
         {loading ? (
-          <p className="text-sm text-gray-500">Loading...</p>
+          <div className="flex items-center justify-start">
+            <Loader2 className="w-6 h-6 text-blue-500 animate-spin" />
+            <span className="ml-2 text-gray-600">Loading...</span>
+          </div>
         ) : activities.length > 0 ? (
           activities.map((sms, idx) => (
             <div

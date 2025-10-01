@@ -1,19 +1,49 @@
 const Connection = require("../db/Connection");
 const { logAudit } = require("./auditService");
 
-// Get all barangays
-// Get paginated barangays
-exports.getPaginatedBarangays = async (page = 1, limit = 10) => {
+// Get paginated barangays with optional search + sorting
+exports.getPaginatedBarangays = async (
+  page = 1,
+  limit = 10,
+  search = "",
+  sortBy = "barangay_name",
+  sortOrder = "ASC"
+) => {
   const offset = (page - 1) * limit;
+  const searchQuery = `%${search}%`;
 
-  const data = await Connection(
-    "SELECT id, barangay_name, created_at FROM barangays ORDER BY barangay_name ASC LIMIT ? OFFSET ?",
-    [parseInt(limit), parseInt(offset)]
-  );
+  // ✅ allow only specific safe columns
+  const allowedSortColumns = ["barangay_name", "controlNo", "created_at"];
+  const safeSortBy = allowedSortColumns.includes(sortBy)
+    ? sortBy
+    : "barangay_name";
+  const safeSortOrder = sortOrder.toUpperCase() === "DESC" ? "DESC" : "ASC";
 
-  const [countResult] = await Connection(
-    "SELECT COUNT(*) AS total FROM barangays"
-  );
+  let data, countResult;
+
+  if (search && search.trim() !== "") {
+    data = await Connection(
+      `SELECT * FROM barangays 
+       WHERE barangay_name LIKE ? 
+       ORDER BY ${safeSortBy} ${safeSortOrder} 
+       LIMIT ? OFFSET ?`,
+      [searchQuery, parseInt(limit), parseInt(offset)]
+    );
+
+    [countResult] = await Connection(
+      "SELECT COUNT(*) AS total FROM barangays WHERE barangay_name LIKE ?",
+      [searchQuery]
+    );
+  } else {
+    data = await Connection(
+      `SELECT * FROM barangays 
+       ORDER BY ${safeSortBy} ${safeSortOrder} 
+       LIMIT ? OFFSET ?`,
+      [parseInt(limit), parseInt(offset)]
+    );
+
+    [countResult] = await Connection("SELECT COUNT(*) AS total FROM barangays");
+  }
 
   return {
     data,
@@ -28,7 +58,7 @@ exports.getAllBarangay = async () => {
 };
 
 // Create a new barangay
-exports.createBarangay = async (name, user) => {
+exports.createBarangay = async (name, controlNo, user, ip) => {
   // Check for duplicate name
   const existing = await Connection(
     "SELECT * FROM barangays WHERE barangay_name = ?",
@@ -41,8 +71,8 @@ exports.createBarangay = async (name, user) => {
   }
 
   const result = await Connection(
-    "INSERT INTO barangays (barangay_name) VALUES (?)",
-    [name.trim()]
+    "INSERT INTO barangays (barangay_name, controlNo) VALUES (?, ?)",
+    [name.trim(), controlNo]
   );
 
   if (result.affectedRows === 1 && user) {
@@ -51,7 +81,8 @@ exports.createBarangay = async (name, user) => {
       user.email,
       user.role,
       "CREATE",
-      `Created barangay '${name}'.`
+      `Created barangay '${name}'.`,
+      ip
     );
   }
 
@@ -59,10 +90,10 @@ exports.createBarangay = async (name, user) => {
 };
 
 // Update a barangay
-exports.updateBarangay = async (id, name, user) => {
+exports.updateBarangay = async (id, name, controlNo, user, ip) => {
   const existing = await Connection(
-    "SELECT id FROM barangays WHERE barangay_name = ? AND id != ?",
-    [name.trim(), id]
+    "SELECT id FROM barangays WHERE barangay_name = ? AND controlNo = ? AND id != ?",
+    [name.trim(), controlNo, id]
   );
   if (existing.length > 0) {
     const error = new Error("Another barangay with this name already exists.");
@@ -70,14 +101,13 @@ exports.updateBarangay = async (id, name, user) => {
     throw error;
   }
 
-  const [oldData] = await Connection(
-    "SELECT barangay_name FROM barangays WHERE id = ?",
-    [id]
-  );
+  const [oldData] = await Connection("SELECT * FROM barangays WHERE id = ?", [
+    id,
+  ]);
 
   const result = await Connection(
-    "UPDATE barangays SET barangay_name = ? WHERE id = ?",
-    [name, id]
+    "UPDATE barangays SET barangay_name = ?, controlNo = ? WHERE id = ?",
+    [name, controlNo, id]
   );
 
   if (result.affectedRows === 1 && user) {
@@ -86,7 +116,8 @@ exports.updateBarangay = async (id, name, user) => {
       user.email,
       user.role,
       "UPDATE",
-      `Updated barangay ${oldData.barangay_name} → ${name}.`
+      `Updated barangay ${oldData.barangay_name} → ${name}.`,
+      ip
     );
   }
 
@@ -94,7 +125,7 @@ exports.updateBarangay = async (id, name, user) => {
 };
 
 // Delete a barangay
-exports.deleteBarangay = async (id, user) => {
+exports.deleteBarangay = async (id, user, ip) => {
   const [barangay] = await Connection(
     "SELECT barangay_name FROM barangays WHERE id = ?",
     [id]
@@ -108,7 +139,8 @@ exports.deleteBarangay = async (id, user) => {
       user.email,
       user.role,
       "DELETE",
-      `Deleted barangay '${barangay?.barangay_name}'`
+      `Deleted barangay '${barangay?.barangay_name}'`,
+      ip
     );
   }
 

@@ -1,18 +1,23 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { Loader2 } from "lucide-react";
 
 const RecentRegistrations = () => {
   const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(false);
   const backendUrl =
     import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const res = await axios.get(`${backendUrl}/api/senior-citizens/new`); // your route
+        setLoading(true);
+        const res = await axios.get(`${backendUrl}/api/senior-citizens/new`);
         setData(res.data);
       } catch (err) {
         console.error("Failed to fetch recent registrations", err);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -41,7 +46,19 @@ const RecentRegistrations = () => {
             </tr>
           </thead>
           <tbody>
-            {data.length > 0 ? (
+            {loading ? (
+              <tr>
+                <td
+                  colSpan="4"
+                  className="px-4 py-6 text-sm text-center text-gray-500"
+                >
+                  <div className="flex items-center justify-center">
+                    <Loader2 className="w-6 h-6 text-blue-500 animate-spin" />
+                    <span className="ml-2 text-gray-600">Loading...</span>
+                  </div>
+                </td>
+              </tr>
+            ) : data.length > 0 ? (
               data.map((citizen) => (
                 <tr key={citizen.id} className="border-b border-gray-200">
                   <td className="px-4 py-3 text-sm">{citizen.name}</td>

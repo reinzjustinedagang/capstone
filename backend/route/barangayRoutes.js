@@ -2,15 +2,21 @@ const express = require("express");
 const router = express.Router();
 const barangayService = require("../service/barangayService");
 
-// GET paginated barangays
+// GET paginated barangays (with search + sorting)
 router.get("/", async (req, res) => {
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || 10;
+  const search = req.query.search || "";
+  const sortBy = req.query.sortBy || "barangay_name"; // default sort column
+  const sortOrder = req.query.sortOrder === "desc" ? "DESC" : "ASC"; // only allow ASC/DESC
 
   try {
     const { data, total } = await barangayService.getPaginatedBarangays(
       page,
-      limit
+      limit,
+      search,
+      sortBy,
+      sortOrder
     );
     res.json({ barangays: data, total });
   } catch (error) {
@@ -46,7 +52,7 @@ router.get("/count/all", async (req, res) => {
 
 // POST create a new barangay
 router.post("/", async (req, res) => {
-  const { name } = req.body;
+  const { name, controlNo } = req.body;
   const user = req.session.user;
   const ip = req.userIp;
 
@@ -57,7 +63,7 @@ router.post("/", async (req, res) => {
   }
 
   try {
-    await barangayService.createBarangay(name, user, ip);
+    await barangayService.createBarangay(name, controlNo, user, ip);
     res.status(201).json({ message: "Barangay created successfully" });
   } catch (error) {
     console.error("Error creating barangay:", error);
@@ -69,7 +75,7 @@ router.post("/", async (req, res) => {
 
 // PUT update a barangay
 router.put("/:id", async (req, res) => {
-  const { name } = req.body;
+  const { name, controlNo } = req.body;
   const user = req.session.user;
   const ip = req.userIp;
 
@@ -78,7 +84,13 @@ router.put("/:id", async (req, res) => {
   }
 
   try {
-    await barangayService.updateBarangay(req.params.id, name, user, ip);
+    await barangayService.updateBarangay(
+      req.params.id,
+      name,
+      controlNo,
+      user,
+      ip
+    );
     res.json({ message: "Barangay updated successfully" });
   } catch (error) {
     console.error("Error updating barangay:", error);
