@@ -981,6 +981,8 @@ exports.getArchivedSeniorCitizens = async (options) => {
     }
   }
 
+  const allowedSort = ["lastName", "archive_date", "deceased_date"]; // add whatever columns you allow sorting on
+
   // 🔽 Sorting
   let orderByClause = "";
   if (sortBy && allowedSort.includes(sortBy)) {

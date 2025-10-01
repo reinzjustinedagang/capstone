@@ -383,7 +383,7 @@ const Archive = ({ onView }) => {
                     key={col.key}
                     onClick={() => col.sortable && toggleSortOrder(col.key)}
                     className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider 
-          ${col.sortable ? "cursor-pointer text-gray-700" : "text-gray-500"}`}
+    ${col.sortable ? "cursor-pointer text-gray-700" : "text-gray-500"}`}
                   >
                     <div className="flex items-center">
                       {col.label}
