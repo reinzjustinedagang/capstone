@@ -4,50 +4,46 @@ const { logAudit } = require("./auditService");
 const bcrypt = require("bcrypt");
 
 exports.sendSMS = async (message, recipients, user, options = {}) => {
-  // If user looks like options (has skipLogging), swap
   if (user && user.skipLogging) {
     options = user;
     user = null;
   }
 
-  let validRecipients = [];
+  let validRecipients = (recipients || []).filter(
+    (num) => num && num.toString().trim() !== ""
+  );
+
+  if (validRecipients.length === 0) {
+    throw new Error("No valid recipients to send SMS.");
+  }
+
   try {
     const [credentials] = await Connection(
       "SELECT * FROM sms_credentials LIMIT 1"
     );
     if (!credentials) throw new Error("SMS credentials not found.");
 
-    validRecipients = (recipients || []).filter(
-      (num) => num && num.toString().trim() !== ""
-    );
+    const logs = [];
 
-    if (validRecipients.length === 0) {
-      throw new Error("No valid recipients to send SMS.");
+    for (const number of validRecipients) {
+      const params = new URLSearchParams();
+      params.append("apikey", credentials.api_key);
+      params.append("number", number);
+      params.append("message", message);
+      if (credentials.sender_id)
+        params.append("sendername", credentials.sender_id);
+
+      const response = await axios.post(
+        "https://api.semaphore.co/api/v4/messages",
+        params.toString(),
+        { headers: { "Content-Type": "application/x-www-form-urlencoded" } }
+      );
+
+      logs.push(response.data);
     }
 
-    // Convert to comma-separated string
-    const numbersStr = validRecipients.join(",");
-
-    // Prepare payload as URL-encoded form data
-    const params = new URLSearchParams();
-    params.append("apikey", credentials.api_key);
-    params.append("number", numbersStr);
-    params.append("message", message);
-    if (credentials.sender_id)
-      params.append("sendername", credentials.sender_id);
-
-    // Send SMS via Semaphore
-    const response = await axios.post(
-      "https://api.semaphore.co/api/v4/messages",
-      params.toString(),
-      { headers: { "Content-Type": "application/x-www-form-urlencoded" } }
-    );
-
-    const data = response.data;
-    const logs = Array.isArray(data) ? data : [data];
-
-    // ✅ Only log if NOT OTP (skipLogging flag is false)
-    if (!options.skipLogging) {
+    // Logging after sending all
+    if (!options.skipLogging && logs.length) {
       const allStatuses = logs.map((l) => l.status);
       const overallStatus = allStatuses.every((s) => s === "Success")
         ? "Success"
@@ -68,7 +64,7 @@ exports.sendSMS = async (message, recipients, user, options = {}) => {
         `INSERT INTO sms_logs (recipients, message, status, reference_id, credit_used, sent_by, sent_role, sent_email)
          VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
         [
-          JSON.stringify(validRecipients), // full batch list
+          JSON.stringify(validRecipients),
           message,
           overallStatus,
           referenceIds || null,
@@ -83,22 +79,14 @@ exports.sendSMS = async (message, recipients, user, options = {}) => {
     return { success: true, response: logs };
   } catch (error) {
     console.error("Error sending SMS:", error?.response?.data || error.message);
-
     if (!options.skipLogging) {
-      // More descriptive error status
-      const apiError =
-        error?.response?.data?.error ||
-        error?.response?.data?.message ||
-        error.message ||
-        "Unknown Error";
-
       await Connection(
         `INSERT INTO sms_logs (recipients, message, status, reference_id, credit_used, sent_by, sent_role, sent_email)
          VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
         [
           JSON.stringify(validRecipients),
           message,
-          `Failed: ${apiError}`, // <-- descriptive reason
+          `Failed: ${error?.response?.data?.error || error.message}`,
           null,
           0,
           user ? user.id : null,
@@ -107,7 +95,6 @@ exports.sendSMS = async (message, recipients, user, options = {}) => {
         ]
       );
     }
-
     return {
       success: false,
       response: error?.response?.data || { message: error.message },

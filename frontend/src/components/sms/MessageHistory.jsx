@@ -21,16 +21,16 @@ const MessageHistory = () => {
   const [allEmails, setAllEmails] = useState(["All"]);
   const [showFilters, setShowFilters] = useState(false);
 
-  const fetchFilterOptions = async () => {
-    try {
-      const res = await axios.get(`${backendUrl}/api/sms/filter-options`, {
-        withCredentials: true,
-      });
-      setAllEmails(["All", ...(res.data.emails || [])]);
-    } catch (err) {
-      console.error("Failed to fetch SMS filter options:", err);
-    }
-  };
+  // const fetchFilterOptions = async () => {
+  //   try {
+  //     const res = await axios.get(`${backendUrl}/api/sms/filter-options`, {
+  //       withCredentials: true,
+  //     });
+  //     setAllEmails(["All", ...(res.data.emails || [])]);
+  //   } catch (err) {
+  //     console.error("Failed to fetch SMS filter options:", err);
+  //   }
+  // };
 
   const fetchHistory = async () => {
     setLoading(true);
