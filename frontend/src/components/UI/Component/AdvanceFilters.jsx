@@ -36,7 +36,7 @@ const AdvancedFilters = ({
   healthStatusOptions,
   pensionOptions,
 }) => (
-  <div className="grid grid-cols-4 md:grid-cols-5 gap-4 pt-2 border-t border-gray-200">
+  <div className="p-4 grid grid-cols-4 md:grid-cols-5 gap-4 pt-2 border-t border-gray-200">
     <SelectFilter
       label="Age"
       value={filterAge}

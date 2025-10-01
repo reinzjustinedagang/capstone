@@ -26,9 +26,9 @@ const SearchAndFilterBar = ({
   pensionOptions,
 }) => {
   return (
-    <div className="p-4 border-b border-gray-200 space-y-4">
+    <div className="border-b border-gray-200 space-y-4">
       {/* Top Section */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0">
+      <div className="p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0">
         <SearchInput value={searchTerm} onChange={setSearchTerm} />
         <FilterToggles
           showFilters={showFilters}

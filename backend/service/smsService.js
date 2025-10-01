@@ -48,11 +48,12 @@ exports.sendSMS = async (message, recipients, user, options = {}) => {
 
     // ✅ Only log if NOT OTP (skipLogging flag is false)
     if (!options.skipLogging) {
-      const overallStatus = logs.every((l) => l.status === "Success")
+      const allStatuses = logs.map((l) => l.status);
+      const overallStatus = allStatuses.every((s) => s === "Success")
         ? "Success"
-        : logs.some((l) => l.status === "Success")
+        : allStatuses.some((s) => s === "Success")
         ? "Partial"
-        : "Failed";
+        : `Failed: ${allStatuses.join(",")}`;
 
       const referenceIds = logs
         .map((l) => l.message_id)
@@ -84,13 +85,20 @@ exports.sendSMS = async (message, recipients, user, options = {}) => {
     console.error("Error sending SMS:", error?.response?.data || error.message);
 
     if (!options.skipLogging) {
+      // More descriptive error status
+      const apiError =
+        error?.response?.data?.error ||
+        error?.response?.data?.message ||
+        error.message ||
+        "Unknown Error";
+
       await Connection(
         `INSERT INTO sms_logs (recipients, message, status, reference_id, credit_used, sent_by, sent_role, sent_email)
          VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
         [
-          JSON.stringify(validRecipients), // full batch list
+          JSON.stringify(validRecipients),
           message,
-          "Failed",
+          `Failed: ${apiError}`, // <-- descriptive reason
           null,
           0,
           user ? user.id : null,
@@ -172,42 +180,70 @@ exports.updateSmsCredentials = async (api_key, sender_id, user, ip) => {
   return { actionType };
 };
 
-exports.getPaginatedSMSHistory = async (limit, offset, user) => {
-  let logs, totalResult;
+exports.getPaginatedSMSHistory = async (limit, offset, user, filters = {}) => {
+  const { role = "All", email = "All", status = "All" } = filters;
 
-  if (user && user.role?.toLowerCase() === "admin") {
-    // Admin → see all SMS logs
-    logs = await Connection(
-      `
-      SELECT id, recipients, message, status, reference_id, credit_used, created_at, sent_by, sent_role, sent_email
-      FROM sms_logs
-      ORDER BY created_at DESC
-      LIMIT ? OFFSET ?
-      `,
-      [limit, offset]
-    );
+  let baseQuery = `
+    SELECT id, recipients, message, status, reference_id, credit_used, created_at, sent_by, sent_role, sent_email
+    FROM sms_logs
+  `;
+  let whereClauses = [];
+  let params = [];
 
-    totalResult = await Connection(`SELECT COUNT(*) AS total FROM sms_logs`);
-  } else if (user && user.id) {
-    // Staff → only see their SMS logs
-    logs = await Connection(
-      `
-      SELECT id, recipients, message, status, reference_id, credit_used, created_at, sent_by
-      FROM sms_logs
-      WHERE sent_by = ?
-      ORDER BY created_at DESC
-      LIMIT ? OFFSET ?
-      `,
-      [user.id, limit, offset]
-    );
-
-    totalResult = await Connection(
-      `SELECT COUNT(*) AS total FROM sms_logs WHERE sent_by = ?`,
-      [user.id]
-    );
-  } else {
-    return { logs: [], total: 0 };
+  // Role filtering
+  if (role !== "All") {
+    whereClauses.push("sent_role = ?");
+    params.push(role.toLowerCase());
   }
+
+  // Email filtering
+  if (email !== "All") {
+    whereClauses.push("sent_email = ?");
+    params.push(email);
+  }
+
+  // Status filtering
+  if (status !== "All") {
+    if (status === "Failed") {
+      // cover both "Failed" and descriptive failures like "Failed: Invalid Number"
+      whereClauses.push("status LIKE 'Failed%'");
+    } else {
+      whereClauses.push("status = ?");
+      params.push(status);
+    }
+  }
+
+  // Access control
+  if (user && user.role?.toLowerCase() !== "admin") {
+    whereClauses.push("sent_by = ?");
+    params.push(user.id);
+  }
+
+  // Build WHERE clause
+  const whereSQL = whereClauses.length
+    ? "WHERE " + whereClauses.join(" AND ")
+    : "";
+
+  // Paginated logs
+  const logs = await Connection(
+    `
+      ${baseQuery}
+      ${whereSQL}
+      ORDER BY created_at DESC
+      LIMIT ? OFFSET ?
+    `,
+    [...params, limit, offset]
+  );
+
+  // Total count for pagination
+  const totalResult = await Connection(
+    `
+      SELECT COUNT(*) AS total
+      FROM sms_logs
+      ${whereSQL}
+    `,
+    params
+  );
 
   const total = totalResult[0]?.total || 0;
   return { logs, total };

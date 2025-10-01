@@ -279,7 +279,7 @@ export default function AuditLogs() {
 
         {/* Collapsible Filters */}
         {showFilters && (
-          <div className="p-4 border-b border-gray-200 bg-gray-50">
+          <div className="p-4 border-b border-gray-200">
             <div className="grid grid-cols-4 md:grid-cols-5 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">

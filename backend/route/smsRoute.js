@@ -79,10 +79,17 @@ router.get("/history", isAuthenticated, async (req, res) => {
     const limit = parseInt(req.query.limit) || 10;
     const offset = (page - 1) * limit;
 
+    const filters = {
+      role: req.query.role || "All",
+      email: req.query.email || "All",
+      status: req.query.status || "All",
+    };
+
     const { logs, total } = await smsService.getPaginatedSMSHistory(
       limit,
       offset,
-      user
+      user,
+      filters
     );
 
     res.json({ logs, total });
