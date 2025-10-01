@@ -446,7 +446,7 @@ exports.updateSeniorCitizen = async (id, updatedData, user, ip) => {
 
     // Force pensioner to "none" if SOCIAL PENSION
     if (formData.remarks === "SOCIAL PENSION") {
-      formData.pensioner = "none";
+      formData.pensioner = "NONE";
     }
 
     // Check duplicate ID if changed
@@ -850,32 +850,32 @@ exports.getSmsRecipients = async (
 ) => {
   try {
     let sql = `
-      SELECT 
-        sc.id,
-        CONCAT_WS(' ', sc.lastName, sc.firstName, sc.middleName,  sc.suffix) AS name,
-        COALESCE(
-          JSON_UNQUOTE(JSON_EXTRACT(sc.form_data, '$.mobileNumber')),
-          JSON_UNQUOTE(JSON_EXTRACT(sc.form_data, '$.emergencyContactNumber'))
-        ) AS contact,
-        JSON_UNQUOTE(JSON_EXTRACT(sc.form_data, '$.barangay')) AS barangay,
-        sc.barangay_id,
-        TIMESTAMPDIFF(
+  SELECT 
+    sc.id,
+    CONCAT_WS(' ', CONCAT(sc.lastName, ','), sc.firstName, sc.middleName, sc.suffix) AS name,
+    COALESCE(
+      JSON_UNQUOTE(JSON_EXTRACT(sc.form_data, '$.mobileNumber')),
+      JSON_UNQUOTE(JSON_EXTRACT(sc.form_data, '$.emergencyContactNumber'))
+    ) AS contact,
+    JSON_UNQUOTE(JSON_EXTRACT(sc.form_data, '$.barangay')) AS barangay,
+    sc.barangay_id,
+    TIMESTAMPDIFF(
+      YEAR,
+      STR_TO_DATE(JSON_UNQUOTE(JSON_EXTRACT(sc.form_data, '$.birthdate')), '%Y-%m-%d'),
+      CURDATE()
+    ) AS age
+  FROM senior_citizens sc
+  WHERE (JSON_EXTRACT(sc.form_data, '$.mobileNumber') IS NOT NULL
+      OR JSON_EXTRACT(sc.form_data, '$.emergencyContactNumber') IS NOT NULL)
+    AND sc.deleted = 0 
+    AND registered = 1
+    AND archived = 0
+    AND TIMESTAMPDIFF(
           YEAR,
           STR_TO_DATE(JSON_UNQUOTE(JSON_EXTRACT(sc.form_data, '$.birthdate')), '%Y-%m-%d'),
           CURDATE()
-        ) AS age
-      FROM senior_citizens sc
-      WHERE (JSON_EXTRACT(sc.form_data, '$.mobileNumber') IS NOT NULL
-          OR JSON_EXTRACT(sc.form_data, '$.emergencyContactNumber') IS NOT NULL)
-        AND sc.deleted = 0 
-        AND registered = 1
-        AND archived = 0
-        AND TIMESTAMPDIFF(
-              YEAR,
-              STR_TO_DATE(JSON_UNQUOTE(JSON_EXTRACT(sc.form_data, '$.birthdate')), '%Y-%m-%d'),
-              CURDATE()
-            ) >= 60
-    `;
+        ) >= 60
+`;
 
     const params = [];
 
