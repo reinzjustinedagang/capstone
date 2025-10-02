@@ -88,13 +88,13 @@ const AddEvent = ({ onEventAdded }) => {
       const { title, type, description, date } = formData;
 
       if (type === "slideshow") {
-        if (!type || !imageFile) {
+        if (!type) {
           setError("All fields including image are required.");
           setLoading(false);
           return;
         }
       } else {
-        if (!title || !type || !description || !date || !imageFile) {
+        if (!title || !type || !description || !date) {
           setError("All fields including image are required.");
           setLoading(false);
           return;
@@ -188,6 +188,7 @@ const AddEvent = ({ onEventAdded }) => {
             value={formData.type}
             onChange={handleChange}
             className="mt-1 w-full border rounded-md px-3 py-2 focus:ring-blue-500 focus:outline-none"
+            required
           >
             <option value="">-- Select Type --</option>
             <option value="slideshow">Slideshow</option>
@@ -208,6 +209,7 @@ const AddEvent = ({ onEventAdded }) => {
                 value={formData.title}
                 onChange={handleChange}
                 className="mt-1 w-full border rounded-md px-3 py-2 focus:ring-blue-500 focus:outline-none"
+                required
               />
             </div>
 
@@ -221,6 +223,7 @@ const AddEvent = ({ onEventAdded }) => {
                 onChange={handleChange}
                 className="mt-1 w-full border rounded-md px-3 py-2 focus:ring-blue-500 focus:outline-none"
                 rows={3}
+                required
               />
             </div>
 
@@ -234,6 +237,7 @@ const AddEvent = ({ onEventAdded }) => {
                 value={formData.date}
                 onChange={handleChange}
                 className="mt-1 w-full border rounded-md px-3 py-2 focus:ring-blue-500 focus:outline-none"
+                required
               />
             </div>
           </>

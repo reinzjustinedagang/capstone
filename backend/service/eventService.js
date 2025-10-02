@@ -105,9 +105,9 @@ exports.create = async (data, user, ip) => {
     if (!title || title.trim() === "") title = "Slideshow";
     if (!description || description.trim() === "") description = "Slideshow";
     if (!date || date.trim() === "") date = "2025-05-31";
-    if (!image_url) throw new Error("Image is required for slideshow.");
+    // if (!image_url) throw new Error("Image is required for slideshow.");
   } else {
-    if (!title || !description || !date || !image_url) {
+    if (!title || !description || !date) {
       throw new Error("All fields including image are required for an event.");
     }
   }

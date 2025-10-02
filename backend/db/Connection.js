@@ -54,7 +54,7 @@ async function initTables() {
       CREATE TABLE IF NOT EXISTS barangays (
         id INT AUTO_INCREMENT PRIMARY KEY,
         barangay_name VARCHAR(255) NOT NULL,
-        controlNo INT(10),
+        controlNo VARCHAR(3),
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
     `);

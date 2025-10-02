@@ -20,17 +20,11 @@ const BenefitsCard = ({
       >
         {/* Image */}
         <div className="relative w-full aspect-[4/3] bg-gray-100">
-          {type.image_url ? (
-            <img
-              src={type.image_url}
-              alt={type.title || "Benefit Image"}
-              className="w-full h-full object-cover"
-            />
-          ) : (
-            <div className="flex items-center justify-center w-full h-full text-gray-500">
-              No Image
-            </div>
-          )}
+          <img
+            src={type.image_url || "https://placehold.co/600x400?text=Benefits"}
+            alt={type.title}
+            className="w-full h-full object-cover"
+          />
 
           {/* Pending Badge */}
           {type.approved === 0 && (
