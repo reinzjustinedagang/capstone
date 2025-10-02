@@ -47,23 +47,24 @@ exports.sendSMS = async (message, recipients, user, options = {}) => {
     const logs = Array.isArray(data) ? data : [data];
 
     // ✅ Only log if NOT OTP (skipLogging flag is false)
+    // ✅ Only log if NOT OTP (skipLogging flag is false)
     if (!options.skipLogging) {
-      for (const log of logs) {
-        await Connection(
-          `INSERT INTO sms_logs (recipients, message, status, reference_id, credit_used, sent_by, sent_role, sent_email)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-          [
-            JSON.stringify(validRecipients), // cleaned list only
-            message,
-            log.status === "Pending" ? "Success" : log.status,
-            log.message_id || null,
-            log.credits_used || 0,
-            user ? user.id : null,
-            user ? user.role : null,
-            user ? user.email : null,
-          ]
-        );
-      }
+      const firstLog = Array.isArray(logs) ? logs[0] : logs;
+
+      await Connection(
+        `INSERT INTO sms_logs (recipients, message, status, reference_id, credit_used, sent_by, sent_role, sent_email)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+        [
+          JSON.stringify(validRecipients), // full recipients list
+          message,
+          firstLog.status === "Pending" ? "Success" : firstLog.status, // use first status
+          firstLog.message_id || null, // use first ref
+          logs.reduce((sum, l) => sum + (l.credits_used || 0), 0), // total credits used
+          user ? user.id : null,
+          user ? user.role : null,
+          user ? user.email : null,
+        ]
+      );
     }
 
     return { success: true, response: logs };
