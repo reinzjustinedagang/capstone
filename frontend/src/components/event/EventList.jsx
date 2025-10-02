@@ -84,17 +84,15 @@ const EventList = ({ onEdit }) => {
                     Pending
                   </span>
                 )}
-                {event.image_url ? (
-                  <img
-                    src={event.image_url}
-                    alt={event.title}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <div className="flex items-center justify-center w-full h-full text-gray-500">
-                    No Image
-                  </div>
-                )}
+
+                <img
+                  src={
+                    event.image_url ||
+                    "https://placehold.co/600x400?text=Events"
+                  }
+                  alt={event.title}
+                  className="w-full h-full object-cover"
+                />
 
                 {/* Edit Button */}
                 <button

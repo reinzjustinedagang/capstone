@@ -189,6 +189,7 @@ const UpdateEvent = ({ eventId, onSuccess }) => {
             value={formData.type}
             onChange={handleChange}
             className="mt-1 w-full border rounded-md px-3 py-2 focus:ring-blue-500 focus:outline-none"
+            required
           >
             <option value="event">Event</option>
           </select>
@@ -206,6 +207,7 @@ const UpdateEvent = ({ eventId, onSuccess }) => {
                 value={formData.title}
                 onChange={handleChange}
                 className="mt-1 w-full border rounded-md px-3 py-2 focus:ring-blue-500 focus:outline-none"
+                required
               />
             </div>
 
@@ -219,6 +221,7 @@ const UpdateEvent = ({ eventId, onSuccess }) => {
                 onChange={handleChange}
                 rows={3}
                 className="mt-1 w-full border rounded-md px-3 py-2 focus:ring-blue-500 focus:outline-none"
+                required
               />
             </div>
 
@@ -232,6 +235,7 @@ const UpdateEvent = ({ eventId, onSuccess }) => {
                 value={formData.date}
                 onChange={handleChange}
                 className="mt-1 w-full border rounded-md px-3 py-2 focus:ring-blue-500 focus:outline-none"
+                required
               />
             </div>
           </>

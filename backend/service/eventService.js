@@ -168,7 +168,7 @@ exports.update = async (id, data, user, ip) => {
   if (type === "slideshow" && !image_url) {
     throw new Error("Image is required for slideshow");
   }
-  if (type !== "slideshow" && (!title || !description || !date || !image_url)) {
+  if (type !== "slideshow" && (!title || !description || !date)) {
     throw new Error("All fields including image are required for an event");
   }
 
