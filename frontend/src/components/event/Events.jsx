@@ -80,12 +80,20 @@ const Events = () => {
           {activeTab === "eventlist" && <EventList onEdit={handleEdit} />}
           {activeTab === "slideshow" && <EventSlideshow />}
           {activeTab === "addevent" && (
-            <AddEvent onEventAdded={handleAddedSuccess} />
+            <AddEvent
+              onEventAdded={handleAddedSuccess}
+              onCancel={() => {
+                setActiveTab("eventlist");
+              }}
+            />
           )}
           {activeTab === "updateevent" && selectedEventId && (
             <UpdateEvent
               eventId={selectedEventId}
               onSuccess={handleUpdateSuccess}
+              onCancel={() => {
+                setActiveTab("eventlist");
+              }}
             />
           )}
         </div>

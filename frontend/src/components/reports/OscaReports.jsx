@@ -13,6 +13,7 @@ import PensionerDistribution from "./chart/PensionerDistribution";
 import RemarksDistribution from "./chart/RemarksDistribution";
 import PensionerRemarksReportPrint from "./print/PensionerRemarksReportPrint";
 import CitizenListPrint from "./print/CitizenListPrint";
+import ReportsSummary from "./chart/ReportsSummary";
 
 const OscaReportsChart = () => {
   const chartOptions = [
@@ -52,7 +53,7 @@ const OscaReportsChart = () => {
                   <th className="w-3/4 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Report Name
                   </th>
-                  <th className="w-1/4 px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="w-1/4 px-6 py-3 text-end text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Actions
                   </th>
                 </tr>
@@ -71,7 +72,7 @@ const OscaReportsChart = () => {
                     <span className="sm:hidden block text-xs font-semibold text-gray-500 mb-1">
                       Actions
                     </span>
-                    <div className="flex justify-end sm:justify-center">
+                    <div className="flex justify-end ">
                       <BarangayReportPrint />
                     </div>
                   </td>
@@ -89,7 +90,7 @@ const OscaReportsChart = () => {
                     <span className="sm:hidden block text-xs font-semibold text-gray-500 mb-1">
                       Actions
                     </span>
-                    <div className="flex justify-end sm:justify-center">
+                    <div className="flex justify-end ">
                       <PensionerRemarksReportPrint />
                     </div>
                   </td>
@@ -107,7 +108,7 @@ const OscaReportsChart = () => {
                     <span className="sm:hidden block text-xs font-semibold text-gray-500 mb-1">
                       Actions
                     </span>
-                    <div className="flex justify-end sm:justify-center">
+                    <div className="flex justify-end ">
                       <MonthlySummaryReportPrint />
                     </div>
                   </td>
@@ -125,7 +126,7 @@ const OscaReportsChart = () => {
                     <span className="sm:hidden block text-xs font-semibold text-gray-500 mb-1">
                       Actions
                     </span>
-                    <div className="flex justify-end sm:justify-center">
+                    <div className="flex justify-end ">
                       <CitizenListPrint />
                     </div>
                   </td>
@@ -139,7 +140,6 @@ const OscaReportsChart = () => {
       {/* Other Reports Section */}
       <div className=" rounded-lg">
         <h2 className="text-lg font-medium mb-4">Statistical Reports</h2>
-
         {/* Dropdown to select charts */}
         <div className="flex items-center gap-3 mb-4">
           <label className="font-medium text-gray-600">Select Report:</label>
@@ -155,12 +155,11 @@ const OscaReportsChart = () => {
             ))}
           </select>
         </div>
-
         {/* Render the selected chart */}
         <div>{renderSelectedChart()}</div>
         <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
           <PensionerDistribution />
-          <RemarksDistribution />
+          <RemarksDistribution /> <ReportsSummary />
         </div>
       </div>
     </div>

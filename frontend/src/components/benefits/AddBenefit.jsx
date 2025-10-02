@@ -17,7 +17,7 @@ import {
   List,
 } from "lucide-react";
 
-const AddBenefit = () => {
+const AddBenefit = ({ onCancel }) => {
   const [formData, setFormData] = useState({
     type: "",
     title: "",
@@ -257,7 +257,10 @@ const AddBenefit = () => {
           </div>
         </div>
 
-        <div className="flex justify-end">
+        <div className="flex justify-end gap-3">
+          <Button variant="secondary" onClick={onCancel} disabled={saving}>
+            Cancel
+          </Button>
           <Button
             type="submit"
             variant="primary"

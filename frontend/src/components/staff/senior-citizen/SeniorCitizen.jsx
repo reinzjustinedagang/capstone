@@ -48,7 +48,7 @@ const SeniorCitizen = () => {
   return (
     <>
       <div className="mb-4 flex flex-col sm:flex-row justify-between items-center space-y-3 sm:space-y-0">
-        <div className="relative w-full sm:w-64">
+        <div className="relative w-full sm:w-64  mt-4 md:mt-0">
           {activeTab !== "list" && (
             <div
               className="flex items-center cursor-pointer text-gray-600 hover:text-gray-900 transition-colors"
@@ -64,7 +64,7 @@ const SeniorCitizen = () => {
           )}
         </div>
 
-        <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+        <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto ">
           <Button
             variant="primary"
             icon={<Plus className="h-4 w-4 mr-2" />}

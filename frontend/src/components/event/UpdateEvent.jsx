@@ -5,7 +5,7 @@ import Button from "../UI/Button";
 import CropperModal from "../UI/CropperModal";
 import axios from "axios";
 
-const UpdateEvent = ({ eventId, onSuccess }) => {
+const UpdateEvent = ({ eventId, onSuccess, onCancel }) => {
   const [formData, setFormData] = useState({
     title: "",
     type: "event",
@@ -244,11 +244,7 @@ const UpdateEvent = ({ eventId, onSuccess }) => {
 
       {/* Actions */}
       <div className="flex justify-end gap-3 mt-6">
-        <Button
-          variant="secondary"
-          onClick={() => onSuccess()}
-          disabled={loading}
-        >
+        <Button variant="secondary" onClick={onCancel} disabled={loading}>
           Cancel
         </Button>
 

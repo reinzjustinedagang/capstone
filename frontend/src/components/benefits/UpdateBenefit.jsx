@@ -16,7 +16,7 @@ import Modal from "../UI/Modal";
 import CropperModal from "../UI/CropperModal";
 import axios from "axios";
 
-const UpdateBenefit = ({ benefitId, onSuccess }) => {
+const UpdateBenefit = ({ benefitId, onSuccess, onCancel }) => {
   const [formData, setFormData] = useState({
     type: "",
     title: "",
@@ -317,7 +317,10 @@ const UpdateBenefit = ({ benefitId, onSuccess }) => {
         </div>
 
         {/* Save Button */}
-        <div className="flex justify-end">
+        <div className="flex justify-end gap-3">
+          <Button variant="secondary" onClick={onCancel} disabled={saving}>
+            Cancel
+          </Button>
           <Button
             type="submit"
             variant="primary"

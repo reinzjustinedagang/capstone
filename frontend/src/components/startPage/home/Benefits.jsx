@@ -80,7 +80,10 @@ const Benefits = () => {
                   {/* Image */}
                   <div className="relative w-full h-40">
                     <img
-                      src={benefit.image_url || "https://placehold.co/600x400"}
+                      src={
+                        benefit.image_url ||
+                        "https://placehold.co/600x400?text=Benefits"
+                      }
                       alt={benefit.provider}
                       className="w-full h-full object-cover"
                     />

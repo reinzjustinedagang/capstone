@@ -88,7 +88,10 @@ const Events = () => {
                   {/* Image */}
                   <div className="relative w-full h-40">
                     <img
-                      src={event.image_url || "https://placehold.co/300x200"}
+                      src={
+                        event.image_url ||
+                        "https://placehold.co/300x200?text=Events"
+                      }
                       alt={event.title}
                       className="w-full h-full object-cover"
                     />

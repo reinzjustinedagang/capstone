@@ -35,9 +35,9 @@ export const BenefitDetailsPage = () => {
   return (
     <div className="max-w-4xl mx-auto py-10 px-5">
       <img
-        src={benefit.image_url || "https://placehold.co/800x400"}
+        src={benefit.image_url || "https://placehold.co/800x400?text=Benefits"}
         alt={benefit.title}
-        className="w-full h-[400px] object-cover rounded-lg mb-6"
+        className="w-full h-[400px] object-cover object-center rounded-lg mb-6"
       />
       <h1 className="text-3xl font-bold mb-2">{benefit.title}</h1>
       <p className="text-sm text-gray-600 mb-2 capitalize">

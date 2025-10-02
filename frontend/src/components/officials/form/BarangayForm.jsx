@@ -75,6 +75,13 @@ const BarangayForm = ({
                 }
                 alt="Profile Preview"
                 className="w-full h-full object-cover rounded-xl border-4 border-blue-200 group-hover:border-blue-400 transition-all duration-300 shadow"
+                onClick={() => {
+                  const imageSrc =
+                    formData.imageFile instanceof File
+                      ? URL.createObjectURL(formData.imageFile)
+                      : existingImage || user;
+                  window.open(imageSrc, "_blank");
+                }}
               />
               <label
                 htmlFor="image"

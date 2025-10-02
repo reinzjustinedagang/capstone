@@ -65,7 +65,7 @@ const SeniorCitizen = () => {
   return (
     <>
       <div className="mt-4 mb-4 md:mt-0 flex flex-col sm:flex-row justify-between items-center space-y-3 sm:space-y-0">
-        <div className="relative w-full sm:w-64">
+        <div className="relative w-full sm:w-64 mb-4 md:mb-0">
           {activeTab !== "list" &&
             activeTab !== "unregistered" &&
             activeTab !== "archived" && (

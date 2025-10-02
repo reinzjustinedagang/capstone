@@ -36,7 +36,7 @@ const Events = () => {
     <>
       {/* Add Event Button */}
       <div className="mt-4 mb-4 md:mt-0 flex flex-col sm:flex-row justify-between sm:items-center ">
-        <div className="relative w-full sm:w-64">
+        <div className="relative w-full sm:w-64 mb-4 md:mb-0">
           {activeTab !== "eventlist" && (
             <div
               className="flex items-center cursor-pointer text-gray-600 hover:text-gray-900 transition-colors"

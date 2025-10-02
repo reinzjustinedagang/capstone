@@ -16,7 +16,7 @@ const LandingLayout = ({ children }) => {
       <Header />
 
       {/* Main Content */}
-      <main className="flex-grow relative z-10">
+      <main className="flex-grow relative z-10 pt-30">
         <Outlet />
       </main>
 

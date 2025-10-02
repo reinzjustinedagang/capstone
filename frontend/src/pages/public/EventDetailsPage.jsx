@@ -36,10 +36,11 @@ export const EventDetailsPage = () => {
   return (
     <div className="max-w-4xl mx-auto py-10 px-5">
       <img
-        src={event.image_url || "https://placehold.co/800x400"}
+        src={event.image_url || "https://placehold.co/800x400?text=Events"}
         alt={event.title}
-        className="w-full h-[400px] object-cover rounded-lg mb-6"
+        className="w-full h-[400px] object-cover object-center rounded-lg mb-6"
       />
+
       <h1 className="text-3xl font-bold mb-2">{event.title}</h1>
       <p className="text-sm text-gray-600 mb-4">
         {new Date(event.date).toLocaleDateString("en-US", {

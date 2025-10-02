@@ -134,7 +134,7 @@ const Dashboard = () => {
           ✅ Login successful! Welcome back.
         </div>
       )}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-6 md:mt-0 mb-6">
         <NavLink to="/staff/senior-citizen-list">
           <Card
             title="Total Registered Senior Citizens"

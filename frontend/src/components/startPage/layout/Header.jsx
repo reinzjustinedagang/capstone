@@ -55,7 +55,7 @@ const Header = () => {
   ];
 
   return (
-    <header className="sticky top-0 inset-x-0 z-50 bg-white shadow-2xl">
+    <header className="fixed top-0 inset-x-0 z-50 bg-white shadow-2xl">
       <nav className="flex items-center justify-between p-5 lg:px-8 max-w-7xl mx-auto">
         {/* Logo */}
         <div className="flex items-center gap-2">

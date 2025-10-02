@@ -51,7 +51,10 @@ export const HomeBenefitsPage = () => {
                 {/* Image */}
                 <div className="relative w-full h-40">
                   <img
-                    src={benefit.image_url || "https://placehold.co/400x250"}
+                    src={
+                      benefit.image_url ||
+                      "https://placehold.co/400x250?text=Benefits"
+                    }
                     alt={benefit.type}
                     className="w-full h-full object-cover"
                   />

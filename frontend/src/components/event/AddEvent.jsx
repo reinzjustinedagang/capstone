@@ -12,7 +12,7 @@ import Modal from "../UI/Modal";
 import CropperModal from "../UI/CropperModal";
 import axios from "axios";
 
-const AddEvent = ({ onEventAdded }) => {
+const AddEvent = ({ onEventAdded, onCancel }) => {
   const [formData, setFormData] = useState({
     title: "",
     type: "event",
@@ -257,7 +257,11 @@ const AddEvent = ({ onEventAdded }) => {
       )}
 
       {/* Save Button */}
-      <div className="flex justify-end items-center mt-6">
+      <div className="flex justify-end items-center gap-3 mt-6">
+        <Button variant="secondary" onClick={onCancel} disabled={loading}>
+          Cancel
+        </Button>
+
         <Button
           type="submit"
           disabled={loading}
@@ -265,7 +269,7 @@ const AddEvent = ({ onEventAdded }) => {
             loading ? (
               <Loader2 className="animate-spin w-4 h-4" />
             ) : (
-              <SaveIcon />
+              <SaveIcon className="w-4 h-4 " />
             )
           }
         >

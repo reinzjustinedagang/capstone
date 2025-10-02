@@ -94,11 +94,20 @@ const Benefits = () => {
           {activeTab === "national" && <National onEdit={handleEdit} />}
           {activeTab === "ra" && <RepublicActs onEdit={handleEdit} />}
 
-          {activeTab === "addbenefits" && <AddBenefit />}
+          {activeTab === "addbenefits" && (
+            <AddBenefit
+              onCancel={() => {
+                setActiveTab("local");
+              }}
+            />
+          )}
           {activeTab === "updatebenefits" && (
             <UpdateBenefit
               benefitId={selectedBenefitId}
               onSuccess={handleUpdateSuccess}
+              onCancel={() => {
+                setActiveTab("local");
+              }}
             />
           )}
         </div>

@@ -8,13 +8,9 @@ const BarangayCard = ({ official, onEdit, onDelete }) => {
       {/* Status Badge */}
       <span
         className={`absolute top-2 left-2 px-1.5 py-0.5 text-[10px] font-semibold rounded-md
-          ${
-            official.approved === 0
-              ? "bg-yellow-500 text-white"
-              : "bg-green-500 text-white"
-          }`}
+          ${official.approved === 0 && "bg-yellow-500 text-white"}`}
       >
-        {official.approved === 0 ? "Pending" : "Approved"}
+        {official.approved === 0 ? "Pending" : ""}
       </span>
 
       {/* Barangay Name */}
