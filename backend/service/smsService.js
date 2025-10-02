@@ -164,6 +164,7 @@ exports.getRecentSMSHistory = async () => {
     const recentHistory = await Connection(`
       SELECT * 
       FROM sms_logs 
+      WHERE status = 'Success'
       ORDER BY created_at DESC 
       LIMIT 5
     `);

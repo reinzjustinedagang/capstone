@@ -142,8 +142,8 @@ const Archive = ({ onView }) => {
   const handleDeleteConfirm = async () => {
     setDeleting(true);
     try {
-      await axios.patch(
-        `${backendUrl}/api/senior-citizens/soft-delete/${selectedCitizen.id}`,
+      await axios.delete(
+        `${backendUrl}/api/senior-citizens/permanent-delete/${selectedCitizen.id}`,
         {},
         { withCredentials: true }
       );

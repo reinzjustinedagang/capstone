@@ -767,7 +767,7 @@ exports.permanentlyDeleteSeniorCitizen = async (id, user, ip) => {
   try {
     // Get existing images
     const [existing] = await Connection(
-      `SELECT document_image, photo FROM senior_citizens WHERE id = ?`,
+      `SELECT firstName, lastName, middleName, document_image, photo FROM senior_citizens WHERE id = ?`,
       [id]
     );
 
@@ -796,7 +796,7 @@ exports.permanentlyDeleteSeniorCitizen = async (id, user, ip) => {
           user.email,
           user.role,
           "PERMANENT_DELETE",
-          `Permanently deleted Senior Citizen ID: ${id}`,
+          `Permanently deleted Senior Citizen: '${existing.lastName}, ${existing.firstName} ${existing.middleName}'`,
           ip
         );
       }

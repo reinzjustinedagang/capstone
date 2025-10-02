@@ -166,22 +166,6 @@ const MessageHistory = () => {
       {showFilters && (
         <div className="p-4 border rounded-t-xl border-gray-200 ">
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {/* Role Filter */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Role
-              </label>
-              <select
-                value={filterRole}
-                onChange={(e) => setFilterRole(e.target.value)}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2"
-              >
-                <option value="All">All Roles</option>
-                <option value="admin">Admin</option>
-                <option value="staff">Staff</option>
-              </select>
-            </div>
-
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 User
@@ -196,6 +180,22 @@ const MessageHistory = () => {
                     {user === "All" ? "All Emails" : user}
                   </option>
                 ))}
+              </select>
+            </div>
+
+            {/* Role Filter */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Role
+              </label>
+              <select
+                value={filterRole}
+                onChange={(e) => setFilterRole(e.target.value)}
+                className="w-full border border-gray-300 rounded-lg px-3 py-2"
+              >
+                <option value="All">All Roles</option>
+                <option value="admin">Admin</option>
+                <option value="staff">Staff</option>
               </select>
             </div>
 
