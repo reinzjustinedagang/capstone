@@ -11,22 +11,24 @@ const {
 // ─── COUNT ALL OFFICIALS ─────────────────────────────
 exports.getOfficialsCount = async () => {
   try {
-    const [[municipal]] = await Connection(
+    const [municipal] = await Connection(
       `SELECT COUNT(*) AS count FROM municipal_officials`
     );
-    const [[barangay]] = await Connection(
+    const [barangay] = await Connection(
       `SELECT COUNT(*) AS count FROM barangay_officials`
     );
-    const [[orgChart]] = await Connection(
+    const [orgChart] = await Connection(
       `SELECT COUNT(*) AS count FROM orgChart`
     );
 
     return {
-      municipal: municipal.count || 0,
-      barangay: barangay.count || 0,
-      orgChart: orgChart.count || 0,
+      municipal: municipal?.count || 0,
+      barangay: barangay?.count || 0,
+      orgChart: orgChart?.count || 0,
       total:
-        (municipal.count || 0) + (barangay.count || 0) + (orgChart.count || 0),
+        (municipal?.count || 0) +
+        (barangay?.count || 0) +
+        (orgChart?.count || 0),
     };
   } catch (error) {
     console.error("Error in getOfficialsCount:", error);
