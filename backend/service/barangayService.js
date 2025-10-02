@@ -57,9 +57,15 @@ exports.getAllBarangay = async () => {
   return result;
 };
 
+// Helper function
+function formatControlNo(no) {
+  return String(no).padStart(3, "0");
+}
+
 // Create a new barangay
 exports.createBarangay = async (name, controlNo, user, ip) => {
-  // Check for duplicate name
+  const formattedControlNo = formatControlNo(controlNo);
+
   const existing = await Connection(
     "SELECT * FROM barangays WHERE barangay_name = ?",
     [name.trim()]
@@ -72,7 +78,7 @@ exports.createBarangay = async (name, controlNo, user, ip) => {
 
   const result = await Connection(
     "INSERT INTO barangays (barangay_name, controlNo) VALUES (?, ?)",
-    [name.trim(), controlNo]
+    [name.trim(), formattedControlNo]
   );
 
   if (result.affectedRows === 1 && user) {
@@ -81,7 +87,7 @@ exports.createBarangay = async (name, controlNo, user, ip) => {
       user.email,
       user.role,
       "CREATE",
-      `Created barangay '${name}'.`,
+      `Created barangay '${name}' with Control No. ${formattedControlNo}.`,
       ip
     );
   }
@@ -89,11 +95,13 @@ exports.createBarangay = async (name, controlNo, user, ip) => {
   return result;
 };
 
-// Update a barangay
+// Update barangay
 exports.updateBarangay = async (id, name, controlNo, user, ip) => {
+  const formattedControlNo = formatControlNo(controlNo);
+
   const existing = await Connection(
     "SELECT id FROM barangays WHERE barangay_name = ? AND controlNo = ? AND id != ?",
-    [name.trim(), controlNo, id]
+    [name.trim(), formattedControlNo, id]
   );
   if (existing.length > 0) {
     const error = new Error("Another barangay with this name already exists.");
@@ -107,7 +115,7 @@ exports.updateBarangay = async (id, name, controlNo, user, ip) => {
 
   const result = await Connection(
     "UPDATE barangays SET barangay_name = ?, controlNo = ? WHERE id = ?",
-    [name, controlNo, id]
+    [name, formattedControlNo, id]
   );
 
   if (result.affectedRows === 1 && user) {
@@ -116,7 +124,7 @@ exports.updateBarangay = async (id, name, controlNo, user, ip) => {
       user.email,
       user.role,
       "UPDATE",
-      `Updated barangay ${oldData.barangay_name} → ${name}.`,
+      `Updated barangay ${oldData.barangay_name} → ${name} (Control No: ${formattedControlNo}).`,
       ip
     );
   }

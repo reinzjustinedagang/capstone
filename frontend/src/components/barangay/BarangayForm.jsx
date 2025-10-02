@@ -23,23 +23,26 @@ const BarangayForm = ({ barangay, onClose, onSuccess }) => {
     setError("");
 
     try {
+      // format control number to 3 digits (e.g., 1 -> "001")
+      const formattedControlNo = controlNo.padStart(3, "0");
+
       if (barangay) {
         // Update existing
         await axios.put(
           `${backendUrl}/api/barangays/${barangay.id}`,
-          { name, controlNo },
+          { name, controlNo: formattedControlNo },
           { withCredentials: true }
         );
       } else {
         // Create new
         await axios.post(
           `${backendUrl}/api/barangays`,
-          { name, controlNo },
+          { name, controlNo: formattedControlNo },
           { withCredentials: true }
         );
       }
 
-      onSuccess(); // refresh list + close modal
+      onSuccess();
     } catch (err) {
       console.error("Failed to submit form:", err);
       setError(
