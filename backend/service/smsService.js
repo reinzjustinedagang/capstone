@@ -52,14 +52,13 @@ exports.sendSMS = async (message, recipients, user, options = {}) => {
       const firstLog = Array.isArray(logs) ? logs[0] : logs;
 
       await Connection(
-        `INSERT INTO sms_logs (recipients, message, status, reference_id, credit_used, sent_by, sent_role, sent_email)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+        `INSERT INTO sms_logs (recipients, message, status, reference_id, sent_by, sent_role, sent_email)
+      VALUES (?, ?, ?, ?, ?, ?, ?)`,
         [
           JSON.stringify(validRecipients), // full recipients list
           message,
           firstLog.status === "Pending" ? "Success" : firstLog.status, // use first status
           firstLog.message_id || null, // use first ref
-          logs.reduce((sum, l) => sum + (l.credits_used || 0), 0), // total credits used
           user ? user.id : null,
           user ? user.role : null,
           user ? user.email : null,
@@ -73,14 +72,13 @@ exports.sendSMS = async (message, recipients, user, options = {}) => {
 
     if (!options.skipLogging) {
       await Connection(
-        `INSERT INTO sms_logs (recipients, message, status, reference_id, credit_used, sent_by, sent_role, sent_email)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+        `INSERT INTO sms_logs (recipients, message, status, reference_id, sent_by, sent_role, sent_email)
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
         [
           JSON.stringify(validRecipients), // clean recipients
           message,
           "Failed",
           null,
-          0,
           user ? user.id : null,
           user ? user.role : null,
           user ? user.email : null,
@@ -180,7 +178,7 @@ exports.getPaginatedSMSHistory = async (limit, offset, user, filters = {}) => {
   const { role = "All", email = "All", status = "All" } = filters;
 
   let baseQuery = `
-    SELECT id, recipients, message, status, reference_id, credit_used, created_at, sent_by, sent_role, sent_email
+    SELECT id, recipients, message, status, reference_id, created_at, sent_by, sent_role, sent_email
     FROM sms_logs
   `;
   let whereClauses = [];
@@ -251,25 +249,23 @@ exports.getSmsCounts = async (user) => {
     let params = [];
 
     if (user && user.role?.toLowerCase() === "admin") {
-      // Admin → all messages
       query = `
         SELECT 
-          SUM(CASE WHEN status = 'Success' THEN 1 ELSE 0 END) AS success_count,
-          SUM(CASE WHEN status = 'Failed' THEN 1 ELSE 0 END) AS failed_count,
-          SUM(CASE WHEN status = 'Pending' THEN 1 ELSE 0 END) AS pending_count,
-          COUNT(*) AS total
+          SUM(CASE WHEN status = 'Success' THEN JSON_LENGTH(recipients) ELSE 0 END) AS success_count,
+          SUM(CASE WHEN status = 'Failed' THEN JSON_LENGTH(recipients) ELSE 0 END) AS failed_count,
+          SUM(CASE WHEN status = 'Pending' THEN JSON_LENGTH(recipients) ELSE 0 END) AS pending_count,
+          SUM(JSON_LENGTH(recipients)) AS total
         FROM sms_logs
         WHERE MONTH(created_at) = MONTH(CURRENT_DATE())
           AND YEAR(created_at) = YEAR(CURRENT_DATE())
       `;
     } else if (user && user.id) {
-      // Staff → only their messages
       query = `
         SELECT 
-          SUM(CASE WHEN status = 'Success' THEN 1 ELSE 0 END) AS success_count,
-          SUM(CASE WHEN status = 'Failed' THEN 1 ELSE 0 END) AS failed_count,
-          SUM(CASE WHEN status = 'Pending' THEN 1 ELSE 0 END) AS pending_count,
-          COUNT(*) AS total
+          SUM(CASE WHEN status = 'Success' THEN JSON_LENGTH(recipients) ELSE 0 END) AS success_count,
+          SUM(CASE WHEN status = 'Failed' THEN JSON_LENGTH(recipients) ELSE 0 END) AS failed_count,
+          SUM(CASE WHEN status = 'Pending' THEN JSON_LENGTH(recipients) ELSE 0 END) AS pending_count,
+          SUM(JSON_LENGTH(recipients)) AS total
         FROM sms_logs
         WHERE MONTH(created_at) = MONTH(CURRENT_DATE())
           AND YEAR(created_at) = YEAR(CURRENT_DATE())
