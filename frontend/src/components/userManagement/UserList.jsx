@@ -284,7 +284,7 @@ const UserList = ({ onEdit }) => {
                         <img
                           src={user.image || userIcon} // fallback if no image
                           alt={user.username}
-                          className="h-10 w-10 rounded-full object-cover border"
+                          className="h-10 w-10 rounded-full border-blue-800 object-cover border"
                         />
 
                         {/* Username */}

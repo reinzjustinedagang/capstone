@@ -4,17 +4,22 @@ import user from "../../../assets/user.png";
 
 const BarangayCard = ({ official, onEdit, onDelete }) => {
   return (
-    <div className="relative flex flex-col items-center bg-white p-4 rounded-2xl shadow-md w-48 transition-transform transform">
-      {/* Pending Badge */}
-      {official.approved === 0 && (
-        <span className="absolute top-2 left-2 bg-yellow-500 text-white text-xs font-semibold px-2 py-1 rounded-md shadow">
-          Pending
-        </span>
-      )}
+    <div className="relative flex flex-col items-center bg-white p-3 rounded-xl shadow w-40 transition-all duration-200  ">
+      {/* Status Badge */}
+      <span
+        className={`absolute top-2 left-2 px-1.5 py-0.5 text-[10px] font-semibold rounded-md
+          ${
+            official.approved === 0
+              ? "bg-yellow-500 text-white"
+              : "bg-green-500 text-white"
+          }`}
+      >
+        {official.approved === 0 ? "Pending" : "Approved"}
+      </span>
 
       {/* Barangay Name */}
       <h3
-        className="text-sm font-semibold text-center mb-2 max-w-full"
+        className="text-xs font-semibold text-center mb-1 truncate max-w-[8rem] text-gray-800"
         title={official.barangay_name}
       >
         Brgy.{" "}
@@ -22,47 +27,47 @@ const BarangayCard = ({ official, onEdit, onDelete }) => {
       </h3>
 
       {/* Profile Picture */}
-      <div className="relative mb-3">
+      <div className="mb-2">
         <img
           src={official.image || user}
           alt={official.president_name}
           onError={(e) => {
             e.target.onerror = null;
             e.target.src =
-              "https://placehold.co/80x80/cccccc/ffffff?text=No+Image";
+              "https://placehold.co/64x64/cccccc/ffffff?text=No+Img";
           }}
-          className="w-24 h-24 object-cover border-2 rounded-lg border-blue-500"
+          className="w-16 h-16 object-cover rounded-md border-2 border-blue-500"
         />
       </div>
 
       {/* President Name */}
       <p
-        className="text-sm font-medium text-center max-w-full"
+        className="text-xs font-medium text-center text-gray-900 truncate max-w-[8rem]"
         title={official.president_name}
       >
         {official.president_name}
       </p>
 
       {/* Position */}
-      <p className="text-sm bg-blue-100 text-blue-700 mt-1 px-3 py-0.5 rounded-md font-medium">
-        {official.position.toUpperCase()}
+      <p className="text-[10px] mt-1 px-2 py-0.5 rounded-full font-semibold bg-blue-100 text-blue-700 uppercase tracking-wide">
+        {official.position}
       </p>
 
       {/* Action Buttons */}
-      <div className="flex mt-4 gap-4">
+      <div className="flex mt-2 gap-2">
         <button
           onClick={onEdit}
-          className="text-blue-600 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 p-2 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-300 transition"
+          className="text-blue-600 hover:text-white bg-blue-50 hover:bg-blue-600 p-1.5 rounded-full focus:outline-none transition"
           aria-label={`Edit ${official.president_name}`}
         >
-          <Edit className="h-5 w-5" />
+          <Edit className="h-4 w-4" />
         </button>
         <button
           onClick={onDelete}
-          className="text-red-600 hover:text-red-800 bg-red-50 hover:bg-red-100 p-2 rounded-full focus:outline-none focus:ring-2 focus:ring-red-300 transition"
+          className="text-red-600 hover:text-white bg-red-50 hover:bg-red-600 p-1.5 rounded-full focus:outline-none transition"
           aria-label={`Delete ${official.president_name}`}
         >
-          <Trash2 className="h-5 w-5" />
+          <Trash2 className="h-4 w-4" />
         </button>
       </div>
     </div>

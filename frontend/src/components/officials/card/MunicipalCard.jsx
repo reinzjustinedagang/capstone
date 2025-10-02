@@ -3,7 +3,7 @@ import { Edit, Trash2 } from "lucide-react";
 import user from "../../../assets/user.png";
 
 const MunicipalCard = ({ official, onEdit, onDelete, isHead = false }) => {
-  const imageUrl = official.image ? `${official.image}` : null;
+  const imageUrl = official.image ? official.image : null;
   const isMember = official.type === "bottom";
 
   return (
@@ -14,74 +14,60 @@ const MunicipalCard = ({ official, onEdit, onDelete, isHead = false }) => {
       )}
 
       <div
-        className={`
-          relative
-          z-10
-          bg-white
-          px-4
-          py-2
-          rounded-xl
-          shadow-lg
-          flex
-          items-center
-          text-left
-          border-2
+        className={`relative z-10 bg-white px-3 py-2 rounded-lg shadow-md flex items-center text-left border
           ${isHead ? "border-blue-500" : "border-gray-200"}
-        `}
+          w-60 sm:w-64`}
       >
         {/* Pending Badge */}
         {official.approved === 0 && (
-          <span className="absolute top-2 left-2 bg-yellow-500 text-white text-xs font-semibold px-2 py-1 rounded-md shadow">
+          <span className="absolute top-1 right-1 bg-yellow-500 text-white text-[10px] font-semibold px-1.5 py-0.5 rounded-md shadow">
             Pending
           </span>
         )}
+
         {/* Left: Profile Picture */}
-        <div className="flex-shrink-0 mr-4">
-          {imageUrl ? (
-            <img
-              src={imageUrl}
-              alt={`${official.name}'s profile`}
-              className="h-20 w-20 object-cover border-2 rounded-lg border-blue-500"
-              onError={(e) => {
-                e.target.onerror = null;
-                e.target.src = `https://placehold.co/128x128/cccccc/ffffff?text=No+Image`;
-              }}
-            />
-          ) : (
-            <img
-              src={user}
-              alt={`${official.name}'s profile`}
-              className="h-20 w-20 object-cover border-2 rounded-lg border-blue-500"
-            />
-          )}
+        <div className="flex-shrink-0 mr-3">
+          <img
+            src={imageUrl || user}
+            alt={`${official.name}'s profile`}
+            className="h-14 w-14 object-cover border-2 rounded-md border-blue-400"
+            onError={(e) => {
+              e.target.onerror = null;
+              e.target.src =
+                "https://placehold.co/64x64/cccccc/ffffff?text=No+Img";
+            }}
+          />
         </div>
 
         {/* Right: Text + Actions */}
-        <div className="flex flex-col">
-          <div>
-            <h3 className="text-sm font-semibold">{official.name}</h3>
-            <p className="text-sm bg-blue-100 text-blue-700 mt-1 rounded-md font-medium px-3 py-0.5">
-              {official.position}
-            </p>
-          </div>
+        <div className="flex flex-col flex-1 min-w-0">
+          <h3 className="text-sm font-semibold truncate" title={official.name}>
+            {official.name}
+          </h3>
+          <p
+            className="text-xs bg-blue-100 text-blue-700 mt-1 rounded-md font-medium px-2 py-0.5 truncate"
+            title={official.position}
+          >
+            {official.position}
+          </p>
 
           {/* Action Buttons */}
-          <div className="flex mt-2 gap-2">
+          <div className="flex mt-2 gap-1">
             <button
               onClick={onEdit}
               aria-label={`Edit ${official.name}`}
               title="Edit Official"
-              className="text-blue-600 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 p-2 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-300 transition"
+              className="text-blue-600 hover:text-white bg-blue-50 hover:bg-blue-600 p-1.5 rounded-full focus:outline-none transition"
             >
-              <Edit className="h-5 w-5" />
+              <Edit className="h-4 w-4" />
             </button>
             <button
               onClick={onDelete}
               aria-label={`Delete ${official.name}`}
               title="Delete Official"
-              className="text-red-600 hover:text-red-800 bg-red-50 hover:bg-red-100 p-2 rounded-full focus:outline-none focus:ring-2 focus:ring-red-300 transition"
+              className="text-red-600 hover:text-white bg-red-50 hover:bg-red-600 p-1.5 rounded-full focus:outline-none transition"
             >
-              <Trash2 className="h-5 w-5" />
+              <Trash2 className="h-4 w-4" />
             </button>
           </div>
         </div>

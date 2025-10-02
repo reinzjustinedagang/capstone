@@ -162,7 +162,7 @@ const SystemTab = () => {
               className="w-30 h-30 object-cover border rounded-full"
             />
           ) : (
-            <div className="w-20 h-20 border flex items-center justify-center text-gray-400">
+            <div className="w-30 h-30 border rounded-full flex items-center justify-center text-gray-400">
               No Image
             </div>
           )}
@@ -271,6 +271,7 @@ const SystemTab = () => {
           imageSrc={rawImage}
           onClose={() => setShowCropper(false)}
           onCropComplete={handleCropComplete}
+          cropShape="round"
         />
       )}
 

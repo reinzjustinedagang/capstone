@@ -32,7 +32,11 @@ const ProfilePicture = ({ profilePicture, onCropReady }) => {
       <img
         src={tempImageUrl || profilePicture || user}
         alt="Profile"
-        className="w-full h-full rounded-full object-cover border-4 border-blue-200 group-hover:border-blue-400 transition-all duration-300 shadow"
+        className="w-full h-full rounded-full object-cover border-4 border-blue-200 group-hover:border-blue-400 transition-all duration-300 shadow cursor-pointer"
+        onClick={() => {
+          const imgUrl = tempImageUrl || profilePicture || user;
+          window.open(imgUrl, "_blank");
+        }}
       />
 
       <label

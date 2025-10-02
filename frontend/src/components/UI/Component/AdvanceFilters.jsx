@@ -39,7 +39,7 @@ const AdvancedFilters = ({
   pensionOptions,
   reportsOptions,
 }) => (
-  <div className="p-4 grid grid-cols-4 md:grid-cols-5 gap-4 pt-2 border-t border-gray-200">
+  <div className="p-4 grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 pt-2 border-t border-gray-200">
     <SelectFilter
       label="Age"
       value={filterAge}
