@@ -121,49 +121,58 @@ const Header = () => {
 
       {/* Mobile Menu */}
       {menuOpen && (
-        <div className="lg:hidden fixed inset-0 z-50 bg-white bg-opacity-95 backdrop-blur-sm">
-          <div className="p-6 space-y-6">
-            {/* Header + Close */}
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <img
-                  src={systemSettings.seal || null}
-                  alt="OSCA Logo"
-                  className="h-12 w-auto"
-                />
-                <span className="font-bold text-blue-800 text-lg">
-                  {systemSettings.system_name ||
-                    "Office of the Senior Citizen Affairs"}
-                </span>
-              </div>
-              <button
-                onClick={() => setMenuOpen(false)}
-                className="p-2 rounded-md text-gray-700 hover:bg-gray-100"
-              >
-                <X className="h-6 w-6" />
-              </button>
-            </div>
+        <div className="lg:hidden fixed inset-0 z-50 bg-opacity-95 backdrop-blur-sm flex">
+          {/* Dimmed background */}
+          <div
+            className="flex-1 bg-opacity-40"
+            onClick={() => setMenuOpen(false)}
+          ></div>
 
-            {/* Nav Items */}
-            <nav className="flex flex-col gap-4">
-              {navItems.map(({ to, label, icon: Icon }) => (
-                <NavLink
-                  key={to}
-                  to={to}
+          {/* Slide-in menu */}
+          <div className="w-72 max-w-xs bg-white shadow-xl h-full overflow-y-auto animate-slide-in">
+            <div className="p-6 space-y-6">
+              {/* Header + Close */}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <img
+                    src={systemSettings.seal || null}
+                    alt="OSCA Logo"
+                    className="h-12 w-auto"
+                  />
+                  <span className="font-bold text-blue-800 text-lg">
+                    {systemSettings.system_name ||
+                      "Office of the Senior Citizen Affairs"}
+                  </span>
+                </div>
+                <button
                   onClick={() => setMenuOpen(false)}
-                  className={({ isActive }) =>
-                    `flex items-center gap-3 px-4 py-3 rounded-lg font-semibold text-lg transition-colors ${
-                      isActive
-                        ? "text-blue-700 bg-blue-50"
-                        : "text-gray-900 hover:bg-gray-100 hover:text-blue-600"
-                    }`
-                  }
+                  className="p-2 rounded-md text-gray-700 hover:bg-gray-100"
                 >
-                  <Icon className="h-5 w-5" />
-                  {label}
-                </NavLink>
-              ))}
-            </nav>
+                  <X className="h-6 w-6" />
+                </button>
+              </div>
+
+              {/* Nav Items */}
+              <nav className="flex flex-col gap-4">
+                {navItems.map(({ to, label, icon: Icon }) => (
+                  <NavLink
+                    key={to}
+                    to={to}
+                    onClick={() => setMenuOpen(false)}
+                    className={({ isActive }) =>
+                      `flex items-center gap-3 px-4 py-3 rounded-lg font-semibold text-lg transition-colors ${
+                        isActive
+                          ? "text-blue-700 bg-blue-50"
+                          : "text-gray-900 hover:bg-gray-100 hover:text-blue-600"
+                      }`
+                    }
+                  >
+                    <Icon className="h-5 w-5" />
+                    {label}
+                  </NavLink>
+                ))}
+              </nav>
+            </div>
           </div>
         </div>
       )}
