@@ -83,7 +83,7 @@ const UserManagement = () => {
                     : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
                 }`}
             >
-              <UserX2 className="inline-block h-4 w-4 mr-2" /> Block User
+              <UserX2 className="inline-block h-4 w-4 mr-2" /> Blocked User
             </button>
           </nav>
         </div>
@@ -95,7 +95,13 @@ const UserManagement = () => {
           )}
           {activeTab === "blocked" && <BlockedUsers />}
           {activeTab === "update" && (
-            <UpdateUser id={selectedUserId} onSuccess={handleUpdateSuccess} />
+            <UpdateUser
+              id={selectedUserId}
+              onSuccess={handleUpdateSuccess}
+              onCancel={() => {
+                setActiveTab("list");
+              }}
+            />
           )}
           {activeTab === "add" && <AddUser />}
         </div>

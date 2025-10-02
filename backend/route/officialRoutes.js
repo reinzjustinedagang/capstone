@@ -8,6 +8,17 @@ const {
   deleteCloudinaryImage,
 } = require("../utils/cloudinaryHelpers");
 
+// ----------------- OFFICIALS COUNT ROUTE -----------------
+router.get("/count", async (req, res) => {
+  try {
+    const counts = await officialService.getOfficialsCount();
+    res.json(counts);
+  } catch (error) {
+    console.error("Failed to fetch officials count:", error);
+    res.status(500).json({ message: "Failed to fetch officials count" });
+  }
+});
+
 router.get("/municipal-public", async (req, res) => {
   try {
     const officials = await officialService.getMunicipalPublic();

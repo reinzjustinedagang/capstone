@@ -243,6 +243,10 @@ const MessageTemplates = () => {
                 placeholder="Type your message template here."
                 maxLength={160}
               ></textarea>
+              {/* ✅ Character counter */}
+              <p className="mt-2 text-sm text-gray-500 text-right">
+                {newTemplate.message.length} / 160 characters
+              </p>
             </div>
             {error && <p className="text-red-500 text-sm">{error}</p>}
             <div className="flex justify-end space-x-3 pt-4">
@@ -341,6 +345,10 @@ const MessageTemplates = () => {
                 }
                 className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
               ></textarea>
+              {/* ✅ Character counter */}
+              <p className="mt-2 text-sm text-gray-500 text-right">
+                {selectedTemplate?.message?.length || 0} / 160 characters
+              </p>
             </div>
             {error && <p className="text-red-500 text-sm">{error}</p>}
             <div className="flex justify-end space-x-3 pt-4">

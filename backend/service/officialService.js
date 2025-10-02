@@ -8,6 +8,32 @@ const {
   deleteLocalImage,
 } = require("../utils/serviceHelpers");
 
+// ─── COUNT ALL OFFICIALS ─────────────────────────────
+exports.getOfficialsCount = async () => {
+  try {
+    const [[municipal]] = await Connection(
+      `SELECT COUNT(*) AS count FROM municipal_officials`
+    );
+    const [[barangay]] = await Connection(
+      `SELECT COUNT(*) AS count FROM barangay_officials`
+    );
+    const [[orgChart]] = await Connection(
+      `SELECT COUNT(*) AS count FROM orgChart`
+    );
+
+    return {
+      municipal: municipal.count || 0,
+      barangay: barangay.count || 0,
+      orgChart: orgChart.count || 0,
+      total:
+        (municipal.count || 0) + (barangay.count || 0) + (orgChart.count || 0),
+    };
+  } catch (error) {
+    console.error("Error in getOfficialsCount:", error);
+    throw error;
+  }
+};
+
 exports.getMunicipalPublic = async () => {
   return await Connection(
     `SELECT * FROM municipal_officials WHERE approved = 1 ORDER BY type DESC, id ASC`

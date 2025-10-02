@@ -21,18 +21,31 @@ const MessageHistory = () => {
   const [allUsers, setAllUsers] = useState(["All"]);
   const [showFilters, setShowFilters] = useState(false);
 
+  // Current logged in user
+  const [currentRole, setCurrentRole] = useState(null);
+
   useEffect(() => {
-    const fetchFilterOptions = async () => {
+    const fetchUserAndFilters = async () => {
       try {
-        const response = await axios.get(`${backendUrl}/api/sms/filters`, {
+        // ✅ Fetch current user session
+        const userRes = await axios.get(`${backendUrl}/api/user/me`, {
           withCredentials: true,
         });
-        setAllUsers(["All", ...response.data.users]);
+        setCurrentRole(userRes.data?.role || "staff");
+
+        // ✅ Fetch filters only if admin
+        if (userRes.data?.role === "admin") {
+          const response = await axios.get(`${backendUrl}/api/sms/filters`, {
+            withCredentials: true,
+          });
+          setAllUsers(["All", ...response.data.users]);
+        }
       } catch (err) {
-        console.error("Failed to fetch filter options:", err);
+        console.error("Failed to fetch user or filter options:", err);
       }
     };
-    fetchFilterOptions();
+
+    fetchUserAndFilters();
   }, []);
 
   const fetchHistory = async () => {
@@ -59,13 +72,9 @@ const MessageHistory = () => {
     }
   };
 
-  // useEffect(() => {
-  //   fetchFilterOptions();
-  // }, []);
-
   useEffect(() => {
-    fetchHistory();
-  }, [page, filterRole, filterEmail, filterStatus]);
+    if (currentRole) fetchHistory();
+  }, [page, filterRole, filterEmail, filterStatus, currentRole]);
 
   useEffect(() => {
     setPage(1);
@@ -168,40 +177,44 @@ const MessageHistory = () => {
       {showFilters && (
         <div className="p-4 border rounded-t-xl border-gray-200 ">
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                User
-              </label>
-              <select
-                className="w-full border border-gray-300 rounded-lg px-3 py-2"
-                value={filterEmail}
-                onChange={(e) => setFilterEmail(e.target.value)} // ✅ correct
-              >
-                {allUsers.map((user) => (
-                  <option key={user} value={user}>
-                    {user === "All" ? "All Emails" : user}
-                  </option>
-                ))}
-              </select>
-            </div>
+            {/* ✅ Only show if admin */}
+            {currentRole === "admin" && (
+              <>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    User
+                  </label>
+                  <select
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                    value={filterEmail}
+                    onChange={(e) => setFilterEmail(e.target.value)}
+                  >
+                    {allUsers.map((user) => (
+                      <option key={user} value={user}>
+                        {user === "All" ? "All Emails" : user}
+                      </option>
+                    ))}
+                  </select>
+                </div>
 
-            {/* Role Filter */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Role
-              </label>
-              <select
-                value={filterRole}
-                onChange={(e) => setFilterRole(e.target.value)}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2"
-              >
-                <option value="All">All Roles</option>
-                <option value="admin">Admin</option>
-                <option value="staff">Staff</option>
-              </select>
-            </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Role
+                  </label>
+                  <select
+                    value={filterRole}
+                    onChange={(e) => setFilterRole(e.target.value)}
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                  >
+                    <option value="All">All Roles</option>
+                    <option value="admin">Admin</option>
+                    <option value="staff">Staff</option>
+                  </select>
+                </div>
+              </>
+            )}
 
-            {/* Status Filter */}
+            {/* Status Filter (always shown) */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Status

@@ -11,7 +11,7 @@ import axios from "axios";
 import Modal from "../UI/Modal";
 import Button from "../UI/Button";
 
-export default function UpdateUser({ id, onSuccess }) {
+export default function UpdateUser({ id, onSuccess, onCancel }) {
   const navigate = useNavigate();
 
   const [firstName, setFirstName] = useState("");
@@ -258,7 +258,11 @@ export default function UpdateUser({ id, onSuccess }) {
           </div>
         </div>
 
-        <div className="flex justify-end">
+        <div className="flex justify-end gap-3">
+          <Button variant="secondary" onClick={onCancel} disabled={loading}>
+            Cancel
+          </Button>
+
           <Button type="submit" disabled={loading} variant="primary">
             {loading ? (
               <>

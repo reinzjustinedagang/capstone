@@ -216,7 +216,7 @@ const MonthlySummaryReportPrint = () => {
             className="border border-gray-300 px-3 py-1 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             {Array.from(
-              { length: 10 },
+              { length: 4 },
               (_, i) => new Date().getFullYear() - i
             ).map((y) => (
               <option key={y} value={y}>

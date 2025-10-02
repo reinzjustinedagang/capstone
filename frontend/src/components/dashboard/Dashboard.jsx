@@ -3,18 +3,15 @@ import axios from "axios";
 import Card from "../UI/Card";
 import { NavLink, useLocation } from "react-router-dom";
 import {
-  UsersIcon,
   MessageSquareIcon,
-  BellIcon,
-  UserPlusIcon,
   HouseIcon,
   GiftIcon,
   Calendar,
-  User,
-  UserRoundPlus,
   UserRoundCheck,
   UserRound,
-  UserRoundX,
+  SquareUser,
+  ShieldUser,
+  Network,
 } from "lucide-react";
 import BarangayDistribution from "../reports/chart/BarangayDistribution";
 import RecentRegistrations from "./RecentRegistrations";
@@ -28,6 +25,15 @@ const Dashboard = () => {
   const [userCount, setUserCount] = useState(0);
   const [eventsCount, setEventsCount] = useState(0);
   const [benefitsCount, setBenefitsCount] = useState(0);
+
+  // Officials count (from backend)
+  const [officials, setOfficials] = useState({
+    municipal: 0,
+    barangay: 0,
+    orgChart: 0,
+    total: 0,
+  });
+
   const [loading, setLoading] = useState(true);
   const backendUrl =
     import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
@@ -37,16 +43,13 @@ const Dashboard = () => {
   useEffect(() => {
     if (location.state?.loginSuccess) {
       setShowLoginNotification(true);
-
-      // Auto hide after 3 seconds
       const timer = setTimeout(() => setShowLoginNotification(false), 3000);
-
-      // Clear state so it doesn’t persist on refresh
       window.history.replaceState({}, document.title);
       return () => clearTimeout(timer);
     }
   }, [location]);
 
+  // Existing count fetchers...
   const fetchEventsCount = async () => {
     try {
       const res = await axios.get(`${backendUrl}/api/events/count/all`, {
@@ -54,7 +57,7 @@ const Dashboard = () => {
       });
       setEventsCount(res.data.count || 0);
     } catch (err) {
-      console.error("Failed to fetch barangay count", err);
+      console.error("Failed to fetch events count", err);
     }
   };
 
@@ -63,7 +66,7 @@ const Dashboard = () => {
       const res = await axios.get(`${backendUrl}/api/user/count/all`);
       setUserCount(res.data.count || 0);
     } catch (err) {
-      console.error("Failed to fetch barangay count", err);
+      console.error("Failed to fetch user count", err);
     }
   };
 
@@ -94,7 +97,7 @@ const Dashboard = () => {
       );
       setRegisterCount(res.data.count || 0);
     } catch (err) {
-      console.error("Failed to fetch senior citizen count", err);
+      console.error("Failed to fetch senior citizen register count", err);
     }
   };
 
@@ -105,7 +108,7 @@ const Dashboard = () => {
       });
       setBenefitsCount(res.data.count || 0);
     } catch (err) {
-      console.error("Failed to fetch senior citizen count", err);
+      console.error("Failed to fetch benefits count", err);
     }
   };
 
@@ -114,9 +117,23 @@ const Dashboard = () => {
       const res = await axios.get(`${backendUrl}/api/sms/count`, {
         withCredentials: true,
       });
-      setSmsCount(res.data.success_count || 0); // only successful sent
+      setSmsCount(res.data.success_count || 0);
     } catch (err) {
       console.error("Failed to fetch SMS count", err);
+    }
+  };
+
+  // 🔹 NEW: fetch officials count
+  const fetchOfficialsCount = async () => {
+    try {
+      const res = await axios.get(`${backendUrl}/api/officials/count`, {
+        withCredentials: true,
+      });
+      setOfficials(
+        res.data || { municipal: 0, barangay: 0, orgChart: 0, total: 0 }
+      );
+    } catch (err) {
+      console.error("Failed to fetch officials count", err);
     }
   };
 
@@ -131,6 +148,7 @@ const Dashboard = () => {
         fetchBenefitsCount(),
         fetchRegisterCount(),
         fetchSmsCount(),
+        fetchOfficialsCount(), // include officials
       ]);
       setLoading(false);
     };
@@ -153,14 +171,6 @@ const Dashboard = () => {
             color="blue"
           />
         </NavLink>
-        {/* <NavLink to="/admin/senior-citizen-list">
-          <Card
-            title="Not Registered Senior Citizens"
-            value={loading ? "—" : registerCount}
-            icon={<UserRoundX />}
-            color="blue"
-          />
-        </NavLink> */}
 
         <NavLink to="/admin/barangays">
           <Card
@@ -170,6 +180,7 @@ const Dashboard = () => {
             color="blue"
           />
         </NavLink>
+
         <NavLink to="/admin/sms-management">
           <Card
             title="SMS Sent (This Month)"
@@ -178,6 +189,7 @@ const Dashboard = () => {
             color="blue"
           />
         </NavLink>
+
         <NavLink to="/admin/benefits">
           <Card
             title="Total Benefits"
@@ -186,6 +198,7 @@ const Dashboard = () => {
             color="blue"
           />
         </NavLink>
+
         <NavLink to="/admin/events">
           <Card
             title="Total Events"
@@ -194,6 +207,7 @@ const Dashboard = () => {
             color="blue"
           />
         </NavLink>
+
         <NavLink to="/admin/user-management">
           <Card
             title="Total User"
@@ -202,12 +216,41 @@ const Dashboard = () => {
             color="blue"
           />
         </NavLink>
+
+        {/* Officials from backend */}
+        <NavLink to="/admin/osca-officials">
+          <Card
+            title="Barangay Association President"
+            value={loading ? "—" : officials.barangay}
+            icon={<SquareUser />}
+            color="blue"
+          />
+        </NavLink>
+
+        <NavLink to="/admin/osca-officials">
+          <Card
+            title="Federation Officer"
+            value={loading ? "—" : officials.municipal}
+            icon={<ShieldUser />}
+            color="blue"
+          />
+        </NavLink>
+
+        <NavLink to="/admin/osca-officials">
+          <Card
+            title="Organizational Chart"
+            value={loading ? "—" : officials.orgChart}
+            icon={<Network />}
+            color="blue"
+          />
+        </NavLink>
       </div>
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
         <RecentRegistrations />
-
         <RecentSmsActivities />
       </div>
+
       <div>
         <BarangayDistribution />
       </div>
