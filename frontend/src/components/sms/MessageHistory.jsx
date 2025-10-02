@@ -24,7 +24,9 @@ const MessageHistory = () => {
   useEffect(() => {
     const fetchFilterOptions = async () => {
       try {
-        const response = await axios.get(`${backendUrl}/api/sms/filters`);
+        const response = await axios.get(`${backendUrl}/api/sms/filters`, {
+          withCredentials: true,
+        });
         setAllUsers(["All", ...response.data.users]);
       } catch (err) {
         console.error("Failed to fetch filter options:", err);

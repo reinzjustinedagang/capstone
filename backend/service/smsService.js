@@ -370,15 +370,23 @@ exports.resetPassword = async (cpNumber, newPassword) => {
 };
 
 // smsService.js
-exports.getSmsFilters = async () => {
+exports.getSmsFilters = async (user) => {
   try {
-    const usersResult = await Connection(
-      `SELECT DISTINCT sent_email FROM sms_logs WHERE sent_email IS NOT NULL ORDER BY sent_email ASC`
-    );
+    if (user.role === "admin") {
+      // Admins see all distinct sent_email values
+      const usersResult = await Connection(
+        `SELECT DISTINCT sent_email 
+         FROM sms_logs 
+         WHERE sent_email IS NOT NULL 
+         ORDER BY sent_email ASC`
+      );
 
-    const users = usersResult.map((row) => row.sent_email);
-
-    return { users };
+      const users = usersResult.map((row) => row.sent_email);
+      return { users };
+    } else {
+      // Non-admins only see their own email
+      return { users: [user.email] };
+    }
   } catch (err) {
     console.error("❌ Failed to fetch SMS filter options:", err);
     throw err;

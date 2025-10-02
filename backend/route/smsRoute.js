@@ -186,9 +186,10 @@ router.post("/reset-password", async (req, res) => {
 });
 
 // routes/sms.js
-router.get("/filters", async (req, res) => {
+router.get("/filters", isAuthenticated, async (req, res) => {
+  const user = req.session.user;
   try {
-    const filters = await smsService.getSmsFilters();
+    const filters = await smsService.getSmsFilters(user);
     res.status(200).json(filters);
   } catch (err) {
     console.error("Error in /sms/filters:", err);
