@@ -346,12 +346,12 @@ exports.createSeniorCitizen = async (data, user, ip) => {
       document_type: data.documentType || null,
       photo: photoUrl,
       // Set date fields
-      pdl_date: formData.pdl?.toLowerCase() === "yes" ? now : null,
+      pdl_date: formData.remarks === "PDL" ? now : null,
       socpen_date: formData.remarks === "SOCIAL PENSION" ? now : null,
       nonsocpen_date: formData.remarks === "NON-SOCIAL PENSION" ? now : null,
-      transferee_date: formData.transfer?.toLowerCase() === "yes" ? now : null,
-      booklet_date: formData.booklet?.toLowerCase() === "yes" ? now : null,
-      utp_date: formData.utp?.toLowerCase() === "yes" ? now : null,
+      transferee_date: formData.remarks === "TRANSFER" ? now : null,
+      booklet_date: formData.remarks === "BOOKLET" ? now : null,
+      utp_date: formData.remarks === "UTP" ? now : null,
     };
 
     // Insert into DB
@@ -474,25 +474,17 @@ exports.updateSeniorCitizen = async (id, updatedData, user, ip) => {
       photo: photoUrl,
       photo_public_id: photoPublicId,
       // Conditional date fields
-      pdl_date:
-        formData.pdl && formData.pdl.toLowerCase() === "yes"
-          ? new Date()
-          : null,
+      pdl_date: formData.pdl && formData.remarks === "PDL" ? new Date() : null,
       socpen_date: formData.remarks === "SOCIAL PENSION" ? new Date() : null,
       nonsocpen_date:
         formData.remarks === "NON-SOCIAL PENSION" ? new Date() : null,
       transferee_date:
-        formData.transfer && formData.transfer.toLowerCase() === "yes"
+        formData.transfer && formData.remarks === "TRANSFER"
           ? new Date()
           : null,
       booklet_date:
-        formData.booklet && formData.booklet.toLowerCase() === "yes"
-          ? new Date()
-          : null,
-      utp_date:
-        formData.utp && formData.utp.toLowerCase() === "yes"
-          ? new Date()
-          : null,
+        formData.booklet && formData.booklet === "BOOKLET" ? new Date() : null,
+      utp_date: formData.utp && formData.remarks === "UTP" ? new Date() : null,
     };
 
     // Update DB
