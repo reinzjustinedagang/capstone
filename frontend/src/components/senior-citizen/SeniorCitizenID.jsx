@@ -287,7 +287,8 @@ const SeniorCitizenID = ({
         <View style={styles.footer}>
           <Text style={styles.signatureSection}>Signature/Thumbmark</Text>
           <Text style={styles.controlSection}>
-            Control No. <Text style={{ fontWeight: "bold" }}>5100-</Text>
+            Control No.{" "}
+            <Text style={{ fontWeight: "bold" }}>{zipCode || "1"}-</Text>
             {controlNo}
           </Text>
         </View>
@@ -356,7 +357,7 @@ const SeniorCitizenID = ({
           <View style={styles.signatureArea}>
             {/* Left side */}
             <View style={styles.signatureBlock}>
-              <Text style={styles.nameText}>{oscaHead}</Text>
+              <Text style={styles.nameText}>{oscaHead || "HEAD"}</Text>
               <Text style={styles.designationText}>
                 MSWO Officer / OIC-OSCA Head
               </Text>
@@ -364,7 +365,7 @@ const SeniorCitizenID = ({
 
             {/* Right side */}
             <View style={styles.signatureBlock}>
-              <Text style={styles.nameText}>{mayor}</Text>
+              <Text style={styles.nameText}>{mayor || "MAYOR"}</Text>
               <Text style={styles.designationText}>Municipal Mayor</Text>
             </View>
           </View>

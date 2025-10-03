@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
+import axios from "axios";
 import {
   PercentIcon,
   Stethoscope,
@@ -30,7 +31,33 @@ const SeniorCitizen = () => {
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [showUpdateModal, setShowUpdateModal] = useState(false);
 
+  const [zipCode, setZipCode] = useState("");
+  const [oscaHead, setOscaHead] = useState("");
+  const [mayor, setMayor] = useState("");
+
   const navigate = useNavigate();
+
+  const backendUrl =
+    import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
+
+  useEffect(() => {
+    const fetchOfficials = async () => {
+      try {
+        const zip = await axios.get(`${backendUrl}/api/settings/`);
+        setZipCode(zip.data.zipCode || "");
+
+        const head = await axios.get(`${backendUrl}/api/officials/head`);
+        setOscaHead(head.data?.name || "");
+
+        const mayorRes = await axios.get(`${backendUrl}/api/officials/mayor`);
+        setMayor(mayorRes.data?.name || "");
+      } catch (err) {
+        console.error("Failed to fetch officials:", err);
+      }
+    };
+
+    fetchOfficials();
+  }, [backendUrl]);
 
   const handleAddSuccess = () => {
     setActiveTab("list");
@@ -175,10 +202,9 @@ const SeniorCitizen = () => {
         {activeTab === "id" && (
           <SeniorCitizenIDPDF
             citizen={selectedIDCitizen}
-            onSuccess={handleUpdateSuccess}
-            onCancel={() => {
-              setActiveTab("unregistered");
-            }}
+            zipCode={zipCode}
+            oscaHead={oscaHead}
+            mayor={mayor}
           />
         )}
       </div>
