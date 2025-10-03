@@ -22,6 +22,7 @@ const SystemTab = () => {
     systemName: "",
     municipality: "",
     province: "",
+    zipCode: "",
   });
 
   const [sealFile, setSealFile] = useState(null);
@@ -52,6 +53,7 @@ const SystemTab = () => {
             systemName: res.data.system_name || "",
             municipality: res.data.municipality || "",
             province: res.data.province || "",
+            zipCode: res.data.zipCode || "",
           });
           setSealPreview(res.data.seal || null);
           setSealFile(null);
@@ -100,7 +102,12 @@ const SystemTab = () => {
     setError("");
     setSuccessMessage("");
 
-    if (!formData.systemName || !formData.municipality || !formData.province) {
+    if (
+      !formData.systemName ||
+      !formData.municipality ||
+      !formData.province ||
+      formData.zipCode
+    ) {
       setError("All required fields must be filled.");
       setLoading(false);
       return;
@@ -111,6 +118,7 @@ const SystemTab = () => {
       formPayload.append("systemName", formData.systemName);
       formPayload.append("municipality", formData.municipality);
       formPayload.append("province", formData.province);
+      formPayload.append("zipCode", formData.zipCode);
       formPayload.append("existingSeal", sealPreview || "");
       if (sealFile) formPayload.append("image", sealFile);
 
@@ -228,6 +236,23 @@ const SystemTab = () => {
               value={formData.province}
               onChange={(e) =>
                 setFormData({ ...formData, province: e.target.value })
+              }
+              className="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 pl-10 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+            />
+            <MapIcon className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
+          </div>
+        </div>
+
+        {/* Zip Code */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700">
+            Zip Code
+          </label>
+          <div className="mt-1 relative">
+            <input
+              value={formData.zipCode}
+              onChange={(e) =>
+                setFormData({ ...formData, zipCode: e.target.value })
               }
               className="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 pl-10 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
             />

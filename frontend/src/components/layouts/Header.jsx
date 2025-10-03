@@ -70,12 +70,12 @@ const Header = () => {
     }
   };
 
-  const pageTitle = location.pathname
-    .split("/")
-    .pop()
-    .split("-")
-    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-    .join(" ");
+  const pathSegments = location.pathname.split("/").filter(Boolean);
+  let pageTitle = pathSegments[pathSegments.length - 1]
+    .replace(/-/g, " ")
+    .replace(/\d+$/, "") // remove numeric id
+    .trim();
+  pageTitle = pageTitle.charAt(0).toUpperCase() + pageTitle.slice(1);
 
   return (
     <header className="bg-white border-b border-gray-200">
@@ -133,13 +133,13 @@ const Header = () => {
               {/* Dropdown Icon */}
               <div
                 className="
-      absolute bottom-0.5 right-0
-      bg-blue-500 text-white rounded-full p-0.1 cursor-pointer
-      shadow-lg hover:bg-blue-700
-      block lg:opacity-0 lg:group-hover:opacity-100
-      transition-all duration-300
-      flex items-center justify-center
-    "
+    absolute bottom-0.5 right-0
+    bg-blue-500 text-white rounded-full p-0.1 cursor-pointer
+    shadow-lg hover:bg-blue-700
+    block lg:flex lg:opacity-0 lg:group-hover:opacity-100
+    transition-all duration-300
+    items-center justify-center
+  "
                 onClick={() => setShowDropdown(!showDropdown)}
               >
                 <ChevronDown className="h-4 w-4" />

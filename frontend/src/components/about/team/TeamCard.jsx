@@ -4,44 +4,57 @@ import user from "../../../assets/user.png";
 
 const TeamCard = ({ member, onEdit, onDelete }) => {
   return (
-    <div className="relative flex flex-col items-center bg-white p-4 rounded-2xl shadow-md w-48 transition-transform transform hover:scale-105">
+    <div className="relative flex flex-col items-center bg-white p-4 rounded-2xl shadow-md w-48 transition-all duration-200 ">
+      {/* Status Badge (optional) */}
+      {member.status && (
+        <span
+          className={`absolute top-2 left-2 px-2 py-0.5 text-[11px] font-semibold rounded-md
+            ${
+              member.status === "Pending"
+                ? "bg-yellow-500 text-white"
+                : "bg-green-500 text-white"
+            }`}
+        >
+          {member.status}
+        </span>
+      )}
       {/* Profile Picture */}
-      <div className="relative mb-3">
+      <div className="mb-3">
         <img
           src={member.image || user}
           alt={member.name}
           onError={(e) => {
             e.target.onerror = null;
             e.target.src =
-              "https://placehold.co/80x80/cccccc/ffffff?text=No+Image";
+              "https://placehold.co/80x80/cccccc/ffffff?text=No+Img";
           }}
-          className="w-24 h-24 object-cover border-2 rounded-full border-blue-500"
+          className="w-24 h-24 object-cover rounded-full border-2 border-blue-500"
         />
       </div>
+
       {/* Member Name */}
       <h3
-        className="text-sm font-semibold text-center mb-2 max-w-full truncate"
+        className="text-sm font-semibold text-center mb-2 truncate max-w-[10rem] text-gray-800"
         title={member.name}
       >
         {member.name}
       </h3>
-      {/* Role */}
-      <p className="text-sm bg-blue-100 text-blue-700 mt-1 px-3 py-0.5 rounded-md font-medium truncate">
+      {/* Role / Position */}
+      <p className="text-[11px] mt-1 px-3 py-1 rounded-full font-semibold bg-blue-100 text-blue-700 uppercase tracking-wide text-center truncate">
         {member.role}
       </p>
-
       {/* Action Buttons */}
-      <div className="flex mt-4 gap-3">
+      <div className="flex mt-3 gap-3">
         <button
           onClick={onEdit}
-          className="text-blue-600 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 p-2 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-300 transition"
+          className="text-blue-600 hover:text-white bg-blue-50 hover:bg-blue-600 p-2 rounded-full focus:outline-none transition"
           aria-label={`Edit ${member.name}`}
         >
           <Edit className="h-5 w-5" />
         </button>
         <button
           onClick={onDelete}
-          className="text-red-600 hover:text-red-800 bg-red-50 hover:bg-red-100 p-2 rounded-full focus:outline-none focus:ring-2 focus:ring-red-300 transition"
+          className="text-red-600 hover:text-white bg-red-50 hover:bg-red-600 p-2 rounded-full focus:outline-none transition"
           aria-label={`Delete ${member.name}`}
         >
           <Trash2 className="h-5 w-5" />

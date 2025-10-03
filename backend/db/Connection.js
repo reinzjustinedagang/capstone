@@ -325,6 +325,7 @@ async function initTables() {
         system_name VARCHAR(255) NOT NULL,
         municipality VARCHAR(255) NOT NULL,
         province VARCHAR(255) NOT NULL,
+        zipCode INT(5),
         seal VARCHAR(500), -- path or URL of uploaded seal image,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         mission TEXT NULL,

@@ -83,7 +83,7 @@ const Sidebar = () => {
       label: "User Management",
       icon: UserCogIcon,
     },
-    { to: "/admin/about", label: "About OSCA", icon: InfoIcon },
+    { to: "/admin/about-osca", label: "About OSCA", icon: InfoIcon },
   ];
 
   return (

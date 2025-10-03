@@ -40,6 +40,7 @@ exports.updateSystemSettings = async (
   systemName,
   municipality,
   province,
+  zipCode,
   sealPath,
   user,
   ip
@@ -61,14 +62,14 @@ exports.updateSystemSettings = async (
 
   if (existingRows.length === 0) {
     await Connection(
-      `INSERT INTO system_setting (id, system_name, municipality, province, seal) VALUES (1, ?, ?, ?, ?)`,
-      [systemName, municipality, province, sealPath]
+      `INSERT INTO system_setting (id, system_name, municipality, province, zipCode, seal) VALUES (1, ?, ?, ?, ?, ?)`,
+      [systemName, municipality, province, zipCode, sealPath]
     );
     changes.push("Initial system settings created.");
   } else {
     await Connection(
-      `UPDATE system_setting SET system_name = ?, municipality = ?, province = ?, seal = ? WHERE id = 1`,
-      [systemName, municipality, province, sealPath || old.seal]
+      `UPDATE system_setting SET system_name = ?, municipality = ?, province = ?, zipCode =  ?, seal = ? WHERE id = 1`,
+      [systemName, municipality, province, zipCode, sealPath || old.seal]
     );
   }
 
@@ -79,6 +80,8 @@ exports.updateSystemSettings = async (
     changes.push(`Municipality: '${old.municipality}' → '${municipality}'`);
   if (old.province !== province)
     changes.push(`Province: '${old.province}' → '${province}'`);
+  if (old.zipCode !== zipCode)
+    changes.push(`Zip Code: '${old.zipCode}' → '${zipCode}'`);
   if (sealPath && old.seal !== sealPath) changes.push(`Seal updated`);
 
   // Log audit

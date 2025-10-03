@@ -55,11 +55,8 @@ const EventSlideshow = () => {
       await axios.delete(`${backendUrl}/api/events/${eventToDelete}`, {
         withCredentials: true,
       });
-
-      // Re-fetch events from backend instead of just filtering state
       await fetchEvents();
-
-      setCurrentIndex(0); // Reset to first slide for safety
+      setCurrentIndex(0);
       setShowConfirmModal(false);
       setShowSuccessModal(true);
     } catch (err) {
@@ -74,34 +71,32 @@ const EventSlideshow = () => {
 
   if (!currentEvent) {
     return (
-      <section className="relative h-[60vh] md:h-[70vh] flex items-center justify-center bg-gray-200 rounded-xl shadow-lg mx-4">
+      <section className="relative h-64 sm:h-80 md:h-[50vh] flex items-center justify-center bg-gray-200 rounded-xl shadow-lg mx-4">
         <p className="text-gray-500">No slideshow to display.</p>
       </section>
     );
   }
 
   return (
-    <section className="relative h-[70vh] md:h-[60vh] flex items-center justify-center overflow-hidden rounded-xl shadow-lg mx-4">
+    <section className="relative h-64 sm:h-80 md:h-[50vh] flex items-center justify-center overflow-hidden rounded-xl shadow-lg mx-4">
       {/* Background image */}
       <div
         className="absolute inset-0 bg-cover bg-center transition-all duration-700"
-        style={{
-          backgroundImage: `url(${currentEvent.image_url})`,
-        }}
+        style={{ backgroundImage: `url(${currentEvent.image_url})` }}
       />
 
       {/* Overlay */}
-      <div className="absolute inset-0 rounded-xl" />
+      <div className="absolute inset-0 bg-black/25 rounded-xl" />
 
       {/* Event info */}
-      <div className="absolute bottom-12 left-1/2 -translate-x-1/2 text-center text-white px-6 max-w-2xl">
+      <div className="absolute bottom-4 sm:bottom-8 left-1/2 -translate-x-1/2 text-center text-white px-4 sm:px-6 max-w-xs sm:max-w-xl">
         {/* Delete button */}
         <button
           onClick={() => {
             setEventToDelete(currentEvent.id);
             setShowConfirmModal(true);
           }}
-          className="mt-3 px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg flex items-center gap-2 mx-auto"
+          className="mt-3 px-3 py-1 sm:px-4 sm:py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg flex items-center gap-2 mx-auto text-sm sm:text-base"
         >
           <Trash2 className="h-4 w-4" />
           Delete Slideshow
@@ -111,29 +106,30 @@ const EventSlideshow = () => {
       {/* Navigation buttons */}
       <button
         onClick={prevSlide}
-        className="absolute left-3 top-1/2 -translate-y-1/2 bg-white/30 hover:bg-white/50 p-2 rounded-full text-white"
+        className="absolute left-2 sm:left-3 top-1/2 -translate-y-1/2 bg-white/30 hover:bg-white/50 p-2 sm:p-3 rounded-full text-white"
       >
-        <ChevronLeft className="h-6 w-6" />
+        <ChevronLeft className="h-4 sm:h-6 w-4 sm:w-6" />
       </button>
       <button
         onClick={nextSlide}
-        className="absolute right-3 top-1/2 -translate-y-1/2 bg-white/30 hover:bg-white/50 p-2 rounded-full text-white"
+        className="absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 bg-white/30 hover:bg-white/50 p-2 sm:p-3 rounded-full text-white"
       >
-        <ChevronRight className="h-6 w-6" />
+        <ChevronRight className="h-4 sm:h-6 w-4 sm:w-6" />
       </button>
 
       {/* Indicators */}
-      <div className="absolute bottom-4 flex justify-center gap-2 w-full">
+      <div className="absolute bottom-2 sm:bottom-4 flex justify-center gap-2 w-full">
         {events.map((_, idx) => (
           <div
             key={idx}
             onClick={() => setCurrentIndex(idx)}
-            className={`h-2.5 w-2.5 rounded-full cursor-pointer transition ${
+            className={`h-2 w-2 sm:h-2.5 sm:w-2.5 rounded-full cursor-pointer transition ${
               idx === currentIndex ? "bg-white" : "bg-gray-400"
             }`}
           />
         ))}
       </div>
+
       {/* Confirm Delete Modal */}
       <Modal
         isOpen={showConfirmModal}
@@ -143,7 +139,7 @@ const EventSlideshow = () => {
         <div className="mt-4 text-sm text-gray-700">
           Are you sure you want to delete this event?
         </div>
-        <div className="mt-6 flex justify-end space-x-4">
+        <div className="mt-6 flex flex-col sm:flex-row justify-end sm:space-x-4 space-y-2 sm:space-y-0">
           <button
             onClick={() => setShowConfirmModal(false)}
             className="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 text-sm"

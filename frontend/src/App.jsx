@@ -229,7 +229,7 @@ function App() {
         <Route path="recycle-bin" element={<RecycleBinPage />} />
         <Route path="login-trail/:userId" element={<LoginTrailPage />} />
         <Route path="events" element={<EventsPage />} />
-        <Route path="about" element={<AboutOscaPage />} />
+        <Route path="about-osca" element={<AboutOscaPage />} />
         <Route path="archive" element={<ArchivePage />} />
       </Route>
 
