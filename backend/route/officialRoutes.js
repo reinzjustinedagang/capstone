@@ -19,6 +19,26 @@ router.get("/count", async (req, res) => {
   }
 });
 
+router.get("/head", async (req, res) => {
+  try {
+    const head = await officialService.getHead();
+    res.json(head);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Failed to fetch head" });
+  }
+});
+
+router.get("/mayor", async (req, res) => {
+  try {
+    const mayor = await officialService.getMayor();
+    res.json(mayor);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Failed to fetch mayor" });
+  }
+});
+
 router.get("/municipal-public", async (req, res) => {
   try {
     const officials = await officialService.getMunicipalPublic();

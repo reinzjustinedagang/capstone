@@ -36,6 +36,20 @@ exports.getOfficialsCount = async () => {
   }
 };
 
+exports.getHead = async () => {
+  const rows = await Connection(
+    `SELECT name FROM municipal_officials WHERE type = 'top' AND approved = 1`
+  );
+  return rows[0] || null; // return only one object instead of array
+};
+
+exports.getMayor = async () => {
+  const rows = await Connection(
+    `SELECT name FROM orgChart WHERE type = 'top' AND approved = 1`
+  );
+  return rows[0] || null; // return only one object instead of array
+};
+
 exports.getMunicipalPublic = async () => {
   return await Connection(
     `SELECT * FROM municipal_officials WHERE approved = 1 ORDER BY type DESC, id ASC`

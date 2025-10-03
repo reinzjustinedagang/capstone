@@ -220,6 +220,9 @@ const SeniorCitizenID = ({
   sex,
   dateIssued,
   controlNo,
+  zipCode,
+  oscaHead,
+  mayor,
   photoUrl,
   oscaLogoUrl = oscaLogo,
   municipalSealUrl = municipalSeal,
@@ -353,7 +356,7 @@ const SeniorCitizenID = ({
           <View style={styles.signatureArea}>
             {/* Left side */}
             <View style={styles.signatureBlock}>
-              <Text style={styles.nameText}>MARCELINO G. CORPUZ JR.</Text>
+              <Text style={styles.nameText}>{oscaHead}</Text>
               <Text style={styles.designationText}>
                 MSWO Officer / OIC-OSCA Head
               </Text>
@@ -361,7 +364,7 @@ const SeniorCitizenID = ({
 
             {/* Right side */}
             <View style={styles.signatureBlock}>
-              <Text style={styles.nameText}>REY C. LADAGA</Text>
+              <Text style={styles.nameText}>{mayor}</Text>
               <Text style={styles.designationText}>Municipal Mayor</Text>
             </View>
           </View>
