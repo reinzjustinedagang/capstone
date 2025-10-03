@@ -26,12 +26,13 @@ router.get("/", async (req, res) => {
 // POST (insert/update) system settings
 router.post("/", isAuthenticated, upload.single("image"), async (req, res) => {
   try {
-    const { systemName, municipality, province, existingSeal } = req.body;
+    const { systemName, municipality, province, zipCode, existingSeal } =
+      req.body;
     const ip = req.userIp;
     const user = req.session.user;
 
     // Validate required fields
-    if (!systemName || !municipality || !province) {
+    if (!systemName || !municipality || !province || !zipCode) {
       return res.status(400).json({
         message: "systemName, municipality, and province are required",
       });
@@ -66,6 +67,7 @@ router.post("/", isAuthenticated, upload.single("image"), async (req, res) => {
       systemName,
       municipality,
       province,
+      zipCode,
       sealPath,
       user,
       ip

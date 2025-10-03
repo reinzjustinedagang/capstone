@@ -106,7 +106,7 @@ const SystemTab = () => {
       !formData.systemName ||
       !formData.municipality ||
       !formData.province ||
-      formData.zipCode
+      !formData.zipCode
     ) {
       setError("All required fields must be filled.");
       setLoading(false);
