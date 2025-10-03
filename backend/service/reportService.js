@@ -379,12 +379,19 @@ exports.getPensionerReport = async () => {
         AND deleted = 0
         AND archived = 0
         AND CAST(JSON_UNQUOTE(JSON_EXTRACT(form_data, '$.age')) AS UNSIGNED) >= 60
-        AND JSON_UNQUOTE(JSON_EXTRACT(form_data, '$.pensioner')) IN ('GSIS','SSS','PVAO','PWD')
+       AND JSON_UNQUOTE(JSON_EXTRACT(form_data, '$.pensioner')) IN ('DSWD SOCPEN','GSIS','SSS','PVAO','AFPSLAI','OTHERS')
       GROUP BY pensioner
       `
     );
 
-    const report = { GSIS: 0, SSS: 0, PVAO: 0, PWD: 0 };
+    const report = {
+      DSWDSOCPEN: 0,
+      GSIS: 0,
+      SSS: 0,
+      PVAO: 0,
+      AFPSLAI: 0,
+      OTHERS: 0,
+    };
 
     rows.forEach((r) => {
       if (report.hasOwnProperty(r.pensioner)) {

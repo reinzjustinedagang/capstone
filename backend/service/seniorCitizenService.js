@@ -349,7 +349,7 @@ exports.createSeniorCitizen = async (data, user, ip) => {
       pdl_date: formData.pdl?.toLowerCase() === "yes" ? now : null,
       socpen_date: formData.remarks === "SOCIAL PENSION" ? now : null,
       nonsocpen_date: formData.remarks === "NON-SOCIAL PENSION" ? now : null,
-      transferee_date: formData.tranfer?.toLowerCase() === "yes" ? now : null,
+      transferee_date: formData.transfer?.toLowerCase() === "yes" ? now : null,
       booklet_date: formData.booklet?.toLowerCase() === "yes" ? now : null,
       utp_date: formData.utp?.toLowerCase() === "yes" ? now : null,
     };
@@ -482,7 +482,7 @@ exports.updateSeniorCitizen = async (id, updatedData, user, ip) => {
       nonsocpen_date:
         formData.remarks === "NON-SOCIAL PENSION" ? new Date() : null,
       transferee_date:
-        formData.tranfer && formData.tranfer.toLowerCase() === "yes"
+        formData.transfer && formData.transfer.toLowerCase() === "yes"
           ? new Date()
           : null,
       booklet_date:
@@ -597,7 +597,7 @@ exports.getPaginatedFilteredCitizens = async (options) => {
   }
 
   if (reports === "Transferee") {
-    where += ` AND JSON_UNQUOTE(JSON_EXTRACT(sc.form_data, '$.tranfer')) = 'yes'`;
+    where += ` AND JSON_UNQUOTE(JSON_EXTRACT(sc.form_data, '$.transfer')) = 'yes'`;
   }
 
   if (reports === "PDL") {
