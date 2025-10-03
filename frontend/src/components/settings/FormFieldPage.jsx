@@ -383,7 +383,7 @@ const FormFieldsPage = () => {
       >
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Show Outside */}
-          <div className="flex items-center space-x-2">
+          {/* <div className="flex items-center space-x-2">
             <input
               type="checkbox"
               name="show_outside" // 👈 new key
@@ -394,7 +394,7 @@ const FormFieldsPage = () => {
             <label className="text-sm font-medium text-gray-700">
               Show Outside
             </label>
-          </div>
+          </div> */}
 
           {/* Required */}
           <div className="flex items-center space-x-2">
@@ -975,7 +975,7 @@ const FormFieldsPage = () => {
             </div>
 
             {/* Show Outside */}
-            <div className="flex items-center gap-2">
+            {/* <div className="flex items-center gap-2">
               <input
                 type="checkbox"
                 name="show_outside"
@@ -989,7 +989,7 @@ const FormFieldsPage = () => {
               <label className="text-sm font-medium text-gray-700">
                 Show Outside
               </label>
-            </div>
+            </div> */}
 
             <div className="flex justify-end gap-2">
               <button

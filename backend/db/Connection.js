@@ -382,7 +382,8 @@ async function initTables() {
         required BOOLEAN DEFAULT false,
         \`group\` VARCHAR(100) NOT NULL,
         \`order\` INT NOT NULL,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        show_outside INT DEFAULT 0
       )
     `);
     console.log("✅ form_fields table ready.");
