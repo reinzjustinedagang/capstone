@@ -559,10 +559,10 @@ exports.getPaginatedFilteredCitizens = async (options) => {
     params.push(healthStatus);
   }
 
-  //Pensioner filter
+  // Pensioner filter (supports comma-separated values)
   if (pensioner && pensioner !== "All Pensions") {
-    where += ` AND JSON_UNQUOTE(JSON_EXTRACT(sc.form_data, '$.pensioner')) LIKE ?`;
-    params.push(pensioner);
+    where += ` AND CONCAT(',', JSON_UNQUOTE(JSON_EXTRACT(sc.form_data, '$.pensioner')), ',') LIKE ?`;
+    params.push(`%,${pensioner},%`);
   }
 
   // Gender filter
