@@ -4,7 +4,7 @@ const {
   extractCloudinaryPublicId,
   safeCloudinaryDestroy,
   deleteLocalImage,
-} = require("../utils/cloudinary");
+} = require("../utils/serviceHelpers");
 
 exports.getEventCount = async (user) => {
   if (user && user.role === "admin") {

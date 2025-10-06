@@ -160,19 +160,20 @@ const EventSlideshow = () => {
         </div>
       </Modal>
 
-      {/* Success Modal */}
+      {/* ✅ Success Modal (Delete Confirmation) */}
       <Modal
         isOpen={showSuccessModal}
         onClose={() => setShowSuccessModal(false)}
-        title=""
+        title="Success"
       >
         <div className="p-6 text-center">
           <div className="mx-auto mb-4 w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
             <CheckCircle className="w-6 h-6 text-green-500" />
           </div>
-          <h3 className="text-lg font-medium text-gray-800 mb-2">
-            Event Deleted Successfully
-          </h3>
+          <h3 className="text-lg font-medium text-gray-800 mb-2">Success</h3>
+          <p className="text-sm text-gray-600 mb-4">
+            Event Deleted Successfully!
+          </p>
           <button
             onClick={() => setShowSuccessModal(false)}
             className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg"
