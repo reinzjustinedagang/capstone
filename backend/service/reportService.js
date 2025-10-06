@@ -366,24 +366,20 @@ exports.getUTPReport = async (year) => {
   }
 };
 
-// 📊 Pensioner Report (Totals Only)
 exports.getPensionerReport = async () => {
   try {
-    const rows = await Connection(
-      `
-      SELECT 
-        JSON_UNQUOTE(JSON_EXTRACT(form_data, '$.pensioner')) AS pensioner,
-        COUNT(*) AS count
-      FROM senior_citizens
-      WHERE registered = 1
-        AND deleted = 0
-        AND archived = 0
+    const rows = await Connection(`
+      SELECT
+        sc.id,
+        JSON_UNQUOTE(JSON_EXTRACT(form_data, '$.pensioner')) AS pensioner
+      FROM senior_citizens sc
+      WHERE sc.registered = 1
+        AND sc.deleted = 0
+        AND sc.archived = 0
         AND CAST(JSON_UNQUOTE(JSON_EXTRACT(form_data, '$.age')) AS UNSIGNED) >= 60
-       AND JSON_UNQUOTE(JSON_EXTRACT(form_data, '$.pensioner')) IN ('DSWD SOCPEN','GSIS','SSS','PVAO','AFPSLAI','OTHERS')
-      GROUP BY pensioner
-      `
-    );
+    `);
 
+    // Initialize counters
     const report = {
       DSWDSOCPEN: 0,
       GSIS: 0,
@@ -393,10 +389,33 @@ exports.getPensionerReport = async () => {
       OTHERS: 0,
     };
 
-    rows.forEach((r) => {
-      if (report.hasOwnProperty(r.pensioner)) {
-        report[r.pensioner] = r.count;
+    rows.forEach((row) => {
+      if (!row.pensioner) return;
+
+      let pensions = [];
+
+      try {
+        // Case 1: pensioner stored as JSON array, e.g. ["SSS","GSIS"]
+        if (row.pensioner.trim().startsWith("[")) {
+          pensions = JSON.parse(row.pensioner);
+        }
+        // Case 2: pensioner stored as comma-separated string, e.g. "SSS,PVAO"
+        else {
+          pensions = row.pensioner.split(",").map((p) => p.trim());
+        }
+      } catch {
+        pensions = [row.pensioner.trim()];
       }
+
+      // Count each pension type
+      pensions.forEach((p) => {
+        const normalized = p.replace(/\s+/g, "").toUpperCase(); // e.g. "DSWD SOCPEN" -> "DSWDSOCPEN"
+        if (report.hasOwnProperty(normalized)) {
+          report[normalized]++;
+        } else {
+          report.OTHERS++;
+        }
+      });
     });
 
     return report;
