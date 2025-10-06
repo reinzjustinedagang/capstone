@@ -2,26 +2,29 @@ const Connection = require("../db/Connection");
 const { logAudit } = require("./auditService");
 const cloudinary = require("../utils/cloudinary");
 
-// Generate next unique idNumber (6-digit like 000013)
-const generateUniqueIdNumber = async () => {
-  const result = await Connection(
-    `SELECT REGEXP_REPLACE(
-        JSON_UNQUOTE(JSON_EXTRACT(form_data, '$.idNumber')),
-        '[^0-9]', ''
-      ) AS idNumber
-     FROM senior_citizens
-     WHERE JSON_EXTRACT(form_data, '$.idNumber') IS NOT NULL
-     ORDER BY CAST(REGEXP_REPLACE(
-        JSON_UNQUOTE(JSON_EXTRACT(form_data, '$.idNumber')),
-        '[^0-9]', ''
-      ) AS UNSIGNED) DESC
-     LIMIT 1`
-  );
+// Generate unique 6-digit ID per barangay
+const generateUniqueBarangayIdNumber = async (barangayControl) => {
+  let idNumber;
+  let isDuplicate = true;
+  let attempts = 0;
 
-  let lastId = result[0]?.idNumber || "000000";
-  let nextId = (parseInt(lastId, 10) + 1).toString().padStart(6, "0");
+  while (isDuplicate && attempts < 50) {
+    const randomPart = Math.floor(Math.random() * 1000)
+      .toString()
+      .padStart(3, "0");
+    idNumber = `${barangayControl}${randomPart}`;
 
-  return nextId;
+    isDuplicate = await isDuplicateIdNumber(idNumber);
+    attempts++;
+  }
+
+  if (isDuplicate) {
+    throw new Error(
+      "Failed to generate a unique ID number after multiple attempts."
+    );
+  }
+
+  return idNumber;
 };
 
 // Check duplicate idNumber
@@ -315,17 +318,35 @@ exports.createSeniorCitizen = async (data, user, ip) => {
 
     const formData = data.form_data || {};
 
-    // Normalize and validate ID number
-    if (formData.idNumber) {
-      formData.idNumber = formData.idNumber.replace(/\D/g, "").padStart(6, "0");
+    // ✅ Get barangay control number for ID prefix
+    const [barangay] = await Connection(
+      "SELECT controlNo FROM barangays WHERE id = ?",
+      [data.barangay_id]
+    );
+
+    if (!barangay) {
+      const err = new Error("Invalid barangay ID.");
+      err.code = 400;
+      throw err;
     }
 
+    const barangayControl = String(barangay.controlNo).padStart(3, "0");
+
+    // ✅ Generate or validate ID number
     if (!formData.idNumber || formData.idNumber.trim() === "") {
-      formData.idNumber = await generateUniqueIdNumber();
-    } else if (await isDuplicateIdNumber(formData.idNumber)) {
-      const err = new Error(`ID Number '${formData.idNumber}' already exists.`);
-      err.code = 409;
-      throw err;
+      formData.idNumber = await generateUniqueBarangayIdNumber(barangayControl);
+    } else {
+      // Normalize
+      formData.idNumber = formData.idNumber.replace(/\D/g, "").padStart(6, "0");
+
+      // Check duplicate
+      if (await isDuplicateIdNumber(formData.idNumber)) {
+        const err = new Error(
+          `ID Number '${formData.idNumber}' already exists.`
+        );
+        err.code = 409;
+        throw err;
+      }
     }
 
     // ✅ Auto-force pensioner to "none" if SOCIAL PENSION
@@ -365,7 +386,7 @@ exports.createSeniorCitizen = async (data, user, ip) => {
         user.email,
         user.role,
         "CREATE",
-        `Created New Senior Citizen: '${data.lastName}, ${data.firstName} ${data.middleName}'.`,
+        `Created New Senior Citizen: '${data.lastName}, ${data.firstName} ${data.middleName}' (ID: ${formData.idNumber}).`,
         ip
       );
     }
@@ -378,12 +399,12 @@ exports.createSeniorCitizen = async (data, user, ip) => {
   }
 };
 
-//update
+//UPDATE
 exports.updateSeniorCitizen = async (id, updatedData, user, ip) => {
   try {
     // Fetch existing record
     const [existing] = await Connection(
-      `SELECT document_image, document_public_id, photo, photo_public_id, form_data
+      `SELECT document_image, document_public_id, photo, photo_public_id, form_data, barangay_id
        FROM senior_citizens
        WHERE id = ? AND deleted = 0`,
       [id]
@@ -401,10 +422,7 @@ exports.updateSeniorCitizen = async (id, updatedData, user, ip) => {
       new Promise((resolve, reject) => {
         const stream = cloudinary.uploader.upload_stream(
           { folder },
-          (error, result) => {
-            if (error) reject(error);
-            else resolve(result);
-          }
+          (error, result) => (error ? reject(error) : resolve(result))
         );
         stream.end(file.buffer);
       });
@@ -438,26 +456,46 @@ exports.updateSeniorCitizen = async (id, updatedData, user, ip) => {
         ? JSON.parse(existing.form_data)
         : existing.form_data || {};
 
-    // Normalize ID number
-    if (formData.idNumber) {
-      formData.idNumber = formData.idNumber.replace(/\D/g, "");
-      formData.idNumber = formData.idNumber.padStart(6, "0");
-    }
+    // ✅ Check if barangay changed
+    const barangayChanged = updatedData.barangay_id !== existing.barangay_id;
 
-    // Force pensioner to "none" if SOCIAL PENSION
-    if (formData.remarks === "SOCIAL PENSION") {
-      formData.pensioner = "NONE";
-    }
+    // ✅ Handle barangay-based ID logic
+    let newIdNumber = formData.idNumber
+      ? formData.idNumber.replace(/\D/g, "").padStart(6, "0")
+      : null;
 
-    // Check duplicate ID if changed
-    if (formData.idNumber && formData.idNumber !== oldFormData.idNumber) {
-      if (await isDuplicateIdNumber(formData.idNumber, id)) {
-        const err = new Error(
-          `ID Number '${formData.idNumber}' already exists.`
-        );
+    if (barangayChanged) {
+      // Barangay changed → generate new barangay-based ID
+      const [barangay] = await Connection(
+        "SELECT controlNo FROM barangays WHERE id = ?",
+        [updatedData.barangay_id]
+      );
+
+      if (!barangay) {
+        const err = new Error("Invalid barangay ID.");
+        err.code = 400;
+        throw err;
+      }
+
+      const barangayControl = String(barangay.controlNo).padStart(3, "0");
+      newIdNumber = await generateUniqueBarangayIdNumber(barangayControl);
+      formData.idNumber = newIdNumber;
+    } else if (newIdNumber && newIdNumber !== oldFormData.idNumber) {
+      // Same barangay, manually changed ID → validate duplicate
+      if (await isDuplicateIdNumber(newIdNumber, id)) {
+        const err = new Error(`ID Number '${newIdNumber}' already exists.`);
         err.code = 409;
         throw err;
       }
+      formData.idNumber = newIdNumber;
+    } else {
+      // Keep old ID
+      formData.idNumber = oldFormData.idNumber;
+    }
+
+    // ✅ Auto-force pensioner to "none" if SOCIAL PENSION
+    if (formData.remarks === "SOCIAL PENSION") {
+      formData.pensioner = "NONE";
     }
 
     // Prepare update data
@@ -474,17 +512,13 @@ exports.updateSeniorCitizen = async (id, updatedData, user, ip) => {
       photo: photoUrl,
       photo_public_id: photoPublicId,
       // Conditional date fields
-      pdl_date: formData.pdl && formData.remarks === "PDL" ? new Date() : null,
+      pdl_date: formData.remarks === "PDL" ? new Date() : null,
       socpen_date: formData.remarks === "SOCIAL PENSION" ? new Date() : null,
       nonsocpen_date:
         formData.remarks === "NON-SOCIAL PENSION" ? new Date() : null,
-      transferee_date:
-        formData.transfer && formData.remarks === "TRANSFER"
-          ? new Date()
-          : null,
-      booklet_date:
-        formData.booklet && formData.booklet === "Yes" ? new Date() : null,
-      utp_date: formData.utp && formData.remarks === "UTP" ? new Date() : null,
+      transferee_date: formData.remarks === "TRANSFER" ? new Date() : null,
+      booklet_date: formData.booklet === "Yes" ? new Date() : null,
+      utp_date: formData.remarks === "UTP" ? new Date() : null,
     };
 
     // Update DB
@@ -500,7 +534,7 @@ exports.updateSeniorCitizen = async (id, updatedData, user, ip) => {
         user.email,
         user.role,
         "UPDATE",
-        `Updated Senior Citizen: '${updatedData.lastName}, ${updatedData.firstName} ${updatedData.middleName}'.`,
+        `Updated Senior Citizen: '${updatedData.lastName}, ${updatedData.firstName} ${updatedData.middleName}' (ID: ${formData.idNumber}).`,
         ip
       );
     }
@@ -508,6 +542,7 @@ exports.updateSeniorCitizen = async (id, updatedData, user, ip) => {
     return result.affectedRows > 0;
   } catch (error) {
     console.error(`Error updating senior citizen with ID ${id}:`, error);
+    if (error.code === 400 || error.code === 409) throw error;
     throw new Error(`Failed to update senior citizen with ID ${id}.`);
   }
 };
