@@ -215,7 +215,15 @@ const SeniorCitizenList = ({ onEdit, onId }) => {
 
   // const pensionOptions = ["All Pensions", "GSIS", "SSS", "PVAO", "PWD", "NONE"];
 
-  const reportsOptions = ["All", "Booklet", "UTP", "Transferee", "PDL"];
+  const reportsOptions = [
+    "All",
+    "Booklet",
+    "UTP",
+    "Transferee",
+    "PDL",
+    "PWD",
+    "IP's",
+  ];
 
   // Effects
   useEffect(() => {

@@ -71,7 +71,7 @@ const AdvancedFilters = ({
       options={pensionOptions}
     />
     <SelectFilter
-      label="Reports"
+      label="Others"
       value={filterReports}
       onChange={setFilterReports}
       options={reportsOptions}

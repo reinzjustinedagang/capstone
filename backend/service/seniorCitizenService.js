@@ -604,6 +604,20 @@ exports.getPaginatedFilteredCitizens = async (options) => {
     where += ` AND JSON_UNQUOTE(JSON_EXTRACT(sc.form_data, '$.pdl')) = 'yes'`;
   }
 
+  if (reports === "PWD") {
+    where += ` AND JSON_UNQUOTE(JSON_EXTRACT(sc.form_data, '$.isPwd')) = 'Yes'`;
+  }
+
+  if (reports === "IP's") {
+    where += ` 
+    AND (
+      JSON_UNQUOTE(JSON_EXTRACT(sc.form_data, '$.ipMembership')) IS NOT NULL
+      AND JSON_UNQUOTE(JSON_EXTRACT(sc.form_data, '$.ipMembership')) != ''
+      AND JSON_UNQUOTE(JSON_EXTRACT(sc.form_data, '$.ipMembership')) != 'None'
+    )
+  `;
+  }
+
   // Sorting
   const allowedSort = [
     "lastName",
