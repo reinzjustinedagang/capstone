@@ -386,7 +386,7 @@ exports.createSeniorCitizen = async (data, user, ip) => {
         user.email,
         user.role,
         "CREATE",
-        `Created New Senior Citizen: '${data.lastName}, ${data.firstName} ${data.middleName}' (ID: ${formData.idNumber}).`,
+        `Created New Senior Citizen: '${data.lastName}, ${data.firstName} ${data.middleName}'.`,
         ip
       );
     }
@@ -534,7 +534,7 @@ exports.updateSeniorCitizen = async (id, updatedData, user, ip) => {
         user.email,
         user.role,
         "UPDATE",
-        `Updated Senior Citizen: '${updatedData.lastName}, ${updatedData.firstName} ${updatedData.middleName}' (ID: ${formData.idNumber}).`,
+        `Updated Senior Citizen: '${updatedData.lastName}, ${updatedData.firstName} ${updatedData.middleName}'.`,
         ip
       );
     }

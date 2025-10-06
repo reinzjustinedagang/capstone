@@ -379,6 +379,9 @@ export default function AuditLogs() {
                         ))}
                     </div>
                   </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                    User Role
+                  </th>
                   <th
                     className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase cursor-pointer"
                     onClick={() => toggleSortOrder("action")}
@@ -392,9 +395,6 @@ export default function AuditLogs() {
                           <ArrowDown className="h-4 w-4 ml-1" />
                         ))}
                     </div>
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                    User Role
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                     Details
@@ -421,6 +421,18 @@ export default function AuditLogs() {
                         {new Date(log.timestamp).toLocaleString()}
                       </td>
                       <td className="px-6 py-4 text-sm">{log.user}</td>
+                      <td className="px-6 py-4 text-sm">
+                        <span
+                          className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                            log.userRole === "admin"
+                              ? "bg-purple-100 text-purple-800"
+                              : "bg-yellow-100 text-yellow-800"
+                          }`}
+                        >
+                          {log.userRole.charAt(0).toUpperCase() +
+                            log.userRole.slice(1)}
+                        </span>
+                      </td>
                       <td className="px-6 py-4">
                         <span
                           className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
@@ -447,18 +459,7 @@ export default function AuditLogs() {
                           {log.action.replace(/_/g, " ")}
                         </span>
                       </td>
-                      <td className="px-6 py-4 text-sm">
-                        <span
-                          className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                            log.userRole === "admin"
-                              ? "bg-purple-100 text-purple-800"
-                              : "bg-yellow-100 text-yellow-800"
-                          }`}
-                        >
-                          {log.userRole.charAt(0).toUpperCase() +
-                            log.userRole.slice(1)}
-                        </span>
-                      </td>
+
                       <td className="px-6 py-4 text-sm">{log.details}</td>
                       {/* <td className="px-6 py-4 text-sm">{log.ipAddress}</td> */}
                     </tr>
