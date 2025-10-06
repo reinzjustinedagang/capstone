@@ -1,7 +1,6 @@
 const Connection = require("../db/Connection");
 const { logAudit } = require("./auditService");
 
-// Get paginated barangays with optional search + sorting
 exports.getPaginatedBarangays = async (
   page = 1,
   limit = 10,
@@ -12,12 +11,20 @@ exports.getPaginatedBarangays = async (
   const offset = (page - 1) * limit;
   const searchQuery = `%${search}%`;
 
-  // ✅ allow only specific safe columns
   const allowedSortColumns = ["barangay_name", "controlNo", "created_at"];
   const safeSortBy = allowedSortColumns.includes(sortBy)
     ? sortBy
     : "barangay_name";
   const safeSortOrder = sortOrder.toUpperCase() === "DESC" ? "DESC" : "ASC";
+
+  let orderClause;
+
+  // ✅ If sorting by controlNo, cast it as UNSIGNED (numeric)
+  if (safeSortBy === "controlNo") {
+    orderClause = `CAST(controlNo AS UNSIGNED) ${safeSortOrder}`;
+  } else {
+    orderClause = `${safeSortBy} ${safeSortOrder}`;
+  }
 
   let data, countResult;
 
@@ -25,7 +32,7 @@ exports.getPaginatedBarangays = async (
     data = await Connection(
       `SELECT * FROM barangays 
        WHERE barangay_name LIKE ? 
-       ORDER BY ${safeSortBy} ${safeSortOrder} 
+       ORDER BY ${orderClause} 
        LIMIT ? OFFSET ?`,
       [searchQuery, parseInt(limit), parseInt(offset)]
     );
@@ -37,7 +44,7 @@ exports.getPaginatedBarangays = async (
   } else {
     data = await Connection(
       `SELECT * FROM barangays 
-       ORDER BY ${safeSortBy} ${safeSortOrder} 
+       ORDER BY ${orderClause} 
        LIMIT ? OFFSET ?`,
       [parseInt(limit), parseInt(offset)]
     );
