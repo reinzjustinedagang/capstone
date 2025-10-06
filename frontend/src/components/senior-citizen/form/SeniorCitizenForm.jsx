@@ -198,6 +198,13 @@ const SeniorCitizenForm = ({ onSubmit, onCancel, onSuccess }) => {
       const dynamicFields = { ...allFields };
       delete dynamicFields[barangayField.field_name];
 
+      // 🔹 Convert checkbox arrays to comma-separated strings
+      for (const key in dynamicFields) {
+        if (Array.isArray(dynamicFields[key])) {
+          dynamicFields[key] = dynamicFields[key].join(", ");
+        }
+      }
+
       // 🔹 Use FormData for JSON + files
       const payload = new FormData();
       payload.append("firstName", firstName || "");

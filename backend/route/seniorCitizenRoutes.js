@@ -596,10 +596,13 @@ router.get("/archived", async (req, res) => {
 
 router.get("/filters/remarks", async (req, res) => {
   try {
-    const remarks = await seniorCitizenService.getRemarksFilters();
-    res.json(remarks);
+    const filters = await seniorCitizenService.getRemarksFilters();
+    res.json(filters);
   } catch (err) {
-    res.status(500).json({ message: "Failed to fetch remarks options" });
+    console.error("❌ Error in /filters/remarks route:", err);
+    res
+      .status(500)
+      .json({ message: "Failed to fetch remarks and pensioner options" });
   }
 });
 

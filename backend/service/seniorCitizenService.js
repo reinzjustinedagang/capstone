@@ -561,7 +561,7 @@ exports.getPaginatedFilteredCitizens = async (options) => {
 
   //Pensioner filter
   if (pensioner && pensioner !== "All Pensions") {
-    where += ` AND JSON_UNQUOTE(JSON_EXTRACT(sc.form_data, '$.pensioner')) = ?`;
+    where += ` AND JSON_UNQUOTE(JSON_EXTRACT(sc.form_data, '$.pensioner')) LIKE ?`;
     params.push(pensioner);
   }
 
@@ -1092,16 +1092,37 @@ exports.getRemarksFilters = async () => {
        LIMIT 1`
     );
 
-    if (!field) return [];
+    const [pension] = await Connection(
+      `SELECT options 
+       FROM form_fields 
+       WHERE field_name = 'pensioner' 
+       LIMIT 1`
+    );
 
-    // options is stored as a blob (comma-separated string)
-    return field.options
-      .toString()
-      .split(",")
-      .map((opt) => opt.trim())
-      .filter((opt) => opt !== "");
+    if (!field && !pension) return {};
+
+    const remarksOptions = field?.options
+      ? field.options
+          .toString()
+          .split(",")
+          .map((opt) => opt.trim())
+          .filter(Boolean)
+      : [];
+
+    const pensionOptions = pension?.options
+      ? pension.options
+          .toString()
+          .split(",")
+          .map((opt) => opt.trim())
+          .filter(Boolean)
+      : [];
+
+    return {
+      remarks: remarksOptions,
+      pensioner: pensionOptions,
+    };
   } catch (err) {
-    console.error("❌ Failed to fetch remarks options:", err);
+    console.error("❌ Failed to fetch remarks or pensioner options:", err);
     throw err;
   }
 };

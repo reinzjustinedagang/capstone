@@ -83,6 +83,21 @@ const UpdateSeniorCitizenForm = ({ id, onSuccess, onCancel }) => {
             : citizenData.form_data
           : {};
 
+        // ✅ Fix checkbox values (convert strings to arrays)
+        for (const key in dynamicFormData) {
+          const fieldDef = fetchedFields.find((f) => f.field_name === key);
+          if (
+            fieldDef &&
+            fieldDef.type === "checkbox" &&
+            typeof dynamicFormData[key] === "string"
+          ) {
+            dynamicFormData[key] = dynamicFormData[key]
+              .split(",")
+              .map((opt) => opt.trim())
+              .filter(Boolean);
+          }
+        }
+
         const initialData = {};
         const initialCollapsed = {};
 
@@ -202,6 +217,12 @@ const UpdateSeniorCitizenForm = ({ id, onSuccess, onCancel }) => {
       const dynamicFields = { ...allFields };
       // ✅ also keep barangay_id inside form_data
       dynamicFields["barangay_id"] = barangay_id;
+
+      for (const key in dynamicFields) {
+        if (Array.isArray(dynamicFields[key])) {
+          dynamicFields[key] = dynamicFields[key].join(", ");
+        }
+      }
 
       // Use FormData for mixed text + files
       const formDataToSend = new FormData();

@@ -42,6 +42,8 @@ const SeniorCitizenList = ({ onEdit, onId }) => {
   const [healthStatusOptions, setHealthStatusOptions] = useState([
     "All Remarks",
   ]);
+  const [pensionOptions, setPensionOptions] = useState(["All Pensions"]);
+
   const [filterReports, setFilterReports] = useState("All");
   const [filterAge, setFilterAge] = useState("All");
   const [filterGender, setFilterGender] = useState("All");
@@ -76,7 +78,9 @@ const SeniorCitizenList = ({ onEdit, onId }) => {
       const response = await axios.get(
         `${backendUrl}/api/senior-citizens/filters/remarks`
       );
-      setHealthStatusOptions(["All Remarks", ...response.data]);
+      const { remarks = [], pensioner = [] } = response.data;
+      setHealthStatusOptions(["All Remarks", ...remarks]);
+      setPensionOptions(["All Pensions", ...pensioner]);
     } catch (err) {
       console.error("❌ Failed to fetch remarks:", err);
     }
@@ -209,7 +213,7 @@ const SeniorCitizenList = ({ onEdit, onId }) => {
     "100 - 100+",
   ];
 
-  const pensionOptions = ["All Pensions", "GSIS", "SSS", "PVAO", "PWD", "NONE"];
+  // const pensionOptions = ["All Pensions", "GSIS", "SSS", "PVAO", "PWD", "NONE"];
 
   const reportsOptions = ["All", "Booklet", "UTP", "Transferee", "PDL"];
 
