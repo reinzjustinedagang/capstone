@@ -350,7 +350,7 @@ exports.createSeniorCitizen = async (data, user, ip) => {
       socpen_date: formData.remarks === "SOCIAL PENSION" ? now : null,
       nonsocpen_date: formData.remarks === "NON-SOCIAL PENSION" ? now : null,
       transferee_date: formData.remarks === "TRANSFER" ? now : null,
-      booklet_date: formData.remarks === "BOOKLET" ? now : null,
+      booklet_date: formData.booklet === "Yes" ? now : null,
       utp_date: formData.remarks === "UTP" ? now : null,
     };
 
@@ -483,7 +483,7 @@ exports.updateSeniorCitizen = async (id, updatedData, user, ip) => {
           ? new Date()
           : null,
       booklet_date:
-        formData.booklet && formData.booklet === "BOOKLET" ? new Date() : null,
+        formData.booklet && formData.booklet === "Yes" ? new Date() : null,
       utp_date: formData.utp && formData.remarks === "UTP" ? new Date() : null,
     };
 
@@ -589,19 +589,19 @@ exports.getPaginatedFilteredCitizens = async (options) => {
 
   // Report filter
   if (reports === "Booklet") {
-    where += ` AND JSON_UNQUOTE(JSON_EXTRACT(sc.form_data, '$.booklet')) = 'yes'`;
+    where += ` AND JSON_UNQUOTE(JSON_EXTRACT(sc.form_data, '$.booklet')) = 'Yes'`;
   }
 
   if (reports === "UTP") {
-    where += ` AND JSON_UNQUOTE(JSON_EXTRACT(sc.form_data, '$.utp')) = 'yes'`;
+    where += ` AND JSON_UNQUOTE(JSON_EXTRACT(sc.form_data, '$.remarks')) = 'UTP'`;
   }
 
   if (reports === "Transferee") {
-    where += ` AND JSON_UNQUOTE(JSON_EXTRACT(sc.form_data, '$.transfer')) = 'yes'`;
+    where += ` AND JSON_UNQUOTE(JSON_EXTRACT(sc.form_data, '$.remarks')) = 'TRANSFER'`;
   }
 
   if (reports === "PDL") {
-    where += ` AND JSON_UNQUOTE(JSON_EXTRACT(sc.form_data, '$.pdl')) = 'yes'`;
+    where += ` AND JSON_UNQUOTE(JSON_EXTRACT(sc.form_data, '$.remarks')) = 'PDL'`;
   }
 
   if (reports === "PWD") {
