@@ -328,8 +328,14 @@ const SeniorCitizenList = ({ onEdit, onId }) => {
                 seniorCitizens.map((citizen) => (
                   <tr key={citizen.id}>
                     <td className="px-6 py-4 text-sm text-gray-500">
-                      {citizen.form_data?.idNumber}
+                      {citizen.form_data?.idNumber
+                        ? `${citizen.form_data.idNumber.slice(
+                            0,
+                            3
+                          )}-${citizen.form_data.idNumber.slice(3)}`
+                        : ""}
                     </td>
+
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                       {`${citizen.lastName}, ${citizen.firstName} ${
                         citizen.middleName || ""
