@@ -244,7 +244,7 @@ exports.remove = async (id, user, ip) => {
       user.email,
       user.role,
       "DELETE",
-      `Deleted ${type} benefit: '${title}'`,
+      `Deleted ${benefit.type} benefit: '${benefit.title}'`,
       ip
     );
   }
