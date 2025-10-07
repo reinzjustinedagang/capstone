@@ -18,22 +18,24 @@ const PositionList = ({ title, list, handleEdit, handleDelete }) => {
                 <h4 className="text-sm font-semibold text-gray-900">
                   {p.name}
                 </h4>
-                <p className="text-xs text-gray-500 capitalize">{p.type}</p>
+                <span className="text-xs text-gray-700 capitalize bg-gray-100 px-2 py-0.5 rounded font-medium">
+                  {p.type}
+                </span>
               </div>
               <div className="flex gap-2">
                 <button
                   onClick={() => handleEdit(p)}
-                  className="p-2 rounded-md text-xs font-medium bg-white hover:bg-blue-300 text-blue-600 border border-blue-300 hover:border-blue-300 transition-colors duration-200"
+                  className="text-blue-600 hover:text-blue-900"
                   title="Edit position"
                 >
-                  <Edit className="w-4 h-4" />
+                  <Edit className="w-5 h-5" />
                 </button>
                 <button
                   onClick={() => handleDelete(p.id)}
-                  className="p-2 rounded-md text-xs font-medium bg-white hover:bg-red-300 text-red-600 border border-red-300 hover:border-red-300 transition-colors duration-200"
+                  className="text-red-600 hover:text-red-900"
                   title="Delete position"
                 >
-                  <Trash2 className="w-4 h-4" />
+                  <Trash2 className="w-5 h-5" />
                 </button>
               </div>
             </div>

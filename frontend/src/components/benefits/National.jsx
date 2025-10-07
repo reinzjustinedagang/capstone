@@ -1,5 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { PercentIcon, CheckCircle, MapIcon, Loader2 } from "lucide-react";
+import {
+  PercentIcon,
+  CheckCircle,
+  MapIcon,
+  Loader2,
+  Trash2,
+} from "lucide-react";
 import BenefitsCard from "./BenefitsCard";
 import Modal from "../UI/Modal";
 import Button from "../UI/Button";
@@ -136,8 +142,8 @@ const National = ({ onEdit }) => {
           title=""
         >
           <div className="p-6 text-center">
-            <div className="mx-auto mb-4 w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
-              <CheckCircle className="w-6 h-6 text-green-500" />
+            <div className="mx-auto mb-4 w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
+              <Trash2 className="w-6 h-6 text-red-500" />
             </div>
             <h3 className="text-lg font-medium text-gray-800 mb-2">Delete</h3>
             <p className="text-sm text-gray-600 mb-4">Deleted Successfully!</p>

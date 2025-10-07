@@ -15,6 +15,7 @@ import {
   Tag,
   Save,
   Eye,
+  SaveIcon,
 } from "lucide-react";
 import Button from "../UI/Button";
 import Modal from "../UI/Modal";
@@ -547,7 +548,7 @@ const FormFieldsPage = () => {
               loading ? (
                 <Loader2 className="animate-spin w-4 h-4" />
               ) : (
-                <PlusCircle />
+                <SaveIcon className="h-4 w-4 mr-2" />
               )
             }
           >
