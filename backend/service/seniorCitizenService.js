@@ -351,7 +351,7 @@ exports.createSeniorCitizen = async (data, user, ip) => {
 
     // ✅ Auto-force pensioner to "none" if SOCIAL PENSION
     if (formData.remarks === "SOCIAL PENSION") {
-      formData.pensioner = "NONE";
+      formData.pensioner = "";
     }
 
     const now = new Date();
@@ -495,7 +495,7 @@ exports.updateSeniorCitizen = async (id, updatedData, user, ip) => {
 
     // ✅ Auto-force pensioner to "none" if SOCIAL PENSION
     if (formData.remarks === "SOCIAL PENSION") {
-      formData.pensioner = "NONE";
+      formData.pensioner = "";
     }
 
     // Prepare update data
