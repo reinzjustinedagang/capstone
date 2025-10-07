@@ -166,20 +166,36 @@ const normalize = (val) => {
   return val;
 };
 
-// check duplicate by firstName + lastName + birthdate (null-safe)
-const isDuplicateSeniorCitizen = async ({ firstName, lastName, birthdate }) => {
+// ✅ IMPROVED: Check duplicates using firstName + lastName + birthdate from form_data
+const isDuplicateSeniorCitizen = async (
+  { firstName, lastName, birthdate },
+  excludeId = null
+) => {
   let sql, params;
 
   if (!birthdate) {
     sql = `SELECT id FROM senior_citizens
-           WHERE firstName = ? AND lastName = ? 
-             AND birthdate IS NULL AND deleted = 0`;
+           WHERE LOWER(TRIM(firstName)) = LOWER(TRIM(?)) 
+             AND LOWER(TRIM(lastName)) = LOWER(TRIM(?))
+             AND (
+               JSON_UNQUOTE(JSON_EXTRACT(form_data, '$.birthdate')) IS NULL
+               OR JSON_UNQUOTE(JSON_EXTRACT(form_data, '$.birthdate')) = ''
+             )
+             AND deleted = 0`;
     params = [firstName, lastName];
   } else {
     sql = `SELECT id FROM senior_citizens
-           WHERE firstName = ? AND lastName = ? 
-             AND birthdate = ? AND deleted = 0`;
+           WHERE LOWER(TRIM(firstName)) = LOWER(TRIM(?)) 
+             AND LOWER(TRIM(lastName)) = LOWER(TRIM(?))
+             AND JSON_UNQUOTE(JSON_EXTRACT(form_data, '$.birthdate')) = ?
+             AND deleted = 0`;
     params = [firstName, lastName, birthdate];
+  }
+
+  // Exclude current record when updating
+  if (excludeId) {
+    sql += " AND id != ?";
+    params.push(excludeId);
   }
 
   const result = await Connection(sql, params);
@@ -285,10 +301,32 @@ exports.registerSeniorCitizen = async (id, user, ip) => {
 };
 
 // CREATE
+// ✅ FIXED: Add duplicate check to createSeniorCitizen
 exports.createSeniorCitizen = async (data, user, ip) => {
   try {
     let documentUrl = null;
     let photoUrl = null;
+
+    const formData = data.form_data || {};
+
+    // ✅ Extract birthdate from form_data if available
+    const birthdate = formData.birthdate || data.birthdate || null;
+
+    // ✅ CHECK FOR DUPLICATES BEFORE PROCEEDING
+    if (
+      await isDuplicateSeniorCitizen({
+        firstName: data.firstName,
+        lastName: data.lastName,
+        birthdate,
+      })
+    ) {
+      const msg = `A senior citizen named '${data.firstName} ${data.lastName}'${
+        birthdate ? ` with birthdate '${birthdate}'` : ""
+      } already exists.`;
+      const err = new Error(msg);
+      err.code = 409;
+      throw err;
+    }
 
     // Upload document
     if (data.documentFile) {
@@ -316,8 +354,6 @@ exports.createSeniorCitizen = async (data, user, ip) => {
       photoUrl = result.secure_url;
     }
 
-    const formData = data.form_data || {};
-
     // ✅ Get barangay control number for ID prefix
     const [barangay] = await Connection(
       "SELECT controlNo FROM barangays WHERE id = ?",
@@ -336,10 +372,8 @@ exports.createSeniorCitizen = async (data, user, ip) => {
     if (!formData.idNumber || formData.idNumber.trim() === "") {
       formData.idNumber = await generateUniqueBarangayIdNumber(barangayControl);
     } else {
-      // Normalize
       formData.idNumber = formData.idNumber.replace(/\D/g, "").padStart(6, "0");
 
-      // Check duplicate
       if (await isDuplicateIdNumber(formData.idNumber)) {
         const err = new Error(
           `ID Number '${formData.idNumber}' already exists.`
@@ -366,7 +400,6 @@ exports.createSeniorCitizen = async (data, user, ip) => {
       document_image: documentUrl,
       document_type: data.documentType || null,
       photo: photoUrl,
-      // Set date fields
       pdl_date: formData.remarks === "PDL" ? now : null,
       socpen_date: formData.remarks === "SOCIAL PENSION" ? now : null,
       nonsocpen_date: formData.remarks === "NON-SOCIAL PENSION" ? now : null,
