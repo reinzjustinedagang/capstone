@@ -9,6 +9,7 @@ const Events = () => {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedEvent, setSelectedEvent] = useState(null);
+  const [canScroll, setCanScroll] = useState(false); // ✅ Added state
   const scrollRef = useRef(null);
 
   useEffect(() => {
@@ -28,14 +29,26 @@ const Events = () => {
   const openModal = (event) => setSelectedEvent(event);
   const closeModal = () => setSelectedEvent(null);
 
+  // ✅ Check if the container is scrollable
+  const checkScrollable = () => {
+    const container = scrollRef.current;
+    if (container) {
+      setCanScroll(container.scrollWidth > container.clientWidth);
+    }
+  };
+
+  useEffect(() => {
+    checkScrollable();
+    window.addEventListener("resize", checkScrollable);
+    return () => window.removeEventListener("resize", checkScrollable);
+  }, [events]);
+
   const scroll = (direction) => {
-    if (scrollRef.current) {
-      const { scrollLeft, clientWidth } = scrollRef.current;
-      const scrollAmount = direction === "left" ? -clientWidth : clientWidth;
-      scrollRef.current.scrollTo({
-        left: scrollLeft + scrollAmount,
-        behavior: "smooth",
-      });
+    const container = scrollRef.current;
+    if (container) {
+      const scrollAmount =
+        direction === "left" ? -container.clientWidth : container.clientWidth;
+      container.scrollBy({ left: scrollAmount, behavior: "smooth" });
     }
   };
 
@@ -64,18 +77,23 @@ const Events = () => {
           </div>
         ) : (
           <div className="relative">
-            {/* Left Arrow */}
-            <button
-              onClick={() => scroll("left")}
-              className="absolute -left-6 top-1/2 -translate-y-1/2 bg-white shadow-md p-2 rounded-full z-10 hover:bg-gray-100"
-            >
-              <ChevronLeft className="w-6 h-6 text-gray-700" />
-            </button>
+            {/* ✅ Left Arrow (show only if scrollable) */}
+            {canScroll && (
+              <button
+                onClick={() => scroll("left")}
+                className="absolute -left-6 top-1/2 -translate-y-1/2 p-2 z-10"
+              >
+                <ChevronLeft className="w-6 h-6 text-gray-700" />
+              </button>
+            )}
 
-            {/* Events Scrollable Row */}
+            {/* Scrollable Container */}
             <div
               ref={scrollRef}
-              className="flex space-x-6 overflow-x-auto scrollbar-hide scroll-smooth px-2"
+              onScroll={checkScrollable}
+              className={`flex space-x-6 overflow-x-auto scrollbar-hide scroll-smooth px-2 ${
+                events.length < 5 ? "justify-center" : ""
+              }`}
             >
               {events.map((event) => (
                 <Link
@@ -122,13 +140,15 @@ const Events = () => {
               ))}
             </div>
 
-            {/* Right Arrow */}
-            <button
-              onClick={() => scroll("right")}
-              className="absolute -right-6 top-1/2 -translate-y-1/2 bg-white shadow-md p-2 rounded-full z-10 hover:bg-gray-100"
-            >
-              <ChevronRight className="w-6 h-6 text-gray-700" />
-            </button>
+            {/* ✅ Right Arrow (show only if scrollable) */}
+            {canScroll && (
+              <button
+                onClick={() => scroll("right")}
+                className="absolute -right-6 top-1/2 -translate-y-1/2 p-2 z-10"
+              >
+                <ChevronRight className="w-6 h-6 text-gray-700" />
+              </button>
+            )}
           </div>
         )}
 

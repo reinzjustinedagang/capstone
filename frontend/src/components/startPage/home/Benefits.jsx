@@ -7,6 +7,7 @@ const Benefits = () => {
   const backendUrl = import.meta.env.VITE_API_BASE_URL;
   const [benefits, setBenefits] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [canScroll, setCanScroll] = useState(false); // ✅ New state
   const scrollRef = useRef(null);
 
   useEffect(() => {
@@ -23,12 +24,27 @@ const Benefits = () => {
     fetchBenefits();
   }, [backendUrl]);
 
-  const scrollLeft = () => {
-    scrollRef.current?.scrollBy({ left: -300, behavior: "smooth" });
+  // ✅ Check if container is scrollable
+  const checkScrollable = () => {
+    const container = scrollRef.current;
+    if (container) {
+      setCanScroll(container.scrollWidth > container.clientWidth);
+    }
   };
 
-  const scrollRight = () => {
-    scrollRef.current?.scrollBy({ left: 300, behavior: "smooth" });
+  useEffect(() => {
+    checkScrollable(); // Initial check
+    window.addEventListener("resize", checkScrollable);
+    return () => window.removeEventListener("resize", checkScrollable);
+  }, [benefits]);
+
+  const scroll = (direction) => {
+    const container = scrollRef.current;
+    if (container) {
+      const scrollAmount =
+        direction === "left" ? -container.clientWidth : container.clientWidth;
+      container.scrollBy({ left: scrollAmount, behavior: "smooth" });
+    }
   };
 
   return (
@@ -56,18 +72,23 @@ const Benefits = () => {
           </div>
         ) : (
           <div className="relative">
-            {/* Left Arrow */}
-            <button
-              onClick={scrollLeft}
-              className="absolute -left-6 top-1/2 transform -translate-y-1/2 bg-white shadow-md p-2 rounded-full z-10 hover:bg-gray-100"
-            >
-              <ChevronLeft className="w-6 h-6 text-gray-700" />
-            </button>
+            {/* ✅ Left Arrow (show only if scrollable) */}
+            {canScroll && (
+              <button
+                onClick={() => scroll("left")}
+                className="absolute -left-6 top-1/2 -translate-y-1/2  p-2 z-10"
+              >
+                <ChevronLeft className="w-6 h-6 text-gray-700" />
+              </button>
+            )}
 
             {/* Scrollable Container */}
             <div
               ref={scrollRef}
-              className="flex space-x-6 overflow-x-auto scrollbar-hide scroll-smooth px-2"
+              onScroll={checkScrollable} // ✅ Recheck on scroll
+              className={`flex space-x-6 overflow-x-auto scrollbar-hide scroll-smooth px-2 ${
+                benefits.length < 5 ? "justify-center" : ""
+              }`}
             >
               {benefits.map((benefit) => (
                 <Link
@@ -77,7 +98,6 @@ const Benefits = () => {
                              border border-blue-200 rounded-xl shadow-md cursor-pointer 
                              hover:shadow-lg hover:-translate-y-1 transition-transform flex-shrink-0 overflow-hidden"
                 >
-                  {/* Image */}
                   <div className="relative w-full h-40">
                     <img
                       src={
@@ -89,7 +109,6 @@ const Benefits = () => {
                     />
                   </div>
 
-                  {/* Content */}
                   <div className="p-5">
                     <div className="flex items-center gap-2 mb-3">
                       <Gift className="w-5 h-5 text-blue-600" />
@@ -100,8 +119,6 @@ const Benefits = () => {
                     <p className="text-sm text-gray-700 mb-4 line-clamp-3">
                       {benefit.description}
                     </p>
-
-                    {/* Footer Tag */}
                     <span className="inline-block bg-blue-100 text-blue-700 text-xs font-medium px-3 py-1 rounded-full">
                       {benefit.type === "national"
                         ? "National Benefit"
@@ -112,13 +129,15 @@ const Benefits = () => {
               ))}
             </div>
 
-            {/* Right Arrow */}
-            <button
-              onClick={scrollRight}
-              className="absolute -right-6 top-1/2 transform -translate-y-1/2 bg-white shadow-md p-2 rounded-full z-10 hover:bg-gray-100"
-            >
-              <ChevronRight className="w-6 h-6 text-gray-700" />
-            </button>
+            {/* ✅ Right Arrow (show only if scrollable) */}
+            {canScroll && (
+              <button
+                onClick={() => scroll("right")}
+                className="absolute -right-6 top-1/2 -translate-y-1/2  p-2  z-10 "
+              >
+                <ChevronRight className="w-6 h-6 text-gray-700" />
+              </button>
+            )}
           </div>
         )}
 
