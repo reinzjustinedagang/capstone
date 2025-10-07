@@ -105,7 +105,7 @@ const ReportsSummary = ({ year = new Date().getFullYear() }) => {
       ? `${totalSocPen} seniors receiving SocPen benefits`
       : "No SocPen beneficiaries recorded",
     topRemark
-      ? `Most common health status: ${topRemark[0]} (${topRemark[1]} seniors)`
+      ? `Most common remarks: ${topRemark[0]} (${topRemark[1]} seniors)`
       : "No health status data available",
   ];
 

@@ -226,7 +226,6 @@ const MessageHistory = () => {
               >
                 <option value="All">All Status</option>
                 <option value="Success">Success</option>
-                <option value="Partial">Partial</option>
                 <option value="Failed">Failed</option>
               </select>
             </div>
