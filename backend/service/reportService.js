@@ -389,42 +389,36 @@ exports.getPensionerReport = async () => {
       OTHERS: 0,
     };
 
-    // Pension count distribution
-    const distribution = { "1 Pension": 0, "2 Pensions": 0, "3+ Pensions": 0 };
-
     rows.forEach((row) => {
       if (!row.pensioner) return;
 
       let pensions = [];
 
       try {
+        // Case 1: pensioner stored as JSON array, e.g. ["SSS","GSIS"]
         if (row.pensioner.trim().startsWith("[")) {
           pensions = JSON.parse(row.pensioner);
-        } else {
+        }
+        // Case 2: pensioner stored as comma-separated string, e.g. "SSS,PVAO"
+        else {
           pensions = row.pensioner.split(",").map((p) => p.trim());
         }
       } catch {
         pensions = [row.pensioner.trim()];
       }
 
-      // Count per pension type
+      // Count each pension type
       pensions.forEach((p) => {
-        const normalized = p.replace(/\s+/g, "").toUpperCase();
+        const normalized = p.replace(/\s+/g, "").toUpperCase(); // e.g. "DSWD SOCPEN" -> "DSWDSOCPEN"
         if (report.hasOwnProperty(normalized)) {
           report[normalized]++;
         } else {
           report.OTHERS++;
         }
       });
-
-      // Count per person
-      const count = pensions.length;
-      if (count >= 3) distribution["3+ Pensions"]++;
-      else if (count === 2) distribution["2 Pensions"]++;
-      else distribution["1 Pension"]++;
     });
 
-    return { report, distribution };
+    return report;
   } catch (err) {
     console.error("❌ Error fetching pensioner report:", err);
     throw err;

@@ -155,6 +155,14 @@ router.get("/pensioner", async (req, res) => {
   } catch (err) {
     console.error("❌ Failed to fetch pensioner reports:", err);
     res.status(500).json({ message: "Failed to fetch pensioner reports." });
+    res.json({
+      DSWDSOCPEN: 0,
+      GSIS: 0,
+      SSS: 0,
+      PVAO: 0,
+      AFPSLAI: 0,
+      OTHERS: 0,
+    });
   }
 });
 
