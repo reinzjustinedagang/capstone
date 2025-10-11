@@ -144,9 +144,9 @@ const Archive = ({ onView }) => {
     try {
       await axios.delete(
         `${backendUrl}/api/senior-citizens/permanent-delete/${selectedCitizen.id}`,
-        {},
         { withCredentials: true }
       );
+
       await fetchArchivedCitizens();
       setShowDeleteModal(false);
       setSelectedCitizen(null);

@@ -385,7 +385,7 @@ exports.createSeniorCitizen = async (data, user, ip) => {
 
     // ✅ Auto-force pensioner to "none" if SOCIAL PENSION
     if (formData.remarks === "SOCIAL PENSION") {
-      formData.pensioner = "NONE";
+      formData.pensioner = "";
     }
 
     const now = new Date();
@@ -400,12 +400,12 @@ exports.createSeniorCitizen = async (data, user, ip) => {
       document_image: documentUrl,
       document_type: data.documentType || null,
       photo: photoUrl,
-      pdl_date: formData.remarks === "PDL" ? now : null,
+      pdl_date: formData.pdl === "Yes" ? now : null,
       socpen_date: formData.remarks === "SOCIAL PENSION" ? now : null,
       nonsocpen_date: formData.remarks === "NON-SOCIAL PENSION" ? now : null,
-      transferee_date: formData.remarks === "TRANSFER" ? now : null,
+      transferee_date: formData.transfer === "Yes" ? now : null,
       booklet_date: formData.booklet === "Yes" ? now : null,
-      utp_date: formData.remarks === "UTP" ? now : null,
+      utp_date: formData.utp === "Yes" ? now : null,
     };
 
     // Insert into DB
@@ -528,7 +528,7 @@ exports.updateSeniorCitizen = async (id, updatedData, user, ip) => {
 
     // ✅ Auto-force pensioner to "none" if SOCIAL PENSION
     if (formData.remarks === "SOCIAL PENSION") {
-      formData.pensioner = "NONE";
+      formData.pensioner = "";
     }
 
     // Prepare update data
@@ -545,13 +545,13 @@ exports.updateSeniorCitizen = async (id, updatedData, user, ip) => {
       photo: photoUrl,
       photo_public_id: photoPublicId,
       // Conditional date fields
-      pdl_date: formData.remarks === "PDL" ? new Date() : null,
+      pdl_date: formData.pdl === "Yes" ? new Date() : null,
       socpen_date: formData.remarks === "SOCIAL PENSION" ? new Date() : null,
       nonsocpen_date:
         formData.remarks === "NON-SOCIAL PENSION" ? new Date() : null,
-      transferee_date: formData.remarks === "TRANSFER" ? new Date() : null,
+      transferee_date: formData.transfer === "Yes" ? new Date() : null,
       booklet_date: formData.booklet === "Yes" ? new Date() : null,
-      utp_date: formData.remarks === "UTP" ? new Date() : null,
+      utp_date: formData.utp === "Yes" ? new Date() : null,
     };
 
     // Update DB
@@ -661,15 +661,15 @@ exports.getPaginatedFilteredCitizens = async (options) => {
   }
 
   if (reports === "UTP") {
-    where += ` AND JSON_UNQUOTE(JSON_EXTRACT(sc.form_data, '$.remarks')) = 'UTP'`;
+    where += ` AND JSON_UNQUOTE(JSON_EXTRACT(sc.form_data, '$.UTP')) = 'Yes'`;
   }
 
   if (reports === "Transferee") {
-    where += ` AND JSON_UNQUOTE(JSON_EXTRACT(sc.form_data, '$.remarks')) = 'TRANSFER'`;
+    where += ` AND JSON_UNQUOTE(JSON_EXTRACT(sc.form_data, '$.transfer')) = 'Yes'`;
   }
 
   if (reports === "PDL") {
-    where += ` AND JSON_UNQUOTE(JSON_EXTRACT(sc.form_data, '$.remarks')) = 'PDL'`;
+    where += ` AND JSON_UNQUOTE(JSON_EXTRACT(sc.form_data, '$.pdl')) = 'Yes'`;
   }
 
   if (reports === "PWD") {
