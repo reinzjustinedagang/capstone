@@ -63,8 +63,10 @@ exports.getBirthdayCelebrants = async () => {
         )
     `);
 
-    // Fetch all barangays once
-    const barangays = await Connection("SELECT * FROM barangays");
+    // Fetch barangays once
+    const barangays = await Connection(
+      "SELECT id, barangay_name FROM barangays"
+    );
     const barangayMap = barangays.reduce((acc, b) => {
       acc[b.id] = b.barangay_name;
       return acc;
@@ -90,6 +92,11 @@ exports.getBirthdayCelebrants = async () => {
           : citizen.form_data || {};
 
       const birthdate = formData.birthdate || null;
+      const contact =
+        formData.mobileNumber ||
+        formData.contactNumber ||
+        formData.emergencyContactNumber ||
+        "";
       const barangayName = barangayMap[citizen.barangay_id] || "";
 
       return {
@@ -100,6 +107,7 @@ exports.getBirthdayCelebrants = async () => {
         birthdate,
         age: birthdate ? calculateAge(birthdate) : null,
         barangay: barangayName,
+        contact, // ✅ added contact number
       };
     });
 
