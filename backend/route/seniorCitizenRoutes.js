@@ -4,6 +4,15 @@ const seniorCitizenService = require("../service/seniorCitizenService");
 const upload = require("../middleware/upload");
 const cloudinary = require("../utils/cloudinary");
 
+router.get("/birthdays", async (req, res) => {
+  try {
+    const celebrants = await seniorCitizenService.getBirthdayCelebrants();
+    res.json(celebrants);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
 router.get("/all", async (req, res) => {
   try {
     const citizens = await seniorCitizenService.getAllSeniorCitizens();

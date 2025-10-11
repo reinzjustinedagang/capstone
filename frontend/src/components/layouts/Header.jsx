@@ -87,7 +87,7 @@ const Header = () => {
         <h1 className="text-xl font-bold text-blue-700">{pageTitle}</h1>
 
         <div className="flex items-center space-x-4 ml-auto">
-          {/* <NavLink
+          <NavLink
             to="/admin/notifications"
             className={({ isActive }) =>
               `relative p-2 rounded-full transition duration-150 ${
@@ -99,7 +99,7 @@ const Header = () => {
           >
             <BellIcon className="h-5 w-5" />
             <span className="absolute top-1 right-1 bg-red-500 border-2 border-white rounded-full w-2.5 h-2.5"></span>
-          </NavLink> */}
+          </NavLink>
 
           <div className="flex items-center">
             <div className="mr-3 text-right hidden sm:block">

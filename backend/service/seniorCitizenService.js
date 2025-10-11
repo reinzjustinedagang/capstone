@@ -45,6 +45,71 @@ const isDuplicateIdNumber = async (idNumber, excludeId = null) => {
   return result.length > 0;
 };
 
+// ✅ Get all senior citizens with birthdays today or tomorrow
+exports.getBirthdayCelebrants = async () => {
+  try {
+    const result = await Connection(`
+      SELECT 
+        id, firstName, middleName, lastName, suffix, form_data, barangay_id
+      FROM senior_citizens
+      WHERE deleted = 0 
+        AND registered = 1 
+        AND archived = 0
+        AND JSON_UNQUOTE(JSON_EXTRACT(form_data, '$.birthdate')) IS NOT NULL
+        AND JSON_UNQUOTE(JSON_EXTRACT(form_data, '$.birthdate')) != ''
+        AND (
+          DATE_FORMAT(JSON_UNQUOTE(JSON_EXTRACT(form_data, '$.birthdate')), '%m-%d') = DATE_FORMAT(CURDATE(), '%m-%d')
+          OR DATE_FORMAT(JSON_UNQUOTE(JSON_EXTRACT(form_data, '$.birthdate')), '%m-%d') = DATE_FORMAT(DATE_ADD(CURDATE(), INTERVAL 1 DAY), '%m-%d')
+        )
+    `);
+
+    // Fetch all barangays once
+    const barangays = await Connection("SELECT * FROM barangays");
+    const barangayMap = barangays.reduce((acc, b) => {
+      acc[b.id] = b.barangay_name;
+      return acc;
+    }, {});
+
+    // Helper to compute age
+    const calculateAge = (birthdate) => {
+      const today = new Date();
+      const bDate = new Date(birthdate);
+      let age = today.getFullYear() - bDate.getFullYear();
+      const m = today.getMonth() - bDate.getMonth();
+      if (m < 0 || (m === 0 && today.getDate() < bDate.getDate())) {
+        age--;
+      }
+      return age;
+    };
+
+    // Map results
+    const celebrants = result.map((citizen) => {
+      const formData =
+        typeof citizen.form_data === "string"
+          ? JSON.parse(citizen.form_data || "{}")
+          : citizen.form_data || {};
+
+      const birthdate = formData.birthdate || null;
+      const barangayName = barangayMap[citizen.barangay_id] || "";
+
+      return {
+        id: citizen.id,
+        name: `${citizen.lastName}, ${citizen.firstName}${
+          citizen.middleName ? ` ${citizen.middleName}` : ""
+        }${citizen.suffix ? ` ${citizen.suffix}` : ""}`.trim(),
+        birthdate,
+        age: birthdate ? calculateAge(birthdate) : null,
+        barangay: barangayName,
+      };
+    });
+
+    return celebrants;
+  } catch (error) {
+    console.error("Error fetching birthday celebrants:", error);
+    throw new Error("Failed to fetch birthday celebrants.");
+  }
+};
+
 // Fetch recent senior citizens
 exports.getRecentSeniorCitizens = async () => {
   try {

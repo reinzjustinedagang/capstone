@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import axios from "axios";
 import {
   Cake,
   Crown,
@@ -6,78 +7,64 @@ import {
   UsersRound,
   CalendarDays,
   PartyPopper,
+  Loader2,
 } from "lucide-react";
 
-const mockNotifications = [
-  {
-    id: 1,
-    type: "birthday",
-    name: "Lola Maria Cruz",
-    age: 72,
-    date: "2025-06-29",
-    message: "It's Lola Maria Cruz's 72nd birthday today!",
-  },
-  {
-    id: 2,
-    type: "centenarian",
-    name: "Lolo Jose Santos",
-    age: 100,
-    date: "2025-06-29",
-    message: "Lolo Jose Santos turns 100 years old today! 🎉",
-  },
-  {
-    id: 3,
-    type: "meeting",
-    date: "2025-07-01",
-    message:
-      "Barangay-wide Senior Meeting scheduled on July 1, 2025 at 10:00 AM.",
-  },
-  {
-    id: 4,
-    type: "event",
-    date: "2025-07-04",
-    message:
-      "Health and Wellness Seminar happening this July 4 at Municipal Hall.",
-  },
-  {
-    id: 5,
-    type: "anniversary",
-    name: "Senior Citizen Day",
-    date: "2025-10-01",
-    message: "Celebrating National Senior Citizen Day on October 1!",
-  },
-  {
-    id: 6,
-    type: "birthday",
-    name: "Lolo Pedro Dela Cruz",
-    age: 88,
-    date: "2025-06-28",
-    message: "Yesterday was Lolo Pedro Dela Cruz’s 88th birthday.",
-  },
-  {
-    id: 7,
-    type: "meeting",
-    date: "2025-07-10",
-    message: "Pensioners' Committee meeting on July 10 at 9:00 AM.",
-  },
-  {
-    id: 8,
-    type: "event",
-    date: "2025-07-15",
-    message: "Free Medical Checkup: July 15 at Health Center.",
-  },
-];
-
 const Notification = () => {
+  const backendUrl = import.meta.env.VITE_API_BASE_URL;
   const [notifications, setNotifications] = useState([]);
   const [visibleCount, setVisibleCount] = useState(5);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Simulate fetching
-    setTimeout(() => {
-      setNotifications(mockNotifications);
-    }, 500);
-  }, []);
+    const fetchCelebrants = async () => {
+      try {
+        setLoading(true);
+        const { data } = await axios.get(
+          `${backendUrl}/senior-citizens/birthdays`
+        );
+        const today = new Date();
+        const tomorrow = new Date();
+        tomorrow.setDate(today.getDate() + 1);
+
+        // 🥳 Transform backend data into notification format
+        const celebrants = data.map((person) => {
+          const birthDate = new Date(person.birthdate);
+          const isToday =
+            birthDate.getMonth() === today.getMonth() &&
+            birthDate.getDate() === today.getDate();
+          const isTomorrow =
+            birthDate.getMonth() === tomorrow.getMonth() &&
+            birthDate.getDate() === tomorrow.getDate();
+
+          let message = "";
+          if (isToday) {
+            message = `It's ${person.name}'s ${person.age}th birthday today! 🎂`;
+          } else if (isTomorrow) {
+            message = `${person.name} will turn ${person.age} years old tomorrow! 🎉`;
+          }
+
+          return {
+            id: person.id,
+            type: person.age >= 100 ? "centenarian" : "birthday",
+            name: person.name,
+            age: person.age,
+            date: person.birthdate,
+            barangay: person.barangay,
+            message,
+          };
+        });
+
+        setNotifications(celebrants);
+      } catch (error) {
+        console.error("Error fetching celebrants:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCelebrants();
+  }, [backendUrl]);
 
   const getIcon = (type) => {
     switch (type) {
@@ -97,18 +84,25 @@ const Notification = () => {
   };
 
   const handleToggle = () => {
-    if (visibleCount < notifications.length) {
-      setVisibleCount(notifications.length);
-    } else {
-      setVisibleCount(5);
-    }
+    setVisibleCount((prev) =>
+      prev < notifications.length ? notifications.length : 5
+    );
   };
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center py-10 text-gray-600">
+        <Loader2 className="h-6 w-6 animate-spin mr-2" />
+        Loading notifications...
+      </div>
+    );
+  }
 
   return (
     <>
       {notifications.length === 0 ? (
         <p className="text-gray-600 text-center mt-10">
-          No notifications available.
+          No birthdays today or tomorrow.
         </p>
       ) : (
         <div className="space-y-4">
@@ -120,7 +114,9 @@ const Notification = () => {
               <div className="mt-1">{getIcon(notif.type)}</div>
               <div>
                 <p className="text-gray-800 font-medium">{notif.message}</p>
-                <p className="text-sm text-gray-500">{notif.date}</p>
+                <p className="text-sm text-gray-500">
+                  {notif.barangay} — {notif.date}
+                </p>
               </div>
             </div>
           ))}
