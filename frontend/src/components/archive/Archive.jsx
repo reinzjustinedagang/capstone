@@ -103,11 +103,9 @@ const Archive = ({ onView }) => {
       setTotalCount(total || 0);
       setTotalPages(totalPages || 1);
     } catch (err) {
-      console.error(err);
-      setError("Failed to load archived senior citizens.");
+      console.warn("Failed to load archived citizens:", err.message);
+      setError(""); // Don’t trigger global “Page failed to load” modal
       setArchivedCitizens([]);
-      setTotalCount(0);
-      setTotalPages(1);
     } finally {
       setLoading(false);
     }
@@ -593,10 +591,10 @@ const Archive = ({ onView }) => {
         title="Success"
       >
         <div className="p-6 text-center">
-          <div className="mx-auto mb-4 w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
-            <CheckCircle className="w-6 h-6 text-green-500" />
+          <div className="mx-auto mb-4 w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
+            <Trash2 className="w-6 h-6 text-red-500" />
           </div>
-          <h3 className="text-lg font-medium text-gray-800 mb-2">Success</h3>
+          <h3 className="text-lg font-medium text-gray-800 mb-2">Deleted</h3>
           <p className="text-sm text-gray-600 mb-4">
             Senior Citizen deleted successfully!
           </p>

@@ -14,7 +14,8 @@ import axios from "axios";
 const National = ({ onEdit }) => {
   const [discounts, setDiscounts] = useState([]);
   const [error, setError] = useState("");
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(true); // For initial fetch
+  const [deleteLoading, setDeleteLoading] = useState(false); // For delete
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
@@ -50,7 +51,7 @@ const National = ({ onEdit }) => {
 
   const handleDelete = async () => {
     try {
-      setLoading(true);
+      setDeleteLoading(true);
       await axios.delete(`${backendUrl}/api/benefits/${selectedId}`, {
         withCredentials: true,
       });
@@ -61,7 +62,7 @@ const National = ({ onEdit }) => {
       console.error("Error deleting benefits:", err);
       alert("Failed to delete");
     } finally {
-      setLoading(false);
+      setDeleteLoading(false);
     }
   };
 
@@ -118,9 +119,9 @@ const National = ({ onEdit }) => {
               <Button
                 variant="danger"
                 onClick={handleDelete}
-                disabled={loading}
+                disabled={deleteLoading}
               >
-                {loading ? (
+                {deleteLoading ? (
                   <div className="flex items-center gap-2">
                     <Loader2 className="w-4 h-4 animate-spin" />
                     Deleting...
