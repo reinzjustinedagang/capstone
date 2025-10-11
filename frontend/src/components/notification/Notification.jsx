@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 import Modal from "../UI/Modal";
 import Button from "../UI/Button";
-import Card from "../UI/Card";
+import NotificationCard from "./NotificationCard";
 
 const Notification = () => {
   const backendUrl = import.meta.env.VITE_API_BASE_URL;
@@ -26,6 +26,22 @@ const Notification = () => {
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [showErrorModal, setShowErrorModal] = useState(false);
   const [modalMessage, setModalMessage] = useState("");
+  const [sentMessages, setSentMessages] = useState([]);
+
+  useEffect(() => {
+    // Count all today's and tomorrow's celebrants
+    const activeCount = notifications.filter(
+      (n) => n.day === "today" || n.day === "tomorrow"
+    ).length;
+
+    // Save it to localStorage
+    localStorage.setItem("activeNotifications", activeCount);
+  }, [notifications]);
+
+  useEffect(() => {
+    // When this page opens, mark notifications as read
+    localStorage.setItem("activeNotifications", 0);
+  }, []);
 
   useEffect(() => {
     const fetchCelebrants = async () => {
@@ -100,6 +116,9 @@ const Notification = () => {
       setModalMessage(msg);
       setShowSuccessModal(true);
       setShowSMSModal(false);
+
+      // ✅ Mark as sent
+      setSentMessages((prev) => [...prev, selectedCitizen.id]);
     } catch (err) {
       console.error("Failed to send SMS:", err);
       const msg =
@@ -132,7 +151,7 @@ const Notification = () => {
                   : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
               }`}
             >
-              <Cake className="inline-block h-4 w-4 mr-2 text-pink-500" />
+              <Cake className="inline-block h-4 w-4 mr-2" />
               Today’s Celebrants
             </button>
             <button
@@ -143,7 +162,7 @@ const Notification = () => {
                   : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
               }`}
             >
-              <Crown className="inline-block h-4 w-4 mr-2 text-yellow-600" />
+              <Crown className="inline-block h-4 w-4 mr-2" />
               Tomorrow’s Celebrants
             </button>
           </nav>
@@ -163,42 +182,12 @@ const Notification = () => {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {filtered.map((notif) => (
-                <Card key={notif.id} className="flex flex-col justify-between">
-                  <div>
-                    <div className="flex items-center gap-2 mb-2">
-                      {notif.type === "centenarian" ? (
-                        <Crown className="h-5 w-5 text-yellow-600" />
-                      ) : (
-                        <Cake className="h-5 w-5 text-pink-500" />
-                      )}
-                      <h3 className="text-gray-800 font-medium">
-                        {notif.name}
-                      </h3>
-                    </div>
-                    <p className="text-sm text-gray-600">
-                      Barangay:{" "}
-                      <span className="font-medium">{notif.barangay}</span>
-                    </p>
-                    <p className="text-sm text-gray-600">
-                      Age: <span className="font-medium">{notif.age}</span>
-                    </p>
-                    <p className="text-sm text-gray-600">
-                      Birthdate:{" "}
-                      <span className="font-medium">{notif.birthdate}</span>
-                    </p>
-                  </div>
-
-                  <div className="mt-4 flex justify-end">
-                    <Button
-                      variant="primary"
-                      size="sm"
-                      onClick={() => handleOpenSMSModal(notif)}
-                      icon={<SendIcon className="h-4 w-4 mr-1" />}
-                    >
-                      Send Message
-                    </Button>
-                  </div>
-                </Card>
+                <NotificationCard
+                  key={notif.id}
+                  celebrant={notif}
+                  onSend={handleOpenSMSModal}
+                  isSent={sentMessages.includes(notif.id)} // ✅ Pass sent status
+                />
               ))}
             </div>
           )}

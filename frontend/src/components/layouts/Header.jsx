@@ -28,6 +28,25 @@ const Header = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const backendUrl = import.meta.env.VITE_API_BASE_URL;
+  const [hasNotifications, setHasNotifications] = useState(false);
+
+  useEffect(() => {
+    const checkNotifications = () => {
+      const count = parseInt(
+        localStorage.getItem("activeNotifications") || "0",
+        10
+      );
+      setHasNotifications(count > 0);
+    };
+
+    // Check initially
+    checkNotifications();
+
+    // Recheck when tab regains focus (optional but nice)
+    window.addEventListener("focus", checkNotifications);
+
+    return () => window.removeEventListener("focus", checkNotifications);
+  }, []);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -98,7 +117,9 @@ const Header = () => {
             }
           >
             <BellIcon className="h-5 w-5" />
-            <span className="absolute top-1 right-1 bg-red-500 border-2 border-white rounded-full w-2.5 h-2.5"></span>
+            {hasNotifications && (
+              <span className="absolute top-1 right-1 bg-red-500 border-2 border-white rounded-full w-2.5 h-2.5"></span>
+            )}
           </NavLink>
 
           <div className="flex items-center">
