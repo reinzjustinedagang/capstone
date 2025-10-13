@@ -73,26 +73,25 @@ export default function Register() {
       setShowNotification(true);
       return;
     }
+
     setVerifyingKey(true);
     try {
-      const backendUrl = import.meta.env.VITE_API_BASE_URL;
       const response = await axios.post(
         `${backendUrl}/api/settings/save-key`,
         { key: enteredKey },
         { withCredentials: true }
       );
 
-      if (response.data.skipped) {
+      if (response.data.skipped || response.data.success) {
         setStatus("success");
-        setNotificationMessage(
-          "An unused developer key exists. You can proceed."
-        );
+        setNotificationMessage("Developer key verified! You can proceed.");
+        setValidKey(true); // ✅ only mark as valid here
       } else {
         setStatus("error");
         setNotificationMessage(response.data.message);
       }
+
       setShowNotification(true);
-      setValidKey(true);
     } catch (err) {
       console.error("Developer key verification failed:", err);
       setStatus("error");

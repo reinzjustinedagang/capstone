@@ -118,7 +118,7 @@ const Events = () => {
                   {/* Content */}
                   <div className="p-5">
                     <div className="flex items-center gap-2 mb-3">
-                      <Calendar className="w-5 h-5 text-blue-600" />
+                      {/* <Calendar className="w-5 h-5 text-blue-600" /> */}
                       <h3 className="text-lg font-semibold line-clamp-2 text-gray-900">
                         {event.title}
                       </h3>

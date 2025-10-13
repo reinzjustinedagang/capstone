@@ -110,12 +110,12 @@ const Benefits = () => {
                   </div>
 
                   <div className="p-5">
-                    <div className="flex items-center gap-2 mb-3">
+                    {/* <div className="flex items-center gap-2 mb-3">
                       <Gift className="w-5 h-5 text-blue-600" />
                       <h3 className="text-lg font-semibold line-clamp-2 text-gray-900">
                         {benefit.provider}
                       </h3>
-                    </div>
+                    </div> */}
                     <p className="text-sm text-gray-700 mb-4 line-clamp-3">
                       {benefit.description}
                     </p>

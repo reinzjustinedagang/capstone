@@ -107,7 +107,7 @@ export default function Login() {
       setAttempts(0);
       localStorage.setItem("loginAttempts", "0");
     } catch (err) {
-      console.error("Login error:", err);
+      // console.error("Login error:", err);
       setError(
         err.response?.data?.message ||
           "Login failed. Please check your credentials."

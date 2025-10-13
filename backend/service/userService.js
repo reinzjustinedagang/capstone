@@ -286,7 +286,7 @@ exports.registerInternal = async (
   }
 };
 
-// REGISTER SERVICE
+// REGISTER SERVICE (fixed)
 exports.register = async (
   username,
   email,
@@ -297,6 +297,7 @@ exports.register = async (
   devKey
 ) => {
   try {
+    // 1️⃣ Validate developer key (but don't use it yet)
     const keyCheck = await Connection(
       `SELECT * FROM dev_keys 
        WHERE \`key\` = ? 
@@ -309,33 +310,29 @@ exports.register = async (
     if (!keyCheck.length)
       throw { status: 400, message: "Invalid or already used developer key" };
 
-    // Mark key as used
-    await Connection("UPDATE dev_keys SET used = 1 WHERE id = ?", [
-      keyCheck[0].id,
-    ]);
-
-    // Check if email already exists
+    // 2️⃣ Check if email already exists
     const existingUsers = await Connection(
       "SELECT * FROM users WHERE email = ?",
       [email]
     );
+
     if (existingUsers.length > 0) {
       const error = new Error("User with this email already exists.");
       error.statusCode = 409;
       throw error;
     }
 
+    // 3️⃣ Hash password
     const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
 
-    // 🔑 Check if there's already an Admin in the system
+    // 4️⃣ Check if Admin exists
     const [adminExists] = await Connection(
       "SELECT COUNT(*) AS total FROM users WHERE role = 'Admin'"
     );
 
-    // If there is already an Admin → registered = 0
-    // If no Admin yet → registered = 1
     const registered = adminExists.total > 0 ? 0 : 1;
 
+    // 5️⃣ Insert user
     const query = `
       INSERT INTO users (id, username, email, password, cp_number, role, registered)
       VALUES (NULL, ?, ?, ?, ?, ?, ?)
@@ -349,8 +346,13 @@ exports.register = async (
       registered,
     ]);
 
-    // ✅ Log registration
+    // 6️⃣ Mark key as used only after successful registration
     if (result.affectedRows === 1) {
+      await Connection("UPDATE dev_keys SET used = 1 WHERE id = ?", [
+        keyCheck[0].id,
+      ]);
+
+      // Log registration
       await logAudit(
         result.insertId,
         email,

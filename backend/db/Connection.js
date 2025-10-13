@@ -268,19 +268,18 @@ async function initTables() {
       id INT AUTO_INCREMENT PRIMARY KEY,
       
       -- Core structured fields
-      idNumber VARCHAR(6),
       firstName VARCHAR(255) NOT NULL,
       lastName VARCHAR(255) NOT NULL,
       middleName VARCHAR(255),
       suffix VARCHAR(50),
-      birthdate DATE NULL, 
-      -- Dynamic form fields stored here
-      form_data JSON NOT NULL,
-      
+
       -- Optional: quick access columns (can be included in JSON too)
       age INT GENERATED ALWAYS AS (CAST(JSON_EXTRACT(form_data, '$.age') AS UNSIGNED)) VIRTUAL,
       gender VARCHAR(10) GENERATED ALWAYS AS (JSON_UNQUOTE(JSON_EXTRACT(form_data, '$.gender'))) VIRTUAL,
 
+      -- Dynamic form fields stored here
+      form_data JSON NOT NULL,
+      
       -- Image
       document_image VARCHAR(500),
       document_type VARCHAR(255),

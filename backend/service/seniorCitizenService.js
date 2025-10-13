@@ -700,18 +700,34 @@ exports.getPaginatedFilteredCitizens = async (options) => {
     params.push(healthStatus);
   }
 
-  // Pensioner filter (handles both array and string cases, trims spaces)
   if (pensioner && pensioner !== "All Pensions") {
-    where += `
-    AND (
-      -- Case 1: pensioner stored as string "SSS, PVAO"
-      CONCAT(',', REPLACE(JSON_UNQUOTE(JSON_EXTRACT(sc.form_data, '$.pensioner')), ' ', ''), ',') LIKE ?
-      OR
-      -- Case 2: pensioner stored as JSON array ["SSS","PVAO"]
-      JSON_CONTAINS(JSON_EXTRACT(sc.form_data, '$.pensioner'), JSON_QUOTE(?))
-    )
-  `;
-    params.push(`%,${pensioner},%`, pensioner);
+    if (pensioner === "Others") {
+      // Show seniors who don't have any pension or whose pension is not among known types
+      where += `
+      AND (
+        JSON_EXTRACT(sc.form_data, '$.pensioner') IS NULL
+        OR JSON_UNQUOTE(JSON_EXTRACT(sc.form_data, '$.pensioner')) = ''
+        OR (
+          JSON_EXTRACT(sc.form_data, '$.pensioner') NOT LIKE '%SSS%'
+          AND JSON_EXTRACT(sc.form_data, '$.pensioner') NOT LIKE '%GSIS%'
+          AND JSON_EXTRACT(sc.form_data, '$.pensioner') NOT LIKE '%PVAO%'
+          AND JSON_EXTRACT(sc.form_data, '$.pensioner') NOT LIKE '%DSWD SOCPEN%'
+        )
+      )
+    `;
+    } else {
+      // Specific pension filter (SSS, PVAO, GSIS, etc.)
+      where += `
+      AND (
+        -- Case 1: pensioner stored as string "SSS, PVAO"
+        CONCAT(',', REPLACE(JSON_UNQUOTE(JSON_EXTRACT(sc.form_data, '$.pensioner')), ' ', ''), ',') LIKE ?
+        OR
+        -- Case 2: pensioner stored as JSON array ["SSS","PVAO"]
+        JSON_CONTAINS(JSON_EXTRACT(sc.form_data, '$.pensioner'), JSON_QUOTE(?))
+      )
+    `;
+      params.push(`%,${pensioner},%`, pensioner);
+    }
   }
 
   // Gender filter
