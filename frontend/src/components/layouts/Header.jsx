@@ -6,6 +6,7 @@ import {
   LogOut,
   Settings,
   ChevronDown,
+  Calendar,
 } from "lucide-react";
 import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import Modal from "../UI/Modal";
@@ -92,9 +93,14 @@ const Header = () => {
   const pathSegments = location.pathname.split("/").filter(Boolean);
   let pageTitle = pathSegments[pathSegments.length - 1]
     .replace(/-/g, " ")
-    .replace(/\d+$/, "") // remove numeric id
+    .replace(/\d+$/, "")
     .trim();
-  pageTitle = pageTitle.charAt(0).toUpperCase() + pageTitle.slice(1);
+
+  // Capitalize each word
+  pageTitle = pageTitle
+    .split(" ")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
 
   return (
     <header className="bg-white border-b border-gray-200">
@@ -107,7 +113,7 @@ const Header = () => {
 
         <div className="flex items-center space-x-4 ml-auto">
           <NavLink
-            to="/admin/notifications"
+            to="/admin/birthday-calendar"
             className={({ isActive }) =>
               `relative p-2 rounded-full transition duration-150 ${
                 isActive
@@ -116,7 +122,7 @@ const Header = () => {
               }`
             }
           >
-            <BellIcon className="h-5 w-5" />
+            <Calendar className="h-5 w-5" />
             {hasNotifications && (
               <span className="absolute top-1 right-1 bg-red-500 border-2 border-white rounded-full w-2.5 h-2.5"></span>
             )}

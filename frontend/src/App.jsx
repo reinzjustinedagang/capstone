@@ -226,7 +226,7 @@ function App() {
         <Route path="user-management" element={<UserManagementPage />} />
         <Route path="settings" element={<SettingsPage />} />
         <Route path="barangays" element={<BarangayManagementPage />} />
-        <Route path="notifications" element={<NotificationPage />} />
+        <Route path="birthday-calendar" element={<NotificationPage />} />
         <Route path="recycle-bin" element={<RecycleBinPage />} />
         <Route path="login-trail/:userId" element={<LoginTrailPage />} />
         <Route path="events" element={<EventsPage />} />
