@@ -31,7 +31,7 @@ const BirthdayCalendar = () => {
   const [errorMsg, setErrorMsg] = useState("");
   const [message, setMessage] = useState("");
   const [selectedRecipients, setSelectedRecipients] = useState([]);
-  const [messageText, setMessageText] = useState([]);
+  const [messageText, setMessageText] = useState("");
   const [templates, setTemplates] = useState([]);
   const [selectedTemplateId, setSelectedTemplateId] = useState("");
 
@@ -106,7 +106,9 @@ const BirthdayCalendar = () => {
     const numbers = celebrants
       .filter((s) => selectedRecipients.includes(s.id))
       .map((s) => s.contact)
-      .filter((num) => !!num && num.trim() !== "");
+      .filter((num) => num !== null && num !== undefined)
+      .map((num) => String(num).trim())
+      .filter((num) => num !== "");
 
     if (numbers.length === 0) {
       setErrorMsg("No valid contact numbers selected.");
@@ -215,10 +217,10 @@ const BirthdayCalendar = () => {
           onClose={closeModal}
           isOpen={showModal}
           title={
-            <h3 className="text-base font-semibold flex items-center gap-2">
+            <div className="text-base font-semibold flex items-center gap-2">
               <Cake className="w-5 h-5 text-blue-500" />
               {months[selectedMonth]} {selectedDay} Birthdays
-            </h3>
+            </div>
           }
         >
           <div className="p-4 max-w-md space-y-4">

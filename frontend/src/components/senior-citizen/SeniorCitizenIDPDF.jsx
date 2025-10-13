@@ -28,9 +28,19 @@ const SeniorCitizenIDPDF = ({ citizen, zipCode, oscaHead, mayor }) => {
       name: `${citizen.firstName} ${middleInitial} ${citizen.lastName} ${
         citizen.suffix || ""
       }`.trim(),
-      address: `${
-        citizen.form_data?.street ? citizen.form_data.street + ", " : ""
-      }Brgy. ${citizen.barangay_name || "Unknown"}`,
+      address: (() => {
+        const street = citizen.form_data?.street
+          ? `${citizen.form_data.street}, `
+          : "";
+
+        const barangayName = citizen.barangay_name || "Unknown";
+        const hasBarangayWord = /(brgy|barangay)/i.test(barangayName);
+
+        return `${street}${
+          hasBarangayWord ? barangayName : `Brgy. ${barangayName}`
+        }`;
+      })(),
+
       municipality: `${citizen.form_data?.municipality || "San Jose"}, ${
         citizen.form_data?.province || "Occidental Mindoro"
       }`,
