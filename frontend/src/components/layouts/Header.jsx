@@ -25,26 +25,11 @@ const Header = () => {
   const [showDropdown, setShowDropdown] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [logoutLoading, setLogoutLoading] = useState(false);
-  const [hasNotifications, setHasNotifications] = useState(false);
   const [hasBirthdayToday, setHasBirthdayToday] = useState(false); // 🎂 new
 
   const navigate = useNavigate();
   const location = useLocation();
   const backendUrl = import.meta.env.VITE_API_BASE_URL;
-
-  useEffect(() => {
-    const checkNotifications = () => {
-      const count = parseInt(
-        localStorage.getItem("activeNotifications") || "0",
-        10
-      );
-      setHasNotifications(count > 0);
-    };
-
-    checkNotifications();
-    window.addEventListener("focus", checkNotifications);
-    return () => window.removeEventListener("focus", checkNotifications);
-  }, []);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -68,28 +53,6 @@ const Header = () => {
     };
     fetchUser();
   }, []);
-
-  // 🎂 Check if there are birthdays today
-  useEffect(() => {
-    const fetchTodaysBirthdays = async () => {
-      try {
-        const today = new Date();
-        const month = today.getMonth() + 1;
-        const day = today.getDate();
-
-        const { data } = await axios.get(
-          `${backendUrl}/api/senior-citizens/birthdays/today/${month}/${day}`,
-          { withCredentials: true }
-        );
-
-        setHasBirthdayToday(data && data.length > 0);
-      } catch (error) {
-        console.error("Error checking today's birthdays:", error);
-      }
-    };
-
-    fetchTodaysBirthdays();
-  }, [backendUrl]);
 
   const handleLogout = async () => {
     setLogoutLoading(true);

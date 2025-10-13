@@ -44,6 +44,11 @@ const Notification = () => {
   }, []);
 
   useEffect(() => {
+    localStorage.setItem("activeNotifications", 0);
+    window.dispatchEvent(new Event("focus")); // 🔄 forces StaffHeader to recheck immediately
+  }, []);
+
+  useEffect(() => {
     const fetchCelebrants = async () => {
       try {
         setLoading(true);

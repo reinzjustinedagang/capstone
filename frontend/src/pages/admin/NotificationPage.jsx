@@ -5,7 +5,7 @@ import BirthdayCalendar from "../../components/notification/BirthdayCalendar";
 
 export const NotificationPage = () => {
   useEffect(() => {
-    document.title = "Notification";
+    document.title = "Birthday Calendar";
   }, []);
   return <BirthdayCalendar />;
 };

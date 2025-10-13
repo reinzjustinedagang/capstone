@@ -101,21 +101,6 @@ const BirthdayCalendar = () => {
     setMessage("");
   };
 
-  const handleSelectRecipient = (id) => {
-    setSelectedRecipients((prev) =>
-      prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
-    );
-  };
-
-  const handleSelectAll = (checked) => {
-    if (checked) {
-      const allIds = grouped[selectedDay].map((s) => s.id);
-      setSelectedRecipients(allIds);
-    } else {
-      setSelectedRecipients([]);
-    }
-  };
-
   const handleSendGreetings = async () => {
     const celebrants = grouped[selectedDay] || [];
     const numbers = celebrants
