@@ -765,31 +765,31 @@ exports.getPaginatedFilteredCitizens = async (options) => {
 
   if (pensioner && pensioner !== "All Pensions") {
     if (pensioner === "Others") {
-      // Show seniors who don't have any pension or whose pension is not among known types
       where += `
       AND (
         JSON_EXTRACT(sc.form_data, '$.pensioner') IS NULL
-        OR JSON_UNQUOTE(JSON_EXTRACT(sc.form_data, '$.pensioner')) = ''
+        OR TRIM(JSON_UNQUOTE(JSON_EXTRACT(sc.form_data, '$.pensioner'))) = ''
         OR (
-          JSON_EXTRACT(sc.form_data, '$.pensioner') NOT LIKE '%SSS%'
-          AND JSON_EXTRACT(sc.form_data, '$.pensioner') NOT LIKE '%GSIS%'
-          AND JSON_EXTRACT(sc.form_data, '$.pensioner') NOT LIKE '%PVAO%'
-          AND JSON_EXTRACT(sc.form_data, '$.pensioner') NOT LIKE '%DSWD SOCPEN%'
+          LOWER(JSON_UNQUOTE(JSON_EXTRACT(sc.form_data, '$.pensioner'))) NOT LIKE '%sss%'
+          AND LOWER(JSON_UNQUOTE(JSON_EXTRACT(sc.form_data, '$.pensioner'))) NOT LIKE '%gsis%'
+          AND LOWER(JSON_UNQUOTE(JSON_EXTRACT(sc.form_data, '$.pensioner'))) NOT LIKE '%pvao%'
+            AND LOWER(JSON_UNQUOTE(JSON_EXTRACT(sc.form_data, '$.pensioner'))) NOT LIKE '%afpslai%'
+          AND LOWER(JSON_UNQUOTE(JSON_EXTRACT(sc.form_data, '$.pensioner'))) NOT LIKE '%dswd socpen%'
         )
       )
     `;
     } else {
-      // Specific pension filter (SSS, PVAO, GSIS, etc.)
       where += `
       AND (
-        -- Case 1: pensioner stored as string "SSS, PVAO"
-        CONCAT(',', REPLACE(JSON_UNQUOTE(JSON_EXTRACT(sc.form_data, '$.pensioner')), ' ', ''), ',') LIKE ?
-        OR
-        -- Case 2: pensioner stored as JSON array ["SSS","PVAO"]
-        JSON_CONTAINS(JSON_EXTRACT(sc.form_data, '$.pensioner'), JSON_QUOTE(?))
+        LOWER(JSON_UNQUOTE(JSON_EXTRACT(sc.form_data, '$.pensioner'))) LIKE ?
+        OR JSON_CONTAINS(
+          JSON_EXTRACT(sc.form_data, '$.pensioner'),
+          JSON_QUOTE(?)
+        )
       )
     `;
-      params.push(`%,${pensioner},%`, pensioner);
+      const pensionLike = `%${pensioner.toLowerCase()}%`;
+      params.push(pensionLike, pensioner);
     }
   }
 
