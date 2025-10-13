@@ -24,12 +24,13 @@ const Header = () => {
   const [loading, setLoading] = useState(true);
   const [showDropdown, setShowDropdown] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
-  const [logoutLoading, setLogoutLoading] = useState(false); // ✅ new
+  const [logoutLoading, setLogoutLoading] = useState(false);
+  const [hasNotifications, setHasNotifications] = useState(false);
+  const [hasBirthdayToday, setHasBirthdayToday] = useState(false); // 🎂 new
 
   const navigate = useNavigate();
   const location = useLocation();
   const backendUrl = import.meta.env.VITE_API_BASE_URL;
-  const [hasNotifications, setHasNotifications] = useState(false);
 
   useEffect(() => {
     const checkNotifications = () => {
@@ -40,12 +41,8 @@ const Header = () => {
       setHasNotifications(count > 0);
     };
 
-    // Check initially
     checkNotifications();
-
-    // Recheck when tab regains focus (optional but nice)
     window.addEventListener("focus", checkNotifications);
-
     return () => window.removeEventListener("focus", checkNotifications);
   }, []);
 
@@ -65,7 +62,6 @@ const Header = () => {
         }
       } catch (err) {
         console.error("Failed to fetch user:", err);
-        setUser({ username: "Guest", role: "User", image: null });
       } finally {
         setLoading(false);
       }
@@ -73,8 +69,30 @@ const Header = () => {
     fetchUser();
   }, []);
 
+  // 🎂 Check if there are birthdays today
+  useEffect(() => {
+    const fetchTodaysBirthdays = async () => {
+      try {
+        const today = new Date();
+        const month = today.getMonth() + 1;
+        const day = today.getDate();
+
+        const { data } = await axios.get(
+          `${backendUrl}/api/senior-citizens/birthdays/today/${month}/${day}`,
+          { withCredentials: true }
+        );
+
+        setHasBirthdayToday(data && data.length > 0);
+      } catch (error) {
+        console.error("Error checking today's birthdays:", error);
+      }
+    };
+
+    fetchTodaysBirthdays();
+  }, [backendUrl]);
+
   const handleLogout = async () => {
-    setLogoutLoading(true); // ✅ start loading
+    setLogoutLoading(true);
     try {
       await axios.post(
         `${backendUrl}/api/user/logout`,
@@ -86,7 +104,7 @@ const Header = () => {
     } finally {
       localStorage.clear();
       navigate("/login");
-      setLogoutLoading(false); // ✅ stop loading
+      setLogoutLoading(false);
     }
   };
 
@@ -123,7 +141,9 @@ const Header = () => {
             }
           >
             <Calendar className="h-5 w-5" />
-            {hasNotifications && (
+
+            {/* 🎂 Red dot if birthdays today */}
+            {hasBirthdayToday && (
               <span className="absolute top-1 right-1 bg-red-500 border-2 border-white rounded-full w-2.5 h-2.5"></span>
             )}
           </NavLink>
