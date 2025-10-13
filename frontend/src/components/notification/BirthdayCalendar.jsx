@@ -31,9 +31,7 @@ const BirthdayCalendar = () => {
   const [errorMsg, setErrorMsg] = useState("");
   const [message, setMessage] = useState("");
   const [selectedRecipients, setSelectedRecipients] = useState([]);
-  const [messageText, setMessageText] = useState(
-    "🎂 Happy Birthday! The Office of Senior Citizens Affairs (OSCA) sends warm greetings and wishes you good health and happiness. Enjoy your special day! 🎉"
-  );
+  const [messageText, setMessageText] = useState([]);
   const [templates, setTemplates] = useState([]);
   const [selectedTemplateId, setSelectedTemplateId] = useState("");
 
@@ -181,7 +179,7 @@ const BirthdayCalendar = () => {
       {/* Calendar */}
       {loading ? (
         <div className="flex justify-center items-center py-10 text-gray-600">
-          <Loader2 className="animate-spin mr-2 h-5 w-5" />
+          <Loader2 className="animate-spin text-blue-500 mr-2 h-8 w-8" />
           Loading birthdays...
         </div>
       ) : (
