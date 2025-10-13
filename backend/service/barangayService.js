@@ -5,26 +5,15 @@ exports.getPaginatedBarangays = async (
   page = 1,
   limit = 10,
   search = "",
-  sortBy = "controlNo",
   sortOrder = "ASC"
 ) => {
   const offset = (page - 1) * limit;
   const searchQuery = `%${search}%`;
 
-  const allowedSortColumns = ["barangay_name", "controlNo", "created_at"];
-  const safeSortBy = allowedSortColumns.includes(sortBy)
-    ? sortBy
-    : "barangay_name";
+  // Ensure sort order is valid
   const safeSortOrder = sortOrder.toUpperCase() === "DESC" ? "DESC" : "ASC";
 
-  let orderClause;
-
-  // ✅ If sorting by controlNo, cast it as UNSIGNED (numeric)
-  if (safeSortBy === "controlNo") {
-    orderClause = `CAST(controlNo AS UNSIGNED) ${safeSortOrder}`;
-  } else {
-    orderClause = `${safeSortBy} ${safeSortOrder}`;
-  }
+  const orderClause = `CAST(controlNo AS UNSIGNED) ${safeSortOrder}`;
 
   let data, countResult;
 
@@ -34,12 +23,14 @@ exports.getPaginatedBarangays = async (
        WHERE barangay_name LIKE ? OR controlNo LIKE ?
        ORDER BY ${orderClause} 
        LIMIT ? OFFSET ?`,
-      [searchQuery, parseInt(limit), parseInt(offset)]
+      [searchQuery, searchQuery, parseInt(limit), parseInt(offset)]
     );
 
     [countResult] = await Connection(
-      "SELECT COUNT(*) AS total FROM barangays WHERE barangay_name LIKE ?",
-      [searchQuery]
+      `SELECT COUNT(*) AS total 
+       FROM barangays 
+       WHERE barangay_name LIKE ? OR controlNo LIKE ?`,
+      [searchQuery, searchQuery]
     );
   } else {
     data = await Connection(
