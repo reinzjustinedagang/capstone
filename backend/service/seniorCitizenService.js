@@ -813,7 +813,7 @@ exports.getPaginatedFilteredCitizens = async (options) => {
   }
 
   if (reports === "UTP") {
-    where += ` AND JSON_UNQUOTE(JSON_EXTRACT(sc.form_data, '$.UTP')) = 'Yes'`;
+    where += ` AND JSON_UNQUOTE(JSON_EXTRACT(sc.form_data, '$.utp')) = 'Yes'`;
   }
 
   if (reports === "Transferee") {
