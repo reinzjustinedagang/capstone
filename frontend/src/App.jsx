@@ -58,6 +58,7 @@ import LandingLayout from "./components/startPage/layout/LandingLayout.jsx";
 import { EventDetailsPage } from "./pages/public/EventDetailsPage.jsx";
 import { BenefitDetailsPage } from "./pages/public/BenefitDetailsPage.jsx";
 import { RepublicActDetailsPage } from "./pages/public/RepublicActDetailsPage.jsx";
+import { StaffNotificationPage } from "./pages/staff/StaffNotificationPage.jsx";
 
 function App() {
   return (
@@ -255,6 +256,7 @@ function App() {
         <Route path="my-profile" element={<StaffProfilePage />} />
         <Route path="events" element={<StaffEventsPage />} />
         <Route path="reports" element={<StaffReportsPage />} />
+        <Route path="notifications" element={<StaffNotificationPage />} />
       </Route>
 
       {/* Not Found */}

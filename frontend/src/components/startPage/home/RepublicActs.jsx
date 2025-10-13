@@ -74,7 +74,7 @@ const RepublicActs = () => {
                   className="w-full max-w-[280px] bg-gradient-to-br from-blue-50 to-white border border-blue-200 rounded-xl shadow-md cursor-pointer hover:shadow-lg hover:-translate-y-1 transition-transform p-5"
                 >
                   <div className="flex items-center gap-2 mb-3">
-                    <BookOpenTextIcon className="w-5 h-5 text-blue-600" />
+                    {/* <BookOpenTextIcon className="w-5 h-5 text-blue-600" /> */}
                     <h3 className="text-lg font-semibold line-clamp-2 text-gray-900">
                       {act.title}
                     </h3>

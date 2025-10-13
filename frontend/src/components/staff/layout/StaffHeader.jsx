@@ -23,11 +23,30 @@ const StaffHeader = () => {
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [logoutLoading, setLogoutLoading] = useState(false);
 
+  const [hasNotifications, setHasNotifications] = useState(false);
+
   const navigate = useNavigate();
   const location = useLocation();
   const backendUrl = import.meta.env.VITE_API_BASE_URL;
 
   const isProfilePage = location.pathname === "/staff/my-profile";
+  useEffect(() => {
+    const checkNotifications = () => {
+      const count = parseInt(
+        localStorage.getItem("activeNotifications") || "0",
+        10
+      );
+      setHasNotifications(count > 0);
+    };
+
+    // Check initially
+    checkNotifications();
+
+    // Recheck when tab regains focus (optional but nice)
+    window.addEventListener("focus", checkNotifications);
+
+    return () => window.removeEventListener("focus", checkNotifications);
+  }, []);
 
   const fetchUserData = async () => {
     try {
@@ -112,6 +131,21 @@ const StaffHeader = () => {
 
         {/* Right Section */}
         <div className="flex items-center space-x-4 ml-auto">
+          <NavLink
+            to="/staff/notifications"
+            className={({ isActive }) =>
+              `relative p-2 rounded-full transition duration-150 ${
+                isActive
+                  ? "bg-blue-100 text-blue-700 ring-2 ring-blue-500"
+                  : "text-gray-600 hover:bg-gray-100"
+              }`
+            }
+          >
+            <BellIcon className="h-5 w-5" />
+            {hasNotifications && (
+              <span className="absolute top-1 right-1 bg-red-500 border-2 border-white rounded-full w-2.5 h-2.5"></span>
+            )}
+          </NavLink>
           {/* Profile Dropdown */}
           <div className="flex items-center">
             <div className="mr-3 text-right hidden sm:block">

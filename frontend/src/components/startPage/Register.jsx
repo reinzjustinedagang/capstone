@@ -1,6 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { UserPlus, Loader2, CheckCircle, XCircle } from "lucide-react";
+import {
+  UserPlus,
+  Loader2,
+  CheckCircle,
+  XCircle,
+  EyeIcon,
+  EyeOffIcon,
+} from "lucide-react";
 import axios from "axios";
 import Modal from "../UI/Modal"; // Your modal component
 import Button from "../UI/Button"; // Your button component
@@ -28,6 +35,8 @@ export default function Register() {
 
   // Password strength state
   const [passwordStrength, setPasswordStrength] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   // Notification modal state
   const [showNotification, setShowNotification] = useState(false);
@@ -287,7 +296,7 @@ export default function Register() {
               </div>
 
               {/* Password */}
-              <div>
+              <div className="relative">
                 <label
                   htmlFor="password"
                   className="block text-sm font-medium text-gray-800 mb-1"
@@ -296,7 +305,7 @@ export default function Register() {
                 </label>
                 <input
                   id="password"
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   value={password}
                   autoComplete="new-password"
                   placeholder="******"
@@ -304,8 +313,19 @@ export default function Register() {
                     setPassword(e.target.value);
                     setPasswordStrength(checkPasswordStrength(e.target.value));
                   }}
-                  className="block w-full rounded-lg border border-gray-300 px-4 py-2.5"
+                  className="block w-full rounded-lg border border-gray-300 px-4 py-2.5 pr-10"
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-9 text-gray-500 hover:text-gray-700"
+                >
+                  {showPassword ? (
+                    <EyeOffIcon className="h-5 w-5" />
+                  ) : (
+                    <EyeIcon className="h-5 w-5" />
+                  )}
+                </button>
                 {password && (
                   <p
                     className={`text-sm mt-1 ${
@@ -322,7 +342,7 @@ export default function Register() {
               </div>
 
               {/* ✅ Confirm Password */}
-              <div>
+              <div className="relative">
                 <label
                   htmlFor="confirmPassword"
                   className="block text-sm font-medium text-gray-800 mb-1"
@@ -331,12 +351,23 @@ export default function Register() {
                 </label>
                 <input
                   id="confirmPassword"
-                  type="password"
+                  type={showConfirmPassword ? "text" : "password"}
                   value={confirmPassword}
                   placeholder="******"
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="block w-full rounded-lg border border-gray-300 px-4 py-2.5"
+                  className="block w-full rounded-lg border border-gray-300 px-4 py-2.5 pr-10"
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute right-3 top-9 text-gray-500 hover:text-gray-700"
+                >
+                  {showConfirmPassword ? (
+                    <EyeOffIcon className="h-5 w-5" />
+                  ) : (
+                    <EyeIcon className="h-5 w-5" />
+                  )}
+                </button>
                 {confirmPassword && confirmPassword !== password && (
                   <p className="text-sm text-red-500 mt-1">
                     Passwords do not match
