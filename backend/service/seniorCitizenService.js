@@ -45,9 +45,6 @@ const isDuplicateIdNumber = async (idNumber, excludeId = null) => {
   return result.length > 0;
 };
 
-// ✅ Get all senior citizens with birthdays today or tomorrow
-const Connection = require("../db/Connection");
-
 // 🎂 Fetch seniors whose birthdays are today
 exports.getBirthdayCelebrants = async () => {
   const today = new Date();
