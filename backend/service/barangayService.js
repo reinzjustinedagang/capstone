@@ -31,7 +31,7 @@ exports.getPaginatedBarangays = async (
   if (search && search.trim() !== "") {
     data = await Connection(
       `SELECT * FROM barangays 
-       WHERE barangay_name LIKE ? 
+       WHERE barangay_name LIKE ? OR controlNo LIKE ?
        ORDER BY ${orderClause} 
        LIMIT ? OFFSET ?`,
       [searchQuery, parseInt(limit), parseInt(offset)]

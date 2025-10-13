@@ -62,7 +62,7 @@ const StatisticalSummary = () => {
             ageDist["76_80"] * 78 +
             ageDist["81_85"] * 83 +
             ageDist["86_90"] * 88 +
-            ageDist["90_95"] * 93 +
+            ageDist["91_95"] * 93 +
             ageDist["96_100"] * 98 +
             ageDist["100_plus"] * 102) / // pick midpoint / reasonable rep value
           totalInBuckets
