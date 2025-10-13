@@ -118,6 +118,63 @@ exports.getBirthdayCelebrants = async () => {
   }
 };
 
+exports.getBirthdaysByMonth = async (month) => {
+  try {
+    const result = await Connection(
+      `
+      SELECT id, firstName, middleName, lastName, suffix, form_data, barangay_id
+      FROM senior_citizens
+      WHERE deleted = 0
+        AND registered = 1
+        AND archived = 0
+        AND JSON_UNQUOTE(JSON_EXTRACT(form_data, '$.birthdate')) IS NOT NULL
+        AND MONTH(JSON_UNQUOTE(JSON_EXTRACT(form_data, '$.birthdate'))) = ?
+      `,
+      [month]
+    );
+
+    const barangays = await Connection(
+      "SELECT id, barangay_name FROM barangays"
+    );
+    const barangayMap = barangays.reduce((acc, b) => {
+      acc[b.id] = b.barangay_name;
+      return acc;
+    }, {});
+
+    const calculateAge = (birthdate) => {
+      const today = new Date();
+      const bDate = new Date(birthdate);
+      let age = today.getFullYear() - bDate.getFullYear();
+      const m = today.getMonth() - bDate.getMonth();
+      if (m < 0 || (m === 0 && today.getDate() < bDate.getDate())) age--;
+      return age;
+    };
+
+    return result.map((citizen) => {
+      const formData =
+        typeof citizen.form_data === "string"
+          ? JSON.parse(citizen.form_data || "{}")
+          : citizen.form_data || {};
+
+      const birthdate = formData.birthdate || null;
+      const barangayName = barangayMap[citizen.barangay_id] || "";
+
+      return {
+        id: citizen.id,
+        name: `${citizen.lastName}, ${citizen.firstName}${
+          citizen.middleName ? ` ${citizen.middleName}` : ""
+        }${citizen.suffix ? ` ${citizen.suffix}` : ""}`.trim(),
+        birthdate,
+        age: birthdate ? calculateAge(birthdate) : null,
+        barangay: barangayName,
+      };
+    });
+  } catch (error) {
+    console.error("Error fetching birthdays by month:", error);
+    throw new Error("Failed to fetch monthly birthdays.");
+  }
+};
+
 // Fetch recent senior citizens
 exports.getRecentSeniorCitizens = async () => {
   try {

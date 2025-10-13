@@ -13,6 +13,17 @@ router.get("/birthdays", async (req, res) => {
   }
 });
 
+router.get("/birthdays/month/:month", async (req, res) => {
+  try {
+    const month = parseInt(req.params.month); // 1-12
+    const celebrants = await seniorCitizenService.getBirthdaysByMonth(month);
+    res.json(celebrants);
+  } catch (error) {
+    console.error("Error fetching monthly birthdays:", error);
+    res.status(500).json({ message: error.message });
+  }
+});
+
 router.get("/all", async (req, res) => {
   try {
     const citizens = await seniorCitizenService.getAllSeniorCitizens();
