@@ -13,8 +13,9 @@ export default function Developer() {
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
   const [status, setStatus] = useState("success");
+  const [cooldown, setCooldown] = useState(0);
+  const [isSaved, setIsSaved] = useState(false); // ✅ track if key is saved
 
-  const [cooldown, setCooldown] = useState(0); // seconds left
   const backendUrl = import.meta.env.VITE_API_BASE_URL;
 
   useEffect(() => {
@@ -32,7 +33,6 @@ export default function Developer() {
     }
   }, [navigate]);
 
-  // countdown effect
   useEffect(() => {
     if (cooldown <= 0) return;
     const timer = setInterval(() => {
@@ -50,16 +50,16 @@ export default function Developer() {
 
   const generateKey = () => {
     const randomKey = Math.random().toString(36).substring(2, 12).toUpperCase();
-    const expiry = new Date(Date.now() + 10 * 60 * 1000); // 5 min later
-
+    const expiry = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
     setKey(randomKey);
-    setCooldown(10 * 60); // 5 minutes in seconds
+    setCooldown(10 * 60);
+    setIsSaved(false); // ✅ reset saved state
     localStorage.setItem("devKey", randomKey);
     localStorage.setItem("devKeyExpiry", expiry.toISOString());
   };
 
   const copyKey = () => {
-    if (!key) return;
+    if (!key || !isSaved) return;
     navigator.clipboard.writeText(key);
     setCopying(true);
     setTimeout(() => setCopying(false), 2000);
@@ -78,9 +78,11 @@ export default function Developer() {
       if (response.data.skipped) {
         setSuccessMessage("An unused developer key already exists.");
         setStatus("error");
+        setIsSaved(false);
       } else {
         setSuccessMessage("Developer key saved successfully!");
         setStatus("success");
+        setIsSaved(true); // ✅ mark as saved
       }
 
       setShowSuccessModal(true);
@@ -89,12 +91,12 @@ export default function Developer() {
       setSuccessMessage("Failed to save key.");
       setStatus("error");
       setShowSuccessModal(true);
+      setIsSaved(false);
     } finally {
       setSaving(false);
     }
   };
 
-  // format countdown (mm:ss)
   const formatTime = (seconds) => {
     const m = Math.floor(seconds / 60);
     const s = seconds % 60;
@@ -137,14 +139,17 @@ export default function Developer() {
             <div className="flex gap-2">
               <button
                 onClick={copyKey}
+                disabled={!isSaved} // ✅ only allow copying after saving
                 className={`flex items-center gap-1 px-3 py-1 rounded-lg transition-all duration-200 ${
-                  copying
+                  !isSaved
+                    ? "bg-gray-400 cursor-not-allowed text-white"
+                    : copying
                     ? "bg-gray-400 text-gray-700"
                     : "bg-green-600 hover:bg-green-700 text-white"
                 }`}
               >
                 <Copy className="h-4 w-4" />
-                Copy
+                {isSaved ? "Copy" : "Copy"}
               </button>
 
               <button

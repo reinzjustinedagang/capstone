@@ -38,7 +38,7 @@ const BarangayCard = ({ official, onEdit, onDelete }) => {
 
       {/* Position */}
       <p className="text-sm bg-blue-100 text-blue-700 mt-1 px-3 py-0.5 rounded-md font-medium">
-        {official.position}
+        {official.position.toUpperCase()}
       </p>
     </div>
   );

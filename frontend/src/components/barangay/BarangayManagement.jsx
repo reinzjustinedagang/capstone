@@ -78,15 +78,6 @@ const BarangayManagement = () => {
     }
   };
 
-  const toggleSortOrder = (key) => {
-    if (sortBy === key) {
-      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
-    } else {
-      setSortBy(key);
-      setSortOrder("asc");
-    }
-  };
-
   // Memoized filtered and sorted barangays for display on the current page
   // The sorting is applied to the *current page's* data, not the whole dataset
   // as pagination handles the fetching of limited data.
@@ -99,57 +90,55 @@ const BarangayManagement = () => {
   // Pagination button rendering logic copied from MessageHistory
   const renderPageButtons = () => {
     const pages = [];
-    const maxPageButtons = 5; // Total number of page buttons to display
+    const maxPageButtons = 5; // Total number of numeric page buttons to display (excluding ellipses)
 
-    if (totalPages > 0) {
+    if (totalPages <= maxPageButtons) {
+      // If few pages, show all
+      for (let i = 1; i <= totalPages; i++) pages.push(i);
+    } else {
+      // Always show first page
       pages.push(1);
-    }
 
-    let startPage = Math.max(2, page - Math.floor((maxPageButtons - 3) / 2));
-    let endPage = Math.min(
-      totalPages - 1,
-      page + Math.ceil((maxPageButtons - 3) / 2)
-    );
+      // Determine sliding window range
+      let startPage = Math.max(2, page - 1);
+      let endPage = Math.min(totalPages - 1, page + 1);
 
-    if (
-      page <= Math.floor(maxPageButtons / 2) + 1 &&
-      totalPages > maxPageButtons
-    ) {
-      endPage = maxPageButtons - 1;
-    } else if (
-      page >= totalPages - Math.floor(maxPageButtons / 2) &&
-      totalPages > maxPageButtons
-    ) {
-      startPage = totalPages - (maxPageButtons - 2);
-    }
+      // Adjust range if near the start
+      if (page <= 3) {
+        startPage = 2;
+        endPage = 4;
+      }
 
-    if (startPage > 2) {
-      pages.push("ellipsis-start");
-    }
+      // Adjust range if near the end
+      if (page >= totalPages - 2) {
+        startPage = totalPages - 3;
+        endPage = totalPages - 1;
+      }
 
-    for (let i = startPage; i <= endPage; i++) {
-      pages.push(i);
-    }
+      // Add ellipsis if there's a gap after first page
+      if (startPage > 2) {
+        pages.push("ellipsis-start");
+      }
 
-    if (endPage < totalPages - 1) {
-      pages.push("ellipsis-end");
-    }
+      // Add the range of middle pages
+      for (let i = startPage; i <= endPage; i++) {
+        pages.push(i);
+      }
 
-    if (totalPages > 1 && !pages.includes(totalPages)) {
+      // Add ellipsis if there's a gap before last page
+      if (endPage < totalPages - 1) {
+        pages.push("ellipsis-end");
+      }
+
+      // Always show last page
       pages.push(totalPages);
     }
 
-    const uniquePages = Array.from(new Set(pages)).sort((a, b) => {
-      if (typeof a === "string") return 1;
-      if (typeof b === "string") return -1;
-      return a - b;
-    });
-
-    return uniquePages.map((p, index) => {
-      if (typeof p === "string" && p.startsWith("ellipsis")) {
+    return pages.map((p, index) => {
+      if (typeof p === "string") {
         return (
           <span
-            key={`ellipsis-${p}-${index}`}
+            key={index}
             className="px-2 py-2 text-gray-500 text-sm select-none"
           >
             ...
@@ -158,16 +147,17 @@ const BarangayManagement = () => {
       }
 
       const isCurrentPage = page === p;
-      let buttonClasses = `relative inline-flex items-center px-4 py-2 border text-sm font-medium
-            ${
-              isCurrentPage
-                ? "z-10 bg-blue-50 border-blue-500 text-blue-600"
-                : "bg-white border-gray-300 text-gray-700 hover:bg-gray-50"
-            }
-            transition-colors duration-150 ease-in-out`;
-
       return (
-        <button key={p} onClick={() => setPage(p)} className={buttonClasses}>
+        <button
+          key={p}
+          onClick={() => setPage(p)}
+          className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium transition-colors duration-150 ease-in-out
+          ${
+            isCurrentPage
+              ? "z-10 bg-blue-50 border-blue-500 text-blue-600"
+              : "bg-white border-gray-300 text-gray-700 hover:bg-gray-50"
+          }`}
+        >
           {p}
         </button>
       );
@@ -218,19 +208,8 @@ const BarangayManagement = () => {
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  <th
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-                    onClick={() => toggleSortOrder("barangay_name")}
-                  >
-                    <div className="flex items-center">
-                      Name
-                      {sortBy === "barangay_name" &&
-                        (sortOrder === "asc" ? (
-                          <ArrowUp className="h-4 w-4 ml-1" />
-                        ) : (
-                          <ArrowDown className="h-4 w-4 ml-1" />
-                        ))}
-                    </div>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase ">
+                    Name
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                     Control No.

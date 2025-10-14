@@ -49,10 +49,10 @@ const About = () => {
         {/* Section Header */}
         <div className="w-full text-center px-5 py-6 md:px-8 lg:px-25">
           <h1 className="text-3xl font-bold text-gray-900">About Us</h1>
-          <p className="text-gray-800 mt-2 max-w-3xl mx-auto">
+          {/* <p className="text-gray-800 mt-2 max-w-3xl mx-auto">
             Learn about the Office for Senior Citizens Affairs in San Jose, its
             mission, vision, and the services it provides to the community.
-          </p>
+          </p> */}
         </div>
 
         {/* Preamble */}

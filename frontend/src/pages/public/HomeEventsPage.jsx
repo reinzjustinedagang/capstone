@@ -50,8 +50,8 @@ export const HomeEventPage = () => {
                 key={event.id}
                 to={`/events/${event.id}`}
                 className="bg-gradient-to-br from-blue-50 to-white border border-blue-200 
-                           rounded-xl shadow-md cursor-pointer hover:shadow-lg 
-                           hover:-translate-y-1 transition-transform overflow-hidden"
+             rounded-xl shadow-md cursor-pointer hover:shadow-lg 
+             hover:-translate-y-1 transition-transform overflow-hidden flex flex-col"
               >
                 {/* Image */}
                 <div className="relative w-full h-40">
@@ -66,58 +66,32 @@ export const HomeEventPage = () => {
                 </div>
 
                 {/* Content */}
-                <div className="p-5 flex flex-col justify-between h-full">
+                <div className="flex flex-col justify-between flex-grow p-5">
                   <div>
-                    <div className="flex items-center gap-2 mb-3">
-                      <Calendar className="w-5 h-5 text-blue-600" />
-                      <h3 className="text-lg font-semibold line-clamp-2 text-gray-900">
-                        {event.title}
-                      </h3>
-                    </div>
+                    <h3 className="text-lg font-semibold line-clamp-2 text-gray-900 mb-2">
+                      {event.title}
+                    </h3>
                     <p className="text-sm text-gray-700 mb-4 line-clamp-3">
                       {event.description}
                     </p>
                   </div>
 
                   {/* Footer Tag with Event Date */}
-                  <span className="inline-block bg-blue-100 text-blue-700 text-xs font-medium px-3 py-1 rounded-full">
-                    {new Date(event.date).toLocaleDateString("en-US", {
-                      year: "numeric",
-                      month: "short",
-                      day: "numeric",
-                    })}
-                  </span>
+                  <div className="mt-auto">
+                    <span className="inline-block bg-blue-100 text-blue-700 text-xs font-medium px-3 py-1 rounded-full">
+                      {new Date(event.date).toLocaleDateString("en-US", {
+                        year: "numeric",
+                        month: "short",
+                        day: "numeric",
+                      })}
+                    </span>
+                  </div>
                 </div>
               </Link>
             ))}
           </div>
         )}
       </div>
-
-      {/* Modal */}
-      <Modal
-        isOpen={!!selectedEvent}
-        onClose={closeModal}
-        title={selectedEvent?.title}
-      >
-        {selectedEvent && (
-          <div>
-            <img
-              src={selectedEvent.image_url || "https://placehold.co/600x400"}
-              alt={selectedEvent.title}
-              className="w-full h-full object-cover rounded-lg mb-4"
-            />
-            <p className="text-sm text-gray-600 mb-2">
-              {new Date(selectedEvent.date).toLocaleDateString("en-US", {
-                year: "numeric",
-                month: "long",
-                day: "numeric",
-              })}
-            </p>
-            <p className="text-gray-700">{selectedEvent.description}</p>
-          </div>
-        )}
-      </Modal>
     </div>
   );
 };

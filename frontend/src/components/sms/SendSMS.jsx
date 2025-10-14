@@ -234,7 +234,7 @@ const SendSMS = () => {
                 </div>
               </div>
 
-              <div className="max-h-100 overflow-y-auto">
+              <div className="max-h-96 overflow-y-auto">
                 {loadingRecipients ? (
                   <div className="p-4 flex items-center justify-center text-blue-600">
                     <Loader2 className="animate-spin h-8 w-8" />

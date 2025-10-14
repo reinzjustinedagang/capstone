@@ -50,7 +50,7 @@ const RegistrationBanner = () => {
       <p className="text-lg md:text-xl font-semibold text-blue-700 mb-4">
         REGISTRANTS AS OF TODAY
       </p>
-      <p className="text-gray-600 max-w-2xl mx-auto text-center mb-6">
+      <p className="text-gray-800 max-w-2xl mx-auto text-center mb-6">
         Let us build a reliable database of all Senior Citizens in San Jose,
         Occidental Mindoro. Join the community, register, and be counted today!
       </p>
@@ -64,7 +64,7 @@ const RegistrationBanner = () => {
         {/* Qualifications */}
         <div className="mb-6">
           <h4 className="text-lg font-semibold text-blue-800 mb-3">
-            📋 Qualifications:
+            Qualifications:
           </h4>
           <ul className="space-y-2 text-gray-700 ml-4">
             <li>• Filipino Citizen aged 60 years old and above</li>
@@ -82,7 +82,7 @@ const RegistrationBanner = () => {
         {/* Requirements */}
         <div className="mb-6">
           <h4 className="text-lg font-semibold text-blue-800 mb-3">
-            📄 Requirements:
+            Requirements:
           </h4>
           <div className="bg-white rounded-lg p-4 mb-3">
             <p className="font-medium text-gray-800 mb-2">
@@ -112,7 +112,7 @@ const RegistrationBanner = () => {
         {/* How to Apply Steps */}
         <div className="mb-6">
           <h4 className="text-lg font-semibold text-blue-800 mb-3">
-            ✅ How to Apply:
+            How to Apply:
           </h4>
           <ol className="space-y-3 text-gray-700">
             <li className="flex">
