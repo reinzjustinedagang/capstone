@@ -256,8 +256,8 @@ exports.registerInternal = async (
     const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
 
     const query = `
-      INSERT INTO users (id, username, email, password, cp_number, role)
-      VALUES (NULL, ?, ?, ?, ?, ?)
+      INSERT INTO users (id, username, email, password, cp_number, role, registered)
+      VALUES (NULL, ?, ?, ?, ?, ?, ?)
     `;
     const result = await Connection(query, [
       username,
@@ -265,6 +265,7 @@ exports.registerInternal = async (
       hashedPassword,
       cp_number,
       role,
+      1,
     ]);
 
     // Log audit
