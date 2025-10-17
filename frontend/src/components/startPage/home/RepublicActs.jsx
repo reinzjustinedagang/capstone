@@ -14,7 +14,7 @@ const RepublicActs = () => {
     const fetchActs = async () => {
       try {
         const res = await axios.get(`${backendUrl}/api/benefits/front-ra`);
-        setActs(res.data);
+        setActs(Array.isArray(res.data) ? res.data : []);
       } catch (err) {
         console.error("Error fetching Republic Acts:", err);
       } finally {
@@ -67,7 +67,8 @@ const RepublicActs = () => {
               ref={scrollRef}
               className="flex flex-wrap justify-center gap-6"
             >
-              {acts.map((act, index) => (
+              {Array.isArray(acts) &&
+              acts.map((act, index) => (
                 <div
                   key={act.id || index}
                   onClick={() => navigate(`/ra/${act.id}`)}

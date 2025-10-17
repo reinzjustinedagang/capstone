@@ -12,13 +12,13 @@ const {
 exports.getOfficialsCount = async () => {
   try {
     const [municipal] = await Connection(
-      `SELECT COUNT(*) AS count FROM municipal_officials`
+      `SELECT COUNT(*) AS count FROM municipal_officials WHERE approved = 1`
     );
     const [barangay] = await Connection(
-      `SELECT COUNT(*) AS count FROM barangay_officials`
+      `SELECT COUNT(*) AS count FROM barangay_officials WHERE approved = 1`
     );
     const [orgChart] = await Connection(
-      `SELECT COUNT(*) AS count FROM orgChart`
+      `SELECT COUNT(*) AS count FROM orgChart WHERE approved = 1`
     );
 
     return {
