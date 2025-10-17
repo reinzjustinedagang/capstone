@@ -148,19 +148,25 @@ const BirthdayCalendar = () => {
   return (
     <div className="bg-white rounded-lg shadow p-6">
       {/* Header */}
-      <div className="flex items-center gap-2 justify-end mb-4">
-        <label className="font-semibold text-sm">Month:</label>
-        <select
-          className="text-sm border border-gray-300 rounded-md p-2 focus:ring-blue-500 focus:border-blue-500"
-          value={selectedMonth}
-          onChange={(e) => setSelectedMonth(Number(e.target.value))}
-        >
-          {months.map((m, i) => (
-            <option key={i} value={i}>
-              {m}
-            </option>
-          ))}
-        </select>
+      <div className="flex items-center justify-between mb-4">
+        {/* Month and Year Header */}
+        <h2 className="text-lg font-semibold text-center mb-4">
+          {months[selectedMonth]} {year}
+        </h2>
+        <div>
+          <label className="font-semibold text-sm mr-2">Month:</label>
+          <select
+            className="text-sm border border-gray-300 rounded-md p-2 focus:ring-blue-500 focus:border-blue-500"
+            value={selectedMonth}
+            onChange={(e) => setSelectedMonth(Number(e.target.value))}
+          >
+            {months.map((m, i) => (
+              <option key={i} value={i}>
+                {m}
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
 
       {/* Calendar */}

@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  UserPlus,
   Loader2,
   CheckCircle,
   XCircle,
@@ -19,33 +18,16 @@ export default function AddUser() {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
   const [cp_number, setPhoneNumber] = useState("");
   const [role, setRole] = useState("staff");
 
   const [loading, setLoading] = useState(false);
 
-  // Password strength
-  const [passwordStrength, setPasswordStrength] = useState("");
-
   // Notification modal
   const [showNotification, setShowNotification] = useState(false);
   const [status, setStatus] = useState(""); // "success" | "error"
   const [notificationMessage, setNotificationMessage] = useState("");
-
-  // Password strength checker
-  const checkPasswordStrength = (pwd) => {
-    if (!pwd) return "";
-    const strongRegex =
-      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-    const mediumRegex =
-      /^(((?=.*[a-z])(?=.*[A-Z]))|((?=.*[a-z])(?=.*\d))|((?=.*[A-Z])(?=.*\d)))[A-Za-z\d@$!%*?&]{6,}$/;
-
-    if (strongRegex.test(pwd)) return "strong";
-    if (mediumRegex.test(pwd)) return "medium";
-    return "weak";
-  };
+  const [generatedPassword, setGeneratedPassword] = useState("");
 
   // Handle add user
   const handleAddUser = async (e) => {
@@ -53,8 +35,9 @@ export default function AddUser() {
     setLoading(true);
 
     const username = `${firstName.trim()} ${lastName.trim()}`;
+    const backendUrl = import.meta.env.VITE_API_BASE_URL;
 
-    if (!firstName || !lastName || !email || !password || !cp_number) {
+    if (!firstName || !lastName || !email || !cp_number) {
       setStatus("error");
       setNotificationMessage("Please fill in all required fields.");
       setShowNotification(true);
@@ -62,27 +45,13 @@ export default function AddUser() {
       return;
     }
 
-    if (passwordStrength === "weak") {
-      setStatus("error");
-      setNotificationMessage("Password is too weak. Choose a stronger one.");
-      setShowNotification(true);
-      setLoading(false);
-      return;
-    }
-
-    if (password !== confirmPassword) {
-      setStatus("error");
-      setNotificationMessage("Passwords do not match.");
-      setShowNotification(true);
-      setLoading(false);
-      return;
-    }
+    // Automatically generate password (e.g., "Dagang123")
+    const generatedPwd = `${lastName.trim()}123`;
 
     try {
-      const backendUrl = import.meta.env.VITE_API_BASE_URL;
       await axios.post(
         `${backendUrl}/api/user/register/internal`,
-        { username, email, password, cp_number, role },
+        { username, email, password: generatedPwd, cp_number, role },
         {
           headers: { "Content-Type": "application/json" },
           withCredentials: true,
@@ -90,6 +59,7 @@ export default function AddUser() {
       );
 
       setStatus("success");
+      setGeneratedPassword(generatedPwd);
       setNotificationMessage("User added successfully!");
       setShowNotification(true);
 
@@ -97,8 +67,6 @@ export default function AddUser() {
       setFirstName("");
       setLastName("");
       setEmail("");
-      setPassword("");
-      setConfirmPassword("");
       setPhoneNumber("");
       setRole("staff");
     } catch (err) {
@@ -115,7 +83,7 @@ export default function AddUser() {
 
   return (
     <div className="space-y-6 p-6">
-      <div className="">
+      <div>
         <h1 className="text-xl font-bold mb-4 text-gray-800 flex items-center gap-2">
           <PlusCircle className="w-6 h-6 text-indigo-600" /> Add New User
         </h1>
@@ -164,60 +132,7 @@ export default function AddUser() {
             />
           </div>
 
-          {/* Password */}
-          <div className="flex gap-2">
-            <div className="w-1/2">
-              <label className="block text-sm font-medium text-gray-800 mb-1">
-                Password
-              </label>
-              <input
-                type="password"
-                placeholder="******"
-                value={password}
-                autoComplete="new-password"
-                onChange={(e) => {
-                  setPassword(e.target.value);
-                  setPasswordStrength(checkPasswordStrength(e.target.value));
-                }}
-                className="block w-full rounded-lg border border-gray-300 px-4 py-2.5"
-              />
-              {password && (
-                <p
-                  className={`text-sm mt-1 ${
-                    passwordStrength === "weak"
-                      ? "text-red-500"
-                      : passwordStrength === "medium"
-                      ? "text-yellow-500"
-                      : "text-green-600"
-                  }`}
-                >
-                  Password strength: {passwordStrength}
-                </p>
-              )}
-            </div>
-
-            {/* Confirm Password */}
-            <div className="w-1/2">
-              <label className="block text-sm font-medium text-gray-800 mb-1">
-                Confirm Password
-              </label>
-              <input
-                type="password"
-                placeholder="******"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                className="block w-full rounded-lg border border-gray-300 px-4 py-2.5"
-              />
-              {confirmPassword && confirmPassword !== password && (
-                <p className="text-sm text-red-500 mt-1">
-                  Passwords do not match
-                </p>
-              )}
-            </div>
-          </div>
-
-          {/* Phone */}
-
+          {/* Phone + Role */}
           <div className="flex gap-2">
             <div className="w-1/2">
               <label className="block text-sm font-medium text-gray-800 mb-1">
@@ -233,7 +148,6 @@ export default function AddUser() {
               />
             </div>
 
-            {/* Role */}
             <div className="w-1/2">
               <label className="block text-sm font-medium text-gray-800 mb-1">
                 Role
@@ -287,6 +201,14 @@ export default function AddUser() {
           <p className="text-sm text-gray-600 text-center">
             {notificationMessage}
           </p>
+
+          {status === "success" && generatedPassword && (
+            <div className="bg-gray-100 border border-gray-300 rounded-lg px-4 py-3 w-full text-center">
+              <p className="text-sm text-gray-700">
+                <strong>Generated Password:</strong> {generatedPassword}
+              </p>
+            </div>
+          )}
 
           <Button variant="primary" onClick={() => setShowNotification(false)}>
             OK

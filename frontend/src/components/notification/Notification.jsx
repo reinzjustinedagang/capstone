@@ -1,13 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import {
-  Cake,
-  Crown,
-  Loader2,
-  SendIcon,
-  XCircle,
-  CheckCircle,
-} from "lucide-react";
+import { Cake, Loader2, SendIcon, XCircle, CheckCircle } from "lucide-react";
 import Modal from "../UI/Modal";
 import Button from "../UI/Button";
 import NotificationCard from "./NotificationCard";
@@ -17,6 +10,10 @@ const Notification = () => {
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("today");
+
+  // Templates
+  const [templates, setTemplates] = useState([]);
+  const [selectedTemplateId, setSelectedTemplateId] = useState("");
 
   // For SMS sending
   const [showSMSModal, setShowSMSModal] = useState(false);
@@ -48,6 +45,7 @@ const Notification = () => {
     window.dispatchEvent(new Event("focus")); // 🔄 forces StaffHeader to recheck immediately
   }, []);
 
+  // Fetch celebrants
   useEffect(() => {
     const fetchCelebrants = async () => {
       try {
@@ -95,12 +93,49 @@ const Notification = () => {
     fetchCelebrants();
   }, [backendUrl]);
 
+  // Fetch templates (same as BirthdayCalendar)
+  useEffect(() => {
+    const fetchTemplates = async () => {
+      try {
+        const res = await axios.get(`${backendUrl}/api/templates`);
+        setTemplates(res.data || []);
+      } catch (err) {
+        console.error("Failed to load templates:", err);
+      }
+    };
+    fetchTemplates();
+  }, [backendUrl]);
+
   const handleOpenSMSModal = (citizen) => {
     setSelectedCitizen(citizen);
+    // Reset template selection when opening
+    setSelectedTemplateId("");
     setMessageText(
       `Happy ${citizen.age}th Birthday, ${citizen.name}! 🎉 Wishing you good health and happiness always.`
     );
     setShowSMSModal(true);
+  };
+
+  // If user chooses a template from dropdown, load template message
+  const handleTemplateChange = async (id) => {
+    setSelectedTemplateId(id);
+    if (!id) {
+      // if cleared, keep default birthday message (or empty)
+      setMessageText(
+        selectedCitizen
+          ? `Happy ${selectedCitizen.age}th Birthday, ${selectedCitizen.name}! 🎉 Wishing you good health and happiness always.`
+          : ""
+      );
+      return;
+    }
+
+    try {
+      const res = await axios.get(`${backendUrl}/api/templates/${id}`);
+      // Expecting template payload to contain `message`
+      setMessageText(res.data?.message || "");
+    } catch (err) {
+      console.error("Failed to load template:", err);
+    }
   };
 
   const handleSendSMS = async () => {
@@ -122,7 +157,7 @@ const Notification = () => {
       setShowSuccessModal(true);
       setShowSMSModal(false);
 
-      // ✅ Mark as sent
+      // Mark as sent
       setSentMessages((prev) => [...prev, selectedCitizen.id]);
     } catch (err) {
       console.error("Failed to send SMS:", err);
@@ -191,7 +226,7 @@ const Notification = () => {
                   key={notif.id}
                   celebrant={notif}
                   onSend={handleOpenSMSModal}
-                  isSent={sentMessages.includes(notif.id)} // ✅ Pass sent status
+                  isSent={sentMessages.includes(notif.id)}
                 />
               ))}
             </div>
@@ -205,13 +240,42 @@ const Notification = () => {
         onClose={() => setShowSMSModal(false)}
         title={`Send Message to ${selectedCitizen?.name || ""}`}
       >
-        <div className="p-4 space-y-4">
-          <textarea
-            rows={5}
-            value={messageText}
-            onChange={(e) => setMessageText(e.target.value)}
-            className="w-full border border-gray-300 rounded-md p-2 focus:ring-blue-500 focus:border-blue-500"
-          />
+        <div className="p-4 space-y-4 max-w-md">
+          {/* Template dropdown */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Choose Template
+            </label>
+            <select
+              value={selectedTemplateId}
+              onChange={(e) => handleTemplateChange(e.target.value)}
+              className="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+            >
+              <option value="">-- Select a template --</option>
+              {templates.map((t) => (
+                <option key={t.id} value={t.id}>
+                  {t.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Message textarea */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Message
+            </label>
+            <textarea
+              rows={5}
+              value={messageText}
+              onChange={(e) => setMessageText(e.target.value)}
+              className="w-full border border-gray-300 rounded-md p-2 focus:ring-blue-500 focus:border-blue-500"
+            />
+            <p className="text-xs text-gray-500 text-right mt-1">
+              {messageText.length} / 160 characters
+            </p>
+          </div>
+
           <div className="flex justify-end gap-3">
             <Button
               variant="secondary"
