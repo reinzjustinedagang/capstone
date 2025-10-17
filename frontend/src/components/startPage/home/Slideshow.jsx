@@ -63,7 +63,7 @@ const Slideshow = () => {
 
   return (
     <section
-      className="relative h-[70vh] md:h-[80vh] flex items-center justify-center overflow-hidden shadow-lg  cursor-pointer"
+      className="relative h-[70vh] md:h-[70vh] flex items-center justify-center overflow-hidden shadow-lg  cursor-pointer"
       onClick={
         () => window.open(eventsData[currentIndex].image_url, "_blank") // 👈 open current image
       }
@@ -85,7 +85,7 @@ const Slideshow = () => {
           e.stopPropagation(); // 👈 prevent image click
           prevSlide();
         }}
-        className="absolute left-3 top-1/2 -translate-y-1/2 bg-white/30 hover:bg-white/50 p-2 rounded-full text-white"
+        className="absolute left-3 top-1/2 -translate-y-1/2 p-2 text-white"
       >
         <ChevronLeft className="h-6 w-6" />
       </button>
@@ -94,7 +94,7 @@ const Slideshow = () => {
           e.stopPropagation(); // 👈 prevent image click
           nextSlide();
         }}
-        className="absolute right-3 top-1/2 -translate-y-1/2 bg-white/30 hover:bg-white/50 p-2 rounded-full text-white"
+        className="absolute right-3 top-1/2 -translate-y-1/2 text-white"
       >
         <ChevronRight className="h-6 w-6" />
       </button>
