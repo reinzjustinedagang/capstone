@@ -13,7 +13,7 @@ import Modal from "../../UI/Modal";
 import axios from "axios";
 
 import Button from "../../UI/Button";
-import SeniorCitizenForm from "../../senior-citizen/form/SeniorCitizenForm";
+import SeniorCitizenForm from "./SeniorCitizenForm";
 import UpdateSeniorCitizenForm from "../../senior-citizen/form/UpdateSeniorCitizenForm";
 import SeniorCitizenList from "../../senior-citizen/SeniorCitizenList";
 import SeniorCitizenID from "../../senior-citizen/SeniorCitizenID";
