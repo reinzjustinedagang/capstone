@@ -6,12 +6,11 @@ const BarangayCard = ({ official, onEdit, onDelete }) => {
   return (
     <div className="relative flex flex-col items-center bg-white p-3 rounded-xl shadow w-40 transition-all duration-200 hover:shadow-md ">
       {/* Status Badge */}
-      <span
-        className={`absolute top-2 right-2 px-1.5 py-0.5 text-[10px] font-semibold rounded-md
-          ${official.approved === 0 ? "bg-yellow-500 text-white" : ""}`}
-      >
-        {official.approved === 0 ? "Pending" : ""}
-      </span>
+      {official.approved === 0 && (
+        <span className="absolute top-21 left-12.5 bg-yellow-500 text-white text-xs font-medium px-2 py-1 rounded-md">
+          Pending
+        </span>
+      )}
 
       {/* Barangay Name */}
       <h3

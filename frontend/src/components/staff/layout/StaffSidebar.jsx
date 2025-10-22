@@ -66,8 +66,8 @@ const StaffSidebar = () => {
     { to: "/staff/reports", label: "Reports", icon: FileTextIcon },
     { to: "/staff/benefits", label: "Benefits", icon: GiftIcon },
     { to: "/staff/events", label: "Events", icon: Calendar },
-    { to: "/staff/official", label: "Official", icon: UserCheck },
-    { to: "/staff/login-trails", label: "Login Trails", icon: History },
+    { to: "/staff/osca-officials", label: "OSCA Officials", icon: UserCheck },
+    { to: "/staff/login-history", label: "Login History", icon: History },
     { to: "/staff/about", label: "About OSCA", icon: InfoIcon },
   ];
 

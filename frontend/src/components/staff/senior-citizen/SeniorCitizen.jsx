@@ -15,7 +15,7 @@ import axios from "axios";
 import Button from "../../UI/Button";
 import SeniorCitizenForm from "./SeniorCitizenForm";
 import UpdateSeniorCitizenForm from "../../senior-citizen/form/UpdateSeniorCitizenForm";
-import SeniorCitizenList from "../../senior-citizen/SeniorCitizenList";
+import SeniorCitizenList from "./SeniorCitizenList";
 import SeniorCitizenID from "../../senior-citizen/SeniorCitizenID";
 import SeniorCitizenIDPDF from "../../senior-citizen/SeniorCitizenIDPDF";
 

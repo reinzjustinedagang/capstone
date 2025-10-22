@@ -10,19 +10,19 @@ const RepublicActCard = ({ law, onEdit, onDelete }) => {
       <div className="relative bg-white rounded-2xl shadow p-4 border border-gray-200 hover:shadow-lg transition flex flex-col">
         {/* Pending Badge */}
         {law.approved === 0 && (
-          <span className="absolute top-1 right-2 bg-yellow-500 text-white text-xs font-medium px-2 py-1 rounded-xl">
+          <span className="absolute top-1 left-2 bg-yellow-500 text-white text-xs font-medium px-2 py-1 rounded-md">
             Pending
           </span>
         )}
 
         {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
+        <div className="flex items-center justify-end">
+          {/* <div>
             <BookOpenTextIcon className="w-5 h-5 text-blue-500" />
             <h2 className="text-lg font-semibold text-gray-800 flex items-center gap-2 line-clamp-2">
               {law.title}
             </h2>
-          </div>
+          </div> */}
           <div className="flex items-center gap-2">
             <button
               onClick={() => onEdit && onEdit(law.id)}
@@ -31,13 +31,13 @@ const RepublicActCard = ({ law, onEdit, onDelete }) => {
             >
               <Edit className="w-4 h-4" />
             </button>
-            <button
+            {/* <button
               onClick={() => onDelete && onDelete(law.id)}
               className="text-red-500 hover:text-red-700 transition"
               title="Delete"
             >
               <Trash2 className="w-4 h-4" />
-            </button>
+            </button> */}
           </div>
         </div>
 

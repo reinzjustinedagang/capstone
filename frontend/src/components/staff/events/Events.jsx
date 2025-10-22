@@ -3,7 +3,7 @@ import Modal from "../../UI/Modal";
 import Button from "../../UI/Button";
 import { Calendar, Plus, CheckCircle, ArrowUp } from "lucide-react";
 import AddEvent from "./AddEvent";
-import EventList from "../../event/EventList";
+import EventList from "./EventList";
 import EventSlideshow from "../../event/EventSlideshow";
 import UpdateEvent from "./UpdateEvent";
 

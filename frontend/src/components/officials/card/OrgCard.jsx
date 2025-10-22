@@ -20,7 +20,7 @@ const OrgCard = ({ position, onEdit, onDelete, isTop = false }) => {
       >
         {/* Pending Badge */}
         {position.approved === 0 && (
-          <span className="absolute top-1 right-1 bg-yellow-500 text-white text-[10px] font-semibold px-1.5 py-0.5 rounded-md shadow">
+          <span className="absolute top-1 left-3 bg-yellow-500 text-white text-xs font-medium px-1.5 py-0.5 rounded-md shadow">
             Pending
           </span>
         )}

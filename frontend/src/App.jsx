@@ -250,7 +250,7 @@ function App() {
         />
         <Route path="sms-management" element={<StaffSmsManagementPage />} />
         <Route path="benefits" element={<StaffBenefitsPage />} />
-        <Route path="official" element={<StaffOfficialPage />} />
+        <Route path="osca-officials" element={<StaffOfficialPage />} />
         <Route path="login-trails" element={<StaffLoginTrailPage />} />
         <Route path="about" element={<StaffAboutPage />} />
         <Route path="my-profile" element={<StaffProfilePage />} />

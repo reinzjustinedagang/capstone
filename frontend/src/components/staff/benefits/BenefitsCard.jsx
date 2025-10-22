@@ -51,7 +51,7 @@ const BenefitsCard = ({
             >
               <Edit className="w-4 h-4" />
             </button>
-            <button
+            {/* <button
               onClick={(e) => {
                 e.stopPropagation(); // prevent opening modal
                 onDelete && onDelete(type.id);
@@ -60,7 +60,7 @@ const BenefitsCard = ({
               title="Delete"
             >
               <Trash2 className="w-4 h-4" />
-            </button>
+            </button> */}
           </div>
         </div>
 
@@ -78,7 +78,7 @@ const BenefitsCard = ({
               overflow: "hidden",
             }}
           >
-            {icon} {type.description}
+            {/* {icon} */} {type.description}
           </p>
           {type.provider && (
             <div className="text-xs text-gray-400 mt-1">
