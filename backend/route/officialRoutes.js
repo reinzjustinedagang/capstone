@@ -363,8 +363,7 @@ router.delete("/barangay/:id", isAuthenticated, async (req, res) => {
 // GET: All Barangay Official SMS recipients
 router.get("/sms-barangay-officials", async (req, res) => {
   try {
-    const recipients =
-      await barangayOfficialService.getBarangayOfficialSmsRecipients();
+    const recipients = await officialService.getBarangayOfficialSmsRecipients();
     res.status(200).json(recipients);
   } catch (error) {
     console.error("Error fetching Barangay Official SMS recipients:", error);
