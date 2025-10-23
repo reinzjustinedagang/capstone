@@ -165,19 +165,35 @@ const SeniorCitizenForm = ({ onSubmit, onCancel, onSuccess }) => {
    * --------------------------- */
   const handleSubmit = (e) => {
     e.preventDefault();
+
+    const age = Number(formData.age);
+    if (!age || age < 59) {
+      setFormError(
+        "Only individuals aged 59 and above can be registered as senior citizens."
+      );
+      return;
+    }
+
+    setFormError("");
     setShowConfirmModal(true);
   };
 
   /** ---------------------------
    * Final submit with files
    * --------------------------- */
+
   const handleFinalSubmit = async () => {
     setIsSubmitting(true);
     setFormError("");
 
     try {
-      const { firstName, lastName, middleName, suffix, ...allFields } =
-        formData;
+      // 🔹 Trim name-related fields
+      const firstName = (formData.firstName || "").trim();
+      const lastName = (formData.lastName || "").trim();
+      const middleName = (formData.middleName || "").trim();
+      const suffix = (formData.suffix || "").trim();
+
+      const { age, ...allFields } = formData;
 
       const barangayField = fields.find((f) =>
         f.field_name.toLowerCase().includes("barangay")
@@ -188,11 +204,14 @@ const SeniorCitizenForm = ({ onSubmit, onCancel, onSuccess }) => {
         return;
       }
 
-      // if (!documentFile || !photoFile) {
-      //   setFormError("Please upload both document and photo.");
-      //   setIsSubmitting(false);
-      //   return;
-      // }
+      // 🔹 Age validation
+      if (!age || Number(age) < 59) {
+        setFormError(
+          "Only individuals aged 59 and above can be registered as senior citizens."
+        );
+        setIsSubmitting(false);
+        return;
+      }
 
       const barangay_id = Number(formData[barangayField.field_name]);
       const dynamicFields = { ...allFields };
@@ -207,15 +226,14 @@ const SeniorCitizenForm = ({ onSubmit, onCancel, onSuccess }) => {
 
       // 🔹 Use FormData for JSON + files
       const payload = new FormData();
-      payload.append("firstName", firstName || "");
-      payload.append("lastName", lastName || "");
-      payload.append("middleName", middleName || "");
-      payload.append("suffix", suffix || "");
+      payload.append("firstName", firstName);
+      payload.append("lastName", lastName);
+      payload.append("middleName", middleName);
+      payload.append("suffix", suffix);
       payload.append("barangay_id", barangay_id);
       payload.append("form_data", JSON.stringify(dynamicFields));
       payload.append("documentType", formData.documentType || "");
 
-      // Append files if provided
       if (documentFile) payload.append("documentFile", documentFile);
       if (photoFile) payload.append("photoFile", photoFile);
 

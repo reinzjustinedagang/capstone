@@ -197,6 +197,16 @@ const UpdateSeniorCitizenForm = ({ id, onSuccess, onCancel }) => {
    * --------------------------- */
   const handleSubmit = (e) => {
     e.preventDefault();
+
+    const age = Number(formData.age);
+    if (!age || age < 59) {
+      setFormError(
+        "Only individuals aged 59 and above can be registered as senior citizens."
+      );
+      return;
+    }
+
+    setFormError("");
     setShowConfirmModal(true);
   };
 

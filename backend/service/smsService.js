@@ -351,19 +351,46 @@ exports.verifyOtp = async (cpNumber, otp) => {
 /**
  * Reset password by cpNumber
  */
-exports.resetPassword = async (cpNumber, newPassword) => {
-  const hashed = await bcrypt.hash(newPassword, 10);
+exports.resetPassword = async (cpNumber, newPassword, ip) => {
+  try {
+    // Find the user by cellphone number
+    const [user] = await Connection(
+      `SELECT id, email, role FROM users WHERE cp_number = ?`,
+      [cpNumber]
+    );
 
-  const result = await Connection(
-    `UPDATE users SET password = ? WHERE cp_number = ?`,
-    [hashed, cpNumber]
-  );
+    if (!user) {
+      throw new Error("User not found");
+    }
 
-  if (result.affectedRows === 0) {
-    throw new Error("User not found");
+    // Hash the new password
+    const hashed = await bcrypt.hash(newPassword, 10);
+
+    // Update the user's password
+    const result = await Connection(
+      `UPDATE users SET password = ? WHERE cp_number = ?`,
+      [hashed, cpNumber]
+    );
+
+    if (result.affectedRows === 0) {
+      throw new Error("Failed to reset password");
+    }
+
+    // Log audit trail
+    await logAudit(
+      user.id,
+      user.email,
+      user.role,
+      "RESET PASSWORD",
+      `User '${user.email}' reset their password via mobile number verification.`,
+      ip
+    );
+
+    return true;
+  } catch (error) {
+    console.error("Error in resetPassword:", error);
+    throw error;
   }
-
-  return true;
 };
 
 // smsService.js

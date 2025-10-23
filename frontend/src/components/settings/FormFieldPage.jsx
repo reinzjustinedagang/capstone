@@ -34,6 +34,7 @@ const FormFieldsPage = () => {
   });
 
   const [loading, setLoading] = useState(false);
+  const [fieldloading, setFieldLoading] = useState(false);
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
   const [showConfirmModal, setShowConfirmModal] = useState(false);
@@ -64,6 +65,7 @@ const FormFieldsPage = () => {
 
   const fetchGroups = async () => {
     try {
+      setFieldLoading(true);
       const res = await axios.get(`${backendUrl}/api/form-fields/group`, {
         withCredentials: true,
       });
@@ -71,11 +73,14 @@ const FormFieldsPage = () => {
     } catch (err) {
       console.error(err);
       setError("Failed to fetch groups.");
+    } finally {
+      setFieldLoading(false);
     }
   };
 
   const fetchFields = async () => {
     try {
+      setFieldLoading(true);
       const res = await axios.get(`${backendUrl}/api/form-fields`, {
         withCredentials: true,
       });
@@ -83,6 +88,8 @@ const FormFieldsPage = () => {
     } catch (err) {
       console.error(err);
       setError("Failed to fetch fields.");
+    } finally {
+      setFieldLoading(false);
     }
   };
 
@@ -559,8 +566,13 @@ const FormFieldsPage = () => {
 
       {/* Existing Fields Grouped */}
       <div>
-        <h3 className="text-lg font-semibold mb-3">Existing Fields</h3>
-        {fields.length === 0 ? (
+        <h3 className="text-lg font-semibold mb-3">Existing Fields</h3>{" "}
+        {fieldloading ? (
+          <div className="flex flex-col items-center justify-center py-12">
+            <Loader2 className="w-8 h-8 text-blue-500 animate-spin mb-2" />
+            <p className="text-gray-600">Loading form fields...</p>
+          </div>
+        ) : fields.length === 0 ? (
           <div className="text-center py-12">
             <div className="mx-auto w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4">
               <List className="w-8 h-8 text-gray-400" />
@@ -1053,8 +1065,8 @@ const FormFieldsPage = () => {
         title=""
       >
         <div className="p-6 text-center">
-          <div className="mx-auto mb-4 w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
-            <CheckCircle className="w-6 h-6 text-green-500" />
+          <div className="mx-auto mb-4 w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
+            <Trash2 className="w-6 h-6 text-red-500" />
           </div>
           <h3 className="text-lg font-medium text-gray-800 mb-2">Success</h3>
           <p className="text-sm text-gray-600 mb-4">
@@ -1107,8 +1119,8 @@ const FormFieldsPage = () => {
         title=""
       >
         <div className="p-6 text-center">
-          <div className="mx-auto mb-4 w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
-            <CheckCircle className="w-6 h-6 text-green-500" />
+          <div className="mx-auto mb-4 w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
+            <Trash2 className="w-6 h-6 text-red-500" />
           </div>
           <h3 className="text-lg font-medium text-gray-800 mb-2">Success</h3>
           <p className="text-sm text-gray-600 mb-4">

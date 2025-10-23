@@ -1,12 +1,5 @@
 import React, { useState, useEffect } from "react";
-import {
-  Landmark,
-  Info,
-  MapPin,
-  CheckCircle,
-  Loader2,
-  Trash2,
-} from "lucide-react";
+import { Landmark, Loader2, Trash2 } from "lucide-react";
 import BenefitsCard from "./BenefitsCard";
 import Modal from "../UI/Modal";
 import Button from "../UI/Button";
@@ -15,7 +8,8 @@ import axios from "axios";
 const Local = ({ onEdit }) => {
   const [financial, setFinancial] = useState([]);
   const [error, setError] = useState("");
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(true); // For fetching only
+  const [deleteLoading, setDeleteLoading] = useState(false); // 👈 Separate delete loading
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
@@ -47,13 +41,13 @@ const Local = ({ onEdit }) => {
   };
 
   const confirmDelete = (id) => {
-    setSelectedId(id); // This line is the fix
+    setSelectedId(id);
     setShowConfirmModal(true);
   };
 
   const handleDelete = async () => {
     try {
-      setLoading(true); // Set loading to true while deleting
+      setDeleteLoading(true); // 👈 Only this affects delete modal
       await axios.delete(`${backendUrl}/api/benefits/${selectedId}`, {
         withCredentials: true,
       });
@@ -64,14 +58,8 @@ const Local = ({ onEdit }) => {
       console.error("Error deleting benefits:", err);
       alert("Failed to delete");
     } finally {
-      setLoading(false); // Reset loading state
+      setDeleteLoading(false); // 👈 Reset only delete loader
     }
-  };
-
-  const confirmEdit = (id) => {
-    setSelectedId(id);
-    setShowEditModal(true);
-    console.log("Editing benefit with ID:", id);
   };
 
   return (
@@ -109,7 +97,7 @@ const Local = ({ onEdit }) => {
       {showConfirmModal && (
         <Modal
           isOpen={showConfirmModal}
-          onClose={() => !loading && setShowConfirmModal(false)}
+          onClose={() => !deleteLoading && setShowConfirmModal(false)}
           title="Confirm Delete"
         >
           <div className="p-6">
@@ -120,16 +108,16 @@ const Local = ({ onEdit }) => {
               <Button
                 variant="secondary"
                 onClick={() => setShowConfirmModal(false)}
-                disabled={loading}
+                disabled={deleteLoading}
               >
                 Cancel
               </Button>
               <Button
                 variant="danger"
                 onClick={handleDelete}
-                disabled={loading}
+                disabled={deleteLoading}
               >
-                {loading ? (
+                {deleteLoading ? (
                   <div className="flex items-center gap-2">
                     <Loader2 className="w-4 h-4 animate-spin" />
                     Deleting...

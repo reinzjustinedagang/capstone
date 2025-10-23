@@ -103,8 +103,6 @@ const Archive = ({ onView }) => {
       setTotalCount(total || 0);
       setTotalPages(totalPages || 1);
     } catch (err) {
-      console.warn("Failed to load archived citizens:", err.message);
-      setError(""); // Don’t trigger global “Page failed to load” modal
       setArchivedCitizens([]);
     } finally {
       setLoading(false);

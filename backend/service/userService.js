@@ -565,23 +565,40 @@ exports.updateUserInfo = async (
   }
 };
 
-exports.changePassword = async (id, currentPassword, newPassword) => {
+exports.changePassword = async (id, currentPassword, newPassword, ip) => {
   try {
-    const user = await Connection("SELECT password FROM users WHERE id = ?", [
-      id,
-    ]);
-    if (user.length === 0) return false;
-
-    const passwordMatch = await bcrypt.compare(
-      currentPassword,
-      user[0].password
+    // Fetch the user info
+    const [user] = await Connection(
+      "SELECT id, email, role, password FROM users WHERE id = ?",
+      [id]
     );
+    if (!user) return false;
+
+    // Verify current password
+    const passwordMatch = await bcrypt.compare(currentPassword, user.password);
     if (!passwordMatch) return false;
 
+    // Hash and update password
     const hashedNewPassword = await bcrypt.hash(newPassword, SALT_ROUNDS);
-    const query = `UPDATE users SET password = ? WHERE id = ?`;
-    const result = await Connection(query, [hashedNewPassword, id]);
-    return result.affectedRows === 1;
+    const result = await Connection(
+      "UPDATE users SET password = ? WHERE id = ?",
+      [hashedNewPassword, id]
+    );
+
+    if (result.affectedRows === 1) {
+      // Log the audit
+      await logAudit(
+        user.id,
+        user.email,
+        user.role,
+        "UPDATE",
+        `User '${user.email}' successfully changed their password.`,
+        ip
+      );
+      return true;
+    }
+
+    return false;
   } catch (error) {
     console.error("Error changing password:", error);
     throw error;

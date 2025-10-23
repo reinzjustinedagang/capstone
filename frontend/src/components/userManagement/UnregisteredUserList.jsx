@@ -9,7 +9,7 @@ import {
   ArrowDown,
   ArrowUp,
   SquareCheckBig,
-  CircleCheckBig,
+  CheckCircle,
 } from "lucide-react";
 import Modal from "../UI/Modal";
 import Button from "../UI/Button";
@@ -235,7 +235,7 @@ const UnregisteredUserList = ({ onEdit }) => {
                           className="text-green-600 hover:text-green-900"
                           title="Approve"
                         >
-                          <SquareCheckBig className="h-5 w-5" />
+                          <CheckCircle className="h-5 w-5" />
                         </button>
 
                         <button
@@ -371,21 +371,22 @@ const UnregisteredUserList = ({ onEdit }) => {
       <Modal
         isOpen={approveSuccessModal}
         onClose={() => setApproveSuccessModal(false)}
-        title="User Approved"
+        title="Success"
       >
-        <div className="p-6">
-          <p className="text-gray-700">
-            <span className="font-semibold">{userToApprove?.username}</span> has
-            been successfully approved.
-          </p>
-          <div className="flex justify-end mt-4">
-            <Button
-              variant="primary"
-              onClick={() => setApproveSuccessModal(false)}
-            >
-              OK
-            </Button>
+        <div className="p-6 text-center">
+          <div className="mx-auto mb-4 w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+            <CheckCircle className="w-6 h-6 text-green-500" />
           </div>
+          <h3 className="text-lg font-medium text-gray-800 mb-2">Success</h3>
+          <p className="text-sm text-gray-600 mb-4">
+            User Approved successfully!
+          </p>
+          <Button
+            variant="primary"
+            onClick={() => setApproveSuccessModal(false)}
+          >
+            OK
+          </Button>
         </div>
       </Modal>
     </>
