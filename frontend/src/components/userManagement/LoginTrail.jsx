@@ -112,12 +112,11 @@ const LoginTrail = () => {
             <tbody className="bg-white divide-y divide-gray-200">
               {loading ? (
                 <tr>
-                  <td
-                    colSpan={2}
-                    className="text-center py-6 text-gray-500 flex justify-center items-center space-x-2"
-                  >
-                    <Loader2 className="animate-spin h-6 w-6 text-blue-500" />
-                    <span>Loading login trails...</span>
+                  <td colSpan={2} className="py-12 text-gray-500">
+                    <div className="flex flex-col justify-center items-center space-y-2">
+                      <Loader2 className="animate-spin h-8 w-8 text-blue-500" />
+                      <span>Loading login trails...</span>
+                    </div>
                   </td>
                 </tr>
               ) : currentRecords.length === 0 ? (

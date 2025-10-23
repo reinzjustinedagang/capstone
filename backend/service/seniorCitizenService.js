@@ -1167,7 +1167,7 @@ exports.archiveSeniorCitizen = async (id, reason, deceasedDate, user, ip) => {
         user.email,
         user.role,
         "ARCHIVE",
-        `Archived senior citizen: '${citizen.firstName}, ${citizen.firstName} ${
+        `Archived senior citizen: '${citizen.lastName}, ${citizen.firstName} ${
           citizen.middleName
         }'. Reason: ${reason}${
           deceasedDate ? `, Date of Death: ${deceasedDate}` : ""

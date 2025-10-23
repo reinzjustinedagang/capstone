@@ -88,7 +88,7 @@ const EventList = ({ onEdit }) => {
                 <img
                   src={
                     event.image_url ||
-                    "https://placehold.co/600x400?text=Events"
+                    "https://placehold.co/600x600?text=Events"
                   }
                   alt={event.title}
                   className="w-full h-full object-cover"

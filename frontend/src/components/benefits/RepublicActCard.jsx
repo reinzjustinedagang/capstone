@@ -15,7 +15,7 @@ const RepublicActCard = ({ law, onEdit, onDelete }) => {
         <div className="relative w-full aspect-[4/3] bg-gray-100">
           <img
             src={
-              law.image_url || "https://placehold.co/600x400?text=Republic+Act"
+              law.image_url || "https://placehold.co/600x600?text=Republic+Act"
             }
             alt={law.title}
             className="w-full h-full object-cover"
@@ -56,7 +56,7 @@ const RepublicActCard = ({ law, onEdit, onDelete }) => {
         {/* Content */}
         <div className="p-4 flex flex-col flex-grow">
           <div className="flex items-center gap-2 mb-2">
-            <BookOpenTextIcon className="w-5 h-5 text-blue-500 shrink-0" />
+            {/* <BookOpenTextIcon className="w-5 h-5 text-blue-500 shrink-0" /> */}
             <h2 className="text-base font-semibold text-gray-900 line-clamp-2">
               {law.title}
             </h2>
@@ -98,7 +98,7 @@ const RepublicActCard = ({ law, onEdit, onDelete }) => {
             className="w-full h-auto object-cover rounded-lg mb-4"
           />
 
-          <p className="text-gray-700 text-sm mb-4">{law.description}</p>
+          <p className="text-gray-800 text-sm mb-4">{law.description}</p>
           <div className="text-xs text-gray-500">
             Enacted on:{" "}
             {new Date(law.enacted_date).toLocaleDateString("en-US", {

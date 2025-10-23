@@ -115,6 +115,16 @@ exports.deleteUser = async (id, user, ip) => {
 // UNBLOCK USER SERVICE
 exports.unblockUser = async (id, user, ip) => {
   try {
+    // Fetch the target user's info (the one being unblocked)
+    const [targetUser] = await Connection(
+      `SELECT username, email FROM users WHERE id = ?`,
+      [id]
+    );
+
+    if (!targetUser) {
+      throw new Error("User not found");
+    }
+
     // Update the user to unblock (set blocked = 0)
     const result = await Connection(
       "UPDATE users SET blocked = 0 WHERE id = ?",
@@ -124,11 +134,11 @@ exports.unblockUser = async (id, user, ip) => {
     // Log audit if the update was successful
     if (result.affectedRows === 1) {
       await logAudit(
-        user.id, // admin performing the action
+        user.id, // Admin performing the action
         user.email,
         user.role,
         "UNBLOCK",
-        `'${user.username}' has been unblocked`,
+        `'${targetUser.username}' has been unblocked by '${user.username}'`,
         ip
       );
     }
@@ -142,6 +152,16 @@ exports.unblockUser = async (id, user, ip) => {
 
 exports.blockUser = async (id, user, ip) => {
   try {
+    // Fetch the target user's info (the one being blocked)
+    const [targetUser] = await Connection(
+      `SELECT username, email FROM users WHERE id = ?`,
+      [id]
+    );
+
+    if (!targetUser) {
+      throw new Error("User not found");
+    }
+
     // Block only the user with the given id
     const result = await Connection(
       `UPDATE users SET blocked = 1 WHERE id = ?`,
@@ -149,12 +169,13 @@ exports.blockUser = async (id, user, ip) => {
     );
 
     if (result.affectedRows === 1) {
+      // Log the admin who performed the block, and mention the target user's name
       await logAudit(
-        user.id,
-        user.email,
-        user.role,
+        user.id, // Admin ID
+        user.email, // Admin email
+        user.role, // Admin role
         "BLOCKED",
-        `'${user.username}' has been blocked`,
+        `'${targetUser.username}' has been blocked by '${user.username}'`,
         ip
       );
     }

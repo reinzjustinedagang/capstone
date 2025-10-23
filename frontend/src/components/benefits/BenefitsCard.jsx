@@ -21,7 +21,7 @@ const BenefitsCard = ({
         {/* Image */}
         <div className="relative w-full aspect-[4/3] bg-gray-100">
           <img
-            src={type.image_url || "https://placehold.co/600x400?text=Benefits"}
+            src={type.image_url || "https://placehold.co/600x600?text=Benefits"}
             alt={type.title}
             className="w-full h-full object-cover"
           />
@@ -72,7 +72,8 @@ const BenefitsCard = ({
               overflow: "hidden",
             }}
           >
-            {icon} {type.description}
+            {/* {icon}  */}
+            {type.description}
           </p>
           {type.provider && (
             <div className="text-xs text-gray-400 mt-1">
@@ -98,7 +99,7 @@ const BenefitsCard = ({
           )}
           <p className="text-gray-700 text-sm mb-2">{type.description}</p>
           {type.provider && (
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-gray-500 line-clamp-2">
               Provided by: {type.provider}
             </p>
           )}
