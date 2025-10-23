@@ -325,7 +325,7 @@ exports.updateBarangayOfficial = async (
     const finalImage = image ?? old.image;
 
     const result = await Connection(
-      `UPDATE barangay_officials SET barangay_name = ?, president_name = ?, position = ?, mobileNumber, image = ?, approved = ? WHERE id = ?`,
+      `UPDATE barangay_officials SET barangay_name = ?, president_name = ?, position = ?, mobileNumber = ?, image = ?, approved = ? WHERE id = ?`,
       [
         barangay_name,
         president_name,

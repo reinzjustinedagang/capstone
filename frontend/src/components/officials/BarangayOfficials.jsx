@@ -22,6 +22,7 @@ const BarangayOfficials = ({ title }) => {
     barangay: "",
     president: "",
     position: "",
+    mobileNumber: "",
     existingImage: "",
   });
   const [editingId, setEditingId] = useState(null);
@@ -133,6 +134,7 @@ const BarangayOfficials = ({ title }) => {
       barangay: "",
       president: "",
       position: "",
+      mobileNumber: "",
       existingImage: "",
     });
     setEditingId(null);
@@ -170,6 +172,7 @@ const BarangayOfficials = ({ title }) => {
       form.append("barangay_name", dataToSave.barangay);
       form.append("president_name", dataToSave.president);
       form.append("position", dataToSave.position);
+      form.append("mobileNumber", dataToSave.mobileNumber);
 
       if (dataToSave.id && dataToSave.existingImage) {
         form.append("existing_image", dataToSave.existingImage || "");
@@ -256,6 +259,7 @@ const BarangayOfficials = ({ title }) => {
               barangay: "",
               president: "",
               position: "President",
+              mobileNumber: "",
               existingImage: "",
             });
             setImageFile(null);
@@ -296,6 +300,7 @@ const BarangayOfficials = ({ title }) => {
                       barangay: b.barangay_name,
                       president: b.president_name,
                       position: b.position,
+                      mobileNumber: b.mobileNumber || "",
                       existingImage: b.image,
                       approved: b.approved,
                     });

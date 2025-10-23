@@ -39,7 +39,7 @@ const BarangayForm = ({
   };
 
   useEffect(() => {
-    fetchBarangays();
+    if (barangayOptions.length === 0) fetchBarangays();
   }, []);
 
   const handleChange = (e) => {
@@ -115,7 +115,7 @@ const BarangayForm = ({
               name="barangay"
               value={formData.barangay}
               onChange={handleChange}
-              className="mt-1 block w-full border rounded-md px-3 py-2"
+              className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
               required
             >
               <option value="">Select barangay</option>
@@ -141,7 +141,33 @@ const BarangayForm = ({
               name="president"
               value={formData.president}
               onChange={handleChange}
-              className="mt-1 block w-full border rounded-md px-3 py-2"
+              className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+              required
+            />
+          </div>
+
+          {/* Mobile Number */}
+          <div>
+            <label
+              htmlFor="mobileNumber"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Mobile Number
+            </label>
+            <input
+              type="tel"
+              id="mobileNumber"
+              name="mobileNumber"
+              value={formData.mobileNumber}
+              onChange={(e) => {
+                // Only allow digits and limit to 11 characters
+                const value = e.target.value.replace(/\D/g, "").slice(0, 11);
+                setFormData((prev) => ({ ...prev, mobileNumber: value }));
+              }}
+              placeholder="e.g. 09123456789"
+              pattern="[0-9]{11}"
+              inputMode="numeric"
+              className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
               required
             />
           </div>
@@ -159,7 +185,7 @@ const BarangayForm = ({
               name="position"
               value={formData.position}
               onChange={handleChange}
-              className="mt-1 block w-full border rounded-md px-3 py-2"
+              className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
               required
             >
               <option value="">Select Position</option>
