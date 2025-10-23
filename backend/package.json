@@ -20,6 +20,7 @@
     "express": "^5.1.0",
     "express-mysql-session": "^3.0.3",
     "express-session": "^1.18.1",
+    "helmet": "^8.1.0",
     "multer": "^2.0.1",
     "mysql2": "^3.14.1",
     "node-cron": "^4.2.1",
