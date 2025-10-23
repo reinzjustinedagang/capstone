@@ -1,14 +1,14 @@
+// Import necessary modules
 const express = require("express");
 const cors = require("cors");
 const compression = require("compression");
-const helmet = require("helmet");
 const session = require("express-session");
 const MySQLStore = require("express-mysql-session")(session);
-require("dotenv").config();
+require("dotenv").config(); // Load environment variables
 const cron = require("node-cron");
 const seniorCitizenService = require("../service/seniorCitizenService");
 require("../cron/statusJob");
-
+const helmet = require("helmet");
 const app = express();
 const port = process.env.PORT || 3000;
 
@@ -25,7 +25,7 @@ cron.schedule("0 0 * * *", async () => {
   }
 });
 
-// Session store
+// MySQL session store setup
 const sessionStore = new MySQLStore({
   host: process.env.DB_HOST,
   user: process.env.DB_USER,
@@ -34,17 +34,19 @@ const sessionStore = new MySQLStore({
   database: process.env.DB_DATABASE,
   clearExpired: true,
   checkExpirationInterval: 1000 * 60 * 5,
-  expiration: 1000 * 60 * 60 * 24,
+  expiration: 1000 * 60 * 60 * 24, // 1 day
 });
 
-// Middleware
+// Middleware setup
 app.use(helmet());
-app.use(compression());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(compression());
 
+// Trust proxy
 app.set("trust proxy", 1);
 
+// Session middleware
 app.use(
   session({
     name: "oscaims_sid",
@@ -54,13 +56,14 @@ app.use(
     store: sessionStore,
     cookie: {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-      maxAge: 1000 * 60 * 60 * 24,
+      secure: true,
+      sameSite: "none",
+      maxAge: 1000 * 60 * 60 * 24, // 1 day
     },
   })
 );
 
+// CORS configuration
 app.use(
   cors({
     origin: ["http://localhost:5173", process.env.FRONTEND_URL],
@@ -102,7 +105,13 @@ app.use("/api/settings", systemRoutes);
 app.use("/api/form-fields", formFieldRoutes);
 app.use("/api/position", positionRoutes);
 
-// Health & diagnostics
+// Global error handler
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({ message: "Something went wrong on the server!" });
+});
+
+// Session test route
 app.get("/api/test-session", (req, res) => {
   req.session.views = (req.session.views || 0) + 1;
   res.send(`Session views: ${req.session.views}`);
@@ -122,21 +131,7 @@ app.get("/api/test-db", async (req, res) => {
   }
 });
 
-app.use("*", (req, res) => {
-  res.status(404).json({ message: "Route not found" });
-});
+app.listen(port, () => console.log(`Server running on port ${port}`));
 
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).json({ message: "Something went wrong on the server!" });
-});
-
-app.listen(port, () => console.log(`✅ Server running on port ${port}`));
-
-process.on("SIGTERM", () => {
-  console.log("Shutting down gracefully...");
-  sessionStore.close();
-  process.exit(0);
-});
-
+// Start the server
 module.exports = app;
