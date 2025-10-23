@@ -1076,7 +1076,7 @@ exports.getCitizenCount = async () => {
   }
 };
 
-// Get SMS recipients with optional barangay filter
+// Get SMS recipients (ONLY those with valid mobile numbers)
 exports.getSmsRecipients = async (
   barangay = "",
   barangay_id = "",
@@ -1084,32 +1084,30 @@ exports.getSmsRecipients = async (
 ) => {
   try {
     let sql = `
-  SELECT 
-    sc.id,
-    CONCAT_WS(' ', CONCAT(sc.lastName, ','), sc.firstName, sc.middleName, sc.suffix) AS name,
-    COALESCE(
-      JSON_UNQUOTE(JSON_EXTRACT(sc.form_data, '$.mobileNumber')),
-      JSON_UNQUOTE(JSON_EXTRACT(sc.form_data, '$.emergencyContactNumber'))
-    ) AS contact,
-    JSON_UNQUOTE(JSON_EXTRACT(sc.form_data, '$.barangay')) AS barangay,
-    sc.barangay_id,
-    TIMESTAMPDIFF(
-      YEAR,
-      STR_TO_DATE(JSON_UNQUOTE(JSON_EXTRACT(sc.form_data, '$.birthdate')), '%Y-%m-%d'),
-      CURDATE()
-    ) AS age
-  FROM senior_citizens sc
-  WHERE (JSON_EXTRACT(sc.form_data, '$.mobileNumber') IS NOT NULL
-      OR JSON_EXTRACT(sc.form_data, '$.emergencyContactNumber') IS NOT NULL)
-    AND sc.deleted = 0 
-    AND registered = 1
-    AND archived = 0
-    AND TIMESTAMPDIFF(
+      SELECT 
+        sc.id,
+        CONCAT_WS(' ', CONCAT(sc.lastName, ','), sc.firstName, sc.middleName, sc.suffix) AS name,
+        JSON_UNQUOTE(JSON_EXTRACT(sc.form_data, '$.mobileNumber')) AS contact,
+        JSON_UNQUOTE(JSON_EXTRACT(sc.form_data, '$.barangay')) AS barangay,
+        sc.barangay_id,
+        TIMESTAMPDIFF(
           YEAR,
           STR_TO_DATE(JSON_UNQUOTE(JSON_EXTRACT(sc.form_data, '$.birthdate')), '%Y-%m-%d'),
           CURDATE()
-        ) >= 60
-`;
+        ) AS age
+      FROM senior_citizens sc
+      WHERE 
+        JSON_EXTRACT(sc.form_data, '$.mobileNumber') IS NOT NULL
+        AND JSON_UNQUOTE(JSON_EXTRACT(sc.form_data, '$.mobileNumber')) <> ''
+        AND sc.deleted = 0 
+        AND registered = 1
+        AND archived = 0
+        AND TIMESTAMPDIFF(
+              YEAR,
+              STR_TO_DATE(JSON_UNQUOTE(JSON_EXTRACT(sc.form_data, '$.birthdate')), '%Y-%m-%d'),
+              CURDATE()
+            ) >= 60
+    `;
 
     const params = [];
 
@@ -1124,10 +1122,7 @@ exports.getSmsRecipients = async (
     if (search && search.trim() !== "") {
       sql += ` AND (
         CONCAT_WS(' ', sc.firstName, sc.middleName, sc.lastName, sc.suffix) LIKE ? 
-        OR COALESCE(
-          JSON_UNQUOTE(JSON_EXTRACT(sc.form_data, '$.mobileNumber')),
-          JSON_UNQUOTE(JSON_EXTRACT(sc.form_data, '$.emergencyContactNumber'))
-        ) LIKE ?
+        OR JSON_UNQUOTE(JSON_EXTRACT(sc.form_data, '$.mobileNumber')) LIKE ?
       )`;
       params.push(`%${search}%`, `%${search}%`);
     }
