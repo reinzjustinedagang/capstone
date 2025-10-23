@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   BellIcon,
   MenuIcon,
@@ -25,11 +25,26 @@ const Header = () => {
   const [showDropdown, setShowDropdown] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [logoutLoading, setLogoutLoading] = useState(false);
-  const [hasBirthdayToday, setHasBirthdayToday] = useState(false); // 🎂 new
+  const [hasBirthdayToday, setHasBirthdayToday] = useState(false);
 
   const navigate = useNavigate();
   const location = useLocation();
   const backendUrl = import.meta.env.VITE_API_BASE_URL;
+
+  // 🔹 Dropdown reference
+  const dropdownRef = useRef(null);
+
+  // 🔹 Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setShowDropdown(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -77,7 +92,6 @@ const Header = () => {
     .replace(/\d+$/, "")
     .trim();
 
-  // Capitalize each word
   pageTitle = pageTitle
     .split(" ")
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
@@ -104,8 +118,6 @@ const Header = () => {
             }
           >
             <Calendar className="h-5 w-5" />
-
-            {/* 🎂 Red dot if birthdays today */}
             {hasBirthdayToday && (
               <span className="absolute top-1 right-1 bg-red-500 border-2 border-white rounded-full w-2.5 h-2.5"></span>
             )}
@@ -127,8 +139,8 @@ const Header = () => {
               )}
             </div>
 
-            <div className="relative group">
-              {/* Profile Button */}
+            {/* 🔹 Wrap dropdown in ref */}
+            <div className="relative group" ref={dropdownRef}>
               <button
                 onClick={() => setShowDropdown(!showDropdown)}
                 className="h-10 w-10 rounded-full overflow-hidden border-2 border-blue-500 shadow focus:outline-none"
@@ -140,22 +152,13 @@ const Header = () => {
                 />
               </button>
 
-              {/* Dropdown Icon */}
               <div
-                className="
-    absolute bottom-0.5 right-0
-    bg-blue-500 text-white rounded-full p-0.1 cursor-pointer
-    shadow-lg hover:bg-blue-700
-    block lg:flex lg:opacity-0 lg:group-hover:opacity-100
-    transition-all duration-300
-    items-center justify-center
-  "
+                className="absolute bottom-0.5 right-0 bg-blue-500 text-white rounded-full p-0.1 cursor-pointer shadow-lg hover:bg-blue-700 block lg:flex lg:opacity-0 lg:group-hover:opacity-100 transition-all duration-300 items-center justify-center"
                 onClick={() => setShowDropdown(!showDropdown)}
               >
                 <ChevronDown className="h-4 w-4" />
               </div>
 
-              {/* Dropdown Menu */}
               {showDropdown && (
                 <div className="absolute right-0 mt-2 bg-white border border-gray-200 rounded-md shadow-md w-44 z-50">
                   <button

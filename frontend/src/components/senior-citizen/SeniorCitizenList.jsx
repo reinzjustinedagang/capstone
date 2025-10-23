@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import Button from "../UI/Button";
 import Delete from "../UI/Button/Delete";
@@ -72,6 +72,20 @@ const SeniorCitizenList = ({ onEdit, onId }) => {
   });
   const [archiving, setArchiving] = useState(false);
   const [selectedArchiveCitizen, setSelectedArchiveCitizen] = useState(null);
+
+  const dropdownRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setOpenDropdownId(null);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   const fetchRemarks = async () => {
     try {
@@ -389,7 +403,7 @@ const SeniorCitizenList = ({ onEdit, onId }) => {
                         </button> */}
 
                         {/* More options dropdown */}
-                        <div className="relative">
+                        <div className="relative" ref={dropdownRef}>
                           <button
                             onClick={() =>
                               setOpenDropdownId(

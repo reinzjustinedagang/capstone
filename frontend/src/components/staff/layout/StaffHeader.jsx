@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   BellIcon,
   MenuIcon,
@@ -22,7 +22,6 @@ const StaffHeader = () => {
   const [showDropdown, setShowDropdown] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [logoutLoading, setLogoutLoading] = useState(false);
-
   const [hasNotifications, setHasNotifications] = useState(false);
 
   const navigate = useNavigate();
@@ -30,6 +29,21 @@ const StaffHeader = () => {
   const backendUrl = import.meta.env.VITE_API_BASE_URL;
 
   const isProfilePage = location.pathname === "/staff/my-profile";
+
+  // 🔹 Ref for dropdown container
+  const dropdownRef = useRef(null);
+
+  // 🔹 Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setShowDropdown(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   useEffect(() => {
     const checkNotifications = () => {
       const count = parseInt(
@@ -39,10 +53,7 @@ const StaffHeader = () => {
       setHasNotifications(count > 0);
     };
 
-    // Check initially
     checkNotifications();
-
-    // Recheck when tab regains focus (optional but nice)
     window.addEventListener("focus", checkNotifications);
 
     return () => window.removeEventListener("focus", checkNotifications);
@@ -57,7 +68,6 @@ const StaffHeader = () => {
 
       if (meResponse.status === 200 && meResponse.data.isAuthenticated) {
         const userId = meResponse.data.id;
-
         const response = await axios.get(
           `${backendUrl}/api/user/user/${userId}`,
           { withCredentials: true }
@@ -131,6 +141,7 @@ const StaffHeader = () => {
 
         {/* Right Section */}
         <div className="flex items-center space-x-4 ml-auto">
+          {/* Notifications */}
           <NavLink
             to="/staff/notifications"
             className={({ isActive }) =>
@@ -146,6 +157,7 @@ const StaffHeader = () => {
               <span className="absolute top-1 right-1 bg-red-500 border-2 border-white rounded-full w-2.5 h-2.5"></span>
             )}
           </NavLink>
+
           {/* Profile Dropdown */}
           <div className="flex items-center">
             <div className="mr-3 text-right hidden sm:block">
@@ -162,7 +174,9 @@ const StaffHeader = () => {
                 </>
               )}
             </div>
-            <div className="relative group">
+
+            {/* 🔹 Dropdown with ref */}
+            <div className="relative group" ref={dropdownRef}>
               {/* Profile Button */}
               <button
                 onClick={() => setShowDropdown(!showDropdown)}
