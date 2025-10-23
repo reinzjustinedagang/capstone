@@ -322,6 +322,9 @@ const SendSMS = () => {
                           <div className="text-xs text-gray-500">
                             {citizen.contact}
                           </div>
+                          <div className="text-xs text-gray-400 italic">
+                            {citizen.barangay || "No Barangay Info"}
+                          </div>
                         </label>
                       </div>
                     ))

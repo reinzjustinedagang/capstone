@@ -1088,7 +1088,7 @@ exports.getSmsRecipients = async (
         sc.id,
         CONCAT_WS(' ', CONCAT(sc.lastName, ','), sc.firstName, sc.middleName, sc.suffix) AS name,
         JSON_UNQUOTE(JSON_EXTRACT(sc.form_data, '$.mobileNumber')) AS contact,
-        JSON_UNQUOTE(JSON_EXTRACT(sc.form_data, '$.barangay')) AS barangay,
+        b.barangay_name AS barangay, -- ✅ fetch human-readable barangay name
         sc.barangay_id,
         TIMESTAMPDIFF(
           YEAR,
@@ -1096,12 +1096,13 @@ exports.getSmsRecipients = async (
           CURDATE()
         ) AS age
       FROM senior_citizens sc
+      LEFT JOIN barangays b ON sc.barangay_id = b.id -- ✅ join to get barangay name
       WHERE 
         JSON_EXTRACT(sc.form_data, '$.mobileNumber') IS NOT NULL
         AND JSON_UNQUOTE(JSON_EXTRACT(sc.form_data, '$.mobileNumber')) <> ''
         AND sc.deleted = 0 
-        AND registered = 1
-        AND archived = 0
+        AND sc.registered = 1
+        AND sc.archived = 0
         AND TIMESTAMPDIFF(
               YEAR,
               STR_TO_DATE(JSON_UNQUOTE(JSON_EXTRACT(sc.form_data, '$.birthdate')), '%Y-%m-%d'),
@@ -1115,7 +1116,7 @@ exports.getSmsRecipients = async (
       sql += ` AND sc.barangay_id = ?`;
       params.push(barangay_id);
     } else if (barangay && barangay.trim() !== "") {
-      sql += ` AND JSON_UNQUOTE(JSON_EXTRACT(sc.form_data, '$.barangay')) = ?`;
+      sql += ` AND b.barangay_name = ?`;
       params.push(barangay);
     }
 
@@ -1126,6 +1127,8 @@ exports.getSmsRecipients = async (
       )`;
       params.push(`%${search}%`, `%${search}%`);
     }
+
+    sql += ` ORDER BY b.barangay_name, sc.lastName ASC`; // ✅ optional: better sorting
 
     const result = await Connection(sql, params);
     return result;
