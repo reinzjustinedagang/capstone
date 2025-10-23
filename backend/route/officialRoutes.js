@@ -360,6 +360,18 @@ router.delete("/barangay/:id", isAuthenticated, async (req, res) => {
   }
 });
 
+// GET: All Barangay Official SMS recipients
+router.get("/sms-barangay-officials", async (req, res) => {
+  try {
+    const recipients =
+      await barangayOfficialService.getBarangayOfficialSmsRecipients();
+    res.status(200).json(recipients);
+  } catch (error) {
+    console.error("Error fetching Barangay Official SMS recipients:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
 // ----------------- ORGCHART ROUTES -----------------
 
 router.get("/orgchart", async (req, res) => {

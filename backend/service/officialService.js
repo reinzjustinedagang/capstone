@@ -419,6 +419,31 @@ exports.deleteBarangayOfficial = async (id, user, ip) => {
   return result;
 };
 
+// ─── SMS RECIPIENTS (All Barangay Officials) ─────────────────────────────
+exports.getBarangayOfficialSmsRecipients = async () => {
+  try {
+    const sql = `
+      SELECT 
+        id,
+        president_name AS name,
+        mobileNumber AS contact,
+        barangay_name AS barangay,
+        position,
+        approved
+      FROM barangay_officials
+      WHERE mobileNumber IS NOT NULL 
+        AND mobileNumber <> ''
+      ORDER BY barangay_name ASC
+    `;
+
+    const result = await Connection(sql);
+    return result;
+  } catch (error) {
+    console.error("Error fetching Barangay Official SMS recipients:", error);
+    throw new Error("Internal server error");
+  }
+};
+
 // ─── Organizational Chart ─────────────────────────────
 
 exports.getOrgChart = async () => {

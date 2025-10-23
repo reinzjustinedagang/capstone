@@ -19,6 +19,9 @@ const SendSMS = () => {
   const [selectedRecipients, setSelectedRecipients] = useState([]);
   const [messageText, setMessageText] = useState("");
   const [barangayFilter, setBarangayFilter] = useState("");
+  const [recipientType, setRecipientType] = useState("senior");
+  const [barangayPresidents, setBarangayPresidents] = useState([]);
+
   const [barangays, setBarangays] = useState([]);
   const [seniorCitizens, setSeniorCitizens] = useState([]);
   const [templates, setTemplates] = useState([]);
@@ -67,6 +70,24 @@ const SendSMS = () => {
     }
   };
 
+  // Fetch Barangay Association Presidents
+  const fetchBarangayPresidents = async () => {
+    try {
+      setLoadingRecipients(true);
+      const res = await axios.get(
+        `${backendUrl}/api/officials/sms-barangay-officials`
+      );
+      setBarangayPresidents(res.data || []);
+      setSelectedRecipients([]);
+    } catch (err) {
+      console.error("Failed to fetch Barangay Presidents:", err);
+      setBarangayPresidents([]);
+      setSelectedRecipients([]);
+    } finally {
+      setLoadingRecipients(false);
+    }
+  };
+
   // Fetch templates
   const fetchTemplates = async () => {
     try {
@@ -80,7 +101,7 @@ const SendSMS = () => {
 
   useEffect(() => {
     fetchBarangays();
-    fetchCitizens();
+    fetchCitizens(); // default view
     fetchTemplates();
   }, []);
 
@@ -91,9 +112,15 @@ const SendSMS = () => {
   };
 
   const handleSelectAll = (e) => {
-    setSelectedRecipients(
-      e.target.checked ? seniorCitizens.map((c) => c.id) : []
-    );
+    if (recipientType === "senior") {
+      setSelectedRecipients(
+        e.target.checked ? seniorCitizens.map((c) => c.id) : []
+      );
+    } else {
+      setSelectedRecipients(
+        e.target.checked ? barangayPresidents.map((p) => p.id) : []
+      );
+    }
   };
 
   const handleTemplateChange = async (e) => {
@@ -110,7 +137,9 @@ const SendSMS = () => {
   };
 
   const handleSendMessage = async () => {
-    const numbers = seniorCitizens
+    const sourceList =
+      recipientType === "senior" ? seniorCitizens : barangayPresidents;
+    const numbers = sourceList
       .filter((c) => selectedRecipients.includes(c.id))
       .map((c) => c.contact);
 
@@ -178,8 +207,12 @@ const SendSMS = () => {
                     id="selectAll"
                     onChange={handleSelectAll}
                     checked={
-                      seniorCitizens.length > 0 &&
-                      selectedRecipients.length === seniorCitizens.length
+                      recipientType === "senior"
+                        ? seniorCitizens.length > 0 &&
+                          selectedRecipients.length === seniorCitizens.length
+                        : barangayPresidents.length > 0 &&
+                          selectedRecipients.length ===
+                            barangayPresidents.length
                     }
                     className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                   />
@@ -231,6 +264,29 @@ const SendSMS = () => {
                       ))}
                     </select>
                   </div>
+
+                  {/* President filter */}
+                  <div className="w-full sm:w-1/2">
+                    <select
+                      value={recipientType}
+                      onChange={(e) => {
+                        const selected = e.target.value;
+                        setRecipientType(selected);
+
+                        if (selected === "senior") {
+                          fetchCitizens(barangayFilter, searchText);
+                        } else if (selected === "president") {
+                          fetchBarangayPresidents();
+                        }
+                      }}
+                      className="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                    >
+                      <option value="senior">All Senior Citizens</option>
+                      <option value="president">
+                        Barangay Association Presidents
+                      </option>
+                    </select>
+                  </div>
                 </div>
               </div>
 
@@ -242,35 +298,70 @@ const SendSMS = () => {
                       Loading recipients...
                     </span>
                   </div>
-                ) : seniorCitizens.length > 0 ? (
-                  seniorCitizens.map((citizen) => (
+                ) : recipientType === "senior" ? (
+                  seniorCitizens.length > 0 ? (
+                    seniorCitizens.map((citizen) => (
+                      <div
+                        key={citizen.id}
+                        className="px-4 py-2 border-b border-gray-200 last:border-b-0 flex items-center"
+                      >
+                        <input
+                          type="checkbox"
+                          id={`citizen-${citizen.id}`}
+                          checked={selectedRecipients.includes(citizen.id)}
+                          onChange={() => handleSelectRecipient(citizen.id)}
+                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                        />
+                        <label
+                          htmlFor={`citizen-${citizen.id}`}
+                          className="ml-2 flex-1"
+                        >
+                          <div className="text-sm font-medium text-gray-700">
+                            {citizen.name}
+                          </div>
+                          <div className="text-xs text-gray-500">
+                            {citizen.contact}
+                          </div>
+                        </label>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="p-4 text-center text-gray-500">
+                      No senior citizens found in this barangay.
+                    </div>
+                  )
+                ) : barangayPresidents.length > 0 ? (
+                  barangayPresidents.map((president) => (
                     <div
-                      key={citizen.id}
+                      key={president.id}
                       className="px-4 py-2 border-b border-gray-200 last:border-b-0 flex items-center"
                     >
                       <input
                         type="checkbox"
-                        id={`citizen-${citizen.id}`}
-                        checked={selectedRecipients.includes(citizen.id)}
-                        onChange={() => handleSelectRecipient(citizen.id)}
+                        id={`president-${president.id}`}
+                        checked={selectedRecipients.includes(president.id)}
+                        onChange={() => handleSelectRecipient(president.id)}
                         className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                       />
                       <label
-                        htmlFor={`citizen-${citizen.id}`}
+                        htmlFor={`president-${president.id}`}
                         className="ml-2 flex-1"
                       >
                         <div className="text-sm font-medium text-gray-700">
-                          {citizen.name}
+                          {president.name}
                         </div>
                         <div className="text-xs text-gray-500">
-                          {citizen.contact}
+                          {president.contact}
+                        </div>
+                        <div className="text-xs text-gray-400 italic">
+                          {president.barangay}
                         </div>
                       </label>
                     </div>
                   ))
                 ) : (
                   <div className="p-4 text-center text-gray-500">
-                    No senior citizens found in this barangay.
+                    No Barangay Association Presidents found.
                   </div>
                 )}
               </div>
