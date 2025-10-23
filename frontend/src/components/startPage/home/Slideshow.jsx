@@ -1,17 +1,19 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useLocation } from "react-router-dom";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import axios from "axios";
-import slider4 from "../../../assets/slider4.jpg";
 
 const Slideshow = () => {
   const location = useLocation();
   const [eventsData, setEventsData] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [touchStartX, setTouchStartX] = useState(0);
+  const [touchEndX, setTouchEndX] = useState(0);
+
   const backendUrl =
     import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
 
-  // Fetch slideshow events from backend
+  // Fetch slideshow events
   useEffect(() => {
     const fetchSlideshow = async () => {
       try {
@@ -24,7 +26,7 @@ const Slideshow = () => {
     fetchSlideshow();
   }, []);
 
-  // Auto-slide every 5s
+  // Auto-slide
   useEffect(() => {
     if (eventsData.length === 0) return;
     const timer = setInterval(() => {
@@ -43,71 +45,74 @@ const Slideshow = () => {
     }
   }, [location]);
 
-  // If no events available
-  if (eventsData.length === 0) {
-    return (
-      <section className="relative h-[60vh] md:h-[70vh] flex items-center justify-center">
-        <div className="absolute inset-0 bg-cover bg-center transition-all duration-700" />
-      </section>
-    );
-  }
-
   // Navigation
   const prevSlide = () => {
     setCurrentIndex((prev) => (prev === 0 ? eventsData.length - 1 : prev - 1));
   };
-
   const nextSlide = () => {
     setCurrentIndex((prev) => (prev + 1) % eventsData.length);
   };
 
+  // Swipe handlers
+  const handleTouchStart = (e) => setTouchStartX(e.touches[0].clientX);
+  const handleTouchMove = (e) => setTouchEndX(e.touches[0].clientX);
+  const handleTouchEnd = () => {
+    const deltaX = touchStartX - touchEndX;
+    const threshold = 50;
+    if (deltaX > threshold) nextSlide();
+    else if (deltaX < -threshold) prevSlide();
+  };
+
+  if (eventsData.length === 0) {
+    return (
+      <section className="relative h-[60vh] md:h-[70vh] flex items-center justify-center">
+        <div className="absolute inset-0 bg-gray-200" />
+      </section>
+    );
+  }
+
   return (
     <section
-      className="relative h-[70vh] md:h-[70vh] flex items-center justify-center overflow-hidden shadow-lg  cursor-pointer"
-      onClick={
-        () => window.open(eventsData[currentIndex].image_url, "_blank") // 👈 open current image
-      }
+      className="relative h-[70vh] md:h-[70vh] overflow-hidden"
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
     >
-      {/* Slide */}
+      {/* Slide container */}
       <div
-        className="absolute inset-0 bg-cover bg-center transition-all duration-1000"
-        style={{
-          backgroundImage: `url(${eventsData[currentIndex].image_url})`, // 👈 matches DB field
-        }}
-      />
-
-      {/* Overlay */}
-      <div className="absolute inset-0" />
+        className="flex h-full transition-transform duration-700 ease-in-out"
+        style={{ transform: `translateX(-${currentIndex * 100}%)` }}
+      >
+        {eventsData.map((slide, idx) => (
+          <div
+            key={idx}
+            className="flex-shrink-0 w-full h-full bg-center bg-cover"
+            style={{ backgroundImage: `url(${slide.image_url})` }}
+            onClick={() => window.open(slide.image_url, "_blank")}
+          />
+        ))}
+      </div>
 
       {/* Navigation Buttons */}
       <button
-        onClick={(e) => {
-          e.stopPropagation(); // 👈 prevent image click
-          prevSlide();
-        }}
-        className="absolute left-3 top-1/2 -translate-y-1/2 p-2 text-white"
+        onClick={prevSlide}
+        className="absolute left-3 top-1/2 -translate-y-1/2 p-2 text-white z-10"
       >
         <ChevronLeft className="h-6 w-6" />
       </button>
       <button
-        onClick={(e) => {
-          e.stopPropagation(); // 👈 prevent image click
-          nextSlide();
-        }}
-        className="absolute right-3 top-1/2 -translate-y-1/2 text-white"
+        onClick={nextSlide}
+        className="absolute right-3 top-1/2 -translate-y-1/2 p-2 text-white z-10"
       >
         <ChevronRight className="h-6 w-6" />
       </button>
 
       {/* Indicators */}
-      <div className="absolute bottom-4 flex justify-center gap-2 w-full">
+      <div className="absolute bottom-4 flex justify-center gap-2 w-full z-10">
         {eventsData.map((_, idx) => (
           <div
             key={idx}
-            onClick={(e) => {
-              e.stopPropagation(); // 👈 prevent click bubbling
-              setCurrentIndex(idx);
-            }}
+            onClick={() => setCurrentIndex(idx)}
             className={`h-2.5 w-2.5 rounded-full cursor-pointer transition ${
               idx === currentIndex ? "bg-white" : "bg-gray-400"
             }`}

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { BookOpenTextIcon } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import Header from "../../components/startPage/layout/Header";
 
@@ -31,6 +31,15 @@ export const RepublicActsPage = () => {
           Republic Acts
         </h1>
 
+        {/* ✅ Return Button */}
+        <button
+          onClick={() => navigate(-1)}
+          className="flex items-center gap-2 text-gray-800 hover:text-blue-800 mb-6 transition-colors"
+        >
+          <ArrowLeft className="w-5 h-5" />
+          <span className="font-medium">Return</span>
+        </button>
+
         {loading ? (
           <div className="text-center py-16 text-gray-500">
             <p>Loading Republic Acts...</p>
@@ -51,7 +60,6 @@ export const RepublicActsPage = () => {
                 className="bg-gradient-to-br from-blue-50 to-white border border-blue-200 rounded-xl shadow-md cursor-pointer hover:shadow-lg hover:-translate-y-1 transition-transform p-5"
               >
                 <div className="flex items-center gap-2 mb-3">
-                  <BookOpenTextIcon className="w-5 h-5 text-blue-600" />
                   <h3 className="text-lg font-semibold line-clamp-2 text-gray-900">
                     {act.title}
                   </h3>

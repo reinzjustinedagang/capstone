@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { Link } from "react-router-dom";
-import { Gift } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { ArrowLeft } from "lucide-react";
 
 export const HomeBenefitsPage = () => {
   const backendUrl = import.meta.env.VITE_API_BASE_URL;
   const [benefits, setBenefits] = useState([]);
   const [loading, setLoading] = useState(true);
-
+  const navigate = useNavigate();
   useEffect(() => {
     const fetchBenefits = async () => {
       try {
@@ -28,6 +28,15 @@ export const HomeBenefitsPage = () => {
         <h1 className="text-3xl font-bold text-gray-900 mb-8 text-center">
           Benefits
         </h1>
+
+        {/* ✅ Return Button */}
+        <button
+          onClick={() => navigate(-1)}
+          className="flex items-center gap-2 text-gray-800 hover:text-blue-800 mb-6 transition-colors"
+        >
+          <ArrowLeft className="w-5 h-5" />
+          <span className="font-medium">Return</span>
+        </button>
 
         {loading ? (
           <div className="text-center py-16 text-gray-500">
