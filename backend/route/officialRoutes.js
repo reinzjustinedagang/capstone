@@ -268,7 +268,7 @@ router.post(
   isAuthenticated,
   upload.single("image"),
   async (req, res) => {
-    const { barangay_name, president_name, position } = req.body;
+    const { barangay_name, president_name, position, mobileNumber } = req.body;
     const user = req.session.user;
     const ip = req.userIp;
 
@@ -281,6 +281,7 @@ router.post(
         barangay_name,
         president_name,
         position,
+        mobileNumber,
         imageUrl,
         user,
         ip
@@ -305,8 +306,13 @@ router.put(
   isAuthenticated,
   upload.single("image"),
   async (req, res) => {
-    const { barangay_name, president_name, position, existing_image } =
-      req.body;
+    const {
+      barangay_name,
+      president_name,
+      position,
+      mobileNumber,
+      existing_image,
+    } = req.body;
     const user = req.session.user;
     const ip = req.userIp;
 
@@ -326,6 +332,7 @@ router.put(
         barangay_name,
         president_name,
         position,
+        mobileNumber,
         imageUrl,
         user,
         ip

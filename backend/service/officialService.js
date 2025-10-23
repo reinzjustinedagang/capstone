@@ -254,6 +254,7 @@ exports.addBarangayOfficial = async (
   barangay_name,
   president_name,
   position,
+  mobileNumber,
   image,
   user,
   ip
@@ -270,8 +271,16 @@ exports.addBarangayOfficial = async (
       );
 
     const result = await Connection(
-      `INSERT INTO barangay_officials (barangay_name, president_name, position, image, created_by, approved) VALUES (?, ?, ?, ?, ?, ?)`,
-      [barangay_name, president_name, position, image, user.id, approved]
+      `INSERT INTO barangay_officials (barangay_name, president_name, position, mobileNumber, image, created_by, approved) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      [
+        barangay_name,
+        president_name,
+        position,
+        mobileNumber,
+        image,
+        user.id,
+        approved,
+      ]
     );
 
     if (result.affectedRows === 1 && user) {
@@ -299,6 +308,7 @@ exports.updateBarangayOfficial = async (
   barangay_name,
   president_name,
   position,
+  mobileNumber,
   image,
   user,
   ip
@@ -306,7 +316,7 @@ exports.updateBarangayOfficial = async (
   const approved = user.role === "admin" ? 1 : 0;
   try {
     const oldRows = await Connection(
-      `SELECT barangay_name, president_name, position, image FROM barangay_officials WHERE id = ?`,
+      `SELECT barangay_name, president_name, position, mobileNumber, image FROM barangay_officials WHERE id = ?`,
       [id]
     );
     const old = oldRows[0];
@@ -315,8 +325,16 @@ exports.updateBarangayOfficial = async (
     const finalImage = image ?? old.image;
 
     const result = await Connection(
-      `UPDATE barangay_officials SET barangay_name = ?, president_name = ?, position = ?, image = ?, approved = ? WHERE id = ?`,
-      [barangay_name, president_name, position, finalImage, approved, id]
+      `UPDATE barangay_officials SET barangay_name = ?, president_name = ?, position = ?, mobileNumber, image = ?, approved = ? WHERE id = ?`,
+      [
+        barangay_name,
+        president_name,
+        position,
+        mobileNumber,
+        finalImage,
+        approved,
+        id,
+      ]
     );
 
     if (image && old.image && image !== old.image) {
@@ -342,6 +360,8 @@ exports.updateBarangayOfficial = async (
         changes.push(
           `position: '${old.position || "none"}' → '${position || "none"}'`
         );
+      if (old.mobileNumber !== mobileNumber)
+        changes.push(`Mobile Number Updated'`);
       if (old.image !== finalImage) changes.push(`Officer Image Updated'`);
 
       await logAudit(
