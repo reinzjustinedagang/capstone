@@ -234,8 +234,8 @@ const MessageHistory = () => {
       )}
 
       {/* Table */}
-      <div className="bg-white rounded-b-lg shadow overflow-hidden">
-        <div className="overflow-x-auto">
+      <div className="bg-white rounded-b-lg shadow overflow-visible">
+        <div className="overflow-x-auto overflow-visible relative">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
@@ -290,10 +290,24 @@ const MessageHistory = () => {
 
                   return (
                     <tr key={log.id}>
-                      <td className="px-6 py-4 text-sm text-gray-700">
+                      <td className="px-6 py-4 text-sm text-gray-700 relative group cursor-pointer">
                         {recipientCount} recipient
                         {recipientCount !== 1 ? "s" : ""}
+                        {/* Tooltip */}
+                        {/* Tooltip */}
+                        {log.recipients && (
+                          <div className="absolute top-1/2 left-full transform -translate-y-1/2 ml-3 z-50 opacity-0 group-hover:opacity-100 transition-opacity duration-200 bg-gray-800 text-white text-xs rounded-lg px-3 py-2 whitespace-pre-wrap max-w-xs w-max shadow-lg pointer-events-none">
+                            {Array.isArray(log.recipients)
+                              ? log.recipients.join(", ")
+                              : log.recipients
+                                  ?.split(",")
+                                  .map((r) => r.trim())
+                                  .filter(Boolean)
+                                  .join(", ")}
+                          </div>
+                        )}
                       </td>
+
                       <td className="px-6 py-4 text-sm text-gray-700">
                         {log.message}
                       </td>

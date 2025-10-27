@@ -8,7 +8,7 @@ import {
   TrashIcon,
 } from "lucide-react";
 import OrgForm from "./form/OrgForm";
-import OrgCard from "../../officials/card/OrgCard";
+import OrgCard from "./card/OrgCard";
 import Modal from "../../UI/Modal";
 import Button from "../../UI/Button";
 import axios from "axios";

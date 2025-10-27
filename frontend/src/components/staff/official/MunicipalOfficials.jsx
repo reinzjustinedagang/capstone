@@ -8,7 +8,7 @@ import {
   TrashIcon,
 } from "lucide-react";
 import MunicipalForm from "./form/MunicipalForm";
-import MunicipalCard from "../../officials/card/MunicipalCard";
+import MunicipalCard from "./card/MunicipalCard";
 import Modal from "../../UI/Modal";
 import Button from "../../UI/Button";
 import axios from "axios";

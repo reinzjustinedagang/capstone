@@ -16,9 +16,10 @@ import {
   ChevronUp,
   Archive,
   IdCard,
+  Eye,
 } from "lucide-react";
 
-const SeniorCitizenList = ({ onEdit, onId }) => {
+const SeniorCitizenList = ({ onEdit, onId, onView }) => {
   const backendUrl =
     import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
 
@@ -373,9 +374,18 @@ const SeniorCitizenList = ({ onEdit, onId }) => {
                     <td className="px-6 py-4 text-sm font-xs">
                       <div className="flex space-x-2">
                         <button
+                          onClick={() => onView(citizen.id)}
+                          className="text-green-600 hover:text-green-900"
+                          aria-label={`View ${citizen.firstName} ${citizen.lastName}`}
+                          title="View Senior Citizen"
+                        >
+                          <Eye className="h-5 w-5" />
+                        </button>
+                        <button
                           onClick={() => onEdit(citizen.id)}
                           className="text-blue-600 hover:text-blue-900"
                           aria-label={`Edit ${citizen.firstName} ${citizen.lastName}`}
+                          title="Edit Senior Citizen"
                         >
                           <Edit className="h-5 w-5" />
                         </button>

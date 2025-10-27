@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import Button from "../../UI/Button";
-import BarangayCard from "../../officials/card/BarangayCard";
+import BarangayCard from "./card/BarangayCard";
 import BarangayForm from "./form/BarangayForm";
 import ConfirmationModal from "../../officials/ConfirmationModal";
 import StatusMessage from "../../officials/StatusMessage";

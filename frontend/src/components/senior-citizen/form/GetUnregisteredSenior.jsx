@@ -486,17 +486,17 @@ const GetUnregisteredSenior = ({ id, onSuccess, onCancel }) => {
 
       {formError && <p className="text-red-600">{formError}</p>}
 
-      <div className="flex justify-end gap-3">
+      <div className="flex justify-end m-3 md:m-0">
         <Button variant="secondary" onClick={onCancel} disabled={isSubmitting}>
-          Cancel
+          Back
         </Button>
-        <Button
+        {/* <Button
           type="submit"
           variant="primary"
           disabled={isSubmitting || barangayLoading}
         >
           {isSubmitting ? "Saving..." : "Register Senior Citizen"}
-        </Button>
+        </Button> */}
       </div>
 
       {/* Confirm Modal */}

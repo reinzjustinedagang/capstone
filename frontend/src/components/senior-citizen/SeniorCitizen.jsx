@@ -98,11 +98,7 @@ const SeniorCitizen = () => {
             activeTab !== "archived" && (
               <div
                 className="flex items-center cursor-pointer text-gray-600 hover:text-gray-900 transition-colors"
-                onClick={() =>
-                  activeTab === "view" && selectedCitizenId
-                    ? setActiveTab("unregistered")
-                    : setActiveTab("list")
-                }
+                onClick={() => setActiveTab("list")}
               >
                 <ArrowUp className="h-5 w-5 mr-2 -rotate-90" />
                 Back to Senior Citizens
@@ -167,7 +163,11 @@ const SeniorCitizen = () => {
 
       <div className="bg-white shadow overflow-hidden">
         {activeTab === "list" && (
-          <SeniorCitizenList onEdit={handleEdit} onId={handleId} />
+          <SeniorCitizenList
+            onEdit={handleEdit}
+            onId={handleId}
+            onView={onView}
+          />
         )}
         {activeTab === "unregistered" && (
           <UnregisteredSeniorList onView={onView} onRegister={onRegister} />
@@ -193,9 +193,8 @@ const SeniorCitizen = () => {
         {activeTab === "view" && (
           <GetUnregisteredSenior
             id={selectedCitizenId}
-            onSuccess={handleUpdateSuccess}
             onCancel={() => {
-              setActiveTab("unregistered");
+              setActiveTab("list");
             }}
           />
         )}

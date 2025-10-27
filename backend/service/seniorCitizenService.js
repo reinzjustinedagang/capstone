@@ -1076,7 +1076,7 @@ exports.getCitizenCount = async () => {
   }
 };
 
-// Get SMS recipients (ONLY those with valid mobile numbers)
+// Get SMS recipients (mobileNumber or fallback to emergencyContactNumber)
 exports.getSmsRecipients = async (
   barangay = "",
   barangay_id = "",
@@ -1087,20 +1087,25 @@ exports.getSmsRecipients = async (
       SELECT 
         sc.id,
         CONCAT_WS(' ', CONCAT(sc.lastName, ','), sc.firstName, sc.middleName, sc.suffix) AS name,
-        JSON_UNQUOTE(JSON_EXTRACT(sc.form_data, '$.mobileNumber')) AS contact,
-        b.barangay_name AS barangay, -- ✅ fetch human-readable barangay name
+
+        -- ✅ Prefer mobileNumber, fallback to emergencyContactNumber
+        COALESCE(
+          NULLIF(JSON_UNQUOTE(JSON_EXTRACT(sc.form_data, '$.mobileNumber')), ''),
+          NULLIF(JSON_UNQUOTE(JSON_EXTRACT(sc.form_data, '$.emergencyContactNumber')), '')
+        ) AS contact,
+
+        b.barangay_name AS barangay,
         sc.barangay_id,
+
         TIMESTAMPDIFF(
           YEAR,
           STR_TO_DATE(JSON_UNQUOTE(JSON_EXTRACT(sc.form_data, '$.birthdate')), '%Y-%m-%d'),
           CURDATE()
         ) AS age
       FROM senior_citizens sc
-      LEFT JOIN barangays b ON sc.barangay_id = b.id -- ✅ join to get barangay name
+      LEFT JOIN barangays b ON sc.barangay_id = b.id
       WHERE 
-        JSON_EXTRACT(sc.form_data, '$.mobileNumber') IS NOT NULL
-        AND JSON_UNQUOTE(JSON_EXTRACT(sc.form_data, '$.mobileNumber')) <> ''
-        AND sc.deleted = 0 
+        sc.deleted = 0 
         AND sc.registered = 1
         AND sc.archived = 0
         AND TIMESTAMPDIFF(
@@ -1108,6 +1113,11 @@ exports.getSmsRecipients = async (
               STR_TO_DATE(JSON_UNQUOTE(JSON_EXTRACT(sc.form_data, '$.birthdate')), '%Y-%m-%d'),
               CURDATE()
             ) >= 60
+        -- ✅ Only include if at least one contact exists
+        AND (
+          JSON_UNQUOTE(JSON_EXTRACT(sc.form_data, '$.mobileNumber')) <> ''
+          OR JSON_UNQUOTE(JSON_EXTRACT(sc.form_data, '$.emergencyContactNumber')) <> ''
+        )
     `;
 
     const params = [];
@@ -1124,11 +1134,12 @@ exports.getSmsRecipients = async (
       sql += ` AND (
         CONCAT_WS(' ', sc.firstName, sc.middleName, sc.lastName, sc.suffix) LIKE ? 
         OR JSON_UNQUOTE(JSON_EXTRACT(sc.form_data, '$.mobileNumber')) LIKE ?
+        OR JSON_UNQUOTE(JSON_EXTRACT(sc.form_data, '$.emergencyContactNumber')) LIKE ?
       )`;
-      params.push(`%${search}%`, `%${search}%`);
+      params.push(`%${search}%`, `%${search}%`, `%${search}%`);
     }
 
-    sql += ` ORDER BY b.barangay_name, sc.lastName ASC`; // ✅ optional: better sorting
+    sql += ` ORDER BY b.barangay_name, sc.lastName ASC`;
 
     const result = await Connection(sql, params);
     return result;
