@@ -19,7 +19,7 @@ import { AboutPage } from "./pages/public/AboutPage.jsx";
 import { DeveloperPage } from "./pages/public/DeveloperPage.jsx";
 import { RepublicActsPage } from "./pages/public/RepublicActsPage.jsx";
 import { HomeEventPage } from "./pages/public/HomeEventsPage.jsx";
-import ScrollToTop from "./components/startPage/layout/ScrolltoTop.jsx";
+import ScrollToTop from "./components/startPage/layout/ScrollToTop.jsx";
 
 // Admin Pages
 import { DashboardPage } from "./pages/admin/DashboardPage";
