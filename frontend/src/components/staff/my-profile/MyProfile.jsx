@@ -379,21 +379,27 @@ const MyProfile = () => {
       <Modal
         isOpen={showNotificationModal}
         onClose={closeNotificationModal}
-        title={notificationType === "success" ? "Success!" : "Error!"}
+        title={notificationType === "success" ? "Success" : "Error"}
       >
         <div className="p-6 text-center">
-          {notificationType === "success" ? (
-            <CheckCircle className="h-12 w-12 text-green-500 mx-auto mb-4" />
-          ) : (
-            <XCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-          )}
           <div
-            className={`text-lg font-semibold mb-4 ${
-              notificationType === "success" ? "text-green-700" : "text-red-700"
+            className={`mx-auto mb-4 w-12 h-12 rounded-full flex items-center justify-center ${
+              notificationType === "success" ? "bg-green-100" : "bg-red-100"
             }`}
           >
-            {notificationMessage}
+            {notificationType === "success" ? (
+              <CheckCircle className="w-6 h-6 text-green-500" />
+            ) : (
+              <XCircle className="w-6 h-6 text-red-500" />
+            )}
           </div>
+
+          <h3 className="text-lg font-medium text-gray-800 mb-2">
+            {notificationType === "success" ? "Success" : "Error"}
+          </h3>
+
+          <p className="text-sm text-gray-600 mb-4">{notificationMessage}</p>
+
           <Button
             variant={notificationType === "success" ? "primary" : "danger"}
             onClick={closeNotificationModal}
@@ -402,6 +408,7 @@ const MyProfile = () => {
           </Button>
         </div>
       </Modal>
+
       {/* --- Confirmation Modal --- */}
       <Modal
         isOpen={showConfirmationModal}
@@ -410,7 +417,7 @@ const MyProfile = () => {
       >
         <div className="p-6 text-center">
           <p className="text-lg text-gray-700 mb-6">{confirmationMessage}</p>
-          <div className="flex justify-center gap-4">
+          <div className="flex justify-end gap-4">
             <Button variant="secondary" onClick={handleCancelConfirmation}>
               Cancel
             </Button>

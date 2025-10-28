@@ -10,11 +10,11 @@ import RepublicActs from "./home/RepublicActs";
 
 const Home = () => {
   return (
-    <div>
+    <div className="bg-gradient-to-br from-blue-50 to-indigo-100">
       {/* Background animation elements - consistent with other auth pages */}
       <div className="absolute inset-0 z-0 opacity-20">
-        <div className="absolute w-72 h-72 bg-purple-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob top-1/4 left-1/4 transform -translate-x-1/2 -translate-y-1/2"></div>
-        <div className="absolute w-64 h-64 bg-pink-300 ... right-1/4 transform -translate-y-1/2"></div>
+        <div className="absolute w-72 h-72 bg-purple-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob top-1/4 left-1/4"></div>
+        <div className="absolute w-64 h-64 bg-pink-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000 bottom-1/4 right-1/4"></div>
       </div>
 
       <Slideshow />

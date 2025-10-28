@@ -62,7 +62,7 @@ const MyProfile = () => {
   const closeNotificationModal = () => {
     setShowNotificationModal(false);
     setNotificationMessage("");
-    window.location.reload();
+    window.dispatchEvent(new Event("profileUpdated"));
   };
 
   const handleConfirmAction = () => {
@@ -191,7 +191,8 @@ const MyProfile = () => {
           cp_number,
           image: uploadedImageUrl,
         }));
-        setCroppedImageBlob(null); // Clear blob after upload
+        setCroppedImageBlob(null);
+        window.dispatchEvent(new Event("profileUpdated")); // ✅ add this back
         showNotification("Profile updated successfully!", "success");
       } else {
         showNotification(

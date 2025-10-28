@@ -19,6 +19,7 @@ import { AboutPage } from "./pages/public/AboutPage.jsx";
 import { DeveloperPage } from "./pages/public/DeveloperPage.jsx";
 import { RepublicActsPage } from "./pages/public/RepublicActsPage.jsx";
 import { HomeEventPage } from "./pages/public/HomeEventsPage.jsx";
+import ScrollToTop from "./components/startPage/layout/ScrolltoTop.jsx";
 
 // Admin Pages
 import { DashboardPage } from "./pages/admin/DashboardPage";
@@ -62,207 +63,210 @@ import { StaffNotificationPage } from "./pages/staff/StaffNotificationPage.jsx";
 
 function App() {
   return (
-    <Routes>
-      {/* Public Routes */}
-      <Route element={<LandingLayout />}>
-        <Route
-          path="/"
-          element={
-            <PublicOnlyRoute>
-              <HomePage />
-            </PublicOnlyRoute>
-          }
-        />
-        <Route
-          path="/republic-acts"
-          element={
-            <PublicOnlyRoute>
-              <RepublicActsPage />
-            </PublicOnlyRoute>
-          }
-        />
-        <Route
-          path="/events"
-          element={
-            <PublicOnlyRoute>
-              <HomeEventPage />
-            </PublicOnlyRoute>
-          }
-        />
-        <Route
-          path="/benefits"
-          element={
-            <PublicOnlyRoute>
-              <HomeBenefitsPage />
-            </PublicOnlyRoute>
-          }
-        />
-        <Route
-          path="/organization"
-          element={
-            <PublicOnlyRoute>
-              <OrganizationPage />
-            </PublicOnlyRoute>
-          }
-        />
-        <Route
-          path="/about"
-          element={
-            <PublicOnlyRoute>
-              <AboutPage />
-            </PublicOnlyRoute>
-          }
-        />
-        <Route
-          path="/developer"
-          element={
-            <PublicOnlyRoute>
-              <DeveloperPage />
-            </PublicOnlyRoute>
-          }
-        />
-        <Route
-          path="/login"
-          element={
-            <PublicOnlyRoute>
-              <LoginPage />
-            </PublicOnlyRoute>
-          }
-        />
-        <Route
-          path="/register"
-          element={
-            <PublicOnlyRoute>
-              <RegisterPage />
-            </PublicOnlyRoute>
-          }
-        />
-        <Route
-          path="/register-senior"
-          element={
-            <PublicOnlyRoute>
-              <RegisterSeniorPage />
-            </PublicOnlyRoute>
-          }
-        />
-        <Route
-          path="/register-guide"
-          element={
-            <PublicOnlyRoute>
-              <GuidePage />
-            </PublicOnlyRoute>
-          }
-        />
-        <Route
-          path="/forgot-password"
-          element={
-            <PublicOnlyRoute>
-              <ForgotPasswordPage />
-            </PublicOnlyRoute>
-          }
-        />
-        <Route
-          path="/verify-otp"
-          element={
-            <PublicOnlyRoute>
-              <VerifyOTPPage />
-            </PublicOnlyRoute>
-          }
-        />
-        <Route
-          path="/reset-password"
-          element={
-            <PublicOnlyRoute>
-              <ResetPasswordPage />
-            </PublicOnlyRoute>
-          }
-        />
-        <Route
-          path="/events/:id"
-          element={
-            <PublicOnlyRoute>
-              <EventDetailsPage />
-            </PublicOnlyRoute>
-          }
-        />
-        <Route
-          path="/benefits/:id"
-          element={
-            <PublicOnlyRoute>
-              <BenefitDetailsPage />
-            </PublicOnlyRoute>
-          }
-        />
-        <Route
-          path="/ra/:id"
-          element={
-            <PublicOnlyRoute>
-              <RepublicActDetailsPage />
-            </PublicOnlyRoute>
-          }
-        />
-      </Route>
+    <>
+      {/* ✅ Scroll resets on every route change */}
+      <ScrollToTop />
 
-      {/* Auth-related routes (no Header/Footer needed) */}
+      <Routes>
+        {/* Public Routes */}
+        <Route element={<LandingLayout />}>
+          <Route
+            path="/"
+            element={
+              <PublicOnlyRoute>
+                <HomePage />
+              </PublicOnlyRoute>
+            }
+          />
+          <Route
+            path="/republic-acts"
+            element={
+              <PublicOnlyRoute>
+                <RepublicActsPage />
+              </PublicOnlyRoute>
+            }
+          />
+          <Route
+            path="/events"
+            element={
+              <PublicOnlyRoute>
+                <HomeEventPage />
+              </PublicOnlyRoute>
+            }
+          />
+          <Route
+            path="/benefits"
+            element={
+              <PublicOnlyRoute>
+                <HomeBenefitsPage />
+              </PublicOnlyRoute>
+            }
+          />
+          <Route
+            path="/organization"
+            element={
+              <PublicOnlyRoute>
+                <OrganizationPage />
+              </PublicOnlyRoute>
+            }
+          />
+          <Route
+            path="/about"
+            element={
+              <PublicOnlyRoute>
+                <AboutPage />
+              </PublicOnlyRoute>
+            }
+          />
+          <Route
+            path="/developer"
+            element={
+              <PublicOnlyRoute>
+                <DeveloperPage />
+              </PublicOnlyRoute>
+            }
+          />
+          <Route
+            path="/login"
+            element={
+              <PublicOnlyRoute>
+                <LoginPage />
+              </PublicOnlyRoute>
+            }
+          />
+          <Route
+            path="/register"
+            element={
+              <PublicOnlyRoute>
+                <RegisterPage />
+              </PublicOnlyRoute>
+            }
+          />
+          <Route
+            path="/register-senior"
+            element={
+              <PublicOnlyRoute>
+                <RegisterSeniorPage />
+              </PublicOnlyRoute>
+            }
+          />
+          <Route
+            path="/register-guide"
+            element={
+              <PublicOnlyRoute>
+                <GuidePage />
+              </PublicOnlyRoute>
+            }
+          />
+          <Route
+            path="/forgot-password"
+            element={
+              <PublicOnlyRoute>
+                <ForgotPasswordPage />
+              </PublicOnlyRoute>
+            }
+          />
+          <Route
+            path="/verify-otp"
+            element={
+              <PublicOnlyRoute>
+                <VerifyOTPPage />
+              </PublicOnlyRoute>
+            }
+          />
+          <Route
+            path="/reset-password"
+            element={
+              <PublicOnlyRoute>
+                <ResetPasswordPage />
+              </PublicOnlyRoute>
+            }
+          />
+          <Route
+            path="/events/:id"
+            element={
+              <PublicOnlyRoute>
+                <EventDetailsPage />
+              </PublicOnlyRoute>
+            }
+          />
+          <Route
+            path="/benefits/:id"
+            element={
+              <PublicOnlyRoute>
+                <BenefitDetailsPage />
+              </PublicOnlyRoute>
+            }
+          />
+          <Route
+            path="/ra/:id"
+            element={
+              <PublicOnlyRoute>
+                <RepublicActDetailsPage />
+              </PublicOnlyRoute>
+            }
+          />
+        </Route>
 
-      {/* Admin Routes */}
-      <Route
-        path="/admin"
-        element={
-          <ProtectedRoute role="Admin">
-            <Layout />
-          </ProtectedRoute>
-        }
-      >
-        <Route path="dashboard" element={<DashboardPage />} />
-        <Route path="senior-citizen-list" element={<SeniorCitizenPage />} />
-        <Route path="osca-officials" element={<OfficialsPage />} />
-        <Route path="pension-list" element={<PensionListPage />} />
-        <Route path="benefits" element={<BenefitsPage />} />
-        <Route path="sms-management" element={<SmsPage />} />
-        <Route path="reports" element={<ReportPage />} />
-        <Route path="audit-logs" element={<AuditLogsPage />} />
-        <Route path="my-profile" element={<MyProfilePage />} />
-        <Route path="user-management" element={<UserManagementPage />} />
-        <Route path="settings" element={<SettingsPage />} />
-        <Route path="barangays" element={<BarangayManagementPage />} />
-        <Route path="birthday-calendar" element={<NotificationPage />} />
-        <Route path="recycle-bin" element={<RecycleBinPage />} />
-        <Route path="login-trail/:userId" element={<LoginTrailPage />} />
-        <Route path="events" element={<EventsPage />} />
-        <Route path="about-osca" element={<AboutOscaPage />} />
-        <Route path="archive" element={<ArchivePage />} />
-      </Route>
-
-      {/* Staff Routes */}
-      <Route
-        path="/staff"
-        element={
-          <ProtectedRoute role="Staff">
-            <StaffLayout />
-          </ProtectedRoute>
-        }
-      >
-        <Route path="dashboard" element={<StaffDashboardPage />} />
+        {/* Admin Routes */}
         <Route
-          path="senior-citizen-list"
-          element={<StaffSeniorCitizenPage />}
-        />
-        <Route path="sms-management" element={<StaffSmsManagementPage />} />
-        <Route path="benefits" element={<StaffBenefitsPage />} />
-        <Route path="osca-officials" element={<StaffOfficialPage />} />
-        <Route path="login-history" element={<StaffLoginTrailPage />} />
-        <Route path="about" element={<StaffAboutPage />} />
-        <Route path="my-profile" element={<StaffProfilePage />} />
-        <Route path="events" element={<StaffEventsPage />} />
-        <Route path="reports" element={<StaffReportsPage />} />
-        <Route path="notifications" element={<StaffNotificationPage />} />
-      </Route>
+          path="/admin"
+          element={
+            <ProtectedRoute role="Admin">
+              <Layout />
+            </ProtectedRoute>
+          }
+        >
+          <Route path="dashboard" element={<DashboardPage />} />
+          <Route path="senior-citizen-list" element={<SeniorCitizenPage />} />
+          <Route path="osca-officials" element={<OfficialsPage />} />
+          <Route path="pension-list" element={<PensionListPage />} />
+          <Route path="benefits" element={<BenefitsPage />} />
+          <Route path="sms-management" element={<SmsPage />} />
+          <Route path="reports" element={<ReportPage />} />
+          <Route path="audit-logs" element={<AuditLogsPage />} />
+          <Route path="my-profile" element={<MyProfilePage />} />
+          <Route path="user-management" element={<UserManagementPage />} />
+          <Route path="settings" element={<SettingsPage />} />
+          <Route path="barangays" element={<BarangayManagementPage />} />
+          <Route path="birthday-calendar" element={<NotificationPage />} />
+          <Route path="recycle-bin" element={<RecycleBinPage />} />
+          <Route path="login-trail/:userId" element={<LoginTrailPage />} />
+          <Route path="events" element={<EventsPage />} />
+          <Route path="about-osca" element={<AboutOscaPage />} />
+          <Route path="archive" element={<ArchivePage />} />
+        </Route>
 
-      {/* Not Found */}
-      <Route path="*" element={<NotFoundPage />} />
-      <Route path="/unauthorized" element={<UnauthorizedPage />} />
-    </Routes>
+        {/* Staff Routes */}
+        <Route
+          path="/staff"
+          element={
+            <ProtectedRoute role="Staff">
+              <StaffLayout />
+            </ProtectedRoute>
+          }
+        >
+          <Route path="dashboard" element={<StaffDashboardPage />} />
+          <Route
+            path="senior-citizen-list"
+            element={<StaffSeniorCitizenPage />}
+          />
+          <Route path="sms-management" element={<StaffSmsManagementPage />} />
+          <Route path="benefits" element={<StaffBenefitsPage />} />
+          <Route path="osca-officials" element={<StaffOfficialPage />} />
+          <Route path="login-history" element={<StaffLoginTrailPage />} />
+          <Route path="about" element={<StaffAboutPage />} />
+          <Route path="my-profile" element={<StaffProfilePage />} />
+          <Route path="events" element={<StaffEventsPage />} />
+          <Route path="reports" element={<StaffReportsPage />} />
+          <Route path="notifications" element={<StaffNotificationPage />} />
+        </Route>
+
+        {/* Not Found */}
+        <Route path="*" element={<NotFoundPage />} />
+        <Route path="/unauthorized" element={<UnauthorizedPage />} />
+      </Routes>
+    </>
   );
 }
 

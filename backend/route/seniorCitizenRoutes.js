@@ -13,6 +13,17 @@ router.get("/birthdays", async (req, res) => {
   }
 });
 
+// In routes/seniorCitizenRoutes.js
+router.get("/birthdays/today", async (req, res) => {
+  try {
+    const celebrants = await seniorCitizenService.getBirthdaysToday();
+    res.json(celebrants);
+  } catch (error) {
+    console.error("Error fetching today's birthdays:", error);
+    res.status(500).json({ message: error.message });
+  }
+});
+
 router.get("/birthdays/month/:month", async (req, res) => {
   try {
     const month = parseInt(req.params.month); // 1-12

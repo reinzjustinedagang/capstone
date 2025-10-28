@@ -65,7 +65,7 @@ const Slideshow = () => {
 
   if (eventsData.length === 0) {
     return (
-      <section className="relative h-[60vh] md:h-[70vh] flex items-center justify-center">
+      <section className="relative h-[60vh] md:h-[60vh] flex items-center justify-center">
         <div className="absolute inset-0 bg-gray-200" />
       </section>
     );
@@ -73,7 +73,7 @@ const Slideshow = () => {
 
   return (
     <section
-      className="relative h-[70vh] md:h-[70vh] overflow-hidden"
+      className="relative h-[60vh] md:h-[60vh] overflow-hidden"
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}

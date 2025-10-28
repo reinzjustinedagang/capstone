@@ -47,6 +47,35 @@ const Header = () => {
   }, []);
 
   useEffect(() => {
+    const fetchBirthdaysToday = async () => {
+      try {
+        const today = new Date();
+        const month = today.getMonth() + 1;
+        const day = today.getDate();
+
+        // ✅ Backend endpoint to get today's birthdays
+        const res = await axios.get(
+          `${backendUrl}/api/senior-citizens/birthdays/today`,
+          { withCredentials: true }
+        );
+
+        // if your backend doesn’t have this endpoint, see note below 👇
+        setHasBirthdayToday(res.data && res.data.length > 0);
+      } catch (err) {
+        console.error("Failed to check today's birthdays:", err);
+        setHasBirthdayToday(false);
+      }
+    };
+
+    fetchBirthdaysToday();
+
+    // Optional: check every hour
+    const interval = setInterval(fetchBirthdaysToday, 60 * 60 * 1000);
+
+    return () => clearInterval(interval);
+  }, [backendUrl]);
+
+  useEffect(() => {
     const fetchUser = async () => {
       try {
         setLoading(true);
@@ -66,8 +95,21 @@ const Header = () => {
         setLoading(false);
       }
     };
+
+    // initial fetch
     fetchUser();
-  }, []);
+
+    // ✅ Listen for profile updates like in StaffHeader
+    const handleProfileUpdate = () => {
+      fetchUser();
+    };
+
+    window.addEventListener("profileUpdated", handleProfileUpdate);
+
+    return () => {
+      window.removeEventListener("profileUpdated", handleProfileUpdate);
+    };
+  }, [backendUrl]);
 
   const handleLogout = async () => {
     setLogoutLoading(true);

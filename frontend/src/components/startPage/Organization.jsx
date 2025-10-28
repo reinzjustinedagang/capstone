@@ -7,6 +7,8 @@ import OrgChart from "./organization/OrgChart";
 import MunicipalOfficials from "./organization/MunicipalOfficials";
 import BarangayOfficials from "./organization/BarangayOfficials";
 import BarangayDistribution from "../reports/chart/BarangayDistribution";
+import AgeDistribution from "../reports/chart/AgeDistribution";
+import GenderDistribution from "../reports/chart/GenderDistribution";
 
 const Organization = () => {
   return (
@@ -53,11 +55,21 @@ const Organization = () => {
       </div>
 
       {/* Demographics Chart */}
-      <div id="demographics" className=" px-5 py-6 md:px-8 lg:px-25">
-        <h3 className="text-2xl font-semibold text-gray-900 mb-6 text-center">
+      <div className="px-5 py-6 md:px-8 lg:px-24">
+        <h3 className="text-2xl font-semibold text-gray-900 mb-8 text-center">
           Senior Citizens Demographics
         </h3>
-        <BarangayDistribution />
+
+        {/* Top chart */}
+        <div className="mb-8">
+          <BarangayDistribution />
+        </div>
+
+        {/* Bottom charts side by side */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <AgeDistribution />
+          <GenderDistribution />
+        </div>
       </div>
     </div>
   );

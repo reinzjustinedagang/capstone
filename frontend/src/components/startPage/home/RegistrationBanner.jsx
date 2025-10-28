@@ -43,7 +43,7 @@ const RegistrationBanner = () => {
   }, [citizenCount]);
 
   return (
-    <section className="bg-white py-6 md:px-25 text-center shadow-md">
+    <section className="bg-white py-8 md:px-25 text-center shadow-md">
       <h2 className="text-5xl md:text-6xl font-extrabold text-gray-900 mb-2">
         {animatedCount.toLocaleString()}
       </h2>
