@@ -366,7 +366,8 @@ const SeniorCitizenList = ({ onEdit, onId, onView }) => {
                     </td>
 
                     <td className="px-6 py-4 text-sm text-gray-500">
-                      {citizen.form_data?.mobileNumber}
+                      {citizen.form_data?.mobileNumber ||
+                        citizen.form_data?.emergencyContactNumber}
                     </td>
                     <td className="px-6 py-4">{citizen.form_data?.remarks}</td>
                     <td className="px-6 py-4">

@@ -110,77 +110,100 @@ const MonthlySummaryReportPrint = () => {
         <head>
           <title>Annual Summary Report ${year}</title>
           <style>
-            body { 
-              font-family: Arial, sans-serif; 
-              padding: 20px; 
-              font-size: 12px;
+          @page {
+            size: A4 landscape;
+            margin: 1cm;
+          }
+
+          body { 
+            font-family: Arial, sans-serif; 
+            padding: 10px; 
+            font-size: 10px;
+          }
+
+          .report-header {
+            text-align: center;
+            margin-bottom: 10px;
+          }
+
+          .report-title {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 5px;
+          }
+
+          .report-year {
+            font-size: 12px;
+            color: #666;
+          }
+
+          table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            margin-top: 10px;
+          }
+
+          th, td { 
+            border: 1px solid #333; 
+            padding: 3px 4px;
+            text-align: center;
+            font-weight: bold;
+          }
+
+          th {
+            background-color: #f2f2f2; 
+            font-size: 9px;
+          }
+
+          thead th {
+            vertical-align: middle;
+          }
+
+          .month-header {
+            background-color: #e0e0e0;
+          }
+
+          .total-row {
+            background-color: #f9f9f9;
+            font-weight: bold;
+          }
+
+          .category-totals {
+            margin-top: 15px;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+          }
+
+          .total-box {
+            border: 1px solid #333;
+            padding: 8px;
+            text-align: center;
+          }
+
+          .total-label {
+            font-size: 10px;
+            font-weight: bold;
+            margin-bottom: 2px;
+          }
+
+          .total-value {
+            font-size: 12px;
+            color: #000;
+          }
+
+          @media print {
+            body {
+              zoom: 90%;
             }
-            .report-header {
-              text-align: center;
-              margin-bottom: 30px;
+
+            .page-break {
+              page-break-before: always;
             }
-            .report-title {
-              font-size: 24px;
-              font-weight: bold;
-              margin-bottom: 10px;
-            }
-            .report-year {
-              font-size: 18px;
-              color: #666;
-            }
-            table { 
-              width: 100%; 
-              border-collapse: collapse; 
-              margin: 20px 0;
-            }
-            th, td { 
-              border: 2px solid #333; 
-              padding: 8px; 
-              text-align: center;
-              font-weight: bold;
-            }
-            th { 
-              background-color: #f0f0f0; 
-              font-size: 11px;
-              writing-mode: vertical-rl;
-              text-orientation: mixed;
-              height: 120px;
-            }
-            .month-header {
-              writing-mode: horizontal-tb !important;
-              text-orientation: mixed;
-              height: auto !important;
-              background-color: #e0e0e0;
-              font-size: 12px;
-            }
-            .total-row {
-              background-color: #f9f9f9;
-              font-weight: bold;
-            }
-            .male-cell { color: #2563eb; }
-            .female-cell { color: #dc2626; }
-            .total-cell { color: #059669; font-weight: bold; }
-            .category-totals {
-              margin-top: 30px;
-              display: grid;
-              grid-template-columns: repeat(4, 1fr);
-              gap: 20px;
-            }
-            .total-box {
-              border: 2px solid #333;
-              padding: 15px;
-              text-align: center;
-            }
-            .total-label {
-              font-size: 14px;
-              font-weight: bold;
-              margin-bottom: 5px;
-            }
-            .total-value {
-              font-size: 18px;
-              color: #059669;
-            }
-          </style>
+          }
+
+        </style>
+
         </head>
         <body>
           ${printContents}
@@ -263,16 +286,45 @@ const MonthlySummaryReportPrint = () => {
           <thead>
             <tr>
               <th
+                rowSpan="2"
                 style={{
                   writingMode: "horizontal-tb",
                   textOrientation: "mixed",
                   backgroundColor: "#e0e0e0",
                   height: "auto",
                   fontSize: 12,
+                  border: "1px solid #333",
+                  padding: 8,
                 }}
               >
                 MONTH
               </th>
+              {[
+                "SOC-PEN",
+                "NON-SOCPEN",
+                "DECEASED",
+                "TRANSFER",
+                "PDL",
+                "NEW APPLICANT",
+                "UTP",
+                "BOOKLET",
+              ].map((label) => (
+                <th
+                  key={label}
+                  colSpan="2"
+                  style={{
+                    border: "1px solid #333",
+                    padding: 8,
+                    backgroundColor: "#f0f0f0",
+                    fontWeight: "bold",
+                    fontSize: 11,
+                  }}
+                >
+                  {label}
+                </th>
+              ))}
+            </tr>
+            <tr>
               {[
                 "SOC-PEN",
                 "NON-SOCPEN",
@@ -288,12 +340,11 @@ const MonthlySummaryReportPrint = () => {
                   style={{
                     border: "1px solid #333",
                     padding: 8,
+                    backgroundColor: "#fafafa",
                     fontWeight: "bold",
-                    color: "#000000",
+                    fontSize: 11,
                   }}
                 >
-                  {label}
-                  <br />
                   MALE
                 </th>,
                 <th
@@ -301,17 +352,17 @@ const MonthlySummaryReportPrint = () => {
                   style={{
                     border: "1px solid #333",
                     padding: 8,
+                    backgroundColor: "#fafafa",
                     fontWeight: "bold",
-                    color: "#000000",
+                    fontSize: 11,
                   }}
                 >
-                  {label}
-                  <br />
                   FEMALE
                 </th>,
               ])}
             </tr>
           </thead>
+
           <tbody>
             {months.map((month) => {
               const socpen = getMonthData(reportData.socpen, month);
@@ -325,7 +376,14 @@ const MonthlySummaryReportPrint = () => {
 
               return (
                 <tr key={month}>
-                  <td style={{ border: "1px solid #333", padding: 8 }}>
+                  <td
+                    style={{
+                      border: "1px solid #333",
+                      padding: 8,
+                      fontWeight: "bold",
+                      backgroundColor: "#f9f9f9",
+                    }}
+                  >
                     {month}
                   </td>
                   {[
@@ -343,8 +401,8 @@ const MonthlySummaryReportPrint = () => {
                       style={{
                         border: "1px solid #333",
                         padding: 8,
-                        color: "#000000",
                         fontWeight: "bold",
+                        color: "#000",
                       }}
                     >
                       {data.male || ""}
@@ -354,8 +412,8 @@ const MonthlySummaryReportPrint = () => {
                       style={{
                         border: "1px solid #333",
                         padding: 8,
-                        color: "#000000",
                         fontWeight: "bold",
+                        color: "#000",
                       }}
                     >
                       {data.female || ""}
@@ -364,7 +422,8 @@ const MonthlySummaryReportPrint = () => {
                 </tr>
               );
             })}
-            <tr style={{ backgroundColor: "#f9f9f9", fontWeight: "bold" }}>
+
+            <tr style={{ backgroundColor: "#f0f0f0", fontWeight: "bold" }}>
               <td style={{ border: "1px solid #333", padding: 8 }}>TOTAL</td>
               {[
                 totals.socpen,
@@ -381,8 +440,6 @@ const MonthlySummaryReportPrint = () => {
                   style={{
                     border: "1px solid #333",
                     padding: 8,
-                    color: "#000000",
-                    fontWeight: "bold",
                   }}
                 >
                   {data.male}
@@ -392,8 +449,6 @@ const MonthlySummaryReportPrint = () => {
                   style={{
                     border: "1px solid #333",
                     padding: 8,
-                    color: "#000000",
-                    fontWeight: "bold",
                   }}
                 >
                   {data.female}
@@ -404,7 +459,7 @@ const MonthlySummaryReportPrint = () => {
         </table>
 
         <div
-          className="category-totals"
+          className="category-totals page-break"
           style={{
             marginTop: 30,
             display: "grid",
