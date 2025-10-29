@@ -12,8 +12,25 @@ const CitizenListPrint = () => {
     gender: "",
     barangay: "",
   });
-
+  const [notedBy, setNotedBy] = useState("");
+  const [preparedBy, setPreparedBy] = useState("");
   const reportRef = useRef();
+
+  // ✅ Get logged-in user from localStorage
+  const user = JSON.parse(localStorage.getItem("user"));
+
+  // ✅ Fetch head official (for Noted by)
+  useEffect(() => {
+    const fetchHead = async () => {
+      try {
+        const res = await axios.get(`${backendUrl}/api/officials/head`);
+        setNotedBy(res.data?.name || "");
+      } catch (err) {
+        console.error("Failed to fetch head official:", err);
+      }
+    };
+    fetchHead();
+  }, [backendUrl]);
 
   // ✅ Fetch barangays for dropdown
   useEffect(() => {
@@ -28,7 +45,7 @@ const CitizenListPrint = () => {
     fetchBarangays();
   }, [backendUrl]);
 
-  // ✅ Fetch citizens when filters change
+  // ✅ Fetch citizens for print
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
@@ -43,6 +60,14 @@ const CitizenListPrint = () => {
         setLoading(false);
       }
     };
+
+    // Set prepared by user
+    if (user && user.username) {
+      setPreparedBy(user.username);
+    } else {
+      setPreparedBy("System User");
+    }
+
     fetchData();
   }, [backendUrl, filters]);
 
@@ -52,26 +77,76 @@ const CitizenListPrint = () => {
     setFilters((prev) => ({ ...prev, [name]: value }));
   };
 
-  // ✅ Print only filtered citizens
+  // ✅ Print report with signature area
   const handlePrint = () => {
     if (!reportRef.current) return;
 
-    const printContents = reportRef.current.innerHTML;
+    const printContents = `
+      <h3 style="text-align:center; margin-bottom: 5px; text-transform:uppercase;">San Jose, Occidental Mindoro</h3>
+      <p style="text-align:center; margin-top: 0;">${new Date().toLocaleDateString()}</p>
+      <table style="width:100%; border-collapse: collapse; margin-top: 20px;">
+        <thead>
+          <tr>
+            <th style="border:1px solid #333; padding:6px;">#</th>
+            <th style="border:1px solid #333; padding:6px;">Full Name</th>
+            <th style="border:1px solid #333; padding:6px;">Gender</th>
+            <th style="border:1px solid #333; padding:6px;">Barangay</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${citizens
+            .map(
+              (c, idx) => `
+            <tr>
+              <td style="border:1px solid #333; padding:6px; text-align:center;">${
+                idx + 1
+              }</td>
+              <td style="border:1px solid #333; padding:6px;">${c.lastName}, ${
+                c.firstName
+              } ${c.middleName || ""} ${c.suffix || ""}</td>
+              <td style="border:1px solid #333; padding:6px; text-align:center;">${
+                c.gender
+              }</td>
+              <td style="border:1px solid #333; padding:6px; text-align:center;">${
+                c.barangay_name || ""
+              }</td>
+            </tr>
+          `
+            )
+            .join("")}
+          <tr>
+            <td colspan="4" style="text-align:right; padding:6px; font-weight:bold; border:1px solid #333;">
+              Total: ${citizens.length}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div style="margin-top:60px; display:flex; justify-content:space-between; width:80%; margin-left:auto; margin-right:auto;">
+        <div style="text-align:center;">
+          <p style="margin-bottom:60px;">Prepared by:</p>
+          <p style="text-decoration:underline; font-weight:bold; text-transform:uppercase;">
+            ${(preparedBy || "System User").toUpperCase()}
+          </p>
+          <p>OSCA STAFF</p>
+        </div>
+        <div style="text-align:center;">
+          <p style="margin-bottom:60px;">Noted by:</p>
+          <p style="text-decoration:underline; font-weight:bold; text-transform:uppercase;">
+            ${(notedBy || "Municipal Head").toUpperCase()}
+          </p>
+          <p>MSWD/OIC-OSCA HEAD</p>
+        </div>
+      </div>
+    `;
+
     const newWindow = window.open("", "", "width=1000,height=700");
     newWindow.document.write(`
       <html>
         <head>
           <title>Senior Citizens List</title>
-          <style>
-            body { font-family: Arial, sans-serif; padding: 20px; }
-            h2 { text-align: center; margin-bottom: 20px; }
-            table { width: 100%; border-collapse: collapse; }
-            th, td { border: 1px solid #333; padding: 6px; font-size: 12px; }
-            th { background-color: #f0f0f0; }
-            .total-row { font-weight: bold; background-color: #f9f9f9; }
-          </style>
         </head>
-        <body>
+        <body style="font-family: Arial, sans-serif; padding: 20px;">
           ${printContents}
         </body>
       </html>
@@ -138,38 +213,8 @@ const CitizenListPrint = () => {
         </Button>
       </div>
 
-      {/* Hidden Printable Report */}
-      <div ref={reportRef} style={{ display: "none" }}>
-        <h2>Senior Citizens List</h2>
-        <table>
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>Full Name</th>
-              <th>Gender</th>
-              <th>Barangay</th>
-            </tr>
-          </thead>
-          <tbody>
-            {citizens.map((c, idx) => (
-              <tr key={c.id || idx}>
-                <td>{idx + 1}</td>
-                <td>
-                  {c.lastName}, {c.firstName} {c.middleName || ""}{" "}
-                  {c.suffix || ""}
-                </td>
-                <td>{c.gender}</td>
-                <td>{c.barangay_name || ""}</td>
-              </tr>
-            ))}
-            <tr className="total-row">
-              <td colSpan="4" style={{ textAlign: "right" }}>
-                Total: {citizens.length}
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+      {/* Hidden Printable Report (optional placeholder) */}
+      <div ref={reportRef} style={{ display: "none" }}></div>
     </div>
   );
 };

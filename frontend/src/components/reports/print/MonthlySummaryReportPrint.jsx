@@ -18,6 +18,10 @@ const MonthlySummaryReportPrint = () => {
     booklet: [],
   });
 
+  // ✅ Get logged-in user from localStorage
+  const user = JSON.parse(localStorage.getItem("user"));
+  const [notedBy, setNotedBy] = useState("MSWD/OIC-OSCA HEAD"); // ← Replace with actual head’s name if you have it
+
   const reportRef = useRef();
 
   const months = [
@@ -34,6 +38,19 @@ const MonthlySummaryReportPrint = () => {
     "NOVEMBER",
     "DECEMBER",
   ];
+
+  // ✅ Fetch head official (for Noted by)
+  useEffect(() => {
+    const fetchHead = async () => {
+      try {
+        const res = await axios.get(`${backendUrl}/api/officials/head`);
+        setNotedBy(res.data?.name || "");
+      } catch (err) {
+        console.error("Failed to fetch head official:", err);
+      }
+    };
+    fetchHead();
+  }, [backendUrl]);
 
   useEffect(() => {
     fetchAllData();
@@ -52,13 +69,11 @@ const MonthlySummaryReportPrint = () => {
         "utp",
         "booklet",
       ];
-
-      const requests = endpoints.map((endpoint) =>
-        axios.get(`${backendUrl}/api/charts/${endpoint}?year=${year}`)
+      const responses = await Promise.all(
+        endpoints.map((endpoint) =>
+          axios.get(`${backendUrl}/api/charts/${endpoint}?year=${year}`)
+        )
       );
-
-      const responses = await Promise.all(requests);
-
       setReportData({
         socpen: responses[0].data,
         nonsocpen: responses[1].data,
@@ -103,111 +118,39 @@ const MonthlySummaryReportPrint = () => {
   const handlePrint = () => {
     if (!reportRef.current) return;
 
-    const printContents = reportRef.current.innerHTML;
+    const printContents = `
+  ${reportRef.current.innerHTML}
+  <div style="margin-top:60px; display:flex; justify-content:space-between; width:80%; margin-left:auto; margin-right:auto;">
+    <div style="text-align:center;">
+      <p style="margin-bottom:60px; font-size:12px;">Prepared by:</p>
+      <p style="text-decoration:underline; font-weight:bold; font-size:14px;">${user.username.toUpperCase()}</p>
+      <p style="font-size:12px;">OSCA STAFF</p>
+    </div>
+    <div style="text-align:center;">
+      <p style="margin-bottom:60px; font-size:12px;">Noted by:</p>
+      <p style="text-decoration:underline; font-weight:bold; font-size:14px;">${notedBy.toUpperCase()}</p>
+      <p style="font-size:12px;">MSWD/OIC-OSCA HEAD</p>
+    </div>
+  </div>
+`;
+
     const newWindow = window.open("", "", "width=1200,height=800");
     newWindow.document.write(`
       <html>
         <head>
           <title>Annual Summary Report ${year}</title>
           <style>
-          @page {
-            size: A4 landscape;
-            margin: 1cm;
-          }
-
-          body { 
-            font-family: Arial, sans-serif; 
-            padding: 10px; 
-            font-size: 10px;
-          }
-
-          .report-header {
-            text-align: center;
-            margin-bottom: 10px;
-          }
-
-          .report-title {
-            font-size: 16px;
-            font-weight: bold;
-            margin-bottom: 5px;
-          }
-
-          .report-year {
-            font-size: 12px;
-            color: #666;
-          }
-
-          table { 
-            width: 100%; 
-            border-collapse: collapse; 
-            margin-top: 10px;
-          }
-
-          th, td { 
-            border: 1px solid #333; 
-            padding: 3px 4px;
-            text-align: center;
-            font-weight: bold;
-          }
-
-          th {
-            background-color: #f2f2f2; 
-            font-size: 9px;
-          }
-
-          thead th {
-            vertical-align: middle;
-          }
-
-          .month-header {
-            background-color: #e0e0e0;
-          }
-
-          .total-row {
-            background-color: #f9f9f9;
-            font-weight: bold;
-          }
-
-          .category-totals {
-            margin-top: 15px;
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 10px;
-          }
-
-          .total-box {
-            border: 1px solid #333;
-            padding: 8px;
-            text-align: center;
-          }
-
-          .total-label {
-            font-size: 10px;
-            font-weight: bold;
-            margin-bottom: 2px;
-          }
-
-          .total-value {
-            font-size: 12px;
-            color: #000;
-          }
-
-          @media print {
-            body {
-              zoom: 90%;
-            }
-
-            .page-break {
-              page-break-before: always;
-            }
-          }
-
-        </style>
-
+            @page { size: A4 landscape; margin: 1cm; }
+            body { font-family: Arial, sans-serif; padding: 10px; font-size: 10px; }
+            table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+            th, td { border: 1px solid #333; padding: 3px 4px; text-align: center; font-weight: bold; }
+            th { background-color: #f2f2f2; font-size: 9px; }
+            .report-header { text-align: center; margin-bottom: 10px; }
+            .report-title { font-size: 16px; font-weight: bold; margin-bottom: 5px; }
+            @media print { body { zoom: 90%; } .page-break { page-break-before: always; } }
+          </style>
         </head>
-        <body>
-          ${printContents}
-        </body>
+        <body>${printContents}</body>
       </html>
     `);
     newWindow.document.close();
@@ -265,12 +208,16 @@ const MonthlySummaryReportPrint = () => {
           className="report-header"
           style={{ textAlign: "center", marginBottom: 30 }}
         >
-          <div
+          <h3
             className="report-title"
-            style={{ fontSize: 24, fontWeight: "bold", marginBottom: 10 }}
+            style={{
+              fontWeight: "bold",
+              marginBottom: 10,
+              textTransform: "uppercase",
+            }}
           >
-            Annual Summary Report
-          </div>
+            San Jose, Occidental Mindoro
+          </h3>
           <div className="report-year" style={{ fontSize: 18, color: "#666" }}>
             {year}
           </div>
