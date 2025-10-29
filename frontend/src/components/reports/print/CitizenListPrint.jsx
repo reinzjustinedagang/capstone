@@ -8,9 +8,12 @@ const CitizenListPrint = () => {
   const [citizens, setCitizens] = useState([]);
   const [barangays, setBarangays] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [remarksOptions, setRemarksOptions] = useState(["All Remarks"]); // array
+  const [remarksOption, setRemarksOption] = useState("All Remarks"); // selected value
   const [filters, setFilters] = useState({
     gender: "",
     barangay: "",
+    remarks: "All Remarks",
   });
   const [notedBy, setNotedBy] = useState("");
   const [preparedBy, setPreparedBy] = useState("");
@@ -24,7 +27,11 @@ const CitizenListPrint = () => {
     const fetchHead = async () => {
       try {
         const res = await axios.get(`${backendUrl}/api/officials/head`);
+        const remarksRes = await axios.get(
+          `${backendUrl}/api/senior-citizens/filters/remarks`
+        );
         setNotedBy(res.data?.name || "");
+        setRemarksOptions(["All Remarks", ...remarksRes.data.remarks]); // keep “All Remarks” as first option
       } catch (err) {
         console.error("Failed to fetch head official:", err);
       }
@@ -51,7 +58,7 @@ const CitizenListPrint = () => {
       setLoading(true);
       try {
         const res = await axios.get(`${backendUrl}/api/charts/citizens/print`, {
-          params: filters,
+          params: { ...filters, remarks: remarksOption },
         });
         setCitizens(res.data?.citizens || []);
       } catch (err) {
@@ -61,7 +68,6 @@ const CitizenListPrint = () => {
       }
     };
 
-    // Set prepared by user
     if (user && user.username) {
       setPreparedBy(user.username);
     } else {
@@ -69,7 +75,7 @@ const CitizenListPrint = () => {
     }
 
     fetchData();
-  }, [backendUrl, filters]);
+  }, [backendUrl, filters, remarksOption]);
 
   // ✅ Handle filter changes
   const handleFilterChange = (e) => {
@@ -198,6 +204,24 @@ const CitizenListPrint = () => {
             ) : (
               <option disabled>No barangays available</option>
             )}
+          </select>
+        </div>
+
+        {/* Remarks Filter */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Remarks:
+          </label>
+          <select
+            value={remarksOption}
+            onChange={(e) => setRemarksOption(e.target.value)}
+            className="border border-gray-300 px-3 py-1 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            {remarksOptions.map((remark, i) => (
+              <option key={i} value={remark}>
+                {remark}
+              </option>
+            ))}
           </select>
         </div>
 

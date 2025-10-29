@@ -183,22 +183,15 @@ router.get("/remarks", async (req, res) => {
 // routes/chartRoutes.js
 router.get("/citizens/print", async (req, res) => {
   try {
-    const {
-      search,
-      barangay,
-      gender,
-      ageRange,
-      healthStatus,
-      sortBy,
-      sortOrder,
-    } = req.query;
+    const { search, barangay, gender, ageRange, remarks, sortBy, sortOrder } =
+      req.query;
 
     const citizens = await reportService.getFilteredCitizensForPrint({
       search,
       barangay,
       gender,
       ageRange,
-      healthStatus,
+      remarks,
       sortBy,
       sortOrder,
     });

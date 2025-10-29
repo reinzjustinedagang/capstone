@@ -478,15 +478,8 @@ exports.getRemarksReport = async () => {
 
 // service
 exports.getFilteredCitizensForPrint = async (options) => {
-  const {
-    search,
-    barangay,
-    gender,
-    ageRange,
-    healthStatus,
-    sortBy,
-    sortOrder,
-  } = options;
+  const { search, barangay, gender, ageRange, remarks, sortBy, sortOrder } =
+    options;
 
   const params = [];
   let where =
@@ -516,9 +509,9 @@ exports.getFilteredCitizensForPrint = async (options) => {
   }
 
   // Health status filter
-  if (healthStatus && healthStatus !== "" && healthStatus !== "All Remarks") {
+  if (remarks && remarks !== "" && remarks !== "All Remarks") {
     where += ` AND JSON_UNQUOTE(JSON_EXTRACT(sc.form_data, '$.remarks')) = ?`;
-    params.push(healthStatus);
+    params.push(remarks);
   }
 
   // Age range filter
