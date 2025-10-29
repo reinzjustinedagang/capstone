@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import Button from "../UI/Button";
 import Delete from "../UI/Button/Delete";
@@ -74,6 +74,8 @@ const SeniorCitizenList = ({ onEdit, onId, onView }) => {
   const [archiving, setArchiving] = useState(false);
   const [selectedArchiveCitizen, setSelectedArchiveCitizen] = useState(null);
 
+  const abortControllerRef = useRef(null);
+
   const fetchRemarks = async () => {
     try {
       const response = await axios.get(
@@ -94,8 +96,17 @@ const SeniorCitizenList = ({ onEdit, onId, onView }) => {
 
   // Fetch Citizens
   const fetchCitizens = async () => {
+    // Cancel previous request if still running
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+
     setLoading(true);
     setError("");
+
     try {
       const params = {
         page,
@@ -116,9 +127,11 @@ const SeniorCitizenList = ({ onEdit, onId, onView }) => {
         {
           params,
           withCredentials: true,
+          signal: controller.signal, // ✅ Important
         }
       );
 
+      // Only set data if not aborted
       setSeniorCitizens(
         response.data.citizens.map((citizen) => ({
           ...citizen,
@@ -130,8 +143,12 @@ const SeniorCitizenList = ({ onEdit, onId, onView }) => {
       );
       setTotalCount(response.data.total);
       setTotalPages(response.data.totalPages);
-    } catch {
-      setError("Failed to load senior citizens. Please try again.");
+    } catch (err) {
+      if (axios.isCancel(err) || err.name === "CanceledError") {
+        // console.log("Request cancelled");
+      } else {
+        setError("Failed to load senior citizens. Please try again.");
+      }
     } finally {
       setLoading(false);
     }
@@ -227,8 +244,18 @@ const SeniorCitizenList = ({ onEdit, onId, onView }) => {
   ];
 
   // Effects
+  // ✅ Debounce search to avoid excessive requests
   useEffect(() => {
-    fetchCitizens();
+    const delayDebounce = setTimeout(() => {
+      fetchCitizens();
+    }, 400); // adjust debounce delay
+
+    return () => {
+      clearTimeout(delayDebounce);
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+    };
   }, [
     page,
     searchTerm,
@@ -325,7 +352,21 @@ const SeniorCitizenList = ({ onEdit, onId, onView }) => {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {seniorCitizens.length > 0 ? (
+              {loading ? (
+                <tr>
+                  <td
+                    colSpan="9"
+                    className="px-6 py-10 text-center text-gray-500"
+                  >
+                    <div className="flex justify-center items-center space-x-3">
+                      <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
+                      <span className="text-gray-700 font-medium">
+                        Loading senior citizens...
+                      </span>
+                    </div>
+                  </td>
+                </tr>
+              ) : seniorCitizens.length > 0 ? (
                 seniorCitizens.map((citizen) => (
                   <tr key={citizen.id}>
                     <td className="px-6 py-4 text-sm text-gray-500">
@@ -452,19 +493,10 @@ const SeniorCitizenList = ({ onEdit, onId, onView }) => {
               ) : (
                 <tr>
                   <td
-                    colSpan="8"
-                    className="px-6 py-4 text-center text-gray-500"
+                    colSpan="9"
+                    className="px-6 py-10 text-center text-gray-500"
                   >
-                    {loading ? (
-                      <div className="flex justify-center items-center py-12">
-                        <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
-                        <p className="ml-2 text-gray-600">
-                          Loading Senior Citizen...
-                        </p>
-                      </div>
-                    ) : (
-                      "No senior citizens found."
-                    )}
+                    No senior citizens found.
                   </td>
                 </tr>
               )}

@@ -8,8 +8,8 @@ const CitizenListPrint = () => {
   const [citizens, setCitizens] = useState([]);
   const [barangays, setBarangays] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [remarksOptions, setRemarksOptions] = useState(["All Remarks"]); // array
-  const [remarksOption, setRemarksOption] = useState("All Remarks"); // selected value
+  const [remarksOptions, setRemarksOptions] = useState(["All Remarks"]);
+  const [remarksOption, setRemarksOption] = useState("All Remarks");
   const [filters, setFilters] = useState({
     gender: "",
     barangay: "",
@@ -19,27 +19,27 @@ const CitizenListPrint = () => {
   const [preparedBy, setPreparedBy] = useState("");
   const reportRef = useRef();
 
-  // ✅ Get logged-in user from localStorage
+  // ✅ Get logged-in user
   const user = JSON.parse(localStorage.getItem("user"));
 
-  // ✅ Fetch head official (for Noted by)
+  // ✅ Fetch head official + remarks
   useEffect(() => {
     const fetchHead = async () => {
       try {
-        const res = await axios.get(`${backendUrl}/api/officials/head`);
-        const remarksRes = await axios.get(
-          `${backendUrl}/api/senior-citizens/filters/remarks`
-        );
-        setNotedBy(res.data?.name || "");
-        setRemarksOptions(["All Remarks", ...remarksRes.data.remarks]); // keep “All Remarks” as first option
+        const [headRes, remarksRes] = await Promise.all([
+          axios.get(`${backendUrl}/api/officials/head`),
+          axios.get(`${backendUrl}/api/senior-citizens/filters/remarks`),
+        ]);
+        setNotedBy(headRes.data?.name || "");
+        setRemarksOptions(["All Remarks", ...remarksRes.data.remarks]);
       } catch (err) {
-        console.error("Failed to fetch head official:", err);
+        console.error("Failed to fetch head official/remarks:", err);
       }
     };
     fetchHead();
   }, [backendUrl]);
 
-  // ✅ Fetch barangays for dropdown
+  // ✅ Fetch barangays
   useEffect(() => {
     const fetchBarangays = async () => {
       try {
@@ -52,7 +52,7 @@ const CitizenListPrint = () => {
     fetchBarangays();
   }, [backendUrl]);
 
-  // ✅ Fetch citizens for print
+  // ✅ Fetch citizens
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
@@ -68,12 +68,7 @@ const CitizenListPrint = () => {
       }
     };
 
-    if (user && user.username) {
-      setPreparedBy(user.username);
-    } else {
-      setPreparedBy("System User");
-    }
-
+    setPreparedBy(user?.username || "System User");
     fetchData();
   }, [backendUrl, filters, remarksOption]);
 
@@ -83,13 +78,26 @@ const CitizenListPrint = () => {
     setFilters((prev) => ({ ...prev, [name]: value }));
   };
 
-  // ✅ Print report with signature area
+  // ✅ Print report
   const handlePrint = () => {
     if (!reportRef.current) return;
 
+    // ⬇️ Create filter summary for print header
+    const selectedBarangay = filters.barangay || "All Barangays";
+    const selectedRemarks = remarksOption || "All Remarks";
+    const filterSummary = `${selectedRemarks} • ${selectedBarangay}`;
+
     const printContents = `
-      <h3 style="text-align:center; margin-bottom: 5px; text-transform:uppercase;">San Jose, Occidental Mindoro</h3>
-      <p style="text-align:center; margin-top: 0;">${new Date().toLocaleDateString()}</p>
+      <h3 style="text-align:center; margin-bottom: 5px; text-transform:uppercase;">
+        San Jose, Occidental Mindoro
+      </h3>
+      <p style="text-align:center; margin: 0; font-weight: bold;">
+        ${filterSummary}
+      </p>
+      <p style="text-align:center; margin-top: 0;">
+        ${new Date().toLocaleDateString()}
+      </p>
+
       <table style="width:100%; border-collapse: collapse; margin-top: 20px;">
         <thead>
           <tr>
@@ -104,20 +112,21 @@ const CitizenListPrint = () => {
             .map(
               (c, idx) => `
             <tr>
-              <td style="border:1px solid #333; padding:6px; text-align:center;">${
-                idx + 1
-              }</td>
-              <td style="border:1px solid #333; padding:6px;">${c.lastName}, ${
-                c.firstName
-              } ${c.middleName || ""} ${c.suffix || ""}</td>
-              <td style="border:1px solid #333; padding:6px; text-align:center;">${
-                c.gender
-              }</td>
-              <td style="border:1px solid #333; padding:6px; text-align:center;">${
-                c.barangay_name || ""
-              }</td>
-            </tr>
-          `
+              <td style="border:1px solid #333; padding:6px; text-align:center;">
+                ${idx + 1}
+              </td>
+              <td style="border:1px solid #333; padding:6px;">
+                ${c.lastName}, ${c.firstName} ${c.middleName || ""} ${
+                c.suffix || ""
+              }
+              </td>
+              <td style="border:1px solid #333; padding:6px; text-align:center;">
+                ${c.gender}
+              </td>
+              <td style="border:1px solid #333; padding:6px; text-align:center;">
+                ${c.barangay_name || ""}
+              </td>
+            </tr>`
             )
             .join("")}
           <tr>
@@ -237,7 +246,7 @@ const CitizenListPrint = () => {
         </Button>
       </div>
 
-      {/* Hidden Printable Report (optional placeholder) */}
+      {/* Hidden Printable Report */}
       <div ref={reportRef} style={{ display: "none" }}></div>
     </div>
   );
