@@ -43,7 +43,7 @@ const Archive = ({ onView }) => {
   const reasonOptions = ["All", "Delete", "Transferred", "Deceased", "Other"];
 
   // UI states
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
   // Restore/Delete states
@@ -394,7 +394,7 @@ const Archive = ({ onView }) => {
               <tr>
                 <td colSpan="7" className="py-12 text-center">
                   <Loader2 className="w-8 h-8 text-blue-500 animate-spin mx-auto" />
-                  <p className="mt-2 text-gray-700 font-medium">
+                  <p className="mt-2 text-gray-700">
                     Loading Archived Citizens...
                   </p>
                 </td>

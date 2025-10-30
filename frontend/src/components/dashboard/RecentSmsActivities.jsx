@@ -62,8 +62,8 @@ const RecentSmsActivities = () => {
       <div className="space-y-4">
         {loading ? (
           <div className="flex items-center justify-start">
-            <Loader2 className="w-6 h-6 text-blue-500 animate-spin" />
-            <span className="ml-2 text-gray-600">Loading...</span>
+            <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
+            <span className="ml-2 text-gray-700 text-base">Loading...</span>
           </div>
         ) : activities.length > 0 ? (
           activities.map((sms, idx) => (

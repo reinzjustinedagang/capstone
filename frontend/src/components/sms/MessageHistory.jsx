@@ -20,6 +20,7 @@ const MessageHistory = () => {
   const [filterStatus, setFilterStatus] = useState("All");
   const [allUsers, setAllUsers] = useState(["All"]);
   const [showFilters, setShowFilters] = useState(false);
+  const [selectedRecipients, setSelectedRecipients] = useState(null);
 
   // Current logged in user
   const [currentRole, setCurrentRole] = useState(null);
@@ -267,8 +268,10 @@ const MessageHistory = () => {
                     className="px-6 py-12 text-center text-gray-500 text-sm"
                   >
                     <div className="flex justify-center items-center">
-                      <Loader2 className="animate-spin h-6 w-6 text-blue-600 mr-2" />
-                      Loading history...
+                      <Loader2 className="animate-spin h-8 w-8 text-blue-600 mr-2" />
+                      <span className="ml-2 text-gray-600 text-base">
+                        Loading message history...
+                      </span>
                     </div>
                   </td>
                 </tr>
@@ -290,13 +293,19 @@ const MessageHistory = () => {
 
                   return (
                     <tr key={log.id}>
-                      <td className="px-6 py-4 text-sm text-gray-700 relative group cursor-pointer">
+                      <td
+                        className="px-6 py-4 text-sm text-gray-700 relative group cursor-pointer"
+                        onClick={() =>
+                          setSelectedRecipients(
+                            selectedRecipients === log.id ? null : log.id
+                          )
+                        } // toggle on tap
+                      >
                         {recipientCount} recipient
                         {recipientCount !== 1 ? "s" : ""}
-                        {/* Tooltip */}
-                        {/* Tooltip */}
-                        {log.recipients && (
-                          <div className="absolute top-1/2 left-full transform -translate-y-1/2 ml-3 z-50 opacity-0 group-hover:opacity-100 transition-opacity duration-200 bg-gray-800 text-white text-xs rounded-lg px-3 py-2 whitespace-pre-wrap max-w-xs w-max shadow-lg pointer-events-none">
+                        {/* Tooltip / Popup */}
+                        {log.recipients && selectedRecipients === log.id && (
+                          <div className="absolute left-0 top-full mt-2 z-50 bg-gray-800 text-white text-xs rounded-lg px-3 py-2 whitespace-pre-wrap max-w-xs w-max shadow-lg">
                             {Array.isArray(log.recipients)
                               ? log.recipients.join(", ")
                               : log.recipients

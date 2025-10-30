@@ -53,8 +53,10 @@ const RecentRegistrations = () => {
                   className="px-4 py-6 text-sm text-center text-gray-500"
                 >
                   <div className="flex items-center justify-center">
-                    <Loader2 className="w-6 h-6 text-blue-500 animate-spin" />
-                    <span className="ml-2 text-gray-600">Loading...</span>
+                    <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
+                    <span className="ml-2 text-gray-700 text-base">
+                      Loading...
+                    </span>
                   </div>
                 </td>
               </tr>

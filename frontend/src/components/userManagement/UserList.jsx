@@ -194,8 +194,10 @@ const UserList = ({ onEdit }) => {
 
         {loading ? (
           <div className="p-6 text-center text-gray-500 flex justify-center items-center">
-            <Loader2 className="animate-spin h-6 w-6 mr-3 text-blue-500" />
-            Loading users...
+            <Loader2 className="animate-spin h-8 w-8 mr-3 text-blue-500" />
+            <span className="ml-2 text-gray-600 text-base">
+              Loading users...
+            </span>
           </div>
         ) : (
           <div className="overflow-x-auto">

@@ -53,7 +53,7 @@ const SeniorCitizenList = ({ onEdit, onId, onView }) => {
   const [showFilters, setShowFilters] = useState(false);
 
   // UI States
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
   // Delete states
@@ -360,7 +360,7 @@ const SeniorCitizenList = ({ onEdit, onId, onView }) => {
                   >
                     <div className="flex justify-center items-center space-x-3">
                       <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
-                      <span className="text-gray-700 font-medium">
+                      <span className="text-gray-700 ">
                         Loading senior citizens...
                       </span>
                     </div>

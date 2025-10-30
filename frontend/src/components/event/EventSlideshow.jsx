@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import Modal from "../UI/Modal";
-import { ChevronLeft, ChevronRight, Trash2, CheckCircle } from "lucide-react";
+import { ChevronLeft, ChevronRight, Trash2 } from "lucide-react";
 
 const EventSlideshow = () => {
   const [events, setEvents] = useState([]);
@@ -14,7 +14,10 @@ const EventSlideshow = () => {
   const backendUrl =
     import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
 
-  // Fetch events
+  const touchStartX = useRef(0);
+  const touchEndX = useRef(0);
+
+  // ─── Fetch Events ──────────────────────────────────────────────
   const fetchEvents = async () => {
     try {
       const res = await axios.get(`${backendUrl}/api/events/slideshow`, {
@@ -30,7 +33,7 @@ const EventSlideshow = () => {
     fetchEvents();
   }, []);
 
-  // Auto-slide
+  // ─── Auto Slide ────────────────────────────────────────────────
   useEffect(() => {
     if (events.length === 0) return;
     const interval = setInterval(() => {
@@ -39,6 +42,7 @@ const EventSlideshow = () => {
     return () => clearInterval(interval);
   }, [events]);
 
+  // ─── Manual Navigation ─────────────────────────────────────────
   const prevSlide = () => {
     setCurrentIndex((prev) => (prev === 0 ? events.length - 1 : prev - 1));
   };
@@ -47,7 +51,34 @@ const EventSlideshow = () => {
     setCurrentIndex((prev) => (prev + 1) % events.length);
   };
 
-  // Delete event
+  // ─── Swipe Handlers (Mobile) ───────────────────────────────────
+  const handleTouchStart = (e) => {
+    touchStartX.current = e.touches[0].clientX;
+  };
+
+  const handleTouchMove = (e) => {
+    touchEndX.current = e.touches[0].clientX;
+  };
+
+  const handleTouchEnd = () => {
+    const deltaX = touchStartX.current - touchEndX.current;
+
+    if (Math.abs(deltaX) > 50) {
+      if (deltaX > 0) {
+        // swipe left → next
+        nextSlide();
+      } else {
+        // swipe right → previous
+        prevSlide();
+      }
+    }
+
+    // reset
+    touchStartX.current = 0;
+    touchEndX.current = 0;
+  };
+
+  // ─── Delete Event ──────────────────────────────────────────────
   const handleDelete = async () => {
     if (!eventToDelete) return;
     setLoading(true);
@@ -71,48 +102,51 @@ const EventSlideshow = () => {
 
   if (!currentEvent) {
     return (
-      <section className="relative h-64 sm:h-80 md:h-[50vh] flex items-center justify-center bg-gray-200 rounded-xl shadow-lg mx-4">
+      <section className="relative h-64 sm:h-80 md:h-[50vh] flex items-center justify-center bg-gray-200 rounded-xl shadow-lg">
         <p className="text-gray-500">No slideshow to display.</p>
       </section>
     );
   }
 
   return (
-    <section className="relative h-64 sm:h-80 md:h-[50vh] flex items-center justify-center overflow-hidden rounded-xl shadow-lg mx-4">
+    <section
+      className="relative h-64 sm:h-80 md:h-[50vh] flex items-center justify-center overflow-hidden rounded-xl shadow-lg"
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+    >
       {/* Background image */}
       <div
-        className="absolute inset-0 bg-cover bg-center transition-all duration-700"
+        className="absolute inset-0 bg-cover bg-center transition-all duration-700 ease-in-out"
         style={{ backgroundImage: `url(${currentEvent.image_url})` }}
       />
 
       {/* Overlay */}
       <div className="absolute inset-0 bg-black/25 rounded-xl" />
 
-      {/* Event info */}
+      {/* Event info + delete button */}
       <div className="absolute bottom-4 sm:bottom-8 left-1/2 -translate-x-1/2 text-center text-white px-4 sm:px-6 max-w-xs sm:max-w-xl">
-        {/* Delete button */}
         <button
           onClick={() => {
             setEventToDelete(currentEvent.id);
             setShowConfirmModal(true);
           }}
-          className="mt-3 px-3 py-1 sm:px-4 sm:py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg flex items-center gap-2 mx-auto text-sm sm:text-base"
+          className="bg-white/90 hover:bg-white text-red-500 hover:text-red-600 p-2 rounded-full shadow z-10"
         >
-          <Trash2 className="h-4 w-4" />
-          Delete Slideshow
+          <Trash2 className="h-5 w-5" />
         </button>
       </div>
 
       {/* Navigation buttons */}
       <button
         onClick={prevSlide}
-        className="absolute left-2 sm:left-3 top-1/2 -translate-y-1/2 bg-white/30 hover:bg-white/50 p-2 sm:p-3 rounded-full text-white"
+        className="absolute left-2 sm:left-3 top-1/2 -translate-y-1/2 hover:text-white/50 p-2 sm:p-3 text-white"
       >
         <ChevronLeft className="h-4 sm:h-6 w-4 sm:w-6" />
       </button>
       <button
         onClick={nextSlide}
-        className="absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 bg-white/30 hover:bg-white/50 p-2 sm:p-3 rounded-full text-white"
+        className="absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 hover:text-white/50 p-2 sm:p-3 text-white"
       >
         <ChevronRight className="h-4 sm:h-6 w-4 sm:w-6" />
       </button>
@@ -160,7 +194,7 @@ const EventSlideshow = () => {
         </div>
       </Modal>
 
-      {/* ✅ Success Modal (Delete Confirmation) */}
+      {/* Success Modal */}
       <Modal
         isOpen={showSuccessModal}
         onClose={() => setShowSuccessModal(false)}
