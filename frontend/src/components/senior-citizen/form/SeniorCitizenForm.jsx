@@ -237,7 +237,7 @@ const SeniorCitizenForm = ({ onSubmit, onCancel, onSuccess }) => {
       setShowConfirmModal(false);
       onSubmit?.();
       onSuccess?.();
-      navigate("/staff/senior-citizen-list", {
+      navigate("/admin/senior-citizen-list", {
         state: { message: "New senior citizen added!" },
       });
     } catch (err) {
