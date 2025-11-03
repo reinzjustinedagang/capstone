@@ -27,6 +27,8 @@ const SeniorCitizenForm = ({ onSubmit, onCancel, onSuccess }) => {
   const [documentFile, setDocumentFile] = useState(null);
   const [photoFile, setPhotoFile] = useState(null);
 
+  const [filteredPensionerOptions, setFilteredPensionerOptions] = useState([]);
+
   const [loading, setLoading] = useState(true);
   const [barangayLoading, setBarangayLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -117,6 +119,7 @@ const SeniorCitizenForm = ({ onSubmit, onCancel, onSuccess }) => {
   const handleChange = (e, field) => {
     const { type, value, checked } = e.target;
 
+    // Checkbox handling
     if (field.type === "checkbox") {
       const prev = formData[field.field_name] || [];
       const newVal = checked
@@ -126,9 +129,9 @@ const SeniorCitizenForm = ({ onSubmit, onCancel, onSuccess }) => {
       return;
     }
 
+    // Date handling
     if (field.type === "date") {
       setFormData((prev) => ({ ...prev, [field.field_name]: value }));
-
       if (field.field_name === "birthdate") {
         const birthDate = new Date(value);
         const today = new Date();
@@ -140,7 +143,37 @@ const SeniorCitizenForm = ({ onSubmit, onCancel, onSuccess }) => {
       return;
     }
 
-    setFormData({ ...formData, [field.field_name]: value });
+    // Normal inputs
+    const updatedForm = { ...formData, [field.field_name]: value };
+
+    // 🔹 Dynamic behavior: Remarks → Pensioner filter
+    if (field.field_name.toLowerCase() === "remarks") {
+      const pensionerField = fields.find(
+        (f) => f.field_name.toLowerCase() === "pensioner"
+      );
+
+      if (pensionerField) {
+        const allOptions = pensionerField.options
+          .split(",")
+          .map((opt) => opt.trim());
+
+        let filtered;
+        if (value === "SOCIAL PENSION") {
+          filtered = ["DSWD SOCPEN"];
+          updatedForm["pensioner"] = "DSWD SOCPEN";
+        } else if (value === "NON-SOCIAL PENSION") {
+          filtered = allOptions.filter((opt) => opt !== "DSWD SOCPEN");
+          if (updatedForm["pensioner"] === "DSWD SOCPEN")
+            updatedForm["pensioner"] = "";
+        } else {
+          filtered = allOptions;
+        }
+
+        setFilteredPensionerOptions(filtered);
+      }
+    }
+
+    setFormData(updatedForm);
   };
 
   /** ---------------------------
@@ -322,6 +355,13 @@ const SeniorCitizenForm = ({ onSubmit, onCancel, onSuccess }) => {
           </div>
         );
       case "select":
+        const isPensionerField = field.field_name.toLowerCase() === "pensioner";
+        const optionsList = isPensionerField
+          ? filteredPensionerOptions.length > 0
+            ? filteredPensionerOptions
+            : field.options?.split(",").map((opt) => opt.trim())
+          : field.options?.split(",").map((opt) => opt.trim());
+
         return (
           <div key={field.id}>
             {commonLabel}
@@ -332,14 +372,15 @@ const SeniorCitizenForm = ({ onSubmit, onCancel, onSuccess }) => {
               className="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
             >
               <option value="">Select {field.label}</option>
-              {field.options?.split(",").map((opt) => (
-                <option key={opt.trim()} value={opt.trim()}>
-                  {opt.trim()}
+              {optionsList.map((opt) => (
+                <option key={opt} value={opt}>
+                  {opt}
                 </option>
               ))}
             </select>
           </div>
         );
+
       case "radio":
         return (
           <div key={field.id}>
