@@ -16,7 +16,9 @@ const extractCloudinaryPublicId = (url) => {
 };
 
 exports.getUserCount = async () => {
-  const [result] = await Connection("SELECT COUNT(*) AS count FROM users");
+  const [result] = await Connection(
+    "SELECT COUNT(*) AS count FROM users WHERE blocked = 0 AND registered = 1"
+  );
   return result.count;
 };
 

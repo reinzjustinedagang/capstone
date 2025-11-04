@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import { ChevronDown, ChevronUp, Loader2 } from "lucide-react";
+import { ChevronDown, ChevronUp, Loader2, XCircle } from "lucide-react";
 import Button from "../../UI/Button";
 import Modal from "../../UI/Modal";
 
@@ -203,6 +203,14 @@ const UpdateSeniorCitizenForm = ({ id, onSuccess, onCancel }) => {
       setFormError(
         "Only individuals aged 59 and above can be registered as senior citizens."
       );
+      return;
+    }
+
+    // Check if any pensioner checkbox is checked
+    const hasPension = Object.values(formData.pensioner || {}).some(Boolean);
+
+    if (formData.remarks?.toUpperCase() === "NONE" && hasPension) {
+      setFormError("If remarks is NONE, there should be no pension selected.");
       return;
     }
 
@@ -577,7 +585,12 @@ const UpdateSeniorCitizenForm = ({ id, onSuccess, onCancel }) => {
         </div>
       </div>
 
-      {formError && <p className="text-red-600">{formError}</p>}
+      {formError && (
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg flex items-center">
+          <XCircle className="h-5 w-5 mr-2" />
+          <span>{formError}</span>
+        </div>
+      )}
 
       <div className="flex justify-end mb-6 md:mb-0 gap-3 ">
         <Button variant="secondary" onClick={onCancel} disabled={isSubmitting}>

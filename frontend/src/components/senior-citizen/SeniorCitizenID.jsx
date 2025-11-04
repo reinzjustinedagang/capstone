@@ -8,7 +8,7 @@ import {
   Image,
 } from "@react-pdf/renderer";
 import oscaLogo from "../../assets/osca-sj.png"; // Import your OSCA logo here
-import municipalSeal from "../../assets/osca-logo.png"; // Import your municipal seal here
+import municipalSeal from "../../assets/municipal-logo.png"; // Import your municipal seal here
 
 // Create styles
 const styles = StyleSheet.create({
