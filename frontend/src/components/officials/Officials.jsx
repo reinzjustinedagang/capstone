@@ -19,7 +19,7 @@ const Officials = () => {
   const [activeTab, setActiveTab] = useState("barangay");
   return (
     <>
-      <div className="mt-4 md:mt-0 flex flex-col sm:flex-row justify-end sm:items-center mb-4">
+      {/* <div className="mt-4 md:mt-0 flex flex-col sm:flex-row justify-end sm:items-center mb-4">
         <Button
           variant="primary"
           icon={<Plus className="h-4 w-4 mr-2" />}
@@ -27,7 +27,7 @@ const Officials = () => {
         >
           Add New Position
         </Button>
-      </div>
+      </div> */}
       <div className="bg-white rounded-lg shadow overflow-hidden">
         <div className="border-b border-gray-200">
           <nav className="flex flex-wrap -mb-px">

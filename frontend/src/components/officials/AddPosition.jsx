@@ -151,9 +151,10 @@ const AddPosition = () => {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-xl font-bold mb-4 text-gray-800 flex items-center gap-2">
-        <PlusCircle className="w-6 h-6 text-indigo-600" /> Add New Position
-      </h1>
+      {/* <h1 className="text-xl font-bold mb-4 text-gray-800 flex items-center gap-2">
+        <PlusCircle className="w-6 h-6 text-indigo-600" /> Add New Official
+        Position
+      </h1> */}
 
       {message && (
         <p
@@ -243,8 +244,9 @@ const AddPosition = () => {
       <div>
         <h3 className="text-lg font-semibold mb-3">Existing Positions</h3>
         {loading ? (
-          <div className="flex justify-center items-center py-6">
-            <Loader2 className="w-6 h-6 animate-spin text-gray-500" />
+          <div className="flex flex-col items-center justify-center py-12">
+            <Loader2 className="w-8 h-8 text-blue-500 animate-spin mb-2" />
+            <p className="text-gray-600">Loading positions...</p>
           </div>
         ) : positions.length === 0 ? (
           <div className="text-center py-12">

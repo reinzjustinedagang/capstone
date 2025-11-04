@@ -824,7 +824,7 @@ const SeniorCitizenList = ({ onEdit, onId, onView }) => {
             <XCircle className="w-6 h-6 text-red-500" />
           </div>
           <h3 className="text-lg font-medium text-gray-800 mb-2">
-            Archive Failed
+            Fetching Senior Citizens Failed
           </h3>
           <p className="text-sm text-gray-600 mb-4">{error}</p>
           <Button variant="primary" onClick={() => setError("")}>

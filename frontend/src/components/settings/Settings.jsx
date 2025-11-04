@@ -6,12 +6,14 @@ import {
   BellRing,
   ListIcon,
   ListCheck,
+  UserPlus,
 } from "lucide-react";
 import SmsTab from "./SmsTab";
 import SystemTab from "./SystemTab";
 import SecurityTab from "./SecurityTab";
 import NotificationTab from "./NotificationTab";
 import FormFieldsPage from "./FormFieldPage";
+import AddPosition from "../officials/AddPosition";
 
 const Settings = () => {
   const [activeTab, setActiveTab] = useState("system");
@@ -80,6 +82,19 @@ const Settings = () => {
               <ListCheck className="inline-block h-4 w-4 mr-2" /> Senior Citizen
               Form
             </button>
+            <button
+              onClick={() => setActiveTab("official")}
+              id="senior-form"
+              className={`py-4 px-6 text-center border-b-2 font-medium text-sm transition-colors duration-200
+                ${
+                  activeTab === "official"
+                    ? "border-blue-500 text-blue-600"
+                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                }`}
+            >
+              <UserPlus className="inline-block h-4 w-4 mr-2" /> Add New
+              Official Position
+            </button>
             {/* <button
               onClick={() => setActiveTab("security")}
               className={`py-4 px-6 text-center border-b-2 font-medium text-sm transition-colors duration-200
@@ -109,6 +124,7 @@ const Settings = () => {
           {activeTab === "system" && <SystemTab />}
           {activeTab === "senior-form" && <FormFieldsPage />}
           {activeTab === "notifications" && <NotificationTab />}
+          {activeTab === "official" && <AddPosition />}
         </div>
       </div>
     </>
