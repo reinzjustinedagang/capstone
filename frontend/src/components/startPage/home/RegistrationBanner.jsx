@@ -58,7 +58,7 @@ const RegistrationBanner = () => {
       {/* Registration Instructions */}
       <div className="max-w-4xl mx-auto bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg shadow-lg p-8 text-left">
         <h3 className="text-2xl font-bold text-gray-900 mb-6 text-center">
-          How to Register for OSCA ID
+          Application for Senior Citizen Registration
         </h3>
 
         {/* Qualifications */}

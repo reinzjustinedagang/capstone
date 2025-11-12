@@ -53,7 +53,7 @@ const Benefits = () => {
         {/* Header */}
         <div className="flex flex-col md:flex-row justify-center items-center mb-8">
           <h2 className="text-2xl font-semibold text-gray-900 mb-4 text-center flex items-center gap-2">
-            Benefits
+            Local and National Benefits for Senior Citizens
           </h2>
         </div>
 
