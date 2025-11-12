@@ -30,6 +30,8 @@ const Header = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const backendUrl = import.meta.env.VITE_API_BASE_URL;
+  const isProfilePage = location.pathname === "/admin/my-profile";
+  const isSettingsPage = location.pathname === "/admin/settings";
 
   // 🔹 Dropdown reference
   const dropdownRef = useRef(null);
@@ -208,7 +210,11 @@ const Header = () => {
                       navigate("/admin/my-profile");
                       setShowDropdown(false);
                     }}
-                    className="flex items-center gap-2 w-full px-4 py-2 text-sm hover:bg-blue-600 hover:text-white"
+                    className={`flex items-center gap-2 w-full px-4 py-2 text-sm ${
+                      isProfilePage
+                        ? "bg-blue-700 text-white"
+                        : "hover:bg-blue-600 hover:text-white"
+                    }`}
                   >
                     <UserIcon className="h-4 w-4" />
                     My Profile
@@ -219,7 +225,11 @@ const Header = () => {
                       navigate("/admin/settings");
                       setShowDropdown(false);
                     }}
-                    className="flex items-center gap-2 w-full px-4 py-2 text-sm hover:bg-blue-600 hover:text-white"
+                    className={`flex items-center gap-2 w-full px-4 py-2 text-sm ${
+                      isSettingsPage
+                        ? "bg-blue-700 text-white"
+                        : "hover:bg-blue-600 hover:text-white"
+                    }`}
                   >
                     <Settings className="h-4 w-4" />
                     Settings

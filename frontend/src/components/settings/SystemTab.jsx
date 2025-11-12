@@ -199,6 +199,7 @@ const SystemTab = () => {
           </label>
           <div className="mt-1 relative">
             <input
+              placeholder={loading ? "Loading..." : ""}
               value={formData.systemName}
               onChange={(e) =>
                 setFormData({ ...formData, systemName: e.target.value })
@@ -216,6 +217,7 @@ const SystemTab = () => {
           </label>
           <div className="mt-1 relative">
             <input
+              placeholder={loading ? "Loading..." : ""}
               value={formData.province}
               onChange={(e) =>
                 setFormData({ ...formData, province: e.target.value })
@@ -233,6 +235,7 @@ const SystemTab = () => {
           </label>
           <div className="mt-1 relative">
             <input
+              placeholder={loading ? "Loading..." : ""}
               value={formData.municipality}
               onChange={(e) =>
                 setFormData({ ...formData, municipality: e.target.value })
@@ -250,6 +253,7 @@ const SystemTab = () => {
           </label>
           <div className="mt-1 relative">
             <input
+              placeholder={loading ? "Loading..." : ""}
               value={formData.zipCode}
               onChange={(e) =>
                 setFormData({ ...formData, zipCode: e.target.value })

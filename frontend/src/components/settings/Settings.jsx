@@ -92,7 +92,7 @@ const Settings = () => {
                     : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
                 }`}
             >
-              <UserPlus className="inline-block h-4 w-4 mr-2" /> Add New
+              <UserPlus className="inline-block h-4 w-4 mr-2" />
               Official Position
             </button>
             {/* <button

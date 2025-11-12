@@ -191,7 +191,7 @@ const AddEvent = ({ onEventAdded, onCancel }) => {
             required
           >
             <option value="">-- Select Type --</option>
-            <option value="slideshow">Slideshow</option>
+            <option value="slideshow">Highlight</option>
             <option value="event">Event</option>
           </select>
         </div>

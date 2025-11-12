@@ -78,12 +78,16 @@ const SmsCredentialsForm = () => {
           </label>
           <div className="mt-1 relative">
             <input
-              type="password"
+              type="text"
+              inputMode="none"
+              autoComplete="off"
               value={apiKey}
               onChange={(e) => setApiKey(e.target.value)}
               required
               className="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 pl-10 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+              style={{ WebkitTextSecurity: "disc" }} // visually masks text like password
             />
+
             <KeyRound className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
           </div>
         </div>
@@ -96,6 +100,7 @@ const SmsCredentialsForm = () => {
             <input
               type="text"
               value={senderId}
+              placeholder={loading ? "Loading..." : ""}
               onChange={(e) => setSenderId(e.target.value)}
               className="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 pl-10 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
             />

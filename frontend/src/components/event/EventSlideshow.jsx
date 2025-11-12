@@ -103,7 +103,7 @@ const EventSlideshow = () => {
   if (!currentEvent) {
     return (
       <section className="relative h-64 sm:h-80 md:h-[50vh] flex items-center justify-center bg-gray-200 rounded-xl shadow-lg">
-        <p className="text-gray-500">No slideshow to display.</p>
+        <p className="text-gray-500">No highlight to display.</p>
       </section>
     );
   }
@@ -168,10 +168,10 @@ const EventSlideshow = () => {
       <Modal
         isOpen={showConfirmModal}
         onClose={() => setShowConfirmModal(false)}
-        title="Confirm Delete Event"
+        title="Confirm Delete"
       >
         <div className="mt-4 text-sm text-gray-700">
-          Are you sure you want to delete this event?
+          Are you sure you want to delete this highlight?
         </div>
         <div className="mt-6 flex flex-col sm:flex-row justify-end sm:space-x-4 space-y-2 sm:space-y-0">
           <button
@@ -206,7 +206,7 @@ const EventSlideshow = () => {
           </div>
           <h3 className="text-lg font-medium text-gray-800 mb-2">Deleted</h3>
           <p className="text-sm text-gray-600 mb-4">
-            Event Deleted Successfully!
+            Highlight Deleted Successfully!
           </p>
           <button
             onClick={() => setShowSuccessModal(false)}
