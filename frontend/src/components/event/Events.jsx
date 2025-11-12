@@ -70,7 +70,7 @@ const Events = () => {
                 }`}
             >
               <LucideImagePlay className="inline-block h-4 w-4 mr-2" />{" "}
-              Highlight
+              Highlights
             </button>
           </nav>
         </div>

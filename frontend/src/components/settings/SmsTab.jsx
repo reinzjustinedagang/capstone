@@ -81,6 +81,7 @@ const SmsCredentialsForm = () => {
               type="text"
               inputMode="none"
               autoComplete="off"
+              placeholder={loading ? "Loading..." : ""}
               value={apiKey}
               onChange={(e) => setApiKey(e.target.value)}
               required
