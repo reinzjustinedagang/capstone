@@ -2,6 +2,8 @@ import React, { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import Button from "../../UI/Button";
 import { Printer } from "lucide-react";
+import pilipinas_logo from "../../../assets/bagong-pilipinas.png";
+import sj_logo from "../../../assets/municipal-logo.png";
 
 const MonthlySummaryReportPrint = () => {
   const backendUrl = import.meta.env.VITE_API_BASE_URL;
@@ -17,6 +19,18 @@ const MonthlySummaryReportPrint = () => {
     utp: [],
     booklet: [],
   });
+
+  const toDataURL = (url) =>
+    fetch(url)
+      .then((response) => response.blob())
+      .then(
+        (blob) =>
+          new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onloadend = () => resolve(reader.result);
+            reader.readAsDataURL(blob);
+          })
+      );
 
   // ✅ Get logged-in user from localStorage
   const user = JSON.parse(localStorage.getItem("user"));
@@ -115,7 +129,10 @@ const MonthlySummaryReportPrint = () => {
     );
   };
 
-  const handlePrint = () => {
+  const handlePrint = async () => {
+    const sjLogoBase64 = await toDataURL(sj_logo);
+    const pilipinasLogoBase64 = await toDataURL(pilipinas_logo);
+
     if (!reportRef.current) return;
 
     const printContents = `
@@ -150,7 +167,21 @@ const MonthlySummaryReportPrint = () => {
             @media print { body { zoom: 90%; } .page-break { page-break-before: always; } }
           </style>
         </head>
-        <body>${printContents}</body>
+        <body>
+        <!-- Header with Logos -->
+          <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:20px;">
+            
+            <img src="${sjLogoBase64}" alt="SJ Logo" style="height:70px; width:auto;" />
+            <div style="text-align:center; line-height:1.2;">
+              <h2 style="margin:0; font-size:18px; font-weight:bold;">Republic of the Philippines</h2>
+              <h3 style="margin:0; font-size:16px; font-weight:bold;">Office for Senior Citizen Affairs</h3>
+              <p style="margin:0; font-size:12px;">Burgos Street, San Jose 5100, Occidental Mindoro</p>
+              <p style="margin-top:5px; font-size:12px;">${new Date().toLocaleDateString()}</p>
+            </div>
+
+            <img src="${pilipinasLogoBase64}" alt="Pilipinas Logo" style="height:70px; width:auto;" />
+          </div>
+        ${printContents}</body>
       </html>
     `);
     newWindow.document.close();
@@ -204,7 +235,7 @@ const MonthlySummaryReportPrint = () => {
       </div>
 
       <div ref={reportRef} style={{ display: "none" }}>
-        <div
+        {/* <div
           className="report-header"
           style={{ textAlign: "center", marginBottom: 30 }}
         >
@@ -221,7 +252,7 @@ const MonthlySummaryReportPrint = () => {
           <div className="report-year" style={{ fontSize: 18, color: "#666" }}>
             {year}
           </div>
-        </div>
+        </div> */}
 
         <table
           style={{

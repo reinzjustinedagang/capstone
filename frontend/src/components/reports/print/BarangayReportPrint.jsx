@@ -2,6 +2,8 @@ import React, { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import Button from "../../UI/Button";
 import { Printer } from "lucide-react";
+import pilipinas_logo from "../../../assets/bagong-pilipinas.png";
+import sj_logo from "../../../assets/municipal-logo.png";
 
 const BarangayReportPrint = () => {
   const backendUrl =
@@ -12,6 +14,18 @@ const BarangayReportPrint = () => {
   const reportRef = useRef();
 
   const user = JSON.parse(localStorage.getItem("user"));
+
+  const toDataURL = (url) =>
+    fetch(url)
+      .then((response) => response.blob())
+      .then(
+        (blob) =>
+          new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onloadend = () => resolve(reader.result);
+            reader.readAsDataURL(blob);
+          })
+      );
 
   useEffect(() => {
     const fetchHead = async () => {
@@ -47,15 +61,29 @@ const BarangayReportPrint = () => {
     fetchData();
   }, [backendUrl]);
 
-  const handlePrint = () => {
+  const handlePrint = async () => {
     if (!reportRef.current) return;
 
     const totalMale = data.reduce((sum, item) => sum + item.male_count, 0);
     const totalFemale = data.reduce((sum, item) => sum + item.female_count, 0);
 
+    const sjLogoBase64 = await toDataURL(sj_logo);
+    const pilipinasLogoBase64 = await toDataURL(pilipinas_logo);
+
     const printContents = `
-      <h3 style="text-align:center; margin-bottom: 5px; text-transform:uppercase;">San Jose, Occidental Mindoro</h3>
-      <p style="text-align:center; margin-top: 0;">${new Date().toLocaleDateString()}</p>
+       <!-- Header with Logos -->
+      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:20px;">
+        
+        <img src="${sjLogoBase64}" alt="SJ Logo" style="height:70px; width:auto;" />
+        <div style="text-align:center; line-height:1.2;">
+          <h2 style="margin:0; font-size:18px; font-weight:bold;">Republic of the Philippines</h2>
+          <h3 style="margin:0; font-size:16px; font-weight:bold;">Office for Senior Citizen Affairs</h3>
+          <p style="margin:0; font-size:12px;">Burgos Street, San Jose 5100, Occidental Mindoro</p>
+          <p style="margin-top:5px; font-size:12px;">${new Date().toLocaleDateString()}</p>
+        </div>
+
+        <img src="${pilipinasLogoBase64}" alt="Pilipinas Logo" style="height:70px; width:auto;" />
+      </div>
       <table style="width:100%; border-collapse: collapse; margin-top: 20px;">
         <thead>
           <tr>
