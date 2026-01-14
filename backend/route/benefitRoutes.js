@@ -113,6 +113,18 @@ router.get("/:id", async (req, res) => {
   }
 });
 
+router.get("/:id/recipients", async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const recipients = await benefitService.getRecipients(id);
+    res.status(200).json(recipients);
+  } catch (err) {
+    console.error("Failed to fetch benefit recipients:", err);
+    res.status(500).json({ message: "Failed to fetch recipients" });
+  }
+});
+
 // POST create benefit
 router.post("/", isAuthenticated, upload.single("image"), async (req, res) => {
   const { type, title, description, provider, enacted_date } = req.body;
@@ -157,7 +169,15 @@ router.put(
   upload.single("image"),
   async (req, res) => {
     const { id } = req.params;
-    const { type, title, description, provider, enacted_date } = req.body;
+    const {
+      type,
+      title,
+      description,
+      provider,
+      enacted_date,
+      recipients, // 👈 NEW
+    } = req.body;
+
     const user = req.session.user;
     const ip = req.userIp;
 
@@ -196,6 +216,14 @@ router.put(
 
       if (!updated)
         return res.status(404).json({ message: "Benefit not found" });
+
+      // 👇 ADD RECIPIENTS ONLY IF PROVIDED
+      if (recipients) {
+        const parsedRecipients =
+          typeof recipients === "string" ? JSON.parse(recipients) : recipients;
+
+        await benefitService.updateRecipients(id, parsedRecipients, user, ip);
+      }
 
       res.status(200).json({ message: "Benefit updated" });
     } catch (err) {

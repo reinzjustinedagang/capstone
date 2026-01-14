@@ -217,25 +217,55 @@ async function initTables() {
 
     await pool.query(
       `
-  CREATE TABLE IF NOT EXISTS benefits (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    description TEXT,
-    provider VARCHAR(255),
-    type VARCHAR(255),
-    enacted_date DATE NULL,
-    image_url VARCHAR(500),
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    deleted INT(1) DEFAULT 0,
-    deleted_at TIMESTAMP NULL,
-    created_by INT NOT NULL, 
-    approved INT(1) DEFAULT 0,
-    approved_at TIMESTAMP NULL,
-    approved_by INT NULL
-  )
-  `
+      CREATE TABLE IF NOT EXISTS benefits (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        description TEXT,
+        provider VARCHAR(255),
+        type VARCHAR(255),
+        enacted_date DATE NULL,
+        image_url VARCHAR(500),
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        deleted INT(1) DEFAULT 0,
+        deleted_at TIMESTAMP NULL,
+        created_by INT NOT NULL, 
+        approved INT(1) DEFAULT 0,
+        approved_at TIMESTAMP NULL,
+        approved_by INT NULL
+      )
+      `
     );
     console.log("✅ benefits table ready.");
+
+       await pool.query(
+      `
+      CREATE TABLE IF NOT EXISTS benefit_recipients (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+
+        benefit_id INT NOT NULL,
+        senior_id INT NOT NULL,
+
+        received_date DATE DEFAULT CURRENT_DATE,
+        remarks VARCHAR(255),
+
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+        -- Foreign keys
+        CONSTRAINT fk_benefit
+          FOREIGN KEY (benefit_id) REFERENCES benefits(id)
+          ON DELETE CASCADE,
+
+        CONSTRAINT fk_senior
+          FOREIGN KEY (senior_id) REFERENCES senior_citizens(id)
+          ON DELETE CASCADE,
+
+        -- Prevent duplicate records
+        UNIQUE KEY unique_benefit_senior (benefit_id, senior_id)
+      )
+      `
+    );
+    console.log("✅ benefits recipient table ready.");
 
     await pool.query(
       `

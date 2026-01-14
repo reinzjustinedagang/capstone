@@ -298,7 +298,12 @@ exports.getRecentSeniorCitizens = async () => {
 
 exports.getAllSeniorCitizens = async () => {
   try {
-    const result = await Connection(`SELECT * FROM senior_citizens`);
+    const result = await Connection(`SELECT * FROM senior_citizens 
+        WHERE deleted = 0 
+        AND age >= 60 
+        AND registered = 1 
+        AND archived = 0
+      ORDER BY lastName ASC`);
     return result;
   } catch (error) {
     console.error("Error fetching all senior citizens:", error);

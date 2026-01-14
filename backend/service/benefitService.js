@@ -257,3 +257,46 @@ exports.remove = async (id, user, ip) => {
 
   return result.affectedRows > 0;
 };
+
+exports.getRecipients = async (benefitId) => {
+  const query = `
+    SELECT senior_id
+    FROM benefit_recipients
+    WHERE benefit_id = ?
+  `;
+
+  const rows = await Connection(query, [benefitId]);
+
+  // Return array of IDs only
+  return rows.map((r) => r.senior_id);
+};
+
+exports.updateRecipients = async (benefitId, seniorIds, user, ip) => {
+  if (!Array.isArray(seniorIds)) throw new Error("Recipients must be an array");
+
+  // Remove existing recipients (optional but recommended)
+  await Connection(`DELETE FROM benefit_recipients WHERE benefit_id = ?`, [
+    benefitId,
+  ]);
+
+  if (seniorIds.length === 0) return true;
+
+  const values = seniorIds.map((sid) => [benefitId, sid]);
+
+  await Connection(
+    `INSERT INTO benefit_recipients (benefit_id, senior_id)
+     VALUES ?`,
+    [values]
+  );
+
+  await logAudit(
+    user.id,
+    user.email,
+    user.role,
+    "UPDATE",
+    `Updated benefit recipients (Benefit ID: ${benefitId})`,
+    ip
+  );
+
+  return true;
+};

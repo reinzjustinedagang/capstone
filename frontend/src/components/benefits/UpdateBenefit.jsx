@@ -34,6 +34,9 @@ const UpdateBenefit = ({ benefitId, onSuccess, onCancel }) => {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
 
+  const [seniors, setSeniors] = useState([]);
+  const [selectedSeniors, setSelectedSeniors] = useState([]);
+
   const fileInputRef = useRef(null);
 
   const backendUrl =
@@ -41,31 +44,52 @@ const UpdateBenefit = ({ benefitId, onSuccess, onCancel }) => {
 
   // Fetch benefit details
   useEffect(() => {
-    if (!benefitId) return;
-
-    const fetchBenefit = async () => {
+    const fetchData = async () => {
       try {
-        const res = await axios.get(`${backendUrl}/api/benefits/${benefitId}`);
-        const data = res.data;
+        // Fetch all senior citizens (always)
+        const seniorsRes = await axios.get(
+          `${backendUrl}/api/senior-citizens/all`,
+          { withCredentials: true }
+        );
+        setSeniors(seniorsRes.data);
 
-        // Normalize enacted_date to YYYY-MM-DD if it exists
-        if (data.enacted_date) {
-          data.enacted_date = data.enacted_date.split("T")[0];
+        // Fetch benefit details (only if benefitId exists)
+        if (benefitId) {
+          const benefitRes = await axios.get(
+            `${backendUrl}/api/benefits/${benefitId}`
+          );
+
+          const data = benefitRes.data;
+
+          // Normalize enacted_date to YYYY-MM-DD
+          if (data.enacted_date) {
+            data.enacted_date = data.enacted_date.split("T")[0];
+          }
+
+          setFormData(data);
+
+          if (data.image_url) {
+            setImagePreview(data.image_url);
+          }
         }
+        if (benefitId) {
+          const recipientsRes = await axios.get(
+            `${backendUrl}/api/benefits/${benefitId}/recipients`,
+            { withCredentials: true }
+          );
 
-        setFormData(data);
-        if (data.image_url) {
-          setImagePreview(data.image_url);
+          setSelectedSeniors(recipientsRes.data);
         }
       } catch (err) {
-        console.error("Failed to fetch benefit:", err);
-        setMessage("Failed to load benefit details.");
+        console.error("Error fetching data:", err);
+        setMessage("Failed to load data.");
       } finally {
         setLoading(false);
       }
     };
-    fetchBenefit();
-  }, [benefitId]);
+
+    fetchData();
+  }, [benefitId, backendUrl]);
 
   // Handle input change
   const handleChange = (e) => {
@@ -102,23 +126,8 @@ const UpdateBenefit = ({ benefitId, onSuccess, onCancel }) => {
 
   // Update benefit
   const handleUpdate = async () => {
-    if (formData.approved === 0) {
-      // if pending, call approve instead
-      await handleApprove();
-      return;
-    }
-
-    // otherwise, do normal update
     if (!formData.type || !formData.description) {
       setMessage("Type and description are required.");
-      return;
-    }
-    if (formData.type === "republic-acts" && !formData.title) {
-      setMessage("Title is required for Republic Acts.");
-      return;
-    }
-    if (formData.type === "republic-acts" && !formData.enacted_date) {
-      setMessage("Enacted date is required for Republic Acts.");
       return;
     }
 
@@ -128,9 +137,14 @@ const UpdateBenefit = ({ benefitId, onSuccess, onCancel }) => {
 
     try {
       const payload = new FormData();
+
       Object.entries(formData).forEach(([key, value]) => {
-        if (value !== null) payload.append(key, value);
+        if (value !== null && value !== undefined) payload.append(key, value);
       });
+
+      // ✅ ADD THIS
+      payload.append("recipients", JSON.stringify(selectedSeniors));
+
       if (imageFile) payload.append("image", imageFile);
 
       await axios.put(`${backendUrl}/api/benefits/${benefitId}`, payload, {
@@ -141,7 +155,7 @@ const UpdateBenefit = ({ benefitId, onSuccess, onCancel }) => {
       setShowSuccessModal(true);
       if (onSuccess) onSuccess();
     } catch (err) {
-      console.error("Failed to update benefit:", err);
+      console.error(err);
       setMessage("Failed to update benefit.");
     } finally {
       setSaving(false);
@@ -314,6 +328,31 @@ const UpdateBenefit = ({ benefitId, onSuccess, onCancel }) => {
               <Text className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
             </div>
           </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700">
+              Benefit Recipients
+            </label>
+
+            <div className="border rounded p-3 max-h-48 overflow-y-auto space-y-2">
+              {seniors.map((s) => (
+                <label key={s.id} className="flex items-center gap-2 text-sm">
+                  <input
+                    type="checkbox"
+                    checked={selectedSeniors.includes(s.id)}
+                    onChange={() => {
+                      setSelectedSeniors((prev) =>
+                        prev.includes(s.id)
+                          ? prev.filter((x) => x !== s.id)
+                          : [...prev, s.id]
+                      );
+                    }}
+                  />
+                  {s.lastName}, {s.firstName}
+                </label>
+              ))}
+            </div>
+          </div>
         </div>
 
         {/* Save Button */}
@@ -361,14 +400,20 @@ const UpdateBenefit = ({ benefitId, onSuccess, onCancel }) => {
             </button>
             <button
               disabled={saving}
-              onClick={handleUpdate}
+              onClick={formData.approved === 0 ? handleApprove : handleUpdate}
               className={`px-4 py-2 rounded text-sm ${
                 saving
                   ? "bg-blue-400 cursor-not-allowed"
                   : "bg-blue-600 hover:bg-blue-700"
               } text-white`}
             >
-              {saving ? "Updating..." : "Yes, Update"}
+              {saving
+                ? formData.approved === 0
+                  ? "Approving..."
+                  : "Updating..."
+                : formData.approved === 0
+                ? "Yes, Approve"
+                : "Yes, Update"}
             </button>
           </div>
         </Modal>
