@@ -281,11 +281,12 @@ exports.updateRecipients = async (benefitId, seniorIds, user, ip) => {
 
   if (seniorIds.length === 0) return true;
 
-  const values = seniorIds.map((s) => [
-    benefitId,
-    s.id,
-    s.received_date || null,
-  ]);
+  const values = seniorIds
+    .filter((s) => s.id) // skip entries without id
+    .map((s) => [benefitId, s.id, s.received_date || null]);
+
+  if (values.length === 0) return true;
+
   await Connection(
     `INSERT INTO benefit_recipients (benefit_id, senior_id, received_date) VALUES ?`,
     [values]

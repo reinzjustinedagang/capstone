@@ -79,7 +79,13 @@ const UpdateBenefit = ({ benefitId, onSuccess, onCancel }) => {
             { withCredentials: true }
           );
 
-          setSelectedSeniors(recipientsRes.data);
+          // Map senior_id -> id for frontend
+          const normalizedRecipients = recipientsRes.data.map((r) => ({
+            id: r.senior_id,
+            received_date: r.received_date || "",
+          }));
+
+          setSelectedSeniors(normalizedRecipients);
         }
       } catch (err) {
         console.error("Error fetching data:", err);
