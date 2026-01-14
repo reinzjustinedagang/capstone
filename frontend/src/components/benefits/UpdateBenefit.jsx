@@ -34,6 +34,7 @@ const UpdateBenefit = ({ benefitId, onSuccess, onCancel }) => {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
 
+  const [searchTerm, setSearchTerm] = useState("");
   const [seniors, setSeniors] = useState([]);
   const [selectedSeniors, setSelectedSeniors] = useState([]);
 
@@ -334,23 +335,65 @@ const UpdateBenefit = ({ benefitId, onSuccess, onCancel }) => {
               Benefit Recipients
             </label>
 
-            <div className="border rounded p-3 max-h-48 overflow-y-auto space-y-2">
-              {seniors.map((s) => (
-                <label key={s.id} className="flex items-center gap-2 text-sm">
-                  <input
-                    type="checkbox"
-                    checked={selectedSeniors.includes(s.id)}
-                    onChange={() => {
-                      setSelectedSeniors((prev) =>
-                        prev.includes(s.id)
-                          ? prev.filter((x) => x !== s.id)
-                          : [...prev, s.id]
-                      );
-                    }}
-                  />
-                  {s.lastName}, {s.firstName}
-                </label>
-              ))}
+            {/* Search Input */}
+            <input
+              type="text"
+              placeholder="Search seniors..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="mt-2 mb-2 w-full border rounded px-3 py-2 focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm"
+            />
+
+            <div className="border rounded p-3 max-h-64 overflow-y-auto space-y-2">
+              {seniors
+                .filter(
+                  (s) =>
+                    s.firstName
+                      .toLowerCase()
+                      .includes(searchTerm.toLowerCase()) ||
+                    s.lastName.toLowerCase().includes(searchTerm.toLowerCase())
+                )
+                .map((s) => {
+                  const selected = selectedSeniors.find((x) => x.id === s.id);
+                  return (
+                    <div key={s.id} className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        checked={!!selected}
+                        onChange={() => {
+                          setSelectedSeniors((prev) => {
+                            if (selected) {
+                              return prev.filter((x) => x.id !== s.id);
+                            } else {
+                              return [...prev, { id: s.id, received_date: "" }];
+                            }
+                          });
+                        }}
+                      />
+                      <span className="flex-1">
+                        {s.lastName}, {s.firstName}
+                      </span>
+
+                      {selected && (
+                        <input
+                          type="date"
+                          value={selected.received_date}
+                          onChange={(e) => {
+                            const date = e.target.value;
+                            setSelectedSeniors((prev) =>
+                              prev.map((x) =>
+                                x.id === s.id
+                                  ? { ...x, received_date: date }
+                                  : x
+                              )
+                            );
+                          }}
+                          className="border rounded px-2 py-1 text-sm w-32"
+                        />
+                      )}
+                    </div>
+                  );
+                })}
             </div>
           </div>
         </div>

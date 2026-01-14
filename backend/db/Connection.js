@@ -237,7 +237,7 @@ async function initTables() {
     );
     console.log("✅ benefits table ready.");
 
-       await pool.query(
+    await pool.query(
       `
       CREATE TABLE IF NOT EXISTS benefit_recipients (
         id INT AUTO_INCREMENT PRIMARY KEY,
@@ -245,7 +245,7 @@ async function initTables() {
         benefit_id INT NOT NULL,
         senior_id INT NOT NULL,
 
-        received_date DATE DEFAULT CURRENT_DATE,
+        received_date DATE DEFAULT NULL,
         remarks VARCHAR(255),
 
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
