@@ -268,9 +268,11 @@ exports.getRecipients = async (benefitId) => {
 };
 
 exports.updateRecipients = async (benefitId, seniorIds, user, ip) => {
-  if (!Array.isArray(seniorIds)) throw new Error("Recipients must be an array");
+  if (!Array.isArray(seniorIds)) {
+    throw new Error("Recipients must be an array");
+  }
 
-  // Remove existing recipients (optional but recommended)
+  // Remove old recipients
   await Connection(`DELETE FROM benefit_recipients WHERE benefit_id = ?`, [
     benefitId,
   ]);
@@ -278,13 +280,20 @@ exports.updateRecipients = async (benefitId, seniorIds, user, ip) => {
   if (seniorIds.length === 0) return true;
 
   const values = seniorIds
-    .filter((s) => s.id) // skip entries without id
-    .map((s) => [benefitId, s.id, s.received_date || null]);
+    .filter((s) => s.id)
+    .map((s) => [
+      benefitId,
+      s.id,
+      s.received_date
+        ? String(s.received_date).split("T")[0] // ✅ FIX HERE
+        : null,
+    ]);
 
   if (values.length === 0) return true;
 
   await Connection(
-    `INSERT INTO benefit_recipients (benefit_id, senior_id, received_date) VALUES ?`,
+    `INSERT INTO benefit_recipients (benefit_id, senior_id, received_date)
+     VALUES ?`,
     [values]
   );
 
