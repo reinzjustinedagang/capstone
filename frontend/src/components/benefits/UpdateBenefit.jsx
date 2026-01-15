@@ -3,6 +3,7 @@ import {
   Calendar,
   Building,
   Edit,
+  Search,
   Tags,
   Info,
   SaveIcon,
@@ -79,7 +80,7 @@ const UpdateBenefit = ({ benefitId, onSuccess, onCancel }) => {
           // Map senior_id -> id for frontend consistency
           const normalizedRecipients = recipientsRes.data.map((r) => ({
             id: r.senior_id, // Important! Must match checkbox logic
-            received_date: r.received_date || "",
+            received_date: r.received_date ? r.received_date.split("T")[0] : "",
           }));
 
           setSelectedSeniors(normalizedRecipients);
@@ -283,18 +284,20 @@ const UpdateBenefit = ({ benefitId, onSuccess, onCancel }) => {
             <label className="block text-sm font-medium text-gray-700">
               Type
             </label>
-            <select
-              name="type"
-              value={formData.type}
-              onChange={handleChange}
-              required
-              className="mt-1 w-full border rounded-md px-3 py-2 focus:ring-blue-500 focus:outline-none"
-            >
-              <option value="">-- Select Type --</option>
-              <option value="local">Local Benefits</option>
-              <option value="national">National Benefits</option>
-              <option value="republic-acts">Republic Acts</option>
-            </select>
+            <div className="mt-1 relative">
+              <select
+                name="type"
+                value={formData.type}
+                onChange={handleChange}
+                required
+                className="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 pl-10 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+              >
+                <option value="">-- Select Type --</option>
+                <option value="local">Local Benefits</option>
+                <option value="national">National Benefits</option>
+                <option value="republic-acts">Republic Acts</option>
+              </select>
+            </div>
           </div>
 
           {typeFields.map((field) => (
@@ -316,7 +319,7 @@ const UpdateBenefit = ({ benefitId, onSuccess, onCancel }) => {
             </div>
           ))}
 
-          <div className="md:col-span-2">
+          <div className="md:col-span-1">
             <label className="block text-sm font-medium text-gray-700">
               Description
             </label>
@@ -326,79 +329,92 @@ const UpdateBenefit = ({ benefitId, onSuccess, onCancel }) => {
                 value={formData.description ?? ""}
                 onChange={handleChange}
                 required
-                rows={5}
+                rows={14}
                 className="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 pl-10 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
               />
               <Text className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
             </div>
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Benefit Recipients
-            </label>
+          {formData.type !== "republic-acts" ? (
+            <div>
+              <label className="block text-sm font-medium text-gray-700">
+                Benefit Recipients
+              </label>
 
-            {/* Search Input */}
-            <input
-              type="text"
-              placeholder="Search seniors..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="mt-2 mb-2 w-full border rounded px-3 py-2 focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm"
-            />
+              {/* Search Input */}
+              <div className="mt-1 relative w-full sm:w-64">
+                <input
+                  type="text"
+                  placeholder="Search seniors..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10 pr-4 py-2 border border-gray-300 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                />{" "}
+                <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
+              </div>
 
-            <div className="border rounded p-3 max-h-64 overflow-y-auto space-y-2">
-              {seniors
-                .filter(
-                  (s) =>
-                    s.firstName
-                      .toLowerCase()
-                      .includes(searchTerm.toLowerCase()) ||
-                    s.lastName.toLowerCase().includes(searchTerm.toLowerCase())
-                )
-                .map((s) => {
-                  const selected = selectedSeniors.find((x) => x.id === s.id);
-                  return (
-                    <div key={s.id} className="flex items-center gap-2">
-                      <input
-                        type="checkbox"
-                        checked={!!selected}
-                        onChange={() => {
-                          setSelectedSeniors((prev) => {
-                            if (selected) {
-                              return prev.filter((x) => x.id !== s.id);
-                            } else {
-                              return [...prev, { id: s.id, received_date: "" }];
-                            }
-                          });
-                        }}
-                      />
-                      <span className="flex-1">
-                        {s.lastName}, {s.firstName}
-                      </span>
-
-                      {selected && (
+              <div className="mt-1 border-gray-300 rounded-md shadow-sm py-2 px-3 pl-10 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm max-h-64 overflow-y-auto space-y-2">
+                {seniors
+                  .filter(
+                    (s) =>
+                      s.firstName
+                        .toLowerCase()
+                        .includes(searchTerm.toLowerCase()) ||
+                      s.lastName
+                        .toLowerCase()
+                        .includes(searchTerm.toLowerCase())
+                  )
+                  .map((s) => {
+                    const selected = selectedSeniors.find((x) => x.id === s.id);
+                    return (
+                      <div key={s.id} className="flex items-center gap-2">
                         <input
-                          type="date"
-                          value={selected.received_date}
-                          onChange={(e) => {
-                            const date = e.target.value;
-                            setSelectedSeniors((prev) =>
-                              prev.map((x) =>
-                                x.id === s.id
-                                  ? { ...x, received_date: date }
-                                  : x
-                              )
-                            );
+                          type="checkbox"
+                          checked={!!selected}
+                          onChange={() => {
+                            setSelectedSeniors((prev) => {
+                              if (selected) {
+                                return prev.filter((x) => x.id !== s.id);
+                              } else {
+                                return [
+                                  ...prev,
+                                  { id: s.id, received_date: "" },
+                                ];
+                              }
+                            });
                           }}
-                          className="border rounded px-2 py-1 text-sm w-32"
                         />
-                      )}
-                    </div>
-                  );
-                })}
+                        <span className="flex-1">
+                          {s.lastName}, {s.firstName}{" "}
+                          {s.middleName ? s.middleName[0] + "." : ""}
+                        </span>
+
+                        {selected && (
+                          <input
+                            type="date"
+                            value={selected.received_date}
+                            onChange={(e) => {
+                              const date = e.target.value;
+                              setSelectedSeniors((prev) =>
+                                prev.map((x) =>
+                                  x.id === s.id
+                                    ? { ...x, received_date: date }
+                                    : x
+                                )
+                              );
+                            }}
+                            className="border rounded px-2 py-1 text-sm w-32"
+                          />
+                        )}
+                      </div>
+                    );
+                  })}
+              </div>
             </div>
-          </div>
+          ) : (
+            <></>
+          )}
         </div>
 
         {/* Save Button */}
