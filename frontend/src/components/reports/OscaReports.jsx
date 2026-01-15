@@ -14,6 +14,7 @@ import RemarksDistribution from "./chart/RemarksDistribution";
 import PensionerRemarksReportPrint from "./print/PensionerRemarksReportPrint";
 import CitizenListPrint from "./print/CitizenListPrint";
 import ReportsSummary from "./chart/ReportsSummary";
+import BenefitRecipientsPrint from "./print/BenefitRecipientsPrint";
 
 const OscaReportsChart = () => {
   const chartOptions = [
@@ -128,6 +129,24 @@ const OscaReportsChart = () => {
                     </span>
                     <div className="flex justify-end ">
                       <CitizenListPrint />
+                    </div>
+                  </td>
+                </tr>
+
+                {/* Row */}
+                <tr className="hover:bg-gray-50 flex flex-col sm:table-row">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                    <span className="sm:hidden block text-xs font-semibold text-gray-500 mb-1">
+                      Report Name
+                    </span>
+                    Benefits Recepient List Report
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                    <span className="sm:hidden block text-xs font-semibold text-gray-500 mb-1">
+                      Actions
+                    </span>
+                    <div className="flex justify-end ">
+                      <BenefitRecipientsPrint />
                     </div>
                   </td>
                 </tr>

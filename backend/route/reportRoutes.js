@@ -203,4 +203,27 @@ router.get("/citizens/print", async (req, res) => {
   }
 });
 
+router.get("/benefits/print", async (req, res) => {
+  try {
+    const { benefitId } = req.query;
+
+    if (!benefitId) {
+      return res.status(400).json({
+        error: "benefitId is required",
+      });
+    }
+
+    const recipients = await reportService.getBenefitRecipientsForPrint({
+      benefitId,
+    });
+
+    res.json({ recipients });
+  } catch (err) {
+    console.error("Error fetching benefit recipients for print:", err);
+    res.status(500).json({
+      error: "Failed to fetch benefit recipients for print.",
+    });
+  }
+});
+
 module.exports = router;

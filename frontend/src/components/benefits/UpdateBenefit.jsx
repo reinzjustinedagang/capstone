@@ -4,7 +4,7 @@ import {
   Building,
   Edit,
   Search,
-  Tags,
+  List,
   Info,
   SaveIcon,
   Text,
@@ -194,14 +194,14 @@ const UpdateBenefit = ({ benefitId, onSuccess, onCancel }) => {
   const typeFields =
     formData.type === "republic-acts"
       ? [
-          {
-            name: "title",
-            label: "Title",
-            type: "text",
-            icon: (
-              <Info className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
-            ),
-          },
+          // {
+          //   name: "title",
+          //   label: "Title",
+          //   type: "text",
+          //   icon: (
+          //     <Info className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
+          //   ),
+          // },
           {
             name: "enacted_date",
             label: "Enacted Date",
@@ -297,6 +297,24 @@ const UpdateBenefit = ({ benefitId, onSuccess, onCancel }) => {
                 <option value="national">National Benefits</option>
                 <option value="republic-acts">Republic Acts</option>
               </select>
+              <List className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700">
+              Title
+            </label>
+            <div className="mt-1 relative">
+              <input
+                type="text"
+                name="title"
+                value={formData.title}
+                onChange={handleChange}
+                required
+                className="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 pl-10 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+              />
+              <Info className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
             </div>
           </div>
 
@@ -318,11 +336,15 @@ const UpdateBenefit = ({ benefitId, onSuccess, onCancel }) => {
               </div>
             </div>
           ))}
+        </div>
 
-          <div className="md:col-span-1">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* LEFT: Description */}
+          <div>
             <label className="block text-sm font-medium text-gray-700">
               Description
             </label>
+
             <div className="mt-1 relative">
               <textarea
                 name="description"
@@ -336,25 +358,27 @@ const UpdateBenefit = ({ benefitId, onSuccess, onCancel }) => {
             </div>
           </div>
 
-          {formData.type !== "republic-acts" ? (
+          {/* RIGHT: Benefit Recipients */}
+          {formData.type !== "republic-acts" && (
             <div>
               <label className="block text-sm font-medium text-gray-700">
                 Benefit Recipients
               </label>
 
-              {/* Search Input */}
-              <div className="mt-1 relative w-full sm:w-64">
+              {/* Search */}
+              <div className="mt-1 relative">
                 <input
                   type="text"
                   placeholder="Search seniors..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 pr-4 py-2 border border-gray-300 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                />{" "}
+                  className="pl-10 pr-4 py-2 border border-gray-300 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
                 <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
               </div>
 
-              <div className="mt-1 border-gray-300 rounded-md shadow-sm py-2 px-3 pl-10 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm max-h-64 overflow-y-auto space-y-2">
+              {/* List */}
+              <div className="mt-2 border border-gray-300 rounded-md shadow-sm p-3 max-h-64 overflow-y-auto space-y-2">
                 {seniors
                   .filter(
                     (s) =>
@@ -367,24 +391,21 @@ const UpdateBenefit = ({ benefitId, onSuccess, onCancel }) => {
                   )
                   .map((s) => {
                     const selected = selectedSeniors.find((x) => x.id === s.id);
+
                     return (
                       <div key={s.id} className="flex items-center gap-2">
                         <input
                           type="checkbox"
                           checked={!!selected}
                           onChange={() => {
-                            setSelectedSeniors((prev) => {
-                              if (selected) {
-                                return prev.filter((x) => x.id !== s.id);
-                              } else {
-                                return [
-                                  ...prev,
-                                  { id: s.id, received_date: "" },
-                                ];
-                              }
-                            });
+                            setSelectedSeniors((prev) =>
+                              selected
+                                ? prev.filter((x) => x.id !== s.id)
+                                : [...prev, { id: s.id, received_date: "" }]
+                            );
                           }}
                         />
+
                         <span className="flex-1">
                           {s.lastName}, {s.firstName}{" "}
                           {s.middleName ? s.middleName[0] + "." : ""}
@@ -412,8 +433,6 @@ const UpdateBenefit = ({ benefitId, onSuccess, onCancel }) => {
                   })}
               </div>
             </div>
-          ) : (
-            <></>
           )}
         </div>
 

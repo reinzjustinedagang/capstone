@@ -553,3 +553,49 @@ exports.getFilteredCitizensForPrint = async (options) => {
         : c.form_data || {},
   }));
 };
+
+exports.getBenefitRecipientsForPrint = async (options) => {
+  const { benefitId } = options;
+
+  const params = [];
+  let where = `
+    WHERE br.benefit_id = ?
+      AND sc.deleted = 0
+      AND sc.archived = 0
+      AND sc.age >= 60
+  `;
+
+  params.push(benefitId);
+
+  const data = await Connection(
+    `
+    SELECT
+      sc.id,
+      sc.firstName,
+      sc.middleName,
+      sc.lastName,
+      sc.suffix,
+      sc.age,
+      sc.gender,
+      sc.created_at,
+
+      b.barangay_name,
+
+      br.received_date,
+      br.remarks AS benefit_remarks,
+
+      ben.description AS benefit_description,
+      ben.provider,
+      ben.type
+    FROM benefit_recipients br
+    INNER JOIN senior_citizens sc ON br.senior_id = sc.id
+    LEFT JOIN barangays b ON sc.barangay_id = b.id
+    INNER JOIN benefits ben ON br.benefit_id = ben.id
+    ${where}
+    ORDER BY sc.lastName ASC, sc.firstName ASC
+    `,
+    params
+  );
+
+  return data;
+};

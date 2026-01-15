@@ -112,14 +112,14 @@ const AddBenefit = ({ onCancel }) => {
   const typeFields =
     formData.type === "republic-acts"
       ? [
-          {
-            name: "title",
-            label: "Title",
-            type: "text",
-            icon: (
-              <Info className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
-            ),
-          },
+          // {
+          //   name: "title",
+          //   label: "Title",
+          //   type: "text",
+          //   icon: (
+          //     <Info className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
+          //   ),
+          // },
           {
             name: "enacted_date",
             label: "Enacted Date",
@@ -217,6 +217,23 @@ const AddBenefit = ({ onCancel }) => {
                 <option value="republic-acts">Republic Acts</option>
               </select>
               <List className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700">
+              Title
+            </label>
+            <div className="mt-1 relative">
+              <input
+                type="text"
+                name="title"
+                value={formData.title}
+                onChange={handleChange}
+                required
+                className="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 pl-10 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+              />
+              <Info className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
             </div>
           </div>
 

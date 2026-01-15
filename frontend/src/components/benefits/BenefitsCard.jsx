@@ -173,7 +173,7 @@ const BenefitsCard = ({
             <ul className="list-disc list-inside text-sm text-gray-700 max-h-40 overflow-y-auto">
               {recipients.map((r) => (
                 <li key={r.senior_id}>
-                  {r.name}, Received on:{" "}
+                  {r.name} , Received on:{" "}
                   {new Date(r.received_date).toLocaleDateString()}
                 </li>
               ))}
