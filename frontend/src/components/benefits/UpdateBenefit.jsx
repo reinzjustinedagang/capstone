@@ -47,41 +47,38 @@ const UpdateBenefit = ({ benefitId, onSuccess, onCancel }) => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Fetch all senior citizens (always)
+        // 1️⃣ Fetch all seniors (for selection list)
         const seniorsRes = await axios.get(
           `${backendUrl}/api/senior-citizens/all`,
           { withCredentials: true }
         );
         setSeniors(seniorsRes.data);
 
-        // Fetch benefit details (only if benefitId exists)
         if (benefitId) {
+          // 2️⃣ Fetch benefit details
           const benefitRes = await axios.get(
             `${backendUrl}/api/benefits/${benefitId}`
           );
-
           const data = benefitRes.data;
 
-          // Normalize enacted_date to YYYY-MM-DD
+          // Normalize date for input
           if (data.enacted_date) {
             data.enacted_date = data.enacted_date.split("T")[0];
           }
 
           setFormData(data);
 
-          if (data.image_url) {
-            setImagePreview(data.image_url);
-          }
-        }
-        if (benefitId) {
+          if (data.image_url) setImagePreview(data.image_url);
+
+          // 3️⃣ Fetch recipients and normalize
           const recipientsRes = await axios.get(
             `${backendUrl}/api/benefits/${benefitId}/recipients`,
             { withCredentials: true }
           );
 
-          // Map senior_id -> id for frontend
+          // Map senior_id -> id for frontend consistency
           const normalizedRecipients = recipientsRes.data.map((r) => ({
-            id: r.senior_id,
+            id: r.senior_id, // Important! Must match checkbox logic
             received_date: r.received_date || "",
           }));
 

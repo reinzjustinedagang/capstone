@@ -260,15 +260,11 @@ exports.remove = async (id, user, ip) => {
 
 exports.getRecipients = async (benefitId) => {
   const query = `
-    SELECT senior_id
+    SELECT senior_id, received_date
     FROM benefit_recipients
     WHERE benefit_id = ?
   `;
-
-  const rows = await Connection(query, [benefitId]);
-
-  // Return array of IDs only
-  return rows.map((r) => r.senior_id);
+  return await Connection(query, [benefitId]);
 };
 
 exports.updateRecipients = async (benefitId, seniorIds, user, ip) => {
