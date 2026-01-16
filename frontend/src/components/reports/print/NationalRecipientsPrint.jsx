@@ -5,7 +5,7 @@ import { Printer } from "lucide-react";
 import pilipinas_logo from "../../../assets/bagong-pilipinas.png";
 import sj_logo from "../../../assets/municipal-logo.png";
 
-const BenefitRecipientsPrint = () => {
+const NationalRecipientsPrint = () => {
   const backendUrl =
     import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
 
@@ -46,7 +46,7 @@ const BenefitRecipientsPrint = () => {
       try {
         console.log("BACKEND URL:", backendUrl);
 
-        const res = await axios.get(`${backendUrl}/api/benefits/local`, {
+        const res = await axios.get(`${backendUrl}/api/benefits/national`, {
           withCredentials: true,
         });
         console.log("BENEFITS RESPONSE:", res.data);
@@ -212,7 +212,7 @@ const BenefitRecipientsPrint = () => {
   return (
     <div className="space-y-4">
       <label className="block text-sm font-medium text-gray-700">
-        Select Local Benefit:
+        Select Benefit:
       </label>
 
       <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-end">
@@ -222,7 +222,7 @@ const BenefitRecipientsPrint = () => {
           onChange={(e) => setSelectedBenefitId(e.target.value)}
           className="border border-gray-300 px-3 py-1 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
-          <option value="">-- Select Benefit --</option>
+          <option value="">-- Select National Benefit --</option>
           {benefits.map((b) => (
             <option key={b.id} value={b.id}>
               {b.title}
@@ -247,4 +247,4 @@ const BenefitRecipientsPrint = () => {
   );
 };
 
-export default BenefitRecipientsPrint;
+export default NationalRecipientsPrint;
