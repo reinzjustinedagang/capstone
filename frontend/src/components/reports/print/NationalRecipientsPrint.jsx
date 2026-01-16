@@ -95,8 +95,11 @@ const NationalRecipientsPrint = () => {
     const sjLogoBase64 = await toDataURL(sj_logo);
     const pilipinasLogoBase64 = await toDataURL(pilipinas_logo);
 
-    const benefitTitle =
-      recipients[0]?.benefit_description || "Benefit Recipients";
+    const selectedBenefit = benefits.find(
+      (b) => b.id.toString() === selectedBenefitId.toString()
+    );
+
+    const benefitTitle = selectedBenefit?.title || "Benefit Recipients";
 
     const printContents = `
       <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:20px;">
@@ -212,7 +215,7 @@ const NationalRecipientsPrint = () => {
   return (
     <div className="space-y-4">
       <label className="block text-sm font-medium text-gray-700">
-        Select Benefit:
+        Select National Benefit:
       </label>
 
       <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-end">

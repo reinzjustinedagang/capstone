@@ -95,8 +95,11 @@ const BenefitRecipientsPrint = () => {
     const sjLogoBase64 = await toDataURL(sj_logo);
     const pilipinasLogoBase64 = await toDataURL(pilipinas_logo);
 
-    const benefitTitle =
-      recipients[0]?.benefit_description || "Benefit Recipients";
+    const selectedBenefit = benefits.find(
+      (b) => b.id.toString() === selectedBenefitId.toString()
+    );
+
+    const benefitTitle = selectedBenefit?.title || "Benefit Recipients";
 
     const printContents = `
       <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:20px;">
@@ -222,7 +225,7 @@ const BenefitRecipientsPrint = () => {
           onChange={(e) => setSelectedBenefitId(e.target.value)}
           className="border border-gray-300 px-3 py-1 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
-          <option value="">-- Select Benefit --</option>
+          <option value="">-- Select Local Benefit --</option>
           {benefits.map((b) => (
             <option key={b.id} value={b.id}>
               {b.title}
