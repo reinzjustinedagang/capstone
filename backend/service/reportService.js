@@ -107,7 +107,7 @@ exports.getDeceasedReport = async (year) => {
       GROUP BY MONTH(deceased_date), gender
       ORDER BY MONTH(deceased_date)
       `,
-      [year]
+      [year],
     );
     // format results
     const months = Array.from({ length: 12 }, (_, i) => i + 1);
@@ -118,6 +118,73 @@ exports.getDeceasedReport = async (year) => {
       female:
         results.find((r) => r.month === m && r.gender === "Female")?.count || 0,
     }));
+  } catch (err) {
+    console.error("❌ Error fetching deceased report:", err);
+    throw err;
+  }
+};
+
+exports.getDeceasedNameReport = async (year) => {
+  try {
+    const results = await Connection(
+      `
+      SELECT 
+        MONTH(deceased_date) AS month,
+        gender,
+        firstName,
+        middleName,
+        lastName,
+        deceased_date,
+        barangay_id
+      FROM senior_citizens
+      WHERE deleted = 0
+        AND registered = 1
+        AND archived = 1
+        AND archive_reason = 'Deceased'
+        AND deceased_date IS NOT NULL
+        AND YEAR(deceased_date) = ?
+        AND age >= 60
+      ORDER BY deceased_date
+      `,
+      [year],
+    );
+
+    // Initialize months
+    const months = Array.from({ length: 12 }, (_, i) => i + 1);
+    const report = months.map((m) => ({
+      month: new Date(0, m - 1).toLocaleString("en", { month: "short" }),
+      male: [],
+      female: [],
+    }));
+
+    results.forEach((r) => {
+      // Construct full name
+      const fullName = [r.firstName, r.middleName, r.lastName]
+        .filter(Boolean)
+        .join(" ");
+
+      const monthObj = report.find(
+        (m) =>
+          m.month ===
+          new Date(0, r.month - 1).toLocaleString("en", { month: "short" }),
+      );
+
+      if (monthObj) {
+        const entry = {
+          name: fullName,
+          dateDied: r.deceased_date,
+          barangayId: r.barangay_id,
+        };
+
+        if (r.gender === "Male") {
+          monthObj.male.push(entry);
+        } else if (r.gender === "Female") {
+          monthObj.female.push(entry);
+        }
+      }
+    });
+
+    return report;
   } catch (err) {
     console.error("❌ Error fetching deceased report:", err);
     throw err;
@@ -143,7 +210,7 @@ exports.getTransfereeReport = async (year) => {
       GROUP BY MONTH(transferee_date), gender
       ORDER BY MONTH(transferee_date)
       `,
-      [year]
+      [year],
     );
     const months = Array.from({ length: 12 }, (_, i) => i + 1);
     return months.map((m) => ({
@@ -178,7 +245,7 @@ exports.getSocPenReport = async (year) => {
       GROUP BY MONTH(socpen_date), gender
       ORDER BY MONTH(socpen_date)
       `,
-      [year]
+      [year],
     );
     const months = Array.from({ length: 12 }, (_, i) => i + 1);
     return months.map((m) => ({
@@ -213,7 +280,7 @@ exports.getNonSocPenReport = async (year) => {
       GROUP BY MONTH(nonsocpen_date), gender
       ORDER BY MONTH(nonsocpen_date)
       `,
-      [year]
+      [year],
     );
     const months = Array.from({ length: 12 }, (_, i) => i + 1);
     return months.map((m) => ({
@@ -248,7 +315,7 @@ exports.getPDLReport = async (year) => {
       GROUP BY MONTH(pdl_date), gender
       ORDER BY MONTH(pdl_date)
       `,
-      [year]
+      [year],
     );
     const months = Array.from({ length: 12 }, (_, i) => i + 1);
     return months.map((m) => ({
@@ -282,7 +349,7 @@ exports.getNewSeniorReport = async (year) => {
       GROUP BY MONTH(created_at), gender
       ORDER BY MONTH(created_at)
       `,
-      [year]
+      [year],
     );
     const months = Array.from({ length: 12 }, (_, i) => i + 1);
     return months.map((m) => ({
@@ -316,7 +383,7 @@ exports.getBookletReport = async (year) => {
       GROUP BY MONTH(booklet_date), gender
       ORDER BY MONTH(booklet_date)
       `,
-      [year]
+      [year],
     );
     const months = Array.from({ length: 12 }, (_, i) => i + 1);
     return months.map((m) => ({
@@ -350,7 +417,7 @@ exports.getUTPReport = async (year) => {
       GROUP BY MONTH(utp_date), gender
       ORDER BY MONTH(utp_date)
       `,
-      [year]
+      [year],
     );
     const months = Array.from({ length: 12 }, (_, i) => i + 1);
     return months.map((m) => ({
@@ -542,7 +609,7 @@ exports.getFilteredCitizensForPrint = async (options) => {
      LEFT JOIN barangays b ON sc.barangay_id = b.id
      ${where}
      ORDER BY ${orderBy} ${order}`,
-    params
+    params,
   );
 
   return data.map((c) => ({
@@ -594,7 +661,7 @@ exports.getBenefitRecipientsForPrint = async (options) => {
     ${where}
     ORDER BY sc.lastName ASC, sc.firstName ASC
     `,
-    params
+    params,
   );
 
   return data;

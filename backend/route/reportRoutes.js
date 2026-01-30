@@ -64,6 +64,20 @@ router.get("/deceased", async (req, res) => {
   }
 });
 
+// GET /api/charts/deceased?year=2025
+router.get("/deceased-name", async (req, res) => {
+  try {
+    const year = req.query.year || new Date().getFullYear();
+    // Call the new report function
+    const result = await reportService.getDeceasedNameReport(year);
+    res.json(result);
+  } catch (err) {
+    console.error("❌ Failed to fetch deceased reports:", err);
+    res.status(500).json({ error: "Failed to fetch deceased reports" });
+  }
+});
+
+
 // GET /api/charts/transferees?year=2025
 router.get("/transferees", async (req, res) => {
   const year = req.query.year || new Date().getFullYear();

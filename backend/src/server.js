@@ -56,12 +56,13 @@ app.use(
     store: sessionStore,
     cookie: {
       httpOnly: true,
-      secure: true,
-      sameSite: "none",
-      maxAge: 1000 * 60 * 60 * 24, // 1 day
+      secure: process.env.NODE_ENV === "production", // only true in production
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      maxAge: 1000 * 60 * 60 * 24,
     },
   })
 );
+
 
 // CORS configuration
 app.use(
@@ -131,7 +132,7 @@ app.get("/api/test-db", async (req, res) => {
   }
 });
 
-app.listen(port, () => console.log(`Server running on port ${port}`));
+app.listen(port, () => console.log(`Server running on port http://localhost:${port}`));
 
 // Start the server
 module.exports = app;

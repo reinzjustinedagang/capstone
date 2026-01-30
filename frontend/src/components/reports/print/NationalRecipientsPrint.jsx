@@ -29,7 +29,7 @@ const NationalRecipientsPrint = () => {
             const reader = new FileReader();
             reader.onloadend = () => resolve(reader.result);
             reader.readAsDataURL(blob);
-          })
+          }),
       );
 
   // ✅ Fetch head official
@@ -44,18 +44,15 @@ const NationalRecipientsPrint = () => {
   useEffect(() => {
     const fetchBenefits = async () => {
       try {
-        console.log("BACKEND URL:", backendUrl);
-
         const res = await axios.get(`${backendUrl}/api/benefits/national`, {
           withCredentials: true,
         });
-        console.log("BENEFITS RESPONSE:", res.data);
 
         setBenefits(res.data || []);
       } catch (err) {
         console.error(
           "Failed to fetch benefits:",
-          err.response?.data || err.message
+          err.response?.data || err.message,
         );
       }
     };
@@ -96,7 +93,7 @@ const NationalRecipientsPrint = () => {
     const pilipinasLogoBase64 = await toDataURL(pilipinas_logo);
 
     const selectedBenefit = benefits.find(
-      (b) => b.id.toString() === selectedBenefitId.toString()
+      (b) => b.id.toString() === selectedBenefitId.toString(),
     );
 
     const benefitTitle = selectedBenefit?.title || "Benefit Recipients";
@@ -169,7 +166,7 @@ const NationalRecipientsPrint = () => {
                 }
 
               </td>
-            </tr>`
+            </tr>`,
             )
             .join("")}
           <tr>
