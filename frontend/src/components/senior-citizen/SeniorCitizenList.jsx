@@ -73,13 +73,29 @@ const SeniorCitizenList = ({ onEdit, onId, onView }) => {
   });
   const [archiving, setArchiving] = useState(false);
   const [selectedArchiveCitizen, setSelectedArchiveCitizen] = useState(null);
+  const [deathCertificateFile, setDeathCertificateFile] = useState(null);
+  const [deathCertificatePreview, setDeathCertificatePreview] = useState(null);
+
+  const handleDeathCertificateUpload = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    // Allow images only
+    if (!file.type.startsWith("image/")) {
+      alert("Please upload an image file only.");
+      return;
+    }
+
+    setDeathCertificateFile(file);
+    setDeathCertificatePreview(URL.createObjectURL(file));
+  };
 
   const abortControllerRef = useRef(null);
 
   const fetchRemarks = async () => {
     try {
       const response = await axios.get(
-        `${backendUrl}/api/senior-citizens/filters/remarks`
+        `${backendUrl}/api/senior-citizens/filters/remarks`,
       );
       const { remarks = [], pensioner = [] } = response.data;
       setHealthStatusOptions(["All Remarks", ...remarks]);
@@ -128,7 +144,7 @@ const SeniorCitizenList = ({ onEdit, onId, onView }) => {
           params,
           withCredentials: true,
           signal: controller.signal, // ✅ Important
-        }
+        },
       );
 
       // Only set data if not aborted
@@ -139,7 +155,7 @@ const SeniorCitizenList = ({ onEdit, onId, onView }) => {
             typeof citizen.form_data === "string"
               ? JSON.parse(citizen.form_data || "{}")
               : citizen.form_data || {},
-        }))
+        })),
       );
       setTotalCount(response.data.total);
       setTotalPages(response.data.totalPages);
@@ -184,7 +200,7 @@ const SeniorCitizenList = ({ onEdit, onId, onView }) => {
       await axios.patch(
         `${backendUrl}/api/senior-citizens/soft-delete/${selectedCitizen.id}`,
         {},
-        { withCredentials: true }
+        { withCredentials: true },
       );
       await fetchCitizens();
       setShowDeleteModal(false);
@@ -373,7 +389,7 @@ const SeniorCitizenList = ({ onEdit, onId, onView }) => {
                       {citizen.form_data?.idNumber
                         ? `${citizen.form_data.idNumber.slice(
                             0,
-                            3
+                            3,
                           )}-${citizen.form_data.idNumber.slice(3)}`
                         : ""}
                     </td>
@@ -397,8 +413,8 @@ const SeniorCitizenList = ({ onEdit, onId, onView }) => {
                               barangayMap[citizen.barangay_id] || "Unknown"
                             }`
                           : citizen.form_data?.barangay
-                          ? `Brgy. ${citizen.form_data?.barangay}`
-                          : "",
+                            ? `Brgy. ${citizen.form_data?.barangay}`
+                            : "",
                         citizen.form_data?.municipality,
                         citizen.form_data?.province,
                       ]
@@ -447,7 +463,7 @@ const SeniorCitizenList = ({ onEdit, onId, onView }) => {
                               setOpenDropdownId(
                                 openDropdownId === citizen.id
                                   ? null
-                                  : citizen.id
+                                  : citizen.id,
                               )
                             }
                             className="p-2 text-gray-600 hover:bg-gray-100 rounded"
@@ -638,10 +654,18 @@ const SeniorCitizenList = ({ onEdit, onId, onView }) => {
       </Modal>
 
       {/* Archive Modal */}
-      {/* Archive Modal */}
       <Modal
         isOpen={showArchiveModal}
-        onClose={() => setShowArchiveModal(false)}
+        onClose={() => {
+          setShowArchiveModal(false);
+          setDeathCertificateFile(null);
+          setDeathCertificatePreview(null);
+          setArchiveDetails({
+            reason: "",
+            otherReason: "",
+            deceasedDate: "",
+          });
+        }}
         title="Archive Senior Citizen"
       >
         <div className="p-6">
@@ -680,26 +704,55 @@ const SeniorCitizenList = ({ onEdit, onId, onView }) => {
 
             {/* If Deceased → Date Picker */}
             {archiveDetails.reason === "Deceased" && (
-              <div className="mt-3">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Date of Death
-                </label>
-                <input
-                  type="date"
-                  value={archiveDetails.deceasedDate || ""}
-                  onChange={(e) =>
-                    setArchiveDetails({
-                      ...archiveDetails,
-                      deceasedDate: e.target.value,
-                    })
-                  }
-                  className="w-full border rounded-md px-3 py-2 text-sm"
-                  required
-                />
-                {!archiveDetails.deceasedDate && (
-                  <p className="text-xs text-red-500 mt-1">
-                    Date of death is required for Deceased.
-                  </p>
+              <div className="mt-4 space-y-3">
+                {/* Date of Death */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Date of Death
+                  </label>
+                  <input
+                    type="date"
+                    value={archiveDetails.deceasedDate || ""}
+                    onChange={(e) =>
+                      setArchiveDetails({
+                        ...archiveDetails,
+                        deceasedDate: e.target.value,
+                      })
+                    }
+                    className="w-full border rounded-md px-3 py-2 text-sm"
+                    required
+                  />
+                </div>
+
+                {/* Death Certificate Upload */}
+                <div className="mt-4 space-y-3">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Upload Death Certificate (Image only)
+                  </label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleDeathCertificateUpload}
+                    className="w-full border rounded-md px-3 py-2 text-sm"
+                  />
+
+                  {!deathCertificateFile && (
+                    <p className="text-xs text-red-500 mt-1">
+                      Death certificate image is required.
+                    </p>
+                  )}
+                </div>
+
+                {/* Preview */}
+                {deathCertificatePreview && (
+                  <div className="mt-2">
+                    <p className="text-xs text-gray-600 mb-1">Preview:</p>
+                    <img
+                      src={deathCertificatePreview}
+                      alt="Death Certificate Preview"
+                      className="max-h-48 rounded border"
+                    />
+                  </div>
                 )}
               </div>
             )}
@@ -725,7 +778,16 @@ const SeniorCitizenList = ({ onEdit, onId, onView }) => {
           <div className="flex justify-end space-x-3">
             <Button
               variant="secondary"
-              onClick={() => setShowArchiveModal(false)}
+              onClick={() => {
+                setShowArchiveModal(false);
+                setDeathCertificateFile(null);
+                setDeathCertificatePreview(null);
+                setArchiveDetails({
+                  reason: "",
+                  otherReason: "",
+                  deceasedDate: "",
+                });
+              }}
             >
               Cancel
             </Button>
@@ -759,7 +821,7 @@ const SeniorCitizenList = ({ onEdit, onId, onView }) => {
                           ? archiveDetails.deceasedDate
                           : null,
                     },
-                    { withCredentials: true }
+                    { withCredentials: true },
                   );
                   await fetchCitizens();
                   setShowArchiveModal(false);
@@ -772,10 +834,12 @@ const SeniorCitizenList = ({ onEdit, onId, onView }) => {
                 } catch (err) {
                   console.error("Archive failed", err);
                   setError(
-                    "Failed to archive senior citizen. Please try again."
+                    "Failed to archive senior citizen. Please try again.",
                   );
                 } finally {
                   setArchiving(false);
+                  setDeathCertificateFile(null);
+                  setDeathCertificatePreview(null);
                 }
               }}
               disabled={
@@ -784,7 +848,7 @@ const SeniorCitizenList = ({ onEdit, onId, onView }) => {
                 (archiveDetails.reason === "Other" &&
                   !archiveDetails.otherReason?.trim()) ||
                 (archiveDetails.reason === "Deceased" &&
-                  !archiveDetails.deceasedDate)
+                  (!archiveDetails.deceasedDate || !deathCertificateFile))
               }
             >
               {archiving ? (
