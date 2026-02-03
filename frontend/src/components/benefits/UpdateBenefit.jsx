@@ -51,14 +51,14 @@ const UpdateBenefit = ({ benefitId, onSuccess, onCancel }) => {
         // 1️⃣ Fetch all seniors (for selection list)
         const seniorsRes = await axios.get(
           `${backendUrl}/api/senior-citizens/all`,
-          { withCredentials: true }
+          { withCredentials: true },
         );
         setSeniors(seniorsRes.data);
 
         if (benefitId) {
           // 2️⃣ Fetch benefit details
           const benefitRes = await axios.get(
-            `${backendUrl}/api/benefits/${benefitId}`
+            `${backendUrl}/api/benefits/${benefitId}`,
           );
           const data = benefitRes.data;
 
@@ -74,13 +74,14 @@ const UpdateBenefit = ({ benefitId, onSuccess, onCancel }) => {
           // 3️⃣ Fetch recipients and normalize
           const recipientsRes = await axios.get(
             `${backendUrl}/api/benefits/${benefitId}/recipients`,
-            { withCredentials: true }
+            { withCredentials: true },
           );
 
           // Map senior_id -> id for frontend consistency
           const normalizedRecipients = recipientsRes.data.map((r) => ({
             id: r.senior_id, // Important! Must match checkbox logic
             received_date: r.received_date ? r.received_date.split("T")[0] : "",
+            amount: r.amount,
           }));
 
           setSelectedSeniors(normalizedRecipients);
@@ -174,7 +175,7 @@ const UpdateBenefit = ({ benefitId, onSuccess, onCancel }) => {
       await axios.put(
         `${backendUrl}/api/benefits/${benefitId}/approve`,
         {},
-        { withCredentials: true }
+        { withCredentials: true },
       );
 
       setShowSuccessModal(true);
@@ -387,7 +388,7 @@ const UpdateBenefit = ({ benefitId, onSuccess, onCancel }) => {
                         .includes(searchTerm.toLowerCase()) ||
                       s.lastName
                         .toLowerCase()
-                        .includes(searchTerm.toLowerCase())
+                        .includes(searchTerm.toLowerCase()),
                   )
                   .map((s) => {
                     const selected = selectedSeniors.find((x) => x.id === s.id);
@@ -401,7 +402,10 @@ const UpdateBenefit = ({ benefitId, onSuccess, onCancel }) => {
                             setSelectedSeniors((prev) =>
                               selected
                                 ? prev.filter((x) => x.id !== s.id)
-                                : [...prev, { id: s.id, received_date: "" }]
+                                : [
+                                    ...prev,
+                                    { id: s.id, received_date: "", amount: "" },
+                                  ],
                             );
                           }}
                         />
@@ -412,21 +416,44 @@ const UpdateBenefit = ({ benefitId, onSuccess, onCancel }) => {
                         </span>
 
                         {selected && (
-                          <input
-                            type="date"
-                            value={selected.received_date}
-                            onChange={(e) => {
-                              const date = e.target.value;
-                              setSelectedSeniors((prev) =>
-                                prev.map((x) =>
-                                  x.id === s.id
-                                    ? { ...x, received_date: date }
-                                    : x
-                                )
-                              );
-                            }}
-                            className="border rounded px-2 py-1 text-sm w-32"
-                          />
+                          <div className="flex gap-2">
+                            {/* Received Date */}
+                            <input
+                              type="date"
+                              value={selected.received_date}
+                              required
+                              onChange={(e) => {
+                                const date = e.target.value;
+                                setSelectedSeniors((prev) =>
+                                  prev.map((x) =>
+                                    x.id === s.id
+                                      ? { ...x, received_date: date }
+                                      : x,
+                                  ),
+                                );
+                              }}
+                              className="border rounded px-2 py-1 text-sm w-32"
+                            />
+
+                            {/* Amount Received */}
+                            <input
+                              type="number"
+                              min="0"
+                              step="0.01"
+                              placeholder="₱ Amount"
+                              value={selected.amount ?? ""}
+                              required
+                              onChange={(e) => {
+                                const amount = e.target.value;
+                                setSelectedSeniors((prev) =>
+                                  prev.map((x) =>
+                                    x.id === s.id ? { ...x, amount } : x,
+                                  ),
+                                );
+                              }}
+                              className="border rounded px-2 py-1 text-sm w-28"
+                            />
+                          </div>
                         )}
                       </div>
                     );
@@ -458,8 +485,8 @@ const UpdateBenefit = ({ benefitId, onSuccess, onCancel }) => {
                 ? "Approving..."
                 : "Updating..."
               : formData.approved === 0
-              ? "Approve Benefit"
-              : "Update Benefit"}
+                ? "Approve Benefit"
+                : "Update Benefit"}
           </Button>
         </div>
 
@@ -493,8 +520,8 @@ const UpdateBenefit = ({ benefitId, onSuccess, onCancel }) => {
                   ? "Approving..."
                   : "Updating..."
                 : formData.approved === 0
-                ? "Yes, Approve"
-                : "Yes, Update"}
+                  ? "Yes, Approve"
+                  : "Yes, Update"}
             </button>
           </div>
         </Modal>

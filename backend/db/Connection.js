@@ -102,7 +102,7 @@ async function initTables() {
         approved_at TIMESTAMP NULL,
         approved_by INT NULL
       )
-      `
+      `,
     );
     console.log("✅ organizational chart table ready.");
 
@@ -120,7 +120,7 @@ async function initTables() {
         approved_at TIMESTAMP NULL,
         approved_by INT NULL
   )
-  `
+  `,
     );
     console.log("✅ barangay officials table ready.");
 
@@ -132,7 +132,7 @@ async function initTables() {
     message TEXT NOT NULL,                   
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,  -- When the template was added
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-  )`
+  )`,
     );
     console.log("✅ sms template table ready.");
 
@@ -143,7 +143,7 @@ async function initTables() {
   api_key VARCHAR(255),
   sender_id VARCHAR(50),
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-)`
+)`,
     );
     console.log("✅ sms credentials table ready.");
 
@@ -158,7 +158,7 @@ async function initTables() {
     used BOOLEAN DEFAULT 0,            
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP 
   )
-`
+`,
     );
     console.log("✅ otp code table ready.");
 
@@ -173,7 +173,7 @@ async function initTables() {
     sent_by INT,
     sent_role VARCHAR(100),
     sent_email VARCHAR(255)
-  )`
+  )`,
     );
     console.log("✅ sms logs table ready.");
 
@@ -189,7 +189,7 @@ async function initTables() {
     details TEXT,
     ipAddress VARCHAR(45) 
   )
-  `
+  `,
     );
     console.log("✅ audit logs table ready.");
 
@@ -211,7 +211,7 @@ async function initTables() {
     approved_at TIMESTAMP NULL,
     approved_by INT NULL
   )
-  `
+  `,
     );
     console.log("✅ events table ready.");
 
@@ -233,7 +233,7 @@ async function initTables() {
         approved_at TIMESTAMP NULL,
         approved_by INT NULL
       )
-      `
+      `,
     );
     console.log("✅ benefits table ready.");
 
@@ -246,6 +246,8 @@ async function initTables() {
         senior_id INT NOT NULL,
 
         received_date DATE DEFAULT NULL,
+        amount DECIMAL(10,2) DEFAULT 0,
+
         remarks VARCHAR(255),
 
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -263,7 +265,7 @@ async function initTables() {
         -- Prevent duplicate records
         UNIQUE KEY unique_benefit_senior (benefit_id, senior_id)
       )
-      `
+      `,
     );
     console.log("✅ benefits recipient table ready.");
 
@@ -288,7 +290,7 @@ async function initTables() {
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 )
-  `
+  `,
     );
     console.log("✅ reports table ready.");
 
@@ -334,7 +336,7 @@ async function initTables() {
       archived INT(1) DEFAULT 0,
       archive_reason VARCHAR(255)
   )
-`
+`,
     );
     console.log("✅ senior citizen table ready.");
 
@@ -346,7 +348,7 @@ async function initTables() {
       used INT(1) DEFAULT 0,
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
-      `
+      `,
     );
     console.log("✅ dev key table ready.");
 
@@ -367,7 +369,7 @@ async function initTables() {
         objective TEXT NULL,
         team JSON NULL
       )
-      `
+      `,
     );
     console.log("✅ system settings table ready.");
 
@@ -382,7 +384,7 @@ async function initTables() {
     console.log("✅ form_group table ready.");
 
     const [fgRows] = await pool.query(
-      `SELECT COUNT(*) AS count FROM form_group`
+      `SELECT COUNT(*) AS count FROM form_group`,
     );
     if (fgRows[0].count === 0) {
       const defaultGroups = [
@@ -395,7 +397,7 @@ async function initTables() {
       ];
       await pool.query(
         `INSERT INTO form_group (group_key, group_label) VALUES ?`,
-        [defaultGroups]
+        [defaultGroups],
       );
       console.log("✅ Default form groups inserted.");
     }
@@ -418,7 +420,7 @@ async function initTables() {
     console.log("✅ form_fields table ready.");
 
     const [ffRows] = await pool.query(
-      `SELECT COUNT(*) AS count FROM form_fields`
+      `SELECT COUNT(*) AS count FROM form_fields`,
     );
     if (ffRows[0].count === 0) {
       const defaultFields = [
@@ -801,7 +803,7 @@ async function initTables() {
 
       await pool.query(
         `INSERT INTO form_fields (field_name, label, type, options, required, \`group\`, \`order\`) VALUES ?`,
-        [defaultFields]
+        [defaultFields],
       );
       console.log("✅ Default form fields inserted.");
     }

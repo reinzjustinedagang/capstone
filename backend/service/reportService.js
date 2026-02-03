@@ -649,6 +649,7 @@ exports.getBenefitRecipientsForPrint = async (options) => {
       b.barangay_name,
 
       br.received_date,
+      br.amount,
       br.remarks AS benefit_remarks,
 
       ben.description AS benefit_description,

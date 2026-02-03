@@ -98,6 +98,16 @@ const BenefitRecipientsPrint = () => {
 
     const benefitTitle = selectedBenefit?.title || "Benefit Recipients";
 
+    const hasAmount = recipients.some(
+      (r) =>
+        r.amount !== null && r.amount !== undefined && Number(r.amount) > 0,
+    );
+
+    const totalAmount = recipients.reduce(
+      (sum, r) => sum + (Number(r.amount) || 0),
+      0,
+    );
+
     const printContents = `
       <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:20px;">
         <img src="${sjLogoBase64}" style="height:70px;" />
@@ -119,61 +129,91 @@ const BenefitRecipientsPrint = () => {
       </p>
 
       <table style="width:100%; border-collapse:collapse; margin-top:20px;">
-        <thead>
-          <tr>
-            <th style="border:1px solid #333; padding:6px;">#</th>
-            <th style="border:1px solid #333; padding:6px;">Full Name</th>
-            <th style="border:1px solid #333; padding:6px;">Gender</th>
-            <th style="border:1px solid #333; padding:6px;">Barangay</th>
-            <th style="border:1px solid #333; padding:6px;">Received Date</th>
-          </tr>
-        </thead>
+      <thead>
+  <tr>
+    <th style="border:1px solid #333; padding:6px;">#</th>
+    <th style="border:1px solid #333; padding:6px;">Full Name</th>
+    <th style="border:1px solid #333; padding:6px;">Gender</th>
+    <th style="border:1px solid #333; padding:6px;">Barangay</th>
+    <th style="border:1px solid #333; padding:6px;">Received Date</th>
+    ${
+      hasAmount
+        ? `<th style="border:1px solid #333; padding:6px;">Amount</th>`
+        : ""
+    }
+  </tr>
+</thead>
+
         <tbody>
           ${recipients
             .map(
               (r, idx) => `
             <tr>
-              <td style="border:1px solid #333; padding:6px; text-align:center;">
-                ${idx + 1}
-              </td>
-              <td style="border:1px solid #333; padding:6px;">
-                ${[
-                  r.lastName?.trim(),
-                  ",",
-                  r.firstName?.trim(),
-                  r.middleName?.trim(),
-                  r.suffix?.trim(),
-                ]
-                  .filter(Boolean)
-                  .join(" ")}
+  <td style="border:1px solid #333; padding:6px; text-align:center;">
+    ${idx + 1}
+  </td>
 
-              </td>
-              <td style="border:1px solid #333; padding:6px; text-align:center;">
-                ${r.gender}
-              </td>
-              <td style="border:1px solid #333; padding:6px; text-align:center;">
-                ${r.barangay_name || ""}
-              </td>
-              <td style="border:1px solid #333; padding:6px; text-align:center;">
-                ${
-                  r.received_date
-                    ? new Date(r.received_date).toLocaleDateString("en-PH", {
-                        year: "numeric",
-                        month: "long",
-                        day: "2-digit",
-                      })
-                    : ""
-                }
+  <td style="border:1px solid #333; padding:6px;">
+    ${[
+      r.lastName?.trim(),
+      ",",
+      r.firstName?.trim(),
+      r.middleName?.trim(),
+      r.suffix?.trim(),
+    ]
+      .filter(Boolean)
+      .join(" ")}
+  </td>
 
-              </td>
-            </tr>`,
+  <td style="border:1px solid #333; padding:6px; text-align:center;">
+    ${r.gender}
+  </td>
+
+  <td style="border:1px solid #333; padding:6px; text-align:center;">
+    ${r.barangay_name || ""}
+  </td>
+
+  <td style="border:1px solid #333; padding:6px; text-align:center;">
+    ${
+      r.received_date
+        ? new Date(r.received_date).toLocaleDateString("en-PH", {
+            year: "numeric",
+            month: "long",
+            day: "2-digit",
+          })
+        : ""
+    }
+  </td>
+
+  ${
+    hasAmount
+      ? `<td style="border:1px solid #333; padding:6px; text-align:right;">
+          ₱${Number(r.amount || 0).toLocaleString("en-PH", {
+            minimumFractionDigits: 2,
+          })}
+        </td>`
+      : ""
+  }
+</tr>
+`,
             )
             .join("")}
           <tr>
-            <td colspan="5" style="text-align:right; padding:6px; font-weight:bold; border:1px solid #333;">
-              Total: ${recipients.length}
-            </td>
-          </tr>
+  <td
+    colspan="${hasAmount ? 6 : 5}"
+    style="text-align:right; padding:6px; font-weight:bold; border:1px solid #333;"
+  >
+    Total Recipients: ${recipients.length}
+    ${
+      hasAmount
+        ? `<br/>Total Amount: ₱${totalAmount.toLocaleString("en-PH", {
+            minimumFractionDigits: 2,
+          })}`
+        : ""
+    }
+  </td>
+</tr>
+
         </tbody>
       </table>
 

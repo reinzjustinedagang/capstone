@@ -9,13 +9,13 @@ const {
 exports.getBenefitsCounts = async (user) => {
   if (user && user.role === "admin") {
     const [result] = await Connection(
-      "SELECT COUNT(*) AS count FROM benefits WHERE type != 'republic-acts' AND approved = 1"
+      "SELECT COUNT(*) AS count FROM benefits WHERE type != 'republic-acts' AND approved = 1",
     );
     return result.count;
   } else if (user) {
     const [result] = await Connection(
       "SELECT COUNT(*) AS count FROM benefits WHERE type != 'republic-acts' AND approved = 1 AND created_by = ?",
-      [user.id]
+      [user.id],
     );
     return result.count;
   } else {
@@ -26,7 +26,7 @@ exports.getBenefitsCounts = async (user) => {
 
 exports.getThreeRa = async () => {
   return await Connection(
-    `SELECT * FROM benefits WHERE type = 'republic-acts' AND approved = 1 ORDER BY created_at DESC LIMIT 3`
+    `SELECT * FROM benefits WHERE type = 'republic-acts' AND approved = 1 ORDER BY created_at DESC LIMIT 3`,
   );
 };
 
@@ -46,12 +46,12 @@ exports.getAll = async () => {
 exports.getNational = async (user) => {
   if (user && user.role === "admin") {
     return await Connection(
-      `SELECT * FROM benefits WHERE type = 'national' ORDER BY created_at DESC`
+      `SELECT * FROM benefits WHERE type = 'national' ORDER BY created_at DESC`,
     );
   } else {
     return await Connection(
       `SELECT * FROM benefits WHERE type = 'national' AND created_by = ? ORDER BY created_at DESC`,
-      [user.id]
+      [user.id],
     );
   }
 };
@@ -59,12 +59,12 @@ exports.getNational = async (user) => {
 exports.getLocal = async (user) => {
   if (user && user.role === "admin") {
     return await Connection(
-      `SELECT * FROM benefits WHERE type = 'local' ORDER BY created_at DESC`
+      `SELECT * FROM benefits WHERE type = 'local' ORDER BY created_at DESC`,
     );
   } else {
     return await Connection(
       `SELECT * FROM benefits WHERE type = 'local' AND created_by = ? ORDER BY created_at DESC`,
-      [user.id]
+      [user.id],
     );
   }
 };
@@ -72,12 +72,12 @@ exports.getLocal = async (user) => {
 exports.getRa = async (user) => {
   if (user && user.role === "admin") {
     return await Connection(
-      `SELECT * FROM benefits WHERE type = 'republic-acts' ORDER BY created_at DESC`
+      `SELECT * FROM benefits WHERE type = 'republic-acts' ORDER BY created_at DESC`,
     );
   } else {
     return await Connection(
       `SELECT * FROM benefits WHERE type = 'republic-acts' AND created_by = ? ORDER BY created_at DESC`,
-      [user.id]
+      [user.id],
     );
   }
 };
@@ -151,7 +151,7 @@ exports.create = async (data, user, ip) => {
     `Added new ${type} benefit: '${title}' (Approved: ${
       approved === 1 ? "true" : "false"
     })`,
-    ip
+    ip,
   );
 
   return result;
@@ -192,7 +192,7 @@ exports.update = async (id, data, user, ip) => {
       `Update ${type} benefit: '${title}' (Approved: ${
         approved === 1 ? "true" : "false"
       })`,
-      ip
+      ip,
     );
   }
 
@@ -205,12 +205,12 @@ exports.approve = async (id, user, ip) => {
     `UPDATE benefits 
      SET approved = 1, approved_by = ?, approved_at = NOW() 
      WHERE id = ?`,
-    [user.id, id]
+    [user.id, id],
   );
 
   const [benefit] = await Connection(
     `SELECT title, type FROM benefits WHERE id = ?`,
-    [id]
+    [id],
   );
 
   if (result.affectedRows > 0 && benefit) {
@@ -220,7 +220,7 @@ exports.approve = async (id, user, ip) => {
       user.role,
       "APPROVE",
       `Approved ${benefit.type} benefit: '${benefit.title}'`,
-      ip
+      ip,
     );
   }
 
@@ -231,7 +231,7 @@ exports.approve = async (id, user, ip) => {
 exports.remove = async (id, user, ip) => {
   const benefits = await Connection(
     `SELECT type, title, image_url FROM benefits WHERE id = ?`,
-    [id]
+    [id],
   );
   const benefit = benefits[0];
   if (!benefit) return false;
@@ -245,7 +245,7 @@ exports.remove = async (id, user, ip) => {
       user.role,
       "DELETE",
       `Deleted ${benefit.type} benefit: '${benefit.title}'`,
-      ip
+      ip,
     );
   }
 
@@ -260,7 +260,7 @@ exports.remove = async (id, user, ip) => {
 
 exports.getRecipients = async (benefitId) => {
   const query = `
-    SELECT senior_id, received_date
+    SELECT senior_id, received_date, amount
     FROM benefit_recipients
     WHERE benefit_id = ?
   `;
@@ -284,17 +284,19 @@ exports.updateRecipients = async (benefitId, seniorIds, user, ip) => {
     .map((s) => [
       benefitId,
       s.id,
-      s.received_date
-        ? String(s.received_date).split("T")[0] // ✅ FIX HERE
-        : null,
+      s.received_date ? String(s.received_date).split("T")[0] : null,
+      s.amount && s.amount !== "" ? Number(s.amount) : 0, // ✅ NEW
     ]);
 
   if (values.length === 0) return true;
 
   await Connection(
-    `INSERT INTO benefit_recipients (benefit_id, senior_id, received_date)
-     VALUES ?`,
-    [values]
+    `
+    INSERT INTO benefit_recipients
+      (benefit_id, senior_id, received_date, amount)
+    VALUES ?
+    `,
+    [values],
   );
 
   await logAudit(
@@ -303,7 +305,7 @@ exports.updateRecipients = async (benefitId, seniorIds, user, ip) => {
     user.role,
     "UPDATE",
     `Updated benefit recipients (Benefit ID: ${benefitId})`,
-    ip
+    ip,
   );
 
   return true;
