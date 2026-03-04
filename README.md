@@ -1,4 +1,5 @@
-#Capstone Project
+
+#Capstone Project.
 Web-based Information Management of the Office for the Senior Citizen Affairs in San Jose, Occidental Mindoro.
 
 <li>For backend</li>
